@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>千机百变 — Android foreground service demonstration</title>
+<style>body{font:16px/1.6 system-ui,sans-serif;max-width:960px;margin:40px auto;padding:0 20px;color:#202124}video{width:100%;background:#111;border-radius:8px}h1{font-size:26px}h2{font-size:20px;margin-top:32px}code{background:#eee;padding:2px 5px}</style>
+<h1>千机百变 — Foreground service demonstration</h1>
+<p>Android package: <code>com.bolin.one</code>. These recordings show the application running on a Pixel Tablet Android emulator. The displayed Rive layout is sample content; its weather and accessory indicators are artwork, not live device or weather readings.</p>
+<h2>1. User starts the overlay, then leaves the application</h2>
+<p>The user selects a local resource package and explicitly opens its floating window. The visible Rive content remains on screen when the application is sent to the background. This is the user-visible task supported by <code>FOREGROUND_SERVICE_SPECIAL_USE</code>.</p>
+<video controls preload="metadata" src="overlay-start-home.mp4"></video>
+<h2>2. User stops the overlay</h2>
+<p>The user returns to the application's floating-window settings and closes the overlay. The visible floating window disappears. The overlay is optional and is not started for advertising, downloading, or covert data collection.</p>
+<video controls preload="metadata" src="overlay-close.mp4"></video>
+<p>Review navigation: 应用内 (In-app) → upper-right resource button → 悬浮窗 (Floating window) → select a resource package → 设置 (Settings) → 打开悬浮窗 / 关闭悬浮窗 (Open / Close floating window). The Android “Display over other apps” permission is required.</p>
+</html>
