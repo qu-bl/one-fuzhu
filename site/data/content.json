@@ -87,14 +87,13 @@
   "cards": [
     {
       "id": "audio-orbit",
-      "name": "声音轨道实验",
-      "summary": "用音频事件驱动轨道、光点和空间节奏的互动实验。",
+      "name": "鸿蒙版千机百变招募内测中",
+      "summary": "欢迎共创",
       "details": "",
-      "partnerName": "示例伙伴 D",
-      "category": "游戏与实验",
+      "partnerName": "官方",
+      "category": "全新发布",
       "platforms": [
-        "Apple",
-        "Android"
+        "HarmonyOS"
       ],
       "tags": [
         "音频",
