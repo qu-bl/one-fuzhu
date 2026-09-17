@@ -3,9 +3,9 @@
   "files": [
     {
       "name": "application-script.md",
-      "version": "2026.09.12.3",
+      "version": "2026.09.17.1007",
       "minAppVersion": "1.0.0",
-      "sha256": "34ba7e672ef1f5f0d02ed1f2ffb7413dfe8ed61f5ac33430df5d2648608348f1"
+      "sha256": "87f89c585058fc34395b757cab8fe7f0120a470e5a28cc91a316ec7f3090e352"
     },
     {
       "name": "resource-package.md",
