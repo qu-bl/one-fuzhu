@@ -6,69 +6,41 @@
     <meta name="theme-color" content="#faf9fd" />
     <title>千机百变用户服务协议</title>
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=57" />
-    <script src="./theme.js?v=57"></script>
     <style type="text/css">
-      .doc-page {
+      * { margin: 0; padding: 0; font-size: 16px; color: rgba(0, 0, 0, 0.9); }
+      body {
         max-width: 860px;
-        margin: 0 auto;
-        padding: calc(32px + max(env(safe-area-inset-top, 0px), var(--app-safe-area-top)))
-          var(--page-pad)
-          max(48px, env(safe-area-inset-bottom));
+        margin: auto;
+        padding: 2rem 2rem 5rem 2rem;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "HarmonyOS Sans SC",
+          "Helvetica Neue", Arial, sans-serif;
+        -webkit-text-size-adjust: 100%;
       }
-      .doc-back {
-        display: inline-block;
-        margin-bottom: 12px;
-        font-size: 14px;
-        color: var(--accent);
-        text-decoration: none;
+      a { color: #0a59f7; cursor: pointer; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      #icon { font-size: 0; text-align: center; }
+      #icon svg { width: 4rem; height: 4rem; }
+      h1 { margin: 2rem 0 0.5rem; text-align: center; font-size: 18px; font-weight: 600; }
+      .doc-meta { text-align: center; font-size: 14px; color: rgba(0, 0, 0, 0.6); }
+      .doc-back { display: inline-block; font-size: 14px; }
+      h2 { word-break: break-word; margin-top: 3rem; margin-bottom: 1rem; font-size: 16px; font-weight: 600; }
+      p { word-break: break-word; line-height: 1.4; margin-bottom: 0.6rem; }
+      b { font-weight: 600; }
+      footer { margin-top: 3rem; text-align: center; }
+      footer, footer a { font-size: 14px; color: rgba(0, 0, 0, 0.6); }
+      @media (prefers-color-scheme: dark) {
+        body { background-color: #000000; }
+        * { color: rgba(255, 255, 255, 0.9); }
+        a, footer a { color: rgba(82, 145, 255, 1); }
+        .doc-meta, footer { color: rgba(255, 255, 255, 0.6); }
       }
-      .doc-card {
-        background: var(--md-sys-color-surface-container-low);
-        border-radius: 24px;
-        padding: clamp(24px, 4vw, 48px);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-      }
-      .doc-icon { text-align: center; font-size: 0; color: var(--accent); }
-      .doc-icon svg { width: 4rem; height: 4rem; }
-      .doc-card h1 {
-        margin: 2rem 0 0.5rem;
-        text-align: center;
-        font-size: 20px;
-        font-weight: 600;
-        color: var(--text);
-      }
-      .doc-meta {
-        margin: 0 0 1.5rem;
-        padding-bottom: 20px;
-        text-align: center;
-        border-bottom: 1px solid var(--md-sys-color-outline-variant);
-        color: var(--muted);
-        font-size: 14px;
-      }
-      .doc-card h2 {
-        margin: 0 0 0.6rem;
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--text);
-        word-break: break-word;
-      }
-      .doc-card section { margin-top: 2.25rem; }
-      .doc-card p {
-        margin: 0 0 0.6rem;
-        line-height: 1.6;
-        color: var(--text);
-      }
-      .doc-card b { font-weight: 600; }
-      .doc-card a { color: var(--accent); text-decoration: none; }
-      .doc-card a:hover { text-decoration: underline; }
     </style>
   </head>
   <body>
-    <main class="doc-page">
+    <main>
       <a class="doc-back" href="./index.html">← 返回千机百变</a>
-      <article class="doc-card">
-        <div class="doc-icon">
+      <article>
+        <div id="icon">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="96"
@@ -201,11 +173,9 @@
         </section>
       </article>
     </main>
-    <footer class="site-footer">
+    <footer>
       <span>© 2026 千机百变</span>
-      <span class="site-footer-sep" aria-hidden="true">·</span>
       <a href="./terms.html" aria-current="page">用户协议</a>
-      <span class="site-footer-sep" aria-hidden="true">·</span>
       <a href="./privacy.html">隐私政策</a>
     </footer>
   </body>
