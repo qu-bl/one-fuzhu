@@ -120,8 +120,8 @@ qu.viewModel.trigger(path).fire(payload) 调用已有宿主动作，返回 Promi
 - 创建自有全局 app.* QVMI，发布计算、网络结果供其他脚本或获授权的资源包消费；读写已存在的可写 app.* 字段。
 - 内置唯一应用输出是 app.theme.brand，入口 color，已创建、可读写/订阅。写 qu.viewModel.color('app.theme.brand').value = '#FF6699CC' 即更改全局主题；宿主负责应用和持久化。禁止对其调用 define，即使当前值为 undefined；无需主题 API 或自建输出。
 - 当前应用脚本没有资源包 Rive 画布、音频会话、资源包文件目录、原生 UI 承载者：qu.rive、runtime.audio.*、qu.resources、openUi 不可在本场景使用。没有跨场景选取某资源包会话的 API，也没有全局触摸捕获；device.touch.* 属于运行画面而非全局输入。
-- qu.persistence 在应用会话不保存自建字段。app.* 是应用进程内共享内存，不是持久数据库；同一进程内重载脚本不等于清空这些值，应用重启后需由脚本重新创建/初始化。仅内置品牌色已有宿主持久化消费者。
-- 不直接控制其他页面、编辑器、应用文件、云同步、AI 设置或密钥。创建字段只是在 QVMI 发布数据，不会凭空生成原生 UI 或 RVMI 绑定。
+- 自有 app.* 字段可以要求宿主持久化：define 时带 {persistent:true}，宿主负责落盘并在下次启动还原；qu.persistence.save() 主动落盘、restore() 手动还原，见「持久化与身份」。不标 persistent 的字段仍是进程内共享内存，应用重启即丢；app.theme.brand 的持久化由宿主自己的消费者负责，脚本不要为它 define。
+- 不直接打开或切换其他页面、不读应用文件、不碰云同步与密钥；对编辑器的操作只有 qu.editor.read / apply（见「编辑器读写」）。创建字段只是在 QVMI 发布数据，不会凭空生成原生 UI 或 RVMI 绑定——界面要用 qu.ui.declare 声明（见「声明式 UI」）。
 
 ## 生命周期与调度
 
@@ -134,7 +134,7 @@ qu.viewModel.trigger(path).fire(payload) 调用已有宿主动作，返回 Promi
 | onValue(path,value,qu) | @observe 声明的精确字段订阅收到值；含已有值补发，不只真实变化 |
 | onStop() | 禁用、重载或正常关闭时；同步清理，不能依赖异步收尾必定完成或强杀时必定调用 |
 
-文件头注释元数据：@description 一行说明；@interval 毫秒整数，0 关闭，否则至少 1000；每行 @observe 完整路径可重复声明不同字段，不能写通配符。没有资源包的 activate/deactivate。
+文件头注释元数据：@description 一行说明；@id 声明身份（见「持久化与身份」），一个应用内不能有两个脚本用同一个；@interval 毫秒整数，0 关闭，否则至少 1000；每行 @observe 完整路径可重复声明不同字段，不能写通配符；@ui 块是静态界面声明（见「声明式 UI」）。没有资源包的 activate/deactivate。
 
 onStart 成功后宿主才安装元数据订阅、启动间隔任务，因此不能在 onStart 等待 onValue 解锁。同一字段选择 @observe 或手动 observe 一种即可；宿主管理元数据订阅，手动 observe 返回的取消函数自己在 onStop 调用。
 onInterval/onValue 不会等待上一次返回的 Promise，异步任务应自己设置 busy 标记、catch 错误、检查停止标记；它们不是串行任务队列。应用生命周期脚本不等于系统保证永久后台运行，冷启动/恢复应根据真实时间和新样本计算，不能靠 tick 次数当作经过时间。
@@ -144,17 +144,35 @@ onInterval/onValue 不会等待上一次返回的 Promise，异步任务应自�
 生成前先按本契约确认每个输入、输出字段的来源与类型，再选择操作：
 
 - 宿主或其他脚本已经提供的字段：用对应类型入口取得句柄，直接读取、订阅或向可写字段赋值；不要重新 define，也不要用 define 探测存在性、作为写入前置步骤或包裹成通用“确保字段存在”函数。
-- 本脚本确实需要新增的自有输出：才在 onStart 用 define 声明一次；脚本重载时可再次声明同一个自有字段以复用旧值，不在定时/订阅回调里反复声明。不为已有输出额外创建中转字段。
+- 本脚本确实需要新增的自有输出：才在 onStart 用 define 声明一次；不在定时/订阅回调里反复声明，也不为已有输出额外创建中转字段。
+- define 只用于新建：同一个路径已经存在（自己声明过两次、宿主已按 @ui 块预建、或上一个会话的字段还在）就会抛 ALREADY_EXISTS，宿主不会静默复用当前值。要写“确保存在”必须先判断存在性，或按样例那样 try/catch 后改用类型入口取句柄。
 - 字段存在但值为 undefined 表示尚未发布，不是未创建；输入等待有效值，输出按业务直接赋值。不要因此补声明、换类型或静默切换到自建路径。
 
 const field = qu.viewModel.define(path,type,initialValue,options) 同步返回属性句柄。
 
-- path 必须位于 app.*，推荐 app.<脚本名>.<字段名> 防重名；type 可为 number/boolean/string/color/resource/image/enum/trigger/json/binary（不是 enumeration/list/object）。options 可为 {label:string,description:string}。
-- 首次创建采用 initialValue；省略则无初值，读到 undefined。同名同类型会复用当前值，不会每次 define 都重置。类型不同或只读会抛错。
-- 返回值有 .path、.type、.created、.occupiedBy（其他占用者数组）、.warning，以及 .value、.observe()。重复声明宿主内置字段也会提示占用，不代表另一个脚本正在运行。自有新字段与其他声明撞名时应明确独立命名或有意共享，不能吞掉警告、宣称自动隔离或保证只有一个写入者。
+- path 必须位于 app.*，推荐 app.<脚本名>.<字段名> 防重名；type 可为 number/boolean/string/color/resource/image/enum/trigger/json/binary（不是 enumeration/list/object）。options 可为 {label:string,description:string,persistent:boolean}，要跨重启留存就写 persistent:true（见「持久化与身份」）。
+- 首次创建采用 initialValue；省略则无初值，读到 undefined。类型不符或越权会抛错。
+- 返回值只有 .path、.type、.value、.observe()，没有 .created / .occupiedBy / .warning 之类的占用信息；判断“是不是我刚建的”只能靠 define 是否抛 ALREADY_EXISTS。
+- 自有新字段与其他声明撞名时明确独立命名，或有意共享同一个路径并接受并发写入，不能宣称自动隔离或保证只有一个写入者。
 - 数字、文本、颜色等通过 .value = result 发布；对象/数组用 type json，写整个 JSON 值。发布与订阅解耦，多个消费者可订阅同一字段；未被消费的字段不会自动影响界面。
 - type trigger 的 **define 返回句柄** 另有同步 field.fire()，只发布 true，不带 payload、不返回 Promise。它不等同于 qu.viewModel.trigger(path).fire(payload)，后者只分发宿主 runtime.* 动作。自建事件携带数据时用 json 字段 {sequence,data}；sequence 显式递增以区分重复事件。当前 trigger 观察也可能补发上一次 true，不能把首次回放误当新指令。
 - 没有公开 delete/undefine API。停止订阅或脚本重载不能被当作物理删除字段。
+
+## 持久化与身份
+
+脚本的身份是它所有跨运行数据的唯一分桶键：文件头 `@id` 声明，没声明就用文件名（`ai-copilot.js` 的身份就是 `ai-copilot.js`）。身份决定自有字段的 owner、持久数据存哪一桶、通知与提醒 id 的前缀；它也是改名/重新导入不丢数据的前提——导入会在文件名后加时间戳，身份不变，配置与授权才接得上。一个应用内两个脚本声明同一个 `@id` 时，后载入的那个被宿主拒绝启用并报错，不静默抢数据；删除脚本时它那一桶数据一并删除。
+
+字段要留存，define 时必须带 `{persistent:true}`：
+
+| 项 | 事实 |
+| --- | --- |
+| 可持久类型 | number / boolean / string / color / enum / resource / image，以及字符串数组；json、binary、trigger 不落盘（自定义结构自己 JSON.stringify 进 string 字段） |
+| 落盘位置 | 宿主管理的端云目录，按身份分桶、按字段路径记值；脚本不能指定路径，也不能直接读写文件 |
+| 落盘时机 | 脚本停止时（禁用、源码重载、应用正常退出）自动写一次；脚本可随时 qu.persistence.save() 主动写。强杀、崩溃、被系统回收不走停止流程，本次改动不会落盘 |
+| 还原时机 | onStart 返回之后由宿主灌回。onStart 里给持久字段写的初值会被随后的还原值覆盖，不要把 onStart 的赋值当作默认值 |
+| qu.persistence.restore() | 从落盘数据手动还原到内存，会覆盖当前值；不要在高频循环里调用 |
+
+持久字段仍是普通 QVMI 字段：内存里共享、可订阅、可写；持久化只是宿主多做的落盘与还原。
 
 ## 最小通用例：订阅输入 → 计算 → 发布
 
@@ -182,6 +200,56 @@ defineQuScript({
 ~~~
 
 此例的 define 仅用于新增的电量比例输出，不能照搬到已注册字段。其他内容按真实类型选择入口；只有需要 UI 显示时才写宿主已接入的字段，或者说明需另有消费者。交付前逐项检查所有 define：必须是本脚本自有字段，重复声明已有宿主字段的代码须改为类型句柄访问；同时核对入口/元数据、完整路径、真实输出、错误处理、异步重入和停止清理。
+
+## 声明式 UI：qu.ui.declare
+
+界面不用自己画，也不能自己画：声明一次，宿主按位置渲染，控件直接绑定 QVMI 字段。声明分两层——文件头 `@ui` 块是静态层（脚本没运行也在，宿主会为其中绑定 app.* 的路径预建字段，但不带 persistent），运行时 `qu.ui.declare(set 或 set 数组)` 覆盖同一位置的运行时层，脚本停止后清掉、回落到静态层；`qu.ui.clear()` 清运行时层。
+
+四个位置（`set.slot`）：`scriptUi` 脚本 UI 页、`applicationScript` 应用脚本分栏、`packageBuilder` 资源包制作台分栏、`dialog` 全局弹窗。前三个是常驻位置，`scope` 只能是 `persistent`；`dialog` 是临时位置，`scope` 只能是 `runtime`，一次只打开一个。
+
+| set 字段 | 说明 |
+| --- | --- |
+| id | 位置内唯一；字母开头，只含字母、数字、连字符、下划线，最长 64 |
+| title | 位置里显示的分组标题 |
+| slot | 上面四个之一 |
+| scope | persistent / runtime，必须与 slot 匹配 |
+| density | normal / compact |
+| components | 控件数组，最多 32；嵌套最多 6 层，children 最多 32 |
+
+一次 declare 最多 8 组。公共字段：id、type、label、description、enabled、visible、visibleWhen、flex。各类型除公共字段外可用的字段（写了该类型不支持的字段会直接报错，不会静默忽略）：
+
+| type | 作用 | 可用字段 |
+| --- | --- | --- |
+| text | 一行文字，或用 textPath 显示某字段的值 | text、textPath、format、size（sm/md/lg）、multiline |
+| divider / spacer | 分隔线 / 占位 | — |
+| input | 文本输入 | propertyPath、valueType、defaultValue、placeholder、multiline、lines(1–20)、secure |
+| number | 数字输入 | propertyPath、valueType、defaultValue、placeholder |
+| toggle | 开关 | propertyPath、valueType、defaultValue |
+| slider | 滑块 | propertyPath、valueType、defaultValue、min、max、step、format |
+| color | 颜色 | propertyPath、valueType、defaultValue |
+| singleChoice / multiChoice / segmented / resourceChoice | 单选 / 多选 / 分段 / 资源选择 | propertyPath、valueType、defaultValue、options、optionsPath |
+| filePicker | 选文件 | propertyPath、valueType、defaultValue、text、acceptedFileExtensions、maxBytes |
+| action | 按钮 | text、style（normal / emphasized） |
+| column | 纵向容器 | children、gap、align、scroll |
+| row | 横向容器 | children、gap、align、wrap |
+| stack | 叠放容器 | children、align、valign |
+| card | 带内边距的容器 | children、gap、align、padding、radius（0–64） |
+
+- 输入类控件必须有 propertyPath，写成切片数组（`["app","ai","endpoint"]`），不是字符串，valueType 必须与字段类型一致；`dialog` 里的输入控件必须有 defaultValue，宿主开弹窗就要初值。
+- options 形如 `[{value?,label,resource?}]`，最多 64 项；optionsPath 指向一个存着 JSON 数组文本的字段（用 string 字段存，读的时候 JSON.parse）。
+- visibleWhen 形如 `{path,equals}` 或 `{path,in:[...]}`，两者必须给一个；path 是被读的另一个字段的完整路径。
+- column 的 `scroll:true` 让这一列在自己分到的高度里滚，下面的控件不动——对话记录区要它。
+- 控件自带 label 只给读屏用，宿主不画标题：标题自己用 text 组件拼，说明文字用 size:"sm" 的 text。
+- 顺序：声明里绑定的字段必须已经存在，所以先 define（要留存就带 persistent）再 declare；宿主不会替你补 persistent 标记。
+
+弹窗：declare 到 `dialog`（scope: runtime、输入控件带 defaultValue），再用 `qu.viewModel.openUi(componentId)` 打开。**openUi 的 Promise 只表示弹窗显示出来了**，用户的选择写进控件绑定的字段——用 onValue / observe 接，不要指望返回值携带选择。每次打开前把该字段复位，否则会读到上一次的值。
+
+## 编辑器读写
+
+| 调用 | 说明 |
+| --- | --- |
+| qu.editor.read(target, {project?, file?}) | 读编辑器当前文本，含未保存的编辑。target 为 applicationScript（读当前打开的那份应用脚本，不是调用者自己）或 resourcePackage；resourcePackage 必须带 file: manifest 或 script，project 省略表示当前打开的资源包工程，没有打开就报错 |
+| qu.editor.apply({target, mode?, applicationJavaScript? / manifestJson? / mainJavaScript?}) | 把完整文本交给对应编辑器。mode 为 replace（默认）或 append；单字段上限 262144 字符。改动交给目标页面：页面在屏幕上就立刻应用，不在就先挂着（不写文件），所以 apply 不等于保存 |
 
 ## 生成代码的共同要求
 输入、计算、输出分离：订阅必要数据源，校验数据，在内存计算，只写目标可写字段；不要靠打印日志代替真实输出。不要订阅自己的输出后再次改写形成循环。

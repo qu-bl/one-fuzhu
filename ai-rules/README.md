@@ -6,7 +6,7 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| `application-script.md` | 「应用脚本」场景规则，**自包含**（执行环境 + QVMI + 系统字段 + 日志提醒 + 网络 + 应用脚本规范） |
+| `application-script.md` | 「应用脚本」场景规则，**自包含**（执行环境 + QVMI + 系统字段 + 日志提醒 + 网络 + 应用脚本规范 + 持久化与身份 + 声明式 UI + 编辑器读写） |
 | `resource-package.md` | 「资源包」场景规则，**自包含**（同上前五节 + 资源包规范） |
 | `rules.json` | 版本清单：`schemaVersion:2` + 每个文件的 `version` / `minAppVersion` / `sha256` |
 
