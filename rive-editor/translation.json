@@ -2071,5 +2071,6 @@
   "Published {number} month ago": "{number} 个月前发布",
   "Published {number} months ago": "{number} 个月前发布",
   "Published {number} day ago": "{number} 天前发布",
-  "Character poses": "角色姿势"
+  "Character poses": "角色姿势",
+  "WGSL Shader": "WGSL 着色器"
 }
