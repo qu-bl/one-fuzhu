@@ -119,8 +119,8 @@
     },
     {
       "id": "image-binding-cards",
-      "name": "图片绑定卡片组",
-      "summary": "以外部图片和数据驱动的可复用内容卡片模板。",
+      "name": "RIVE中文系列课程",
+      "summary": "rive101系列官方课，中文译制版",
       "details": "",
       "partnerName": "千机百变官方",
       "category": "模板与示例",
@@ -130,25 +130,22 @@
         "HarmonyOS"
       ],
       "tags": [
-        "图片绑定",
-        "数据绑定",
-        "模板"
+        "课程系列"
       ],
-      "access": {
-        "items": [
-          {
-            "platform": "github",
-            "label": "GitHub",
-            "value": "GitHub：图片绑定卡片组（展示样例，待替换）"
-          }
-        ]
-      },
       "featured": true,
       "visible": true,
       "video": {
-        "platform": "douyin",
-        "id": "3.84 o@q.eo 11/26 :8pm AGi:/ 知否放大镜110｜低头，才能看见水里，映着天 # 知否知否应是绿肥红瘦 # 知否知否 # 知否放大镜 # 飞奔啊蜗牛 # 知否解说  https://v.douyin.com/ux96a0_8fEQ/ 复制此链接，打开Dou音搜索，直接观看视频！",
+        "platform": "bilibili",
+        "id": "BV1MYeY6bEtU",
         "aspectRatio": 1.7777
+      },
+      "access": {
+        "items": [
+          {
+            "platform": "bilibili",
+            "url": "<iframe src=\"//player.bilibili.com/player.html?isOutside=true&aid=117300673910614&bvid=BV1MYeY6bEtU&cid=42041410389&p=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"></iframe>"
+          }
+        ]
       }
     },
     {
