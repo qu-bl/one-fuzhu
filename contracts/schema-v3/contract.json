@@ -1,5 +1,5 @@
 {
-  "contractVersion": "3.0.0",
+  "contractVersion": "3.1.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "manifest": {
     "required": [
@@ -268,7 +268,8 @@
       "title",
       "scope",
       "components",
-      "density"
+      "density",
+      "slot"
     ],
     "conditionFields": [
       "path",
@@ -289,6 +290,9 @@
   },
   "qvmi": {
     "observable": {
+      "app.theme": [
+        "brand"
+      ],
       "system.time": [
         "epochMs"
       ],
@@ -390,6 +394,87 @@
         "type"
       ]
     },
+    "fieldTypes": {
+      "app.theme.brand": "color",
+      "system.time.epochMs": "number",
+      "system.appearance.colorMode": "enum",
+      "system.appearance.language": "string",
+      "system.appearance.region": "string",
+      "system.appearance.locale": "string",
+      "system.appearance.timeZone": "string",
+      "system.appearance.is24HourClock": "boolean",
+      "system.appearance.fontSizeScale": "number",
+      "system.appearance.fontWeightScale": "number",
+      "system.appearance.hasPointerDevice": "boolean",
+      "system.appearance.mcc": "string",
+      "system.appearance.mnc": "string",
+      "system.deviceInfo.type": "string",
+      "system.deviceInfo.manufacturer": "string",
+      "system.deviceInfo.brand": "string",
+      "system.deviceInfo.marketName": "string",
+      "system.deviceInfo.productSeries": "string",
+      "system.deviceInfo.productModel": "string",
+      "system.deviceInfo.productModelAlias": "string",
+      "system.deviceInfo.softwareModel": "string",
+      "system.deviceInfo.hardwareModel": "string",
+      "system.deviceInfo.chipType": "string",
+      "system.deviceInfo.abiList": "string",
+      "system.deviceInfo.performanceClass": "number",
+      "system.deviceInfo.displayVersion": "string",
+      "system.deviceInfo.incrementalVersion": "string",
+      "system.deviceInfo.osFullName": "string",
+      "system.deviceInfo.osReleaseType": "string",
+      "system.deviceInfo.securityPatchTag": "string",
+      "system.deviceInfo.osMajorVersion": "number",
+      "system.deviceInfo.osSeniorVersion": "number",
+      "system.deviceInfo.osFeatureVersion": "number",
+      "system.deviceInfo.osBuildVersion": "number",
+      "system.deviceInfo.sdkApiVersion": "number",
+      "system.deviceInfo.sdkMinorApiVersion": "number",
+      "system.deviceInfo.sdkPatchApiVersion": "number",
+      "system.deviceInfo.firstApiVersion": "number",
+      "system.deviceInfo.versionId": "string",
+      "system.deviceInfo.buildType": "string",
+      "system.deviceInfo.buildTime": "string",
+      "system.deviceInfo.distributionOSName": "string",
+      "system.deviceInfo.distributionOSVersion": "string",
+      "system.deviceInfo.distributionOSApiVersion": "number",
+      "system.deviceInfo.distributionOSApiName": "string",
+      "system.deviceInfo.distributionOSReleaseType": "string",
+      "system.deviceInfo.bootCount": "number",
+      "system.deviceInfo.deviceColor": "string",
+      "system.battery.level": "number",
+      "system.battery.isCharging": "boolean",
+      "device.motion.accelerationX": "number",
+      "device.motion.accelerationY": "number",
+      "device.motion.accelerationZ": "number",
+      "device.motion.rotationX": "number",
+      "device.motion.rotationY": "number",
+      "device.motion.rotationZ": "number",
+      "device.motion.pitch": "number",
+      "device.motion.roll": "number",
+      "device.motion.yaw": "number",
+      "device.ambientLight.normalized": "number",
+      "device.proximity.isNear": "boolean",
+      "device.proximity.normalized": "number",
+      "device.location.latitude": "number",
+      "device.location.longitude": "number",
+      "device.location.altitude": "number",
+      "device.location.speed": "number",
+      "device.location.course": "number",
+      "device.location.horizontalAccuracy": "number",
+      "device.screen.width": "number",
+      "device.screen.height": "number",
+      "device.screen.density": "number",
+      "device.screen.orientation": "enum",
+      "device.touch.x": "number",
+      "device.touch.y": "number",
+      "device.touch.isDown": "boolean",
+      "device.touch.phase": "enum",
+      "device.touch.pointerId": "number",
+      "system.network.isConnected": "boolean",
+      "system.network.type": "enum"
+    },
     "availability": {
       "device.ambientLight.normalized": [
         "harmony",
@@ -443,7 +528,20 @@
       "runtime.audio.pause",
       "runtime.audio.stop",
       "runtime.audio.setVolume"
-    ]
+    ],
+    "triggerPayloadFields": {
+      "runtime.log.info": ["message"],
+      "runtime.log.warn": ["message"],
+      "runtime.log.error": ["message"],
+      "runtime.notification.publish": ["id", "title", "body"],
+      "runtime.notification.cancel": ["id"],
+      "runtime.alarm.schedule": ["id", "fireAt", "title", "body"],
+      "runtime.alarm.cancel": ["id"],
+      "runtime.audio.play": ["audio", "id", "policy", "volume", "options"],
+      "runtime.audio.pause": ["audio", "id"],
+      "runtime.audio.stop": ["audio", "id"],
+      "runtime.audio.setVolume": ["audio", "id", "volume"]
+    }
   },
   "script": {
     "annotations": [
@@ -453,6 +551,39 @@
       "observe",
       "ui"
     ],
-    "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+    "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+    "minimumIntervalMs": 1000,
+    "valueAccessorTypes": [
+      "number", "boolean", "string", "color", "resource", "image", "enum", "trigger", "json", "binary"
+    ],
+    "definitionOptions": {
+      "portable": ["label", "persistent"],
+      "harmonyAndroidOnly": [
+        "description", "unit", "nullable", "writable", "delivery", "range", "values",
+        "maxLength", "access", "valueLabels", "displayPrecision", "displayMultiplier", "displaySuffix"
+      ]
+    },
+    "operationOptionFields": {
+      "network.request": ["method", "headers", "body", "bodyBase64", "timeoutMs", "responseType", "redirect"],
+      "network.download": ["headers", "timeoutMs"],
+      "network.upload": ["method", "headers", "timeoutMs"],
+      "network.stream": ["method", "headers", "body", "timeoutMs"],
+      "network.webSocket.open": ["headers", "protocols"],
+      "rive.load": ["artboard", "stateMachine", "viewModel", "instanceKind", "instance"],
+      "editor.read": ["project", "file"]
+    },
+    "hostOperations": [
+      "values.get", "values.define", "values.remove", "values.list", "values.set",
+      "values.observe", "values.trigger", "ui.open", "ui.declare", "ui.clear",
+      "editor.read", "editor.apply", "network.request", "network.download",
+      "network.upload", "network.stream", "network.webSocket.open",
+      "network.webSocket.send", "network.webSocket.close", "persistence.save",
+      "persistence.restore", "resources.token", "resources.readText",
+      "resources.readBinary", "rive.state", "rive.load", "rive.font.set"
+    ],
+    "applicationOnlyOperations": [
+      "values.define", "values.remove", "values.list", "ui.declare", "ui.clear",
+      "editor.read", "editor.apply"
+    ]
   }
 }
