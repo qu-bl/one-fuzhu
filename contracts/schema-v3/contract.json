@@ -1,6 +1,6 @@
 {
   "contractVersion": "3.0.0",
-  "sourceOfTruth": "HarmonyOS schema-v3 public contract",
+  "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "manifest": {
     "required": [
       "schemaVersion",
