@@ -30,9 +30,53 @@ def build_release():
 def verify_schema_and_fixtures():
     contract = json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))
     script = contract["script"]
+    manifest_validation = contract["manifest"]["validation"]
+    ui_validation = contract["ui"]["validation"]
+    for section, names in (
+        (manifest_validation["patterns"], ("id", "version", "identifier", "qvmiPath", "packageValuePath",
+                                           "networkDomain", "audioFile", "fileExtension")),
+        (ui_validation, ("idPattern",)),
+    ):
+        for name in names:
+            pattern = section[name]
+            if not pattern.startswith("^") or not pattern.endswith("$"):
+                raise ValueError(f"validation pattern must cover the complete value: {name}")
+            re.compile(pattern)
+    for section in (manifest_validation, ui_validation):
+        if any(not isinstance(value, int) or value < 0 for value in section["limits"].values()):
+            raise ValueError("validation limits must be nonnegative integers")
+    if manifest_validation["limits"]["uiSetsMax"] != ui_validation["limits"]["setsMax"]:
+        raise ValueError("manifest and script UI set limits must agree")
+    if set(manifest_validation["persistentValueTypes"]) - set(contract["manifest"]["valueTypes"]):
+        raise ValueError("persistent value type is not a package value type")
+    if set(ui_validation["inputTypes"]) - set(contract["ui"]["typeFields"]):
+        raise ValueError("input UI type is not a component type")
+    if set(ui_validation["enums"]["scope"]) != {"persistent", "runtime"}:
+        raise ValueError("UI scopes must retain the two runtime lifetimes")
+    archive = contract["archive"]
+    for name in ("maxFiles", "maxTotalBytes", "maxSingleFileBytes", "maxPathUtf8Bytes"):
+        if not isinstance(archive[name], int) or archive[name] <= 0:
+            raise ValueError(f"archive limit must be a positive integer: {name}")
+    if archive["maxSingleFileBytes"] > archive["maxTotalBytes"]:
+        raise ValueError("single archive file cannot exceed total archive size")
+    for name in ("forbiddenRootSegments", "forbiddenSegments", "windowsDeviceNames"):
+        if not archive[name] or len(archive[name]) != len(set(archive[name])):
+            raise ValueError(f"archive list must contain unique values: {name}")
+    for section, names in (
+        (contract["resources"], ("readTextMaxBytes", "readBinaryMaxBytes", "riveImageMaxBytes", "riveAssetMaxBytes")),
+        (contract["network"], ("requestMaxBytes", "responseMaxBytes", "transferMaxBytes", "streamMaxBytes")),
+        (script["validation"], ("uiDeclarationMaxChars", "editorApplyMaxUtf16Units", "sourceReadMaxBytes")),
+    ):
+        for name in names:
+            if not isinstance(section[name], int) or section[name] <= 0:
+                raise ValueError(f"shared limit must be positive: {name}")
     operations = script["hostOperations"]
     if len(operations) != len(set(operations)) or not operations:
         raise ValueError("script.hostOperations must contain unique operations")
+    if set(script["operationArguments"]) != set(operations):
+        raise ValueError("every host operation must declare public arguments")
+    if any(len(args) != len(set(args)) for args in script["operationArguments"].values()):
+        raise ValueError("host operation arguments must be unique")
     if not set(script["applicationOnlyOperations"]).issubset(operations):
         raise ValueError("applicationOnlyOperations must be host operations")
     if not set(script["operationOptionFields"]).issubset(operations):
@@ -53,6 +97,8 @@ def verify_schema_and_fixtures():
         raise ValueError("public QVMI paths must be unique")
     if set(qvmi["fieldTypes"]) != public_paths:
         raise ValueError("each public QVMI path must declare exactly one type")
+    if not set(qvmi["writablePublicPaths"]).issubset(public_paths):
+        raise ValueError("writable QVMI paths must be public paths")
     if not set(qvmi["fieldTypes"].values()).issubset(script["valueAccessorTypes"]):
         raise ValueError("public QVMI type has no JavaScript accessor")
     if not set(qvmi["availability"]).issubset(public_paths):

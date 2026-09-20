@@ -1,5 +1,5 @@
 {
-  "contractVersion": "3.1.0",
+  "contractVersion": "3.2.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "manifest": {
     "required": [
@@ -123,7 +123,116 @@
       "artboard",
       "list",
       "viewModel"
-    ]
+    ],
+    "validation": {
+      "fixedFiles": {
+        "preview": "preview.webp",
+        "rive": "main.riv",
+        "javascript": "main.js"
+      },
+      "patterns": {
+        "id": "^[a-z][a-z0-9]*(?:[.-][a-z0-9][a-z0-9-]*)+$",
+        "version": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$",
+        "identifier": "^[A-Za-z][A-Za-z0-9-]{0,63}$",
+        "qvmiPath": "^[a-z][A-Za-z0-9]*(?:\\.[A-Za-z0-9*]+)+$",
+        "packageValuePath": "^package\\.[A-Za-z0-9]+(?:\\.[A-Za-z0-9]+)*$",
+        "networkDomain": "^(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z]{2,63}$",
+        "audioFile": "^assets/.+\\.(?:mp3|wav|ogg|flac|aac|m4a)$",
+        "fileExtension": "^\\.[A-Za-z0-9][A-Za-z0-9._+-]{0,31}$"
+      },
+      "limits": {
+        "nameMax": 128,
+        "authorMax": 128,
+        "descriptionMax": 1024,
+        "riveNameMax": 128,
+        "rivePropertySegmentsMax": 16,
+        "rivePropertySegmentMax": 128,
+        "uiSetsMax": 8
+      },
+      "persistentValueTypes": [
+        "number",
+        "string",
+        "boolean",
+        "color",
+        "enum",
+        "resource",
+        "image",
+        "list"
+      ],
+      "persistentPathPrefix": "package.storage.",
+      "triggerPathPrefix": "runtime.",
+      "forbiddenTriggerPrefixes": [
+        "runtime.network.",
+        "runtime.storage."
+      ],
+      "binding": {
+        "directions": [
+          "toRive",
+          "fromRive",
+          "twoWay"
+        ],
+        "mode": "latest",
+        "transformSourceType": "number",
+        "transformTargetType": "number",
+        "transformDirection": "toRive",
+        "structuredRiveTypes": [
+          "image",
+          "artboard",
+          "list",
+          "viewModel"
+        ],
+        "resourceToImageDirection": "toRive",
+        "triggerTwoWayAllowed": false,
+        "clampLength": 2
+      },
+      "audio": {
+        "usages": [
+          "effect",
+          "music"
+        ],
+        "volumeMin": 0,
+        "volumeMax": 1,
+        "loopUsage": "music"
+      },
+      "packageFiles": {
+        "required": [
+          "resource-package.json",
+          "main.riv",
+          "preview.webp"
+        ],
+        "optional": [
+          "main.js"
+        ],
+        "assetPrefix": "assets/",
+        "scriptDeclarationMatchesFile": true
+      },
+      "rive": {
+        "fits": [
+          "contain",
+          "cover",
+          "fill",
+          "fitWidth",
+          "fitHeight",
+          "none",
+          "scaleDown",
+          "layout"
+        ],
+        "alignments": [
+          "center",
+          "topLeft",
+          "topCenter",
+          "topRight",
+          "centerLeft",
+          "centerRight",
+          "bottomLeft",
+          "bottomCenter",
+          "bottomRight"
+        ],
+        "viewModelAndInstanceTogether": true,
+        "bindingsRequireViewModel": true,
+        "layoutScaleFactorPositive": true
+      }
+    }
   },
   "ui": {
     "commonFields": [
@@ -286,7 +395,83 @@
       "value",
       "resource",
       "label"
-    ]
+    ],
+    "validation": {
+      "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "limits": {
+        "setsMax": 8,
+        "componentsPerSetMax": 32,
+        "childrenMax": 32,
+        "depthMax": 6,
+        "optionsMax": 64,
+        "listItemsMax": 64,
+        "propertyPathSegmentsMax": 8,
+        "extensionsMax": 16,
+        "labelMax": 200,
+        "idMax": 64,
+        "linesMin": 1,
+        "linesMax": 20,
+        "decimalsMin": 0,
+        "decimalsMax": 6,
+        "spaceMax": 200,
+        "paddingMax": 64,
+        "radiusMax": 64
+      },
+      "enums": {
+        "scope": [
+          "persistent",
+          "runtime"
+        ],
+        "density": [
+          "normal",
+          "compact"
+        ],
+        "slot": [
+          "dialog",
+          "scriptUi",
+          "applicationScript",
+          "packageBuilder"
+        ],
+        "size": [
+          "sm",
+          "md",
+          "lg"
+        ],
+        "style": [
+          "normal",
+          "emphasized"
+        ],
+        "align": [
+          "start",
+          "center",
+          "end"
+        ],
+        "valign": [
+          "top",
+          "center",
+          "bottom"
+        ]
+      },
+      "dialogScope": "runtime",
+      "mountedScope": "persistent",
+      "selfDrawnHasSlot": false,
+      "inputTypes": [
+        "input",
+        "number",
+        "toggle",
+        "slider",
+        "color",
+        "singleChoice",
+        "multiChoice",
+        "segmented",
+        "filePicker",
+        "resourceChoice"
+      ],
+      "packageTextScope": "persistent",
+      "packageActionScope": "runtime",
+      "persistentInputRequiresPath": true,
+      "dialogInputRequiresDefault": true
+    }
   },
   "qvmi": {
     "observable": {
@@ -530,17 +715,64 @@
       "runtime.audio.setVolume"
     ],
     "triggerPayloadFields": {
-      "runtime.log.info": ["message"],
-      "runtime.log.warn": ["message"],
-      "runtime.log.error": ["message"],
-      "runtime.notification.publish": ["id", "title", "body"],
-      "runtime.notification.cancel": ["id"],
-      "runtime.alarm.schedule": ["id", "fireAt", "title", "body"],
-      "runtime.alarm.cancel": ["id"],
-      "runtime.audio.play": ["audio", "id", "policy", "volume", "options"],
-      "runtime.audio.pause": ["audio", "id"],
-      "runtime.audio.stop": ["audio", "id"],
-      "runtime.audio.setVolume": ["audio", "id", "volume"]
+      "runtime.log.info": [
+        "message"
+      ],
+      "runtime.log.warn": [
+        "message"
+      ],
+      "runtime.log.error": [
+        "message"
+      ],
+      "runtime.notification.publish": [
+        "id",
+        "title",
+        "body"
+      ],
+      "runtime.notification.cancel": [
+        "id"
+      ],
+      "runtime.alarm.schedule": [
+        "id",
+        "fireAt",
+        "title",
+        "body"
+      ],
+      "runtime.alarm.cancel": [
+        "id"
+      ],
+      "runtime.audio.play": [
+        "audio",
+        "id",
+        "policy",
+        "volume",
+        "options"
+      ],
+      "runtime.audio.pause": [
+        "audio",
+        "id"
+      ],
+      "runtime.audio.stop": [
+        "audio",
+        "id"
+      ],
+      "runtime.audio.setVolume": [
+        "audio",
+        "id",
+        "volume"
+      ]
+    },
+    "writablePublicPaths": [
+      "app.theme.brand"
+    ],
+    "permissionRules": {
+      "observeRequiresDeclaration": true,
+      "triggerRequiresDeclaration": true,
+      "writeRequiresDeclaredValue": true,
+      "publicHostFieldsReadOnlyExceptWritablePaths": true,
+      "applicationGlobalNamespace": "app.",
+      "packageGlobalNamespace": "package.",
+      "triggerNamespace": "runtime."
     }
   },
   "script": {
@@ -554,36 +786,298 @@
     "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
     "minimumIntervalMs": 1000,
     "valueAccessorTypes": [
-      "number", "boolean", "string", "color", "resource", "image", "enum", "trigger", "json", "binary"
+      "number",
+      "boolean",
+      "string",
+      "color",
+      "resource",
+      "image",
+      "enum",
+      "trigger",
+      "json",
+      "binary"
     ],
     "definitionOptions": {
-      "portable": ["label", "persistent"],
+      "portable": [
+        "label",
+        "persistent"
+      ],
       "harmonyAndroidOnly": [
-        "description", "unit", "nullable", "writable", "delivery", "range", "values",
-        "maxLength", "access", "valueLabels", "displayPrecision", "displayMultiplier", "displaySuffix"
+        "description",
+        "unit",
+        "nullable",
+        "writable",
+        "delivery",
+        "range",
+        "values",
+        "maxLength",
+        "access",
+        "valueLabels",
+        "displayPrecision",
+        "displayMultiplier",
+        "displaySuffix"
       ]
     },
     "operationOptionFields": {
-      "network.request": ["method", "headers", "body", "bodyBase64", "timeoutMs", "responseType", "redirect"],
-      "network.download": ["headers", "timeoutMs"],
-      "network.upload": ["method", "headers", "timeoutMs"],
-      "network.stream": ["method", "headers", "body", "timeoutMs"],
-      "network.webSocket.open": ["headers", "protocols"],
-      "rive.load": ["artboard", "stateMachine", "viewModel", "instanceKind", "instance"],
-      "editor.read": ["project", "file"]
+      "network.request": [
+        "method",
+        "headers",
+        "body",
+        "bodyBase64",
+        "timeoutMs",
+        "responseType",
+        "redirect"
+      ],
+      "network.download": [
+        "headers",
+        "timeoutMs"
+      ],
+      "network.upload": [
+        "method",
+        "headers",
+        "timeoutMs"
+      ],
+      "network.stream": [
+        "method",
+        "headers",
+        "body",
+        "timeoutMs"
+      ],
+      "network.webSocket.open": [
+        "headers",
+        "protocols"
+      ],
+      "rive.load": [
+        "artboard",
+        "stateMachine",
+        "viewModel",
+        "instanceKind",
+        "instance"
+      ],
+      "editor.read": [
+        "project",
+        "file"
+      ]
     },
     "hostOperations": [
-      "values.get", "values.define", "values.remove", "values.list", "values.set",
-      "values.observe", "values.trigger", "ui.open", "ui.declare", "ui.clear",
-      "editor.read", "editor.apply", "network.request", "network.download",
-      "network.upload", "network.stream", "network.webSocket.open",
-      "network.webSocket.send", "network.webSocket.close", "persistence.save",
-      "persistence.restore", "resources.token", "resources.readText",
-      "resources.readBinary", "rive.state", "rive.load", "rive.font.set"
+      "values.get",
+      "values.define",
+      "values.remove",
+      "values.list",
+      "values.set",
+      "values.observe",
+      "values.trigger",
+      "ui.open",
+      "ui.declare",
+      "ui.clear",
+      "editor.read",
+      "editor.apply",
+      "network.request",
+      "network.download",
+      "network.upload",
+      "network.stream",
+      "network.webSocket.open",
+      "network.webSocket.send",
+      "network.webSocket.close",
+      "persistence.save",
+      "persistence.restore",
+      "resources.token",
+      "resources.readText",
+      "resources.readBinary",
+      "rive.state",
+      "rive.load",
+      "rive.font.set"
     ],
     "applicationOnlyOperations": [
-      "values.define", "values.remove", "values.list", "ui.declare", "ui.clear",
-      "editor.read", "editor.apply"
+      "values.define",
+      "values.remove",
+      "values.list",
+      "ui.declare",
+      "ui.clear",
+      "editor.read",
+      "editor.apply"
+    ],
+    "validation": {
+      "uiDeclarationMaxChars": 65536,
+      "annotationsRequired": [
+        "id"
+      ],
+      "entryFunction": "defineQuScript",
+      "intervalZeroDisables": true,
+      "observeCanWildcard": true,
+      "applicationOnlyOperationsRequireApplicationScope": true,
+      "networkRequiresDeclaredDomain": true,
+      "persistenceRequiresApplicationScope": false,
+      "packageScriptMustMatchManifest": true,
+      "editorApplyMaxUtf16Units": 262144,
+      "sourceReadMaxBytes": 1048576
+    },
+    "operationArguments": {
+      "values.get": [
+        "path",
+        "type"
+      ],
+      "values.define": [
+        "path",
+        "type",
+        "initialValue",
+        "options"
+      ],
+      "values.remove": [
+        "path"
+      ],
+      "values.list": [],
+      "values.set": [
+        "path",
+        "type",
+        "value"
+      ],
+      "values.observe": [
+        "path",
+        "type",
+        "listener"
+      ],
+      "values.trigger": [
+        "path",
+        "payload"
+      ],
+      "ui.open": [
+        "componentId"
+      ],
+      "ui.declare": [
+        "sets"
+      ],
+      "ui.clear": [],
+      "editor.read": [
+        "target",
+        "project",
+        "file"
+      ],
+      "editor.apply": [
+        "change"
+      ],
+      "network.request": [
+        "url",
+        "options"
+      ],
+      "network.download": [
+        "url",
+        "options"
+      ],
+      "network.upload": [
+        "url",
+        "resource",
+        "options"
+      ],
+      "network.stream": [
+        "url",
+        "options",
+        "onChunk"
+      ],
+      "network.webSocket.open": [
+        "url",
+        "options",
+        "onEvent"
+      ],
+      "network.webSocket.send": [
+        "socket",
+        "data"
+      ],
+      "network.webSocket.close": [
+        "socket",
+        "code",
+        "reason"
+      ],
+      "persistence.save": [],
+      "persistence.restore": [],
+      "resources.token": [
+        "resourceId"
+      ],
+      "resources.readText": [
+        "reference"
+      ],
+      "resources.readBinary": [
+        "reference"
+      ],
+      "rive.state": [],
+      "rive.load": [
+        "options"
+      ],
+      "rive.font.set": [
+        "propertyPath",
+        "resourceId"
+      ]
+    }
+  },
+  "archive": {
+    "extension": ".qjpkg",
+    "maxFiles": 256,
+    "maxTotalBytes": 134217728,
+    "maxSingleFileBytes": 67108864,
+    "maxPathUtf8Bytes": 512,
+    "normalizeUnicode": "NFC",
+    "rejectCaseFoldCollisions": true,
+    "rejectSymlinks": true,
+    "rejectAbsolutePaths": true,
+    "rejectBackslashes": true,
+    "rejectDotSegments": true,
+    "rejectTrailingSpaceOrDot": true,
+    "forbiddenRootSegments": [
+      "data"
+    ],
+    "forbiddenSegments": [
+      ".rivelab",
+      ".qu"
+    ],
+    "windowsDeviceNames": [
+      "CON",
+      "PRN",
+      "AUX",
+      "NUL",
+      "COM1",
+      "COM2",
+      "COM3",
+      "COM4",
+      "COM5",
+      "COM6",
+      "COM7",
+      "COM8",
+      "COM9",
+      "LPT1",
+      "LPT2",
+      "LPT3",
+      "LPT4",
+      "LPT5",
+      "LPT6",
+      "LPT7",
+      "LPT8",
+      "LPT9"
     ]
+  },
+  "resources": {
+    "readTextMaxBytes": 8388608,
+    "readBinaryMaxBytes": 33554432,
+    "riveImageMaxBytes": 33554432,
+    "referenceRoot": "assets/",
+    "referenceRejectTraversal": true,
+    "referenceRejectForeignOwner": true,
+    "riveAssetMaxBytes": 33554432,
+    "duplicateBasenamesAcrossDirectoriesAllowed": true,
+    "bareBasenameRequiresUnique": true
+  },
+  "network": {
+    "scheme": "https",
+    "requiresDeclaredDomain": true,
+    "requestMaxBytes": 1048576,
+    "responseMaxBytes": 1048576,
+    "transferMaxBytes": 67108864,
+    "streamMaxBytes": 16777216,
+    "redirectModes": [
+      "error",
+      "follow"
+    ],
+    "defaultRedirect": "error",
+    "maxRedirects": 5,
+    "redirectMustRemainInDeclaredDomains": true
   }
 }
