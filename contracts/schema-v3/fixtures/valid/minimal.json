@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 3,
+  "id": "com.example.clock",
+  "version": "1.0.0",
+  "name": "时钟",
+  "author": "示例作者",
+  "preview": "preview.webp",
+  "rive": {
+    "file": "main.riv",
+    "artboard": "Main",
+    "stateMachine": "State Machine 1",
+    "layout": {
+      "fit": "contain",
+      "alignment": "center"
+    }
+  },
+  "values": [],
+  "capabilities": {
+    "observe": [
+      "system.time.epochMs"
+    ],
+    "trigger": []
+  },
+  "bindings": [],
+  "assets": {
+    "audio": []
+  },
+  "ui": []
+}

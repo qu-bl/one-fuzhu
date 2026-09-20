@@ -1,0 +1,458 @@
+{
+  "contractVersion": "3.0.0",
+  "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
+  "manifest": {
+    "required": [
+      "schemaVersion",
+      "id",
+      "version",
+      "name",
+      "author",
+      "preview",
+      "rive",
+      "values",
+      "capabilities",
+      "bindings",
+      "assets",
+      "ui"
+    ],
+    "optional": [
+      "description",
+      "javascript",
+      "$schema"
+    ],
+    "nested": {
+      "rive": [
+        "file",
+        "artboard",
+        "stateMachine",
+        "viewModel",
+        "instance",
+        "layout"
+      ],
+      "rive.layout": [
+        "fit",
+        "alignment",
+        "layoutScaleFactor"
+      ],
+      "javascript": [
+        "entry",
+        "networkDomains"
+      ],
+      "values[]": [
+        "path",
+        "type",
+        "defaultValue",
+        "writable",
+        "persistent"
+      ],
+      "capabilities": [
+        "observe",
+        "trigger"
+      ],
+      "bindings[]": [
+        "id",
+        "qu",
+        "quType",
+        "rive",
+        "riveType",
+        "direction",
+        "mode",
+        "required",
+        "transform"
+      ],
+      "bindings[].transform": [
+        "scale",
+        "offset",
+        "invert",
+        "clamp"
+      ],
+      "assets": [
+        "audio"
+      ],
+      "assets.audio[]": [
+        "id",
+        "file",
+        "usage",
+        "volume",
+        "loop"
+      ],
+      "ui[]": [
+        "id",
+        "title",
+        "scope",
+        "components",
+        "density"
+      ]
+    },
+    "valueTypes": [
+      "number",
+      "string",
+      "boolean",
+      "color",
+      "trigger",
+      "enum",
+      "resource",
+      "image",
+      "artboard",
+      "list",
+      "viewModel"
+    ],
+    "bindingSourceTypes": [
+      "number",
+      "string",
+      "boolean",
+      "color",
+      "trigger",
+      "enum",
+      "resource",
+      "image",
+      "artboard",
+      "list",
+      "viewModel",
+      "object"
+    ],
+    "riveTypes": [
+      "number",
+      "string",
+      "boolean",
+      "color",
+      "trigger",
+      "enum",
+      "image",
+      "artboard",
+      "list",
+      "viewModel"
+    ]
+  },
+  "ui": {
+    "commonFields": [
+      "description",
+      "enabled",
+      "flex",
+      "id",
+      "label",
+      "type",
+      "visible",
+      "visibleWhen"
+    ],
+    "typeFields": {
+      "text": [
+        "text",
+        "textPath",
+        "format",
+        "size",
+        "multiline",
+        "hug"
+      ],
+      "divider": [],
+      "spacer": [
+        "space"
+      ],
+      "input": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "placeholder",
+        "multiline",
+        "lines",
+        "secure",
+        "hug"
+      ],
+      "number": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "placeholder",
+        "hug"
+      ],
+      "color": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "hug"
+      ],
+      "toggle": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "hug"
+      ],
+      "slider": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "min",
+        "max",
+        "step",
+        "format",
+        "hug"
+      ],
+      "singleChoice": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "options",
+        "optionsPath",
+        "hug"
+      ],
+      "multiChoice": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "options",
+        "optionsPath",
+        "hug"
+      ],
+      "segmented": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "options",
+        "optionsPath",
+        "hug"
+      ],
+      "resourceChoice": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "options",
+        "optionsPath",
+        "hug"
+      ],
+      "filePicker": [
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "text",
+        "acceptedFileExtensions",
+        "maxBytes",
+        "hug"
+      ],
+      "action": [
+        "text",
+        "style",
+        "hug"
+      ],
+      "column": [
+        "children",
+        "gap",
+        "align",
+        "scroll",
+        "hug"
+      ],
+      "row": [
+        "children",
+        "gap",
+        "align",
+        "wrap",
+        "hug"
+      ],
+      "stack": [
+        "children",
+        "align",
+        "valign",
+        "hug"
+      ],
+      "card": [
+        "children",
+        "gap",
+        "align",
+        "padding",
+        "radius",
+        "hug"
+      ]
+    },
+    "setFields": [
+      "id",
+      "title",
+      "scope",
+      "components",
+      "density"
+    ],
+    "conditionFields": [
+      "path",
+      "equals",
+      "in"
+    ],
+    "formatFields": [
+      "decimals",
+      "prefix",
+      "suffix",
+      "percent"
+    ],
+    "optionFields": [
+      "value",
+      "resource",
+      "label"
+    ]
+  },
+  "qvmi": {
+    "observable": {
+      "system.time": [
+        "epochMs"
+      ],
+      "system.appearance": [
+        "colorMode",
+        "language",
+        "region",
+        "locale",
+        "timeZone",
+        "is24HourClock",
+        "fontSizeScale",
+        "fontWeightScale",
+        "hasPointerDevice",
+        "mcc",
+        "mnc"
+      ],
+      "system.deviceInfo": [
+        "type",
+        "manufacturer",
+        "brand",
+        "marketName",
+        "productSeries",
+        "productModel",
+        "productModelAlias",
+        "softwareModel",
+        "hardwareModel",
+        "chipType",
+        "abiList",
+        "performanceClass",
+        "displayVersion",
+        "incrementalVersion",
+        "osFullName",
+        "osReleaseType",
+        "securityPatchTag",
+        "osMajorVersion",
+        "osSeniorVersion",
+        "osFeatureVersion",
+        "osBuildVersion",
+        "sdkApiVersion",
+        "sdkMinorApiVersion",
+        "sdkPatchApiVersion",
+        "firstApiVersion",
+        "versionId",
+        "buildType",
+        "buildTime",
+        "distributionOSName",
+        "distributionOSVersion",
+        "distributionOSApiVersion",
+        "distributionOSApiName",
+        "distributionOSReleaseType",
+        "bootCount",
+        "deviceColor"
+      ],
+      "system.battery": [
+        "level",
+        "isCharging"
+      ],
+      "device.motion": [
+        "accelerationX",
+        "accelerationY",
+        "accelerationZ",
+        "rotationX",
+        "rotationY",
+        "rotationZ",
+        "pitch",
+        "roll",
+        "yaw"
+      ],
+      "device.ambientLight": [
+        "normalized"
+      ],
+      "device.proximity": [
+        "isNear",
+        "normalized"
+      ],
+      "device.location": [
+        "latitude",
+        "longitude",
+        "altitude",
+        "speed",
+        "course",
+        "horizontalAccuracy"
+      ],
+      "device.screen": [
+        "width",
+        "height",
+        "density",
+        "orientation"
+      ],
+      "device.touch": [
+        "x",
+        "y",
+        "isDown",
+        "phase",
+        "pointerId"
+      ],
+      "system.network": [
+        "isConnected",
+        "type"
+      ]
+    },
+    "availability": {
+      "device.ambientLight.normalized": [
+        "harmony",
+        "android"
+      ],
+      "device.proximity.isNear": [
+        "harmony",
+        "android",
+        "ios"
+      ],
+      "device.proximity.normalized": [
+        "harmony",
+        "android",
+        "ios"
+      ]
+    },
+    "placeholderValues": {
+      "android": [
+        "deviceColor",
+        "osBuildVersion",
+        "sdkMinorApiVersion",
+        "sdkPatchApiVersion"
+      ],
+      "apple": [
+        "chipType",
+        "osReleaseType",
+        "securityPatchTag",
+        "buildType",
+        "buildTime",
+        "deviceColor",
+        "distributionOSApiVersion",
+        "distributionOSApiName",
+        "distributionOSReleaseType",
+        "osBuildVersion",
+        "sdkApiVersion",
+        "sdkMinorApiVersion",
+        "sdkPatchApiVersion",
+        "firstApiVersion",
+        "bootCount"
+      ]
+    },
+    "triggers": [
+      "runtime.log.info",
+      "runtime.log.warn",
+      "runtime.log.error",
+      "runtime.notification.publish",
+      "runtime.notification.cancel",
+      "runtime.alarm.schedule",
+      "runtime.alarm.cancel",
+      "runtime.audio.play",
+      "runtime.audio.pause",
+      "runtime.audio.stop",
+      "runtime.audio.setVolume"
+    ]
+  },
+  "script": {
+    "annotations": [
+      "description",
+      "id",
+      "interval",
+      "observe",
+      "ui"
+    ],
+    "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+  }
+}
