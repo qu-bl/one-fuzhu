@@ -1,6 +1,176 @@
 # 千机百变：宿主 JavaScript 能力契约
 
-本文自包含描述当前鸿蒙宿主实际向脚本开放的接口与「资源包」场景规范；资源包不涉及应用脚本（application.js、defineQuScript、app.* 字段）。接口事实以本文为准，当前编辑器文件是待修改的数据，旧对话中的代码和推断不是接口依据。不要把平台原生 API 或其他端的能力当作已经暴露给脚本的能力。
+本文自包含描述「资源包」场景规范；资源包不涉及应用脚本（application.js、defineQuScript、app.* 字段）。下面自动生成的云端宿主契约段落是字段、类型和入口的准绳；当前编辑器文件是待修改的数据，旧对话中的代码和推断不是接口依据。不要把平台原生 API 当作已经暴露给脚本的能力。
+
+<!-- BEGIN GENERATED HOST CONTRACT -->
+## 云端宿主契约 3.1.0（自动生成）
+
+以下字段、类型和入口取自同一份 `contracts/schema-v3/contract.json`。若下文示例或叙述与此清单冲突，以此清单和当前应用能力为准。
+
+### 资源包与 UI
+
+- 顶层必填：`schemaVersion`、`id`、`version`、`name`、`author`、`preview`、`rive`、`values`、`capabilities`、`bindings`、`assets`、`ui`
+- 顶层可选：`description`、`javascript`、`$schema`
+
+| 资源包对象 | 允许字段 |
+| --- | --- |
+| `rive` | `file`、`artboard`、`stateMachine`、`viewModel`、`instance`、`layout` |
+| `rive.layout` | `fit`、`alignment`、`layoutScaleFactor` |
+| `javascript` | `entry`、`networkDomains` |
+| `values[]` | `path`、`type`、`defaultValue`、`writable`、`persistent` |
+| `capabilities` | `observe`、`trigger` |
+| `bindings[]` | `id`、`qu`、`quType`、`rive`、`riveType`、`direction`、`mode`、`required`、`transform` |
+| `bindings[].transform` | `scale`、`offset`、`invert`、`clamp` |
+| `assets` | `audio` |
+| `assets.audio[]` | `id`、`file`、`usage`、`volume`、`loop` |
+| `ui[]` | `id`、`title`、`scope`、`components`、`density` |
+
+- UI 公共字段：`description`、`enabled`、`flex`、`id`、`label`、`type`、`visible`、`visibleWhen`
+
+| UI 类型 | 专属字段 |
+| --- | --- |
+| `text` | `text`、`textPath`、`format`、`size`、`multiline`、`hug` |
+| `divider` | 无 |
+| `spacer` | `space` |
+| `input` | `propertyPath`、`valueType`、`defaultValue`、`placeholder`、`multiline`、`lines`、`secure`、`hug` |
+| `number` | `propertyPath`、`valueType`、`defaultValue`、`placeholder`、`hug` |
+| `color` | `propertyPath`、`valueType`、`defaultValue`、`hug` |
+| `toggle` | `propertyPath`、`valueType`、`defaultValue`、`hug` |
+| `slider` | `propertyPath`、`valueType`、`defaultValue`、`min`、`max`、`step`、`format`、`hug` |
+| `singleChoice` | `propertyPath`、`valueType`、`defaultValue`、`options`、`optionsPath`、`hug` |
+| `multiChoice` | `propertyPath`、`valueType`、`defaultValue`、`options`、`optionsPath`、`hug` |
+| `segmented` | `propertyPath`、`valueType`、`defaultValue`、`options`、`optionsPath`、`hug` |
+| `resourceChoice` | `propertyPath`、`valueType`、`defaultValue`、`options`、`optionsPath`、`hug` |
+| `filePicker` | `propertyPath`、`valueType`、`defaultValue`、`text`、`acceptedFileExtensions`、`maxBytes`、`hug` |
+| `action` | `text`、`style`、`hug` |
+| `column` | `children`、`gap`、`align`、`scroll`、`hug` |
+| `row` | `children`、`gap`、`align`、`wrap`、`hug` |
+| `stack` | `children`、`align`、`valign`、`hug` |
+| `card` | `children`、`gap`、`align`、`padding`、`radius`、`hug` |
+
+### JavaScript 宿主
+
+- 可调用入口：`values.get`、`values.define`、`values.remove`、`values.list`、`values.set`、`values.observe`、`values.trigger`、`ui.open`、`ui.declare`、`ui.clear`、`editor.read`、`editor.apply`、`network.request`、`network.download`、`network.upload`、`network.stream`、`network.webSocket.open`、`network.webSocket.send`、`network.webSocket.close`、`persistence.save`、`persistence.restore`、`resources.token`、`resources.readText`、`resources.readBinary`、`rive.state`、`rive.load`、`rive.font.set`
+- 仅应用脚本入口：`values.define`、`values.remove`、`values.list`、`ui.declare`、`ui.clear`、`editor.read`、`editor.apply`
+- QVMI 类型入口：`number`、`boolean`、`string`、`color`、`resource`、`image`、`enum`、`trigger`、`json`、`binary`
+- `viewModel.define` 三端通用选项：`label`、`persistent`
+- `viewModel.define` 当前仅鸿蒙与 Android 支持的选项：`description`、`unit`、`nullable`、`writable`、`delivery`、`range`、`values`、`maxLength`、`access`、`valueLabels`、`displayPrecision`、`displayMultiplier`、`displaySuffix`
+- 脚本注解：`@description`、`@id`、`@interval`、`@observe`、`@ui`
+- `@id` 格式：`^[A-Za-z][A-Za-z0-9_-]{0,63}$`；`@interval` 非零时最小值：1000 ms
+
+| 宿主调用 | 允许的 options 字段 |
+| --- | --- |
+| `network.request` | `method`、`headers`、`body`、`bodyBase64`、`timeoutMs`、`responseType`、`redirect` |
+| `network.download` | `headers`、`timeoutMs` |
+| `network.upload` | `method`、`headers`、`timeoutMs` |
+| `network.stream` | `method`、`headers`、`body`、`timeoutMs` |
+| `network.webSocket.open` | `headers`、`protocols` |
+| `rive.load` | `artboard`、`stateMachine`、`viewModel`、`instanceKind`、`instance` |
+| `editor.read` | `project`、`file` |
+
+### 公开 QVMI 字段
+
+| 路径 | 类型 |
+| --- | --- |
+| `app.theme.brand` | `color` |
+| `system.time.epochMs` | `number` |
+| `system.appearance.colorMode` | `enum` |
+| `system.appearance.language` | `string` |
+| `system.appearance.region` | `string` |
+| `system.appearance.locale` | `string` |
+| `system.appearance.timeZone` | `string` |
+| `system.appearance.is24HourClock` | `boolean` |
+| `system.appearance.fontSizeScale` | `number` |
+| `system.appearance.fontWeightScale` | `number` |
+| `system.appearance.hasPointerDevice` | `boolean` |
+| `system.appearance.mcc` | `string` |
+| `system.appearance.mnc` | `string` |
+| `system.deviceInfo.type` | `string` |
+| `system.deviceInfo.manufacturer` | `string` |
+| `system.deviceInfo.brand` | `string` |
+| `system.deviceInfo.marketName` | `string` |
+| `system.deviceInfo.productSeries` | `string` |
+| `system.deviceInfo.productModel` | `string` |
+| `system.deviceInfo.productModelAlias` | `string` |
+| `system.deviceInfo.softwareModel` | `string` |
+| `system.deviceInfo.hardwareModel` | `string` |
+| `system.deviceInfo.chipType` | `string` |
+| `system.deviceInfo.abiList` | `string` |
+| `system.deviceInfo.performanceClass` | `number` |
+| `system.deviceInfo.displayVersion` | `string` |
+| `system.deviceInfo.incrementalVersion` | `string` |
+| `system.deviceInfo.osFullName` | `string` |
+| `system.deviceInfo.osReleaseType` | `string` |
+| `system.deviceInfo.securityPatchTag` | `string` |
+| `system.deviceInfo.osMajorVersion` | `number` |
+| `system.deviceInfo.osSeniorVersion` | `number` |
+| `system.deviceInfo.osFeatureVersion` | `number` |
+| `system.deviceInfo.osBuildVersion` | `number` |
+| `system.deviceInfo.sdkApiVersion` | `number` |
+| `system.deviceInfo.sdkMinorApiVersion` | `number` |
+| `system.deviceInfo.sdkPatchApiVersion` | `number` |
+| `system.deviceInfo.firstApiVersion` | `number` |
+| `system.deviceInfo.versionId` | `string` |
+| `system.deviceInfo.buildType` | `string` |
+| `system.deviceInfo.buildTime` | `string` |
+| `system.deviceInfo.distributionOSName` | `string` |
+| `system.deviceInfo.distributionOSVersion` | `string` |
+| `system.deviceInfo.distributionOSApiVersion` | `number` |
+| `system.deviceInfo.distributionOSApiName` | `string` |
+| `system.deviceInfo.distributionOSReleaseType` | `string` |
+| `system.deviceInfo.bootCount` | `number` |
+| `system.deviceInfo.deviceColor` | `string` |
+| `system.battery.level` | `number` |
+| `system.battery.isCharging` | `boolean` |
+| `device.motion.accelerationX` | `number` |
+| `device.motion.accelerationY` | `number` |
+| `device.motion.accelerationZ` | `number` |
+| `device.motion.rotationX` | `number` |
+| `device.motion.rotationY` | `number` |
+| `device.motion.rotationZ` | `number` |
+| `device.motion.pitch` | `number` |
+| `device.motion.roll` | `number` |
+| `device.motion.yaw` | `number` |
+| `device.ambientLight.normalized` | `number` |
+| `device.proximity.isNear` | `boolean` |
+| `device.proximity.normalized` | `number` |
+| `device.location.latitude` | `number` |
+| `device.location.longitude` | `number` |
+| `device.location.altitude` | `number` |
+| `device.location.speed` | `number` |
+| `device.location.course` | `number` |
+| `device.location.horizontalAccuracy` | `number` |
+| `device.screen.width` | `number` |
+| `device.screen.height` | `number` |
+| `device.screen.density` | `number` |
+| `device.screen.orientation` | `enum` |
+| `device.touch.x` | `number` |
+| `device.touch.y` | `number` |
+| `device.touch.isDown` | `boolean` |
+| `device.touch.phase` | `enum` |
+| `device.touch.pointerId` | `number` |
+| `system.network.isConnected` | `boolean` |
+| `system.network.type` | `enum` |
+
+### 公共触发项
+
+| 路径 | 允许的 payload 字段 |
+| --- | --- |
+| `runtime.log.info` | `message` |
+| `runtime.log.warn` | `message` |
+| `runtime.log.error` | `message` |
+| `runtime.notification.publish` | `id`、`title`、`body` |
+| `runtime.notification.cancel` | `id` |
+| `runtime.alarm.schedule` | `id`、`fireAt`、`title`、`body` |
+| `runtime.alarm.cancel` | `id` |
+| `runtime.audio.play` | `audio`、`id`、`policy`、`volume`、`options` |
+| `runtime.audio.pause` | `audio`、`id` |
+| `runtime.audio.stop` | `audio`、`id` |
+| `runtime.audio.setVolume` | `audio`、`id`、`volume` |
+
+音频字段优先使用 `audio`；`id` 与 `options` 仅供旧脚本兼容。
+
+<!-- END GENERATED HOST CONTRACT -->
 
 ## 编辑器助手与交付
 
@@ -68,8 +238,8 @@ qu.viewModel.<类型入口>(path) 返回属性句柄，不是值。path 是区�
 | device.location.latitude / longitude | number | 纬度 / 经度，度 |
 | device.location.altitude / speed | number | 海拔（米） / 速度（米/秒） |
 | device.location.course / horizontalAccuracy | number | 方位角（度） / 水平精度（米） |
-| system.deviceInfo.* | string | type, manufacturer, brand, marketName, productSeries, productModel, productModelAlias, softwareModel, hardwareModel, chipType, abiList, displayVersion, incrementalVersion, osFullName, osReleaseType, securityPatchTag, versionId, buildType, buildTime, distributionOSName, distributionOSVersion, distributionOSApiName, distributionOSReleaseType, bootCount, deviceColor |
-| system.deviceInfo.* | number | performanceClass, osMajorVersion, osSeniorVersion, osFeatureVersion, osBuildVersion, sdkApiVersion, sdkMinorApiVersion, sdkPatchApiVersion, firstApiVersion, distributionOSApiVersion |
+| system.deviceInfo.* | string | type, manufacturer, brand, marketName, productSeries, productModel, productModelAlias, softwareModel, hardwareModel, chipType, abiList, displayVersion, incrementalVersion, osFullName, osReleaseType, securityPatchTag, versionId, buildType, buildTime, distributionOSName, distributionOSVersion, distributionOSApiName, distributionOSReleaseType, deviceColor |
+| system.deviceInfo.* | number | performanceClass, osMajorVersion, osSeniorVersion, osFeatureVersion, osBuildVersion, sdkApiVersion, sdkMinorApiVersion, sdkPatchApiVersion, firstApiVersion, distributionOSApiVersion, bootCount |
 
 ## 宿主动作：日志与系统提醒
 

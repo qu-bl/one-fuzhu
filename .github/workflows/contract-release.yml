@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'contracts/schema-v3/**'
+      - 'ai-rules/**'
       - '.github/workflows/contract-release.yml'
   push:
     branches: [main]
     paths:
       - 'contracts/schema-v3/**'
+      - 'ai-rules/**'
       - '.github/workflows/contract-release.yml'
 
 jobs:
