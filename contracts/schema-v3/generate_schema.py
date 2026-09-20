@@ -8,6 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 CONTRACT = json.loads((ROOT / "contract.json").read_text())
 TYPES = CONTRACT["manifest"]["valueTypes"]
+MV = CONTRACT["manifest"]["validation"]
+UV = CONTRACT["ui"]["validation"]
 
 
 def obj(properties, required=(), *, extra=False):
@@ -24,35 +26,39 @@ number = {"type": "number"}
 boolean = {"type": "boolean"}
 scalar = {"type": ["string", "number", "boolean"]}
 ui_value = {"oneOf": [scalar, arr(string)]}
-path = arr({"type": "string", "minLength": 1}, minItems=1, maxItems=16)
+path = arr({"type": "string", "minLength": 1}, minItems=1, maxItems=MV["limits"]["rivePropertySegmentsMax"])
+ui_path = arr({"type": "string", "minLength": 1}, minItems=1, maxItems=UV["limits"]["propertyPathSegmentsMax"])
 
-condition = obj({"path": string, "equals": scalar, "in": arr(scalar, minItems=1)}, ["path"])
+condition = obj({"path": string, "equals": scalar, "in": arr(scalar, minItems=1,
+                                                               maxItems=UV["limits"]["optionsMax"])}, ["path"])
 condition["anyOf"] = [{"required": ["equals"]}, {"required": ["in"]}]
-format_shape = obj({"decimals": {"type": "integer", "minimum": 0, "maximum": 6},
+format_shape = obj({"decimals": {"type": "integer", "minimum": UV["limits"]["decimalsMin"], "maximum": UV["limits"]["decimalsMax"]},
                     "prefix": string, "suffix": string, "percent": boolean})
-option = obj({"value": scalar, "resource": string, "label": {"type": "string", "minLength": 1}}, ["label"])
+option = obj({"value": scalar, "resource": string, "label": {"type": "string", "minLength": 1,
+                                                           "maxLength": UV["limits"]["labelMax"]}}, ["label"])
 
 ui_properties = {
-    "id": {"type": "string", "minLength": 1}, "type": string,
-    "label": string, "description": string, "enabled": boolean,
+    "id": {"type": "string", "pattern": UV["idPattern"]}, "type": string,
+    "label": {"type": "string", "minLength": 1, "maxLength": UV["limits"]["labelMax"]},
+    "description": {"type": "string", "maxLength": UV["limits"]["labelMax"]}, "enabled": boolean,
     "visible": boolean, "visibleWhen": condition,
     "flex": {"type": "number", "minimum": 0},
     "text": string, "textPath": string, "format": format_shape,
-    "size": {"enum": ["sm", "md", "lg"]}, "multiline": boolean,
-    "hug": boolean, "space": {"type": "number", "minimum": 0, "maximum": 200},
-    "propertyPath": path, "valueType": {"enum": TYPES}, "defaultValue": ui_value,
-    "placeholder": string, "lines": {"type": "integer", "minimum": 1, "maximum": 20},
+    "size": {"enum": UV["enums"]["size"]}, "multiline": boolean,
+    "hug": boolean, "space": {"type": "number", "minimum": 0, "maximum": UV["limits"]["spaceMax"]},
+    "propertyPath": ui_path, "valueType": {"enum": TYPES}, "defaultValue": ui_value,
+    "placeholder": string, "lines": {"type": "integer", "minimum": UV["limits"]["linesMin"], "maximum": UV["limits"]["linesMax"]},
     "secure": boolean, "min": number, "max": number, "step": number,
-    "options": arr(option), "optionsPath": string,
-    "acceptedFileExtensions": arr(string), "maxBytes": {"type": "integer", "minimum": 0},
-    "style": {"enum": ["normal", "emphasized"]},
-    "children": arr({"$ref": "#/$defs/uiComponent"}),
+    "options": arr(option, maxItems=UV["limits"]["optionsMax"]), "optionsPath": string,
+    "acceptedFileExtensions": arr(string, maxItems=UV["limits"]["extensionsMax"]), "maxBytes": {"type": "integer", "minimum": 0},
+    "style": {"enum": UV["enums"]["style"]},
+    "children": arr({"$ref": "#/$defs/uiComponent"}, maxItems=UV["limits"]["childrenMax"]),
     "gap": {"type": "number", "minimum": 0},
-    "align": {"enum": ["start", "center", "end"]},
-    "valign": {"enum": ["top", "center", "bottom"]},
+    "align": {"enum": UV["enums"]["align"]},
+    "valign": {"enum": UV["enums"]["valign"]},
     "wrap": boolean, "scroll": boolean,
-    "padding": {"type": "number", "minimum": 0, "maximum": 64},
-    "radius": {"type": "number", "minimum": 0, "maximum": 64},
+    "padding": {"type": "number", "minimum": 0, "maximum": UV["limits"]["paddingMax"]},
+    "radius": {"type": "number", "minimum": 0, "maximum": UV["limits"]["radiusMax"]},
 }
 common = CONTRACT["ui"]["commonFields"]
 variants = []
@@ -63,26 +69,25 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
     variants.append(obj(properties, ["id", "type", "label"]))
 
 layout = obj({
-    "fit": {"enum": ["contain", "cover", "fill", "fitWidth", "fitHeight", "none", "scaleDown", "layout"]},
-    "alignment": {"enum": ["center", "topLeft", "topCenter", "topRight", "centerLeft", "centerRight",
-                            "bottomLeft", "bottomCenter", "bottomRight"]},
+    "fit": {"enum": MV["rive"]["fits"]},
+    "alignment": {"enum": MV["rive"]["alignments"]},
     "layoutScaleFactor": {"type": "number", "exclusiveMinimum": 0},
 }, ["fit", "alignment"])
-rive = obj({"file": {"const": "main.riv"}, "artboard": {"type": "string", "minLength": 1},
+rive = obj({"file": {"const": MV["fixedFiles"]["rive"]}, "artboard": {"type": "string", "minLength": 1},
             "stateMachine": {"type": "string", "minLength": 1},
             "viewModel": {"type": "string", "minLength": 1},
             "instance": {"type": "string", "minLength": 1}, "layout": layout},
            ["file", "artboard", "stateMachine", "layout"])
 rive["dependentRequired"] = {"viewModel": ["instance"], "instance": ["viewModel"]}
 
-value = obj({"path": {"type": "string", "pattern": "^package\\.[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*$"},
+value = obj({"path": {"type": "string", "pattern": MV["patterns"]["packageValuePath"]},
              "type": {"enum": TYPES}, "defaultValue": ui_value,
              "writable": boolean, "persistent": boolean},
             ["path", "type", "writable", "persistent"])
 value["if"] = {"properties": {"persistent": {"const": True}}, "required": ["persistent"]}
 value["then"] = {"properties": {
-    "path": {"pattern": "^package\\.storage\\.[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*$"},
-    "type": {"enum": ["number", "string", "boolean", "color", "enum", "resource", "image", "list"]},
+    "path": {"pattern": "^" + MV["persistentPathPrefix"].replace(".", "\\.") + "[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*$"},
+    "type": {"enum": MV["persistentValueTypes"]},
     "writable": {"const": True}}}
 value["allOf"] = []
 for value_type, default_schema in (
@@ -100,37 +105,38 @@ transform = obj({"scale": number, "offset": number, "invert": boolean,
 binding = obj({"id": {"type": "string", "minLength": 1},
                "qu": string, "quType": {"enum": CONTRACT["manifest"]["bindingSourceTypes"]},
                "rive": path, "riveType": {"enum": CONTRACT["manifest"]["riveTypes"]},
-               "direction": {"enum": ["toRive", "fromRive", "twoWay"]},
-               "mode": {"const": "latest"}, "required": boolean, "transform": transform},
+               "direction": {"enum": MV["binding"]["directions"]},
+               "mode": {"const": MV["binding"]["mode"]}, "required": boolean, "transform": transform},
               ["id", "qu", "quType", "rive", "riveType", "direction", "mode", "required"])
-audio = obj({"id": string, "file": {"type": "string", "pattern": "^assets/.+\\.(mp3|m4a|aac|wav|ogg|flac)$"},
-             "usage": {"enum": ["effect", "music"]},
-             "volume": {"type": "number", "minimum": 0, "maximum": 1}, "loop": boolean},
+audio = obj({"id": string, "file": {"type": "string", "pattern": MV["patterns"]["audioFile"]},
+             "usage": {"enum": MV["audio"]["usages"]},
+             "volume": {"type": "number", "minimum": MV["audio"]["volumeMin"], "maximum": MV["audio"]["volumeMax"]}, "loop": boolean},
             ["id", "file", "usage", "volume", "loop"])
 
 schema = obj({
     "$schema": string,
     "schemaVersion": {"const": 3},
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9][a-z0-9-]*)+$"},
-    "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$"},
-    "name": {"type": "string", "minLength": 1, "maxLength": 128},
-    "author": {"type": "string", "minLength": 1, "maxLength": 128},
-    "description": {"type": "string", "maxLength": 1024},
-    "preview": {"const": "preview.webp"},
+    "id": {"type": "string", "pattern": MV["patterns"]["id"]},
+    "version": {"type": "string", "pattern": MV["patterns"]["version"]},
+    "name": {"type": "string", "minLength": 1, "maxLength": MV["limits"]["nameMax"]},
+    "author": {"type": "string", "minLength": 1, "maxLength": MV["limits"]["authorMax"]},
+    "description": {"type": "string", "maxLength": MV["limits"]["descriptionMax"]},
+    "preview": {"const": MV["fixedFiles"]["preview"]},
     "rive": rive,
-    "javascript": obj({"entry": {"const": "main.js"},
-                       "networkDomains": arr({"type": "string", "pattern":
-                                              "^(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z]{2,63}$"})},
+    "javascript": obj({"entry": {"const": MV["fixedFiles"]["javascript"]},
+                       "networkDomains": arr({"type": "string", "pattern": MV["patterns"]["networkDomain"]})},
                       ["entry", "networkDomains"]),
     "values": arr(value),
     "capabilities": obj({"observe": arr(string), "trigger": arr({"type": "string", "pattern": "^runtime\\."})},
                         ["observe", "trigger"]),
     "bindings": arr(binding),
     "assets": obj({"audio": arr(audio)}, ["audio"]),
-    "ui": arr(obj({"id": string, "title": string, "scope": {"enum": ["persistent", "runtime"]},
-                   "components": arr({"$ref": "#/$defs/uiComponent"}),
-                   "density": {"enum": ["normal", "compact"]}},
-                  ["id", "title", "scope", "components"]), maxItems=8),
+    "ui": arr(obj({"id": {"type": "string", "pattern": UV["idPattern"]}, "title": string,
+                   "scope": {"enum": UV["enums"]["scope"]},
+                   "components": arr({"$ref": "#/$defs/uiComponent"},
+                                     maxItems=UV["limits"]["componentsPerSetMax"]),
+                   "density": {"enum": UV["enums"]["density"]}},
+                  ["id", "title", "scope", "components"]), maxItems=UV["limits"]["setsMax"]),
 }, CONTRACT["manifest"]["required"])
 schema.update({"$schema": "https://json-schema.org/draft/2020-12/schema",
                "title": "千机百变资源包 schema v3",
