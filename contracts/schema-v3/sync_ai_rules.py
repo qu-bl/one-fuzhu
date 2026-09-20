@@ -40,6 +40,36 @@ def appendix(contract):
     ]
     for name, fields in ui["typeFields"].items():
         lines.append(f"| `{name}` | " + ("、".join(f"`{field}`" for field in fields) or "无") + " |")
+    mv = manifest["validation"]
+    uv = ui["validation"]
+    archive = contract["archive"]
+    resources = contract["resources"]
+    network = contract["network"]
+    lines += [
+        "", "### 共享行为规则", "",
+        "- 固定文件：" + "、".join(f"`{name}={file}`" for name, file in mv["fixedFiles"].items()),
+        "- 资源包 ID 格式：`" + mv["patterns"]["id"] + "`；版本格式：`" + mv["patterns"]["version"] + "`",
+        "- 持久字段路径前缀：`" + mv["persistentPathPrefix"] + "`；允许类型：" +
+        "、".join(f"`{name}`" for name in mv["persistentValueTypes"]),
+        "- 绑定方向：" + "、".join(f"`{name}`" for name in mv["binding"]["directions"]) +
+        "；模式：`" + mv["binding"]["mode"] + "`；变换仅用于数字到数字的单向绑定。",
+        "- 音频用途：" + "、".join(f"`{name}`" for name in mv["audio"]["usages"]) +
+        f"；音量范围 {mv['audio']['volumeMin']}～{mv['audio']['volumeMax']}；循环仅供 `{mv['audio']['loopUsage']}`。",
+        f"- UI 最多 {uv['limits']['setsMax']} 组，每组最多 {uv['limits']['componentsPerSetMax']} 个控件，"
+        f"嵌套最多 {uv['limits']['depthMax']} 层；控件 ID 格式：`{uv['idPattern']}`。",
+        "- 自绘资源包 UI 不声明 `slot`；`dialog` 使用运行时 scope，其他挂载位置使用持久 scope。",
+        f"- `.qjpkg` 归档最多 {archive['maxFiles']} 个文件，解压总大小最多 {archive['maxTotalBytes']} 字节，"
+        f"单文件最多 {archive['maxSingleFileBytes']} 字节，路径最多 {archive['maxPathUtf8Bytes']} 个 UTF-8 字节。",
+        "- 归档保留目录：" + "、".join(f"`{name}`" for name in
+                                  archive["forbiddenRootSegments"] + archive["forbiddenSegments"]),
+        f"- 脚本资源读取上限：文本 {resources['readTextMaxBytes']} 字节、二进制 {resources['readBinaryMaxBytes']} 字节；"
+        f"Rive 单个资源 {resources['riveAssetMaxBytes']} 字节。",
+        f"- 网络限额：请求／响应分别 {network['requestMaxBytes']}／{network['responseMaxBytes']} 字节，"
+        f"上传下载 {network['transferMaxBytes']} 字节，流式响应 {network['streamMaxBytes']} 字节；"
+        "仅允许已声明域名的 HTTPS 请求。",
+        f"- `@ui` 最多 {script['validation']['uiDeclarationMaxChars']} 个 UTF-16 单元；"
+        f"`editor.apply` 最多 {script['validation']['editorApplyMaxUtf16Units']} 个 UTF-16 单元。",
+    ]
     lines += ["", "### JavaScript 宿主", "",
               "- 可调用入口：" + "、".join(f"`{name}`" for name in script["hostOperations"]),
               "- 仅应用脚本入口：" + "、".join(f"`{name}`" for name in script["applicationOnlyOperations"]),
@@ -52,10 +82,14 @@ def appendix(contract):
               "", "| 宿主调用 | 允许的 options 字段 |", "| --- | --- |"]
     for operation, fields in script["operationOptionFields"].items():
         lines.append(f"| `{operation}` | " + "、".join(f"`{field}`" for field in fields) + " |")
+    lines += ["", "| 宿主调用 | 公共参数顺序 |", "| --- | --- |"]
+    for operation, arguments in script["operationArguments"].items():
+        lines.append(f"| `{operation}` | " + ("、".join(f"`{name}`" for name in arguments) or "无") + " |")
     lines += [
               "", "### 公开 QVMI 字段", "", "| 路径 | 类型 |", "| --- | --- |"]
     for path, type_name in qvmi["fieldTypes"].items():
         lines.append(f"| `{path}` | `{type_name}` |")
+    lines += ["", "- 可写公开字段：" + "、".join(f"`{path}`" for path in qvmi["writablePublicPaths"])]
     lines += ["", "### 公共触发项", "", "| 路径 | 允许的 payload 字段 |", "| --- | --- |"]
     for path, fields in qvmi["triggerPayloadFields"].items():
         lines.append(f"| `{path}` | " + "、".join(f"`{field}`" for field in fields) + " |")

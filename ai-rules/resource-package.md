@@ -3,7 +3,7 @@
 本文自包含描述「资源包」场景规范；资源包不涉及应用脚本（application.js、defineQuScript、app.* 字段）。下面自动生成的云端宿主契约段落是字段、类型和入口的准绳；当前编辑器文件是待修改的数据，旧对话中的代码和推断不是接口依据。不要把平台原生 API 当作已经暴露给脚本的能力。
 
 <!-- BEGIN GENERATED HOST CONTRACT -->
-## 云端宿主契约 3.1.0（自动生成）
+## 云端宿主契约 3.2.0（自动生成）
 
 以下字段、类型和入口取自同一份 `contracts/schema-v3/contract.json`。若下文示例或叙述与此清单冲突，以此清单和当前应用能力为准。
 
@@ -48,6 +48,21 @@
 | `stack` | `children`、`align`、`valign`、`hug` |
 | `card` | `children`、`gap`、`align`、`padding`、`radius`、`hug` |
 
+### 共享行为规则
+
+- 固定文件：`preview=preview.webp`、`rive=main.riv`、`javascript=main.js`
+- 资源包 ID 格式：`^[a-z][a-z0-9]*(?:[.-][a-z0-9][a-z0-9-]*)+$`；版本格式：`^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$`
+- 持久字段路径前缀：`package.storage.`；允许类型：`number`、`string`、`boolean`、`color`、`enum`、`resource`、`image`、`list`
+- 绑定方向：`toRive`、`fromRive`、`twoWay`；模式：`latest`；变换仅用于数字到数字的单向绑定。
+- 音频用途：`effect`、`music`；音量范围 0～1；循环仅供 `music`。
+- UI 最多 8 组，每组最多 32 个控件，嵌套最多 6 层；控件 ID 格式：`^[A-Za-z][A-Za-z0-9_-]{0,63}$`。
+- 自绘资源包 UI 不声明 `slot`；`dialog` 使用运行时 scope，其他挂载位置使用持久 scope。
+- `.qjpkg` 归档最多 256 个文件，解压总大小最多 134217728 字节，单文件最多 67108864 字节，路径最多 512 个 UTF-8 字节。
+- 归档保留目录：`data`、`.rivelab`、`.qu`
+- 脚本资源读取上限：文本 8388608 字节、二进制 33554432 字节；Rive 单个资源 33554432 字节。
+- 网络限额：请求／响应分别 1048576／1048576 字节，上传下载 67108864 字节，流式响应 16777216 字节；仅允许已声明域名的 HTTPS 请求。
+- `@ui` 最多 65536 个 UTF-16 单元；`editor.apply` 最多 262144 个 UTF-16 单元。
+
 ### JavaScript 宿主
 
 - 可调用入口：`values.get`、`values.define`、`values.remove`、`values.list`、`values.set`、`values.observe`、`values.trigger`、`ui.open`、`ui.declare`、`ui.clear`、`editor.read`、`editor.apply`、`network.request`、`network.download`、`network.upload`、`network.stream`、`network.webSocket.open`、`network.webSocket.send`、`network.webSocket.close`、`persistence.save`、`persistence.restore`、`resources.token`、`resources.readText`、`resources.readBinary`、`rive.state`、`rive.load`、`rive.font.set`
@@ -67,6 +82,36 @@
 | `network.webSocket.open` | `headers`、`protocols` |
 | `rive.load` | `artboard`、`stateMachine`、`viewModel`、`instanceKind`、`instance` |
 | `editor.read` | `project`、`file` |
+
+| 宿主调用 | 公共参数顺序 |
+| --- | --- |
+| `values.get` | `path`、`type` |
+| `values.define` | `path`、`type`、`initialValue`、`options` |
+| `values.remove` | `path` |
+| `values.list` | 无 |
+| `values.set` | `path`、`type`、`value` |
+| `values.observe` | `path`、`type`、`listener` |
+| `values.trigger` | `path`、`payload` |
+| `ui.open` | `componentId` |
+| `ui.declare` | `sets` |
+| `ui.clear` | 无 |
+| `editor.read` | `target`、`project`、`file` |
+| `editor.apply` | `change` |
+| `network.request` | `url`、`options` |
+| `network.download` | `url`、`options` |
+| `network.upload` | `url`、`resource`、`options` |
+| `network.stream` | `url`、`options`、`onChunk` |
+| `network.webSocket.open` | `url`、`options`、`onEvent` |
+| `network.webSocket.send` | `socket`、`data` |
+| `network.webSocket.close` | `socket`、`code`、`reason` |
+| `persistence.save` | 无 |
+| `persistence.restore` | 无 |
+| `resources.token` | `resourceId` |
+| `resources.readText` | `reference` |
+| `resources.readBinary` | `reference` |
+| `rive.state` | 无 |
+| `rive.load` | `options` |
+| `rive.font.set` | `propertyPath`、`resourceId` |
 
 ### 公开 QVMI 字段
 
@@ -151,6 +196,8 @@
 | `device.touch.pointerId` | `number` |
 | `system.network.isConnected` | `boolean` |
 | `system.network.type` | `enum` |
+
+- 可写公开字段：`app.theme.brand`
 
 ### 公共触发项
 
