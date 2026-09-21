@@ -18,8 +18,8 @@
     },
     {
       "name": "generation-profile.json",
-      "version": "2026.09.22.0122",
-      "sha256": "28328f9a50e553c026f022b25400c2dc6a8901d23156fffa070f458cce07e249"
+      "version": "2026.09.22.0135",
+      "sha256": "c3eb32c0b963485e5e46465adf26092af1b4df429f16e7dfd7dff33493fa2d53"
     },
     {
       "name": "guidance.json",

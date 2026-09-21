@@ -385,6 +385,53 @@
         "value"
       ]
     },
+    "valueSemantics": {
+      "defaultRequired": true,
+      "typesByComponent": {
+        "toggle": [
+          "boolean"
+        ],
+        "slider": [
+          "number"
+        ]
+      },
+      "inputTypesByMode": {
+        "text": [
+          "string"
+        ],
+        "multiline": [
+          "string"
+        ],
+        "number": [
+          "number"
+        ],
+        "password": [
+          "string"
+        ]
+      },
+      "choiceSingleTypes": [
+        "string",
+        "enum",
+        "resource"
+      ],
+      "choiceMultipleTypes": [
+        "list"
+      ],
+      "buttonValueActions": [
+        "pickFile",
+        "pickResource"
+      ],
+      "buttonValueTypes": [
+        "resource"
+      ],
+      "maxBytesMinimum": 1,
+      "sliderRequiresRange": true,
+      "sliderRangeOrder": "min<max",
+      "sliderStepPositive": true,
+      "sliderStepAtMostRange": true,
+      "selectionMinDefault": 0,
+      "selectionMinAtMostMax": true
+    },
     "enums": {
       "scope": [
         "persistent",

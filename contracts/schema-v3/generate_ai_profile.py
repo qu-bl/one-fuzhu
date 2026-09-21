@@ -39,6 +39,7 @@ def build_profile():
             "bindingKinds": validation["bindingKinds"],
             "bindingDefaults": validation["bindingDefaults"],
             "requiredBindingsByType": validation["requiredBindingsByType"],
+            "valueSemantics": validation["valueSemantics"],
             "enums": validation["enums"],
             "limits": validation["limits"],
         },
