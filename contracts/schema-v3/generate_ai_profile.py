@@ -27,6 +27,7 @@ def build_profile():
             "packageScriptEntryFunction": manifest["validation"]["packageScriptEntryFunction"],
         },
         "ui": {
+            "runtimeSemantics": ui["runtimeSemantics"],
             "allowedFieldsByType": {
                 name: ui["commonFields"] + fields for name, fields in ui["typeFields"].items()
             },

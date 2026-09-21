@@ -173,6 +173,16 @@ def verify_schema_and_fixtures():
     if set(ui_validation["inputTypes"]) - set(contract["ui"]["typeFields"]):
         raise ValueError("input UI type is not a component type")
     verify_ui_generation_rules(contract)
+    if contract["ui"].get("runtimeSemantics") != {
+        "dynamicBindingTransport": "qvmi",
+        "bindingScope": "owner",
+        "observeUniquePathsPerComponent": True,
+        "reevaluateAllBindingsForChangedPath": True,
+        "republishDerivedUiState": False,
+        "nativeComponents": True,
+        "groupDisabledRecursively": True,
+    }:
+        raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
     if set(ui_validation["enums"]["scope"]) != {"persistent", "runtime"}:
         raise ValueError("UI scopes must retain the two runtime lifetimes")
     archive = contract["archive"]
@@ -337,8 +347,8 @@ def verify_ai_guidance():
     if any(not isinstance(item, dict) or set(item) != {"id", "check", "appliesTo"} or
            not item["id"] or not item["check"] or not item["appliesTo"] for item in checklist):
         raise ValueError("AI verify checklist is invalid")
-    if len({item["id"] for item in checklist}) != len(checklist) or "host-error-verbatim" not in {
-            item["id"] for item in checklist}:
+    checklist_ids = {item["id"] for item in checklist}
+    if len(checklist_ids) != len(checklist) or not {"host-error-verbatim", "ui-qvmi-dataflow"}.issubset(checklist_ids):
         raise ValueError("AI verify checklist ids are incomplete")
     feedback = guidance.get("hostErrorFeedback", {})
     if feedback.get("requiredFields") != ["source", "file", "path", "code", "messageRaw"] or \

@@ -1,4 +1,4 @@
-# 动态原生 UI 协议 5.0
+# 动态原生 UI 协议 5.0.2
 
 三端只实现 `group/text/button/toggle/slider/input/choice/spacer` 八种节点，并使用平台原生组件绘制。
 字段、绑定、枚举和限制以 `contract.json` 的 `ui` 段为唯一依据。5.0 是破坏式更新，不解析旧的
@@ -19,6 +19,16 @@
 逐组件固定必填项由 `requiredByType` 和 `requiredBindingsByType` 给出。未取得动态值时必须使用
 `fallback` 或顶层静态值；条件默认值以 `bindingDefaults` 为准。
 每个组件都必须提供非空的静态 `label`，动态 `bindings.label` 只负责运行时替换显示文字，不能代替静态必填值。
+
+## 运行时数据流
+
+所有动态绑定都直接观察当前脚本或资源包所属作用域中的 QVMI 字段。宿主将 QVMI 值转换为原生组件状态，
+不得把 `enabled`、`loading`、`selected`、文案或父级布局状态重新发布为另一组 QVMI 字段。
+同一组件内多个绑定引用同一路径时，宿主只建立一次观察；该路径变化后重新计算所有引用它的绑定。
+
+`group` 的禁用结果属于宿主渲染状态：支持原生继承的平台直接在容器应用，其他平台在渲染树内部传递
+计算结果，但不得写回 QVMI。叶子控件自身的有效启用状态由静态 `enabled`、动态 `bindings.enabled`、
+`bindings.loading` 和祖先分组状态共同决定。
 
 ## 组件职责
 
