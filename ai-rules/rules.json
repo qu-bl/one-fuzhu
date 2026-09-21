@@ -13,18 +13,18 @@
     },
     {
       "name": "examples.json",
-      "version": "2026.09.21.20",
-      "sha256": "9e2dc31a8c435f290e1f414ff8f224c0d76ffc92a32b449a5ba88721ff21cb18"
+      "version": "2026.09.21",
+      "sha256": "cd06b46f6bf01b55622e4f8853ec86e70f44cd61b657cf5bbd0ad26d47aa77ad"
     },
     {
       "name": "generation-profile.json",
-      "version": "2026.09.21.20",
-      "sha256": "2378f48375459c517e2eccbfec4512910469c84fddb09189f1fec5e81b9f6ee9"
+      "version": "2026.09.21",
+      "sha256": "14e42025ed9f2dbedfdcb0e3a6303ce828c9b7f84147f8fcfffcaa0846793e9d"
     },
     {
       "name": "guidance.json",
-      "version": "2026.09.21.20",
-      "sha256": "4dcba9dcce5f1ec11bfd0bcf391ba79dee6c70bb1b9d4a7bbcae8ead20e8b6e6"
+      "version": "2026.09.21",
+      "sha256": "d2d73d698b3e2baa5a53be958aca2b94fbb4d02492c20afc50c5aa9d5ca97b2f"
     },
     {
       "name": "resource-package.md",

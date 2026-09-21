@@ -628,12 +628,6 @@
               "$ref": "#/$defs/uiComponent"
             },
             "maxItems": 32
-          },
-          "density": {
-            "enum": [
-              "normal",
-              "compact"
-            ]
           }
         },
         "required": [
@@ -642,7 +636,14 @@
           "scope",
           "components"
         ],
-        "additionalProperties": true
+        "additionalProperties": true,
+        "propertyNames": {
+          "not": {
+            "enum": [
+              "density"
+            ]
+          }
+        }
       },
       "maxItems": 8
     }
@@ -673,10 +674,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
             },
             "hug": {
               "type": "boolean"
@@ -710,10 +707,6 @@
                 "stack"
               ]
             },
-            "gap": {
-              "type": "number",
-              "minimum": 0
-            },
             "align": {
               "enum": [
                 "start",
@@ -730,11 +723,6 @@
             },
             "scroll": {
               "type": "boolean"
-            },
-            "padding": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 64
             },
             "enabled": {
               "type": "boolean"
@@ -965,7 +953,10 @@
                 "acceptedFileExtensions",
                 "action",
                 "copyable",
+                "density",
+                "flex",
                 "format",
+                "gap",
                 "inputMode",
                 "lines",
                 "max",
@@ -973,6 +964,7 @@
                 "min",
                 "multiline",
                 "options",
+                "padding",
                 "placeholder",
                 "presentation",
                 "secure",
@@ -993,10 +985,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
             },
             "hug": {
               "type": "boolean"
@@ -1040,20 +1028,8 @@
               "required": [],
               "additionalProperties": true
             },
-            "size": {
-              "enum": [
-                "sm",
-                "md",
-                "lg"
-              ]
-            },
             "multiline": {
               "type": "boolean"
-            },
-            "lines": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 20
             },
             "copyable": {
               "type": "boolean"
@@ -1163,10 +1139,13 @@
                 "action",
                 "align",
                 "children",
+                "density",
                 "enabled",
+                "flex",
                 "gap",
                 "inputMode",
                 "layout",
+                "lines",
                 "max",
                 "maxBytes",
                 "min",
@@ -1178,6 +1157,7 @@
                 "secure",
                 "selectionMax",
                 "selectionMin",
+                "size",
                 "space",
                 "step",
                 "style",
@@ -1192,10 +1172,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
             },
             "hug": {
               "type": "boolean"
@@ -1214,11 +1190,6 @@
             },
             "visible": {
               "type": "boolean"
-            },
-            "space": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 200
             },
             "bindings": {
               "type": "object",
@@ -1289,7 +1260,9 @@
                 "align",
                 "children",
                 "copyable",
+                "density",
                 "enabled",
+                "flex",
                 "format",
                 "gap",
                 "inputMode",
@@ -1308,6 +1281,7 @@
                 "selectionMax",
                 "selectionMin",
                 "size",
+                "space",
                 "step",
                 "style",
                 "text",
@@ -1322,10 +1296,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
             },
             "hug": {
               "type": "boolean"
@@ -1368,12 +1338,6 @@
               },
               "required": [],
               "additionalProperties": true
-            },
-            "style": {
-              "enum": [
-                "plain",
-                "filled"
-              ]
             },
             "action": {
               "enum": [
@@ -1631,6 +1595,8 @@
                 "align",
                 "children",
                 "copyable",
+                "density",
+                "flex",
                 "gap",
                 "inputMode",
                 "layout",
@@ -1649,6 +1615,7 @@
                 "size",
                 "space",
                 "step",
+                "style",
                 "valign"
               ]
             }
@@ -1660,10 +1627,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
             },
             "hug": {
               "type": "boolean"
@@ -1693,11 +1656,6 @@
                 "number",
                 "password"
               ]
-            },
-            "lines": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 20
             },
             "min": {
               "type": "number"
@@ -2071,9 +2029,12 @@
                 "align",
                 "children",
                 "copyable",
+                "density",
+                "flex",
                 "format",
                 "gap",
                 "layout",
+                "lines",
                 "maxBytes",
                 "multiline",
                 "options",
@@ -2098,10 +2059,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
             },
             "hug": {
               "type": "boolean"
@@ -2399,6 +2356,8 @@
                 "align",
                 "children",
                 "copyable",
+                "density",
+                "flex",
                 "format",
                 "gap",
                 "inputMode",
@@ -2432,10 +2391,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
             },
             "hug": {
               "type": "boolean"
@@ -2811,6 +2766,8 @@
                 "align",
                 "children",
                 "copyable",
+                "density",
+                "flex",
                 "gap",
                 "inputMode",
                 "layout",
@@ -2840,10 +2797,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
             },
             "hug": {
               "type": "boolean"
@@ -2900,11 +2853,6 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 64
-            },
-            "presentation": {
-              "enum": [
-                "list"
-              ]
             },
             "enabled": {
               "type": "boolean"
@@ -3215,8 +3163,7 @@
             "id",
             "type",
             "label",
-            "selectionMax",
-            "presentation"
+            "selectionMax"
           ],
           "additionalProperties": true,
           "anyOf": [
@@ -3246,6 +3193,8 @@
                 "align",
                 "children",
                 "copyable",
+                "density",
+                "flex",
                 "format",
                 "gap",
                 "inputMode",
@@ -3257,6 +3206,7 @@
                 "multiline",
                 "padding",
                 "placeholder",
+                "presentation",
                 "scroll",
                 "secure",
                 "size",
