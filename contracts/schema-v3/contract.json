@@ -1,5 +1,5 @@
 {
-  "contractVersion": "3.4.1",
+  "contractVersion": "4.0.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -253,6 +253,19 @@
       "visibleWhen"
     ],
     "typeFields": {
+      "group": [
+        "children",
+        "layout",
+        "surface",
+        "gap",
+        "align",
+        "valign",
+        "wrap",
+        "scroll",
+        "padding",
+        "radius",
+        "hug"
+      ],
       "text": [
         "text",
         "textPath",
@@ -261,31 +274,30 @@
         "multiline",
         "hug"
       ],
-      "divider": [],
       "spacer": [
         "space"
+      ],
+      "button": [
+        "text",
+        "style",
+        "action",
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "acceptedFileExtensions",
+        "maxBytes",
+        "hug"
       ],
       "input": [
         "propertyPath",
         "valueType",
         "defaultValue",
         "placeholder",
-        "multiline",
+        "inputMode",
         "lines",
-        "secure",
-        "hug"
-      ],
-      "number": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
-        "placeholder",
-        "hug"
-      ],
-      "color": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
+        "min",
+        "max",
+        "step",
         "hug"
       ],
       "toggle": [
@@ -304,78 +316,15 @@
         "format",
         "hug"
       ],
-      "singleChoice": [
+      "choice": [
         "propertyPath",
         "valueType",
         "defaultValue",
         "options",
         "optionsPath",
-        "hug"
-      ],
-      "multiChoice": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
-        "options",
-        "optionsPath",
-        "hug"
-      ],
-      "segmented": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
-        "options",
-        "optionsPath",
-        "hug"
-      ],
-      "resourceChoice": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
-        "options",
-        "optionsPath",
-        "hug"
-      ],
-      "filePicker": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
-        "text",
-        "acceptedFileExtensions",
-        "maxBytes",
-        "hug"
-      ],
-      "action": [
-        "text",
-        "style",
-        "hug"
-      ],
-      "column": [
-        "children",
-        "gap",
-        "align",
-        "scroll",
-        "hug"
-      ],
-      "row": [
-        "children",
-        "gap",
-        "align",
-        "wrap",
-        "hug"
-      ],
-      "stack": [
-        "children",
-        "align",
-        "valign",
-        "hug"
-      ],
-      "card": [
-        "children",
-        "gap",
-        "align",
-        "padding",
-        "radius",
+        "selectionMin",
+        "selectionMax",
+        "presentation",
         "hug"
       ]
     },
@@ -448,6 +397,32 @@
           "normal",
           "emphasized"
         ],
+        "layout": [
+          "column",
+          "row",
+          "stack"
+        ],
+        "surface": [
+          "none",
+          "card"
+        ],
+        "action": [
+          "emit",
+          "pickFile",
+          "pickResource"
+        ],
+        "inputMode": [
+          "text",
+          "multiline",
+          "number",
+          "password",
+          "color"
+        ],
+        "presentation": [
+          "list",
+          "segmented",
+          "menu"
+        ],
         "align": [
           "start",
           "center",
@@ -464,15 +439,9 @@
       "selfDrawnHasSlot": false,
       "inputTypes": [
         "input",
-        "number",
         "toggle",
         "slider",
-        "color",
-        "singleChoice",
-        "multiChoice",
-        "segmented",
-        "filePicker",
-        "resourceChoice"
+        "choice"
       ],
       "packageTextScope": "persistent",
       "packageActionScope": "runtime",

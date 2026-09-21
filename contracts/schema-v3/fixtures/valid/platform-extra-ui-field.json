@@ -33,7 +33,7 @@
       "components": [
         {
           "id": "layout",
-          "type": "row",
+          "type": "group",
           "label": "一行",
           "description": "组合",
           "children": [
@@ -58,7 +58,8 @@
               "defaultValue": "默认",
               "hug": true
             }
-          ]
+          ],
+          "layout": "row"
         }
       ]
     }

@@ -6,6 +6,7 @@
 
 `contract.json` 是资源包、UI、QVMI、JS、归档、资源读取与网络的共同规则，JSON Schema 是由它生成的资源包结构规则。
 制作台的工程名长度、资源包 UI 文案长度、Rive 路径长度和脚本声明入口也由本契约发布。
+动态原生 UI 的节点、参数与破坏式升级边界见 [UI_PROTOCOL.md](UI_PROTOCOL.md)。
 修改规则时同时更新有效／无效样例，运行 `python release.py` 生成发布描述。
 GitHub Actions 会重新生成 Schema、校验样例及哈希；检查通过后才应合并。
 

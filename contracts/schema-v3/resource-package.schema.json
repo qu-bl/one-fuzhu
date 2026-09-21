@@ -691,6 +691,174 @@
               "maxLength": 200
             },
             "type": {
+              "const": "group"
+            },
+            "visible": {
+              "type": "boolean"
+            },
+            "visibleWhen": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "equals": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                },
+                "in": {
+                  "type": "array",
+                  "items": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 64
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": true,
+              "anyOf": [
+                {
+                  "required": [
+                    "equals"
+                  ]
+                },
+                {
+                  "required": [
+                    "in"
+                  ]
+                }
+              ]
+            },
+            "children": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/uiComponent"
+              },
+              "maxItems": 32
+            },
+            "layout": {
+              "enum": [
+                "column",
+                "row",
+                "stack"
+              ]
+            },
+            "surface": {
+              "enum": [
+                "none",
+                "card"
+              ]
+            },
+            "gap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "align": {
+              "enum": [
+                "start",
+                "center",
+                "end"
+              ]
+            },
+            "valign": {
+              "enum": [
+                "top",
+                "center",
+                "bottom"
+              ]
+            },
+            "wrap": {
+              "type": "boolean"
+            },
+            "scroll": {
+              "type": "boolean"
+            },
+            "padding": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 64
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 64
+            },
+            "hug": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "label"
+          ],
+          "additionalProperties": true,
+          "propertyNames": {
+            "not": {
+              "enum": [
+                "acceptedFileExtensions",
+                "action",
+                "defaultValue",
+                "format",
+                "inputMode",
+                "lines",
+                "max",
+                "maxBytes",
+                "min",
+                "multiline",
+                "options",
+                "optionsPath",
+                "placeholder",
+                "presentation",
+                "propertyPath",
+                "secure",
+                "selectionMax",
+                "selectionMin",
+                "size",
+                "space",
+                "step",
+                "style",
+                "text",
+                "textPath",
+                "valueType"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "flex": {
+              "type": "number",
+              "minimum": 0
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "type": {
               "const": "text"
             },
             "visible": {
@@ -790,10 +958,13 @@
             "not": {
               "enum": [
                 "acceptedFileExtensions",
+                "action",
                 "align",
                 "children",
                 "defaultValue",
                 "gap",
+                "inputMode",
+                "layout",
                 "lines",
                 "max",
                 "maxBytes",
@@ -802,128 +973,17 @@
                 "optionsPath",
                 "padding",
                 "placeholder",
+                "presentation",
                 "propertyPath",
                 "radius",
                 "scroll",
                 "secure",
+                "selectionMax",
+                "selectionMin",
                 "space",
                 "step",
                 "style",
-                "valign",
-                "valueType",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "divider"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "align",
-                "children",
-                "defaultValue",
-                "format",
-                "gap",
-                "hug",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "options",
-                "optionsPath",
-                "padding",
-                "placeholder",
-                "propertyPath",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
+                "surface",
                 "valign",
                 "valueType",
                 "wrap"
@@ -1019,12 +1079,15 @@
             "not": {
               "enum": [
                 "acceptedFileExtensions",
+                "action",
                 "align",
                 "children",
                 "defaultValue",
                 "format",
                 "gap",
                 "hug",
+                "inputMode",
+                "layout",
                 "lines",
                 "max",
                 "maxBytes",
@@ -1034,17 +1097,205 @@
                 "optionsPath",
                 "padding",
                 "placeholder",
+                "presentation",
                 "propertyPath",
                 "radius",
                 "scroll",
                 "secure",
+                "selectionMax",
+                "selectionMin",
                 "size",
                 "step",
                 "style",
+                "surface",
                 "text",
                 "textPath",
                 "valign",
                 "valueType",
+                "wrap"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "flex": {
+              "type": "number",
+              "minimum": 0
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "type": {
+              "const": "button"
+            },
+            "visible": {
+              "type": "boolean"
+            },
+            "visibleWhen": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "equals": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                },
+                "in": {
+                  "type": "array",
+                  "items": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 64
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": true,
+              "anyOf": [
+                {
+                  "required": [
+                    "equals"
+                  ]
+                },
+                {
+                  "required": [
+                    "in"
+                  ]
+                }
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "style": {
+              "enum": [
+                "normal",
+                "emphasized"
+              ]
+            },
+            "action": {
+              "enum": [
+                "emit",
+                "pickFile",
+                "pickResource"
+              ]
+            },
+            "propertyPath": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "maxItems": 8
+            },
+            "valueType": {
+              "enum": [
+                "number",
+                "string",
+                "boolean",
+                "color",
+                "trigger",
+                "enum",
+                "resource",
+                "image",
+                "artboard",
+                "list",
+                "viewModel"
+              ]
+            },
+            "defaultValue": {
+              "oneOf": [
+                {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "acceptedFileExtensions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 16
+            },
+            "maxBytes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "hug": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "label"
+          ],
+          "additionalProperties": true,
+          "propertyNames": {
+            "not": {
+              "enum": [
+                "align",
+                "children",
+                "format",
+                "gap",
+                "inputMode",
+                "layout",
+                "lines",
+                "max",
+                "min",
+                "multiline",
+                "options",
+                "optionsPath",
+                "padding",
+                "placeholder",
+                "presentation",
+                "radius",
+                "scroll",
+                "secure",
+                "selectionMax",
+                "selectionMin",
+                "size",
+                "space",
+                "step",
+                "surface",
+                "textPath",
+                "valign",
                 "wrap"
               ]
             }
@@ -1166,16 +1417,28 @@
             "placeholder": {
               "type": "string"
             },
-            "multiline": {
-              "type": "boolean"
+            "inputMode": {
+              "enum": [
+                "text",
+                "multiline",
+                "number",
+                "password",
+                "color"
+              ]
             },
             "lines": {
               "type": "integer",
               "minimum": 1,
               "maximum": 20
             },
-            "secure": {
-              "type": "boolean"
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "step": {
+              "type": "number"
             },
             "hug": {
               "type": "boolean"
@@ -1191,334 +1454,27 @@
             "not": {
               "enum": [
                 "acceptedFileExtensions",
+                "action",
                 "align",
                 "children",
                 "format",
                 "gap",
-                "max",
+                "layout",
                 "maxBytes",
-                "min",
-                "options",
-                "optionsPath",
-                "padding",
-                "radius",
-                "scroll",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
-                "valign",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "number"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "propertyPath": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "minItems": 1,
-              "maxItems": 8
-            },
-            "valueType": {
-              "enum": [
-                "number",
-                "string",
-                "boolean",
-                "color",
-                "trigger",
-                "enum",
-                "resource",
-                "image",
-                "artboard",
-                "list",
-                "viewModel"
-              ]
-            },
-            "defaultValue": {
-              "oneOf": [
-                {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              ]
-            },
-            "placeholder": {
-              "type": "string"
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "align",
-                "children",
-                "format",
-                "gap",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
                 "multiline",
                 "options",
                 "optionsPath",
                 "padding",
+                "presentation",
                 "radius",
                 "scroll",
                 "secure",
+                "selectionMax",
+                "selectionMin",
                 "size",
                 "space",
-                "step",
                 "style",
-                "text",
-                "textPath",
-                "valign",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "color"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "propertyPath": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "minItems": 1,
-              "maxItems": 8
-            },
-            "valueType": {
-              "enum": [
-                "number",
-                "string",
-                "boolean",
-                "color",
-                "trigger",
-                "enum",
-                "resource",
-                "image",
-                "artboard",
-                "list",
-                "viewModel"
-              ]
-            },
-            "defaultValue": {
-              "oneOf": [
-                {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              ]
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "align",
-                "children",
-                "format",
-                "gap",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "options",
-                "optionsPath",
-                "padding",
-                "placeholder",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
+                "surface",
                 "text",
                 "textPath",
                 "valign",
@@ -1654,10 +1610,13 @@
             "not": {
               "enum": [
                 "acceptedFileExtensions",
+                "action",
                 "align",
                 "children",
                 "format",
                 "gap",
+                "inputMode",
+                "layout",
                 "lines",
                 "max",
                 "maxBytes",
@@ -1667,13 +1626,17 @@
                 "optionsPath",
                 "padding",
                 "placeholder",
+                "presentation",
                 "radius",
                 "scroll",
                 "secure",
+                "selectionMax",
+                "selectionMin",
                 "size",
                 "space",
                 "step",
                 "style",
+                "surface",
                 "text",
                 "textPath",
                 "valign",
@@ -1839,9 +1802,12 @@
             "not": {
               "enum": [
                 "acceptedFileExtensions",
+                "action",
                 "align",
                 "children",
                 "gap",
+                "inputMode",
+                "layout",
                 "lines",
                 "maxBytes",
                 "multiline",
@@ -1849,12 +1815,16 @@
                 "optionsPath",
                 "padding",
                 "placeholder",
+                "presentation",
                 "radius",
                 "scroll",
                 "secure",
+                "selectionMax",
+                "selectionMin",
                 "size",
                 "space",
                 "style",
+                "surface",
                 "text",
                 "textPath",
                 "valign",
@@ -1887,7 +1857,7 @@
               "maxLength": 200
             },
             "type": {
-              "const": "singleChoice"
+              "const": "choice"
             },
             "visible": {
               "type": "boolean"
@@ -2007,724 +1977,22 @@
             "optionsPath": {
               "type": "string"
             },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "align",
-                "children",
-                "format",
-                "gap",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "padding",
-                "placeholder",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
-                "valign",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "multiChoice"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "propertyPath": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "minItems": 1,
-              "maxItems": 8
-            },
-            "valueType": {
-              "enum": [
-                "number",
-                "string",
-                "boolean",
-                "color",
-                "trigger",
-                "enum",
-                "resource",
-                "image",
-                "artboard",
-                "list",
-                "viewModel"
-              ]
-            },
-            "defaultValue": {
-              "oneOf": [
-                {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              ]
-            },
-            "options": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "resource": {
-                    "type": "string"
-                  },
-                  "label": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
-                  }
-                },
-                "required": [
-                  "label"
-                ],
-                "additionalProperties": true
-              },
-              "maxItems": 64
-            },
-            "optionsPath": {
-              "type": "string"
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "align",
-                "children",
-                "format",
-                "gap",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "padding",
-                "placeholder",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
-                "valign",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "segmented"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "propertyPath": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "minItems": 1,
-              "maxItems": 8
-            },
-            "valueType": {
-              "enum": [
-                "number",
-                "string",
-                "boolean",
-                "color",
-                "trigger",
-                "enum",
-                "resource",
-                "image",
-                "artboard",
-                "list",
-                "viewModel"
-              ]
-            },
-            "defaultValue": {
-              "oneOf": [
-                {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              ]
-            },
-            "options": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "resource": {
-                    "type": "string"
-                  },
-                  "label": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
-                  }
-                },
-                "required": [
-                  "label"
-                ],
-                "additionalProperties": true
-              },
-              "maxItems": 64
-            },
-            "optionsPath": {
-              "type": "string"
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "align",
-                "children",
-                "format",
-                "gap",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "padding",
-                "placeholder",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
-                "valign",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "resourceChoice"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "propertyPath": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "minItems": 1,
-              "maxItems": 8
-            },
-            "valueType": {
-              "enum": [
-                "number",
-                "string",
-                "boolean",
-                "color",
-                "trigger",
-                "enum",
-                "resource",
-                "image",
-                "artboard",
-                "list",
-                "viewModel"
-              ]
-            },
-            "defaultValue": {
-              "oneOf": [
-                {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              ]
-            },
-            "options": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "resource": {
-                    "type": "string"
-                  },
-                  "label": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
-                  }
-                },
-                "required": [
-                  "label"
-                ],
-                "additionalProperties": true
-              },
-              "maxItems": 64
-            },
-            "optionsPath": {
-              "type": "string"
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "align",
-                "children",
-                "format",
-                "gap",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "padding",
-                "placeholder",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
-                "valign",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "filePicker"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "propertyPath": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "minItems": 1,
-              "maxItems": 8
-            },
-            "valueType": {
-              "enum": [
-                "number",
-                "string",
-                "boolean",
-                "color",
-                "trigger",
-                "enum",
-                "resource",
-                "image",
-                "artboard",
-                "list",
-                "viewModel"
-              ]
-            },
-            "defaultValue": {
-              "oneOf": [
-                {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              ]
-            },
-            "text": {
-              "type": "string"
-            },
-            "acceptedFileExtensions": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "maxItems": 16
-            },
-            "maxBytes": {
+            "selectionMin": {
               "type": "integer",
-              "minimum": 0
+              "minimum": 0,
+              "maximum": 64
+            },
+            "selectionMax": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "presentation": {
+              "enum": [
+                "list",
+                "segmented",
+                "menu"
+              ]
             },
             "hug": {
               "type": "boolean"
@@ -2739,16 +2007,19 @@
           "propertyNames": {
             "not": {
               "enum": [
+                "acceptedFileExtensions",
+                "action",
                 "align",
                 "children",
                 "format",
                 "gap",
+                "inputMode",
+                "layout",
                 "lines",
                 "max",
+                "maxBytes",
                 "min",
                 "multiline",
-                "options",
-                "optionsPath",
                 "padding",
                 "placeholder",
                 "radius",
@@ -2758,675 +2029,10 @@
                 "space",
                 "step",
                 "style",
-                "textPath",
-                "valign",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "action"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "text": {
-              "type": "string"
-            },
-            "style": {
-              "enum": [
-                "normal",
-                "emphasized"
-              ]
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "align",
-                "children",
-                "defaultValue",
-                "format",
-                "gap",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "options",
-                "optionsPath",
-                "padding",
-                "placeholder",
-                "propertyPath",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "textPath",
-                "valign",
-                "valueType",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "column"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "children": {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/uiComponent"
-              },
-              "maxItems": 32
-            },
-            "gap": {
-              "type": "number",
-              "minimum": 0
-            },
-            "align": {
-              "enum": [
-                "start",
-                "center",
-                "end"
-              ]
-            },
-            "scroll": {
-              "type": "boolean"
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "defaultValue",
-                "format",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "options",
-                "optionsPath",
-                "padding",
-                "placeholder",
-                "propertyPath",
-                "radius",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
+                "surface",
                 "text",
                 "textPath",
                 "valign",
-                "valueType",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "row"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "children": {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/uiComponent"
-              },
-              "maxItems": 32
-            },
-            "gap": {
-              "type": "number",
-              "minimum": 0
-            },
-            "align": {
-              "enum": [
-                "start",
-                "center",
-                "end"
-              ]
-            },
-            "wrap": {
-              "type": "boolean"
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "defaultValue",
-                "format",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "options",
-                "optionsPath",
-                "padding",
-                "placeholder",
-                "propertyPath",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
-                "valign",
-                "valueType"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "stack"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "children": {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/uiComponent"
-              },
-              "maxItems": 32
-            },
-            "align": {
-              "enum": [
-                "start",
-                "center",
-                "end"
-              ]
-            },
-            "valign": {
-              "enum": [
-                "top",
-                "center",
-                "bottom"
-              ]
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "defaultValue",
-                "format",
-                "gap",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "options",
-                "optionsPath",
-                "padding",
-                "placeholder",
-                "propertyPath",
-                "radius",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
-                "valueType",
-                "wrap"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 200
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "flex": {
-              "type": "number",
-              "minimum": 0
-            },
-            "id": {
-              "type": "string",
-              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
-            },
-            "label": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            "type": {
-              "const": "card"
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "visibleWhen": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "equals": {
-                  "type": [
-                    "string",
-                    "number",
-                    "boolean"
-                  ]
-                },
-                "in": {
-                  "type": "array",
-                  "items": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
-                  },
-                  "minItems": 1,
-                  "maxItems": 64
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": true,
-              "anyOf": [
-                {
-                  "required": [
-                    "equals"
-                  ]
-                },
-                {
-                  "required": [
-                    "in"
-                  ]
-                }
-              ]
-            },
-            "children": {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/uiComponent"
-              },
-              "maxItems": 32
-            },
-            "gap": {
-              "type": "number",
-              "minimum": 0
-            },
-            "align": {
-              "enum": [
-                "start",
-                "center",
-                "end"
-              ]
-            },
-            "padding": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 64
-            },
-            "radius": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 64
-            },
-            "hug": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "id",
-            "type",
-            "label"
-          ],
-          "additionalProperties": true,
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "acceptedFileExtensions",
-                "defaultValue",
-                "format",
-                "lines",
-                "max",
-                "maxBytes",
-                "min",
-                "multiline",
-                "options",
-                "optionsPath",
-                "placeholder",
-                "propertyPath",
-                "scroll",
-                "secure",
-                "size",
-                "space",
-                "step",
-                "style",
-                "text",
-                "textPath",
-                "valign",
-                "valueType",
                 "wrap"
               ]
             }
