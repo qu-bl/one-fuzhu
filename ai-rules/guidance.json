@@ -169,7 +169,7 @@
         "Rive 画板、状态机、View Model、实例、属性和素材必须使用已知真实名称；不能假装 JSON 或 JS 创建了缺失资产。",
         "包脚本只能读写清单已声明且授权的字段；公共观察和宿主动作须在 capabilities 中声明；网络域名须在 javascript.networkDomains 中声明。",
         "包脚本不调用 viewModel.define，也不能写全局 app.* 或由宿主 UI 拥有的字段。",
-        "UI binding 直接引用包已声明字段或已授权公开 QVMI 字段；不要为 enabled、loading、selected 或文案创建仅用于转发的重复字段。",
+        "UI binding 直接引用包已声明字段或已授权公开 QVMI 字段；不要为 enabled 或文案创建仅用于转发的重复字段。",
         "activate 建立订阅和运行状态，deactivate 清理；不使用应用脚本的元数据调度。",
         "绑定的 QVMI 路径、类型、方向和 Rive 属性必须与清单及真实资产一致。",
         "资源引用限本包与宿主 token，不使用绝对路径；持久数据写入已声明的可写字段。",

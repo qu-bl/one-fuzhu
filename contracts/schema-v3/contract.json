@@ -1,5 +1,5 @@
 {
-  "contractVersion": "5.0.4",
+  "contractVersion": "5.1.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -256,14 +256,11 @@
       "group": [
         "children",
         "layout",
-        "surface",
         "gap",
         "align",
         "valign",
-        "wrap",
         "scroll",
         "padding",
-        "radius",
         "enabled"
       ],
       "text": [
@@ -345,28 +342,16 @@
       "reevaluateAllBindingsForChangedPath": true,
       "republishDerivedUiState": false,
       "nativeComponents": true,
-      "groupDisabledRecursively": true
+      "groupDisabledRecursively": true,
+      "nativeComponentIntersectionOnly": true,
+      "customDrawingAllowed": false
     },
     "buttonStyleSemantics": {
       "appearancePolicy": "hostNativeOnly",
       "hostAppearanceOverrides": false,
       "plain": "nativeText",
       "filled": "nativeProminent",
-      "outlined": "nativeOutlinedOrNormal",
-      "tonal": "nativeTonalOrNormal",
-      "danger": "nativeDestructiveOrProminent",
-      "selectedPromotion": {
-        "from": [
-          "plain",
-          "outlined",
-          "tonal"
-        ],
-        "to": "filled",
-        "preserve": [
-          "filled",
-          "danger"
-        ]
-      }
+      "unsupportedAppearancePolicy": "reject"
     },
     "validation": {
       "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
@@ -386,8 +371,7 @@
         "decimalsMin": 0,
         "decimalsMax": 6,
         "spaceMax": 200,
-        "paddingMax": 64,
-        "radiusMax": 64
+        "paddingMax": 64
       },
       "enums": {
         "scope": [
@@ -411,19 +395,12 @@
         ],
         "style": [
           "plain",
-          "filled",
-          "outlined",
-          "tonal",
-          "danger"
+          "filled"
         ],
         "layout": [
           "column",
           "row",
           "stack"
-        ],
-        "surface": [
-          "none",
-          "card"
         ],
         "action": [
           "emit",
@@ -434,13 +411,10 @@
           "text",
           "multiline",
           "number",
-          "password",
-          "color"
+          "password"
         ],
         "presentation": [
-          "list",
-          "segmented",
-          "menu"
+          "list"
         ],
         "align": [
           "start",
@@ -571,7 +545,6 @@
           "description",
           "visible",
           "enabled",
-          "loading",
           "error"
         ],
         "text": [
@@ -585,8 +558,6 @@
           "text",
           "visible",
           "enabled",
-          "loading",
-          "selected",
           "error",
           "value"
         ],
@@ -626,7 +597,6 @@
           "description",
           "visible",
           "enabled",
-          "loading",
           "error"
         ]
       },
@@ -639,8 +609,6 @@
         "error": "text",
         "visible": "condition",
         "enabled": "condition",
-        "loading": "condition",
-        "selected": "condition",
         "readOnly": "condition",
         "options": "list",
         "min": "number",
@@ -650,8 +618,6 @@
       "bindingDefaults": {
         "visible": true,
         "enabled": true,
-        "loading": false,
-        "selected": false,
         "readOnly": false
       },
       "requiredBindingsByType": {

@@ -181,6 +181,8 @@ def verify_schema_and_fixtures():
         "republishDerivedUiState": False,
         "nativeComponents": True,
         "groupDisabledRecursively": True,
+        "nativeComponentIntersectionOnly": True,
+        "customDrawingAllowed": False,
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
     if contract["ui"].get("buttonStyleSemantics") != {
@@ -188,16 +190,14 @@ def verify_schema_and_fixtures():
         "hostAppearanceOverrides": False,
         "plain": "nativeText",
         "filled": "nativeProminent",
-        "outlined": "nativeOutlinedOrNormal",
-        "tonal": "nativeTonalOrNormal",
-        "danger": "nativeDestructiveOrProminent",
-        "selectedPromotion": {
-            "from": ["plain", "outlined", "tonal"],
-            "to": "filled",
-            "preserve": ["filled", "danger"],
-        },
+        "unsupportedAppearancePolicy": "reject",
     }:
         raise ValueError("button styles must use host-native appearance without overrides")
+    if ui_validation["enums"]["style"] != ["plain", "filled"] or \
+            ui_validation["enums"]["presentation"] != ["list"] or \
+            "color" in ui_validation["enums"]["inputMode"] or \
+            any(field in contract["ui"]["typeFields"]["group"] for field in ("surface", "radius", "wrap")):
+        raise ValueError("UI contract must expose only the three-platform native intersection")
     if set(ui_validation["enums"]["scope"]) != {"persistent", "runtime"}:
         raise ValueError("UI scopes must retain the two runtime lifetimes")
     archive = contract["archive"]

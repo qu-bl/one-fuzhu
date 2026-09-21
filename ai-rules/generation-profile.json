@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "5.0.4",
+  "contractVersion": "5.1.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -50,28 +50,16 @@
       "reevaluateAllBindingsForChangedPath": true,
       "republishDerivedUiState": false,
       "nativeComponents": true,
-      "groupDisabledRecursively": true
+      "groupDisabledRecursively": true,
+      "nativeComponentIntersectionOnly": true,
+      "customDrawingAllowed": false
     },
     "buttonStyleSemantics": {
       "appearancePolicy": "hostNativeOnly",
       "hostAppearanceOverrides": false,
       "plain": "nativeText",
       "filled": "nativeProminent",
-      "outlined": "nativeOutlinedOrNormal",
-      "tonal": "nativeTonalOrNormal",
-      "danger": "nativeDestructiveOrProminent",
-      "selectedPromotion": {
-        "from": [
-          "plain",
-          "outlined",
-          "tonal"
-        ],
-        "to": "filled",
-        "preserve": [
-          "filled",
-          "danger"
-        ]
-      }
+      "unsupportedAppearancePolicy": "reject"
     },
     "allowedFieldsByType": {
       "group": [
@@ -85,14 +73,11 @@
         "visible",
         "children",
         "layout",
-        "surface",
         "gap",
         "align",
         "valign",
-        "wrap",
         "scroll",
         "padding",
-        "radius",
         "enabled"
       ],
       "text": [
@@ -305,7 +290,6 @@
         "description",
         "visible",
         "enabled",
-        "loading",
         "error"
       ],
       "text": [
@@ -319,8 +303,6 @@
         "text",
         "visible",
         "enabled",
-        "loading",
-        "selected",
         "error",
         "value"
       ],
@@ -360,7 +342,6 @@
         "description",
         "visible",
         "enabled",
-        "loading",
         "error"
       ]
     },
@@ -373,8 +354,6 @@
       "error": "text",
       "visible": "condition",
       "enabled": "condition",
-      "loading": "condition",
-      "selected": "condition",
       "readOnly": "condition",
       "options": "list",
       "min": "number",
@@ -384,8 +363,6 @@
     "bindingDefaults": {
       "visible": true,
       "enabled": true,
-      "loading": false,
-      "selected": false,
       "readOnly": false
     },
     "requiredBindingsByType": {
@@ -428,19 +405,12 @@
       ],
       "style": [
         "plain",
-        "filled",
-        "outlined",
-        "tonal",
-        "danger"
+        "filled"
       ],
       "layout": [
         "column",
         "row",
         "stack"
-      ],
-      "surface": [
-        "none",
-        "card"
       ],
       "action": [
         "emit",
@@ -451,13 +421,10 @@
         "text",
         "multiline",
         "number",
-        "password",
-        "color"
+        "password"
       ],
       "presentation": [
-        "list",
-        "segmented",
-        "menu"
+        "list"
       ],
       "align": [
         "start",
@@ -486,8 +453,7 @@
       "decimalsMin": 0,
       "decimalsMax": 6,
       "spaceMax": 200,
-      "paddingMax": 64,
-      "radiusMax": 64
+      "paddingMax": 64
     }
   },
   "script": {
