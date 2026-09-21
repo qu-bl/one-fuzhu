@@ -71,6 +71,14 @@
         ]
       },
       {
+        "id": "ui-value-semantics",
+        "check": "每个值控件的 bindings.value 都包含 path/type/default，并满足 generation-profile.ui.valueSemantics：输入模式、开关、滑杆、单选、多选和文件选择的值类型正确；滑杆范围完整有效；选择数量有效；文件选择 maxBytes 为正数。",
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
+      },
+      {
         "id": "manifest-schema",
         "check": "resource-package.json 通过宿主持有的完整 resource-package.schema.json。",
         "appliesTo": [
@@ -174,7 +182,8 @@
         "应用脚本不假定拥有资源包 Rive 会话、包文件、包音频或包 UI。",
         "声明式 UI 先准备绑定字段，再声明组件；弹窗打开完成只表示显示请求已提交，不表示用户确认。",
         "脚本自有 UI binding 路径只 define 一次并保持类型一致；公开 QVMI 字段直接使用，宿主负责把绑定结果映射到原生组件。",
-        "持久化仅用于明确声明的自有字段；保存成功不代表云端同步完成。"
+        "持久化仅用于明确声明的自有字段；保存成功不代表云端同步完成。",
+        "值控件必须按 generation-profile.ui.valueSemantics 检查 path/type/default、输入模式、数值范围、选择数量和文件选择上限，禁止等宿主报错后猜测。"
       ]
     },
     "resourcePackage": {
@@ -199,7 +208,8 @@
         "activate 建立订阅和运行状态，deactivate 清理；不使用应用脚本的元数据调度。",
         "绑定的 QVMI 路径、类型、方向和 Rive 属性必须与清单及真实资产一致。",
         "资源引用限本包与宿主 token，不使用绝对路径；持久数据写入已声明的可写字段。",
-        "清单结构校验通过，不代表 Rive 资产或设备能力已验证。"
+        "清单结构校验通过，不代表 Rive 资产或设备能力已验证。",
+        "值控件必须按 generation-profile.ui.valueSemantics 检查 path/type/default、输入模式、数值范围、选择数量和文件选择上限，禁止等宿主报错后猜测。"
       ]
     }
   },

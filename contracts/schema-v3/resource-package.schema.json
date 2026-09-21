@@ -1571,9 +1571,186 @@
                   },
                   "required": [
                     "path",
-                    "type"
+                    "type",
+                    "default"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": true,
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "number"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "boolean"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "list"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "color"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "enum"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "resource"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "image"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "artboard"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               },
               "required": [],
@@ -1587,6 +1764,74 @@
             "action"
           ],
           "additionalProperties": true,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "action": {
+                    "const": "emit"
+                  }
+                },
+                "required": [
+                  "action"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "bindings": {
+                    "not": {
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "pickFile",
+                      "pickResource"
+                    ]
+                  }
+                },
+                "required": [
+                  "action"
+                ]
+              },
+              "then": {
+                "required": [
+                  "maxBytes",
+                  "bindings"
+                ],
+                "properties": {
+                  "maxBytes": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "bindings": {
+                    "required": [
+                      "value"
+                    ],
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "resource"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
           "propertyNames": {
             "not": {
               "enum": [
@@ -1712,9 +1957,186 @@
                   },
                   "required": [
                     "path",
-                    "type"
+                    "type",
+                    "default"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": true,
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "number"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "boolean"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "list"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "color"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "enum"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "resource"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "image"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "artboard"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 },
                 "label": {
                   "type": "object",
@@ -2019,6 +2441,124 @@
             "inputMode"
           ],
           "additionalProperties": true,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "inputMode": {
+                    "const": "text"
+                  }
+                },
+                "required": [
+                  "inputMode"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "string"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "inputMode": {
+                    "const": "multiline"
+                  }
+                },
+                "required": [
+                  "inputMode"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "string"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "inputMode": {
+                    "const": "number"
+                  }
+                },
+                "required": [
+                  "inputMode"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "number"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "inputMode": {
+                    "const": "password"
+                  }
+                },
+                "required": [
+                  "inputMode"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "string"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
           "propertyNames": {
             "not": {
               "enum": [
@@ -2124,9 +2664,186 @@
                   },
                   "required": [
                     "path",
-                    "type"
+                    "type",
+                    "default"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": true,
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "number"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "boolean"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "list"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "color"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "enum"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "resource"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "image"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "artboard"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 },
                 "label": {
                   "type": "object",
@@ -2346,6 +3063,25 @@
             "label"
           ],
           "additionalProperties": true,
+          "allOf": [
+            {
+              "properties": {
+                "bindings": {
+                  "properties": {
+                    "value": {
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "boolean"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
           "propertyNames": {
             "not": {
               "enum": [
@@ -2486,9 +3222,186 @@
                   },
                   "required": [
                     "path",
-                    "type"
+                    "type",
+                    "default"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": true,
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "number"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "boolean"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "list"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "color"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "enum"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "resource"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "image"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "artboard"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 },
                 "min": {
                   "type": "object",
@@ -2756,6 +3669,25 @@
             "label"
           ],
           "additionalProperties": true,
+          "allOf": [
+            {
+              "properties": {
+                "bindings": {
+                  "properties": {
+                    "value": {
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "number"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
           "propertyNames": {
             "not": {
               "enum": [
@@ -2900,9 +3832,186 @@
                   },
                   "required": [
                     "path",
-                    "type"
+                    "type",
+                    "default"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": true,
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "number"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "boolean"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "list"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "color"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "enum"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "resource"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "image"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "artboard"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "default": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 },
                 "options": {
                   "type": "object",
@@ -3181,6 +4290,68 @@
               "required": [
                 "bindings"
               ]
+            }
+          ],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "selectionMax": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "selectionMax"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "string",
+                              "enum",
+                              "resource"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "selectionMax": {
+                    "minimum": 2
+                  }
+                },
+                "required": [
+                  "selectionMax"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "list"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           ],
           "propertyNames": {

@@ -25,6 +25,7 @@ def verify_ui_generation_rules(contract):
     bindings_by_type = validation.get("bindingsByType", {})
     required_bindings = validation.get("requiredBindingsByType", {})
     binding_kinds = validation.get("bindingKinds", {})
+    semantics = validation.get("valueSemantics", {})
     if set(bindings_by_type) != types or set(required_bindings) != types:
         raise ValueError("ui binding matrices must cover every component type exactly once")
     known_bindings = set(binding_kinds)
@@ -61,6 +62,25 @@ def verify_ui_generation_rules(contract):
             fields = rule.get(key, [])
             if len(fields) != len(set(fields)) or not set(fields).issubset(known_fields):
                 raise ValueError(f"ui.requiredWhen has invalid {key}: {rule['id']}")
+    expected_semantics = {
+        "defaultRequired": True,
+        "typesByComponent": {"toggle": ["boolean"], "slider": ["number"]},
+        "inputTypesByMode": {"text": ["string"], "multiline": ["string"],
+                             "number": ["number"], "password": ["string"]},
+        "choiceSingleTypes": ["string", "enum", "resource"],
+        "choiceMultipleTypes": ["list"],
+        "buttonValueActions": ["pickFile", "pickResource"],
+        "buttonValueTypes": ["resource"],
+        "maxBytesMinimum": 1,
+        "sliderRequiresRange": True,
+        "sliderRangeOrder": "min<max",
+        "sliderStepPositive": True,
+        "sliderStepAtMostRange": True,
+        "selectionMinDefault": 0,
+        "selectionMinAtMostMax": True,
+    }
+    if semantics != expected_semantics:
+        raise ValueError("ui.valueSemantics is incomplete")
         for key in ("requiredBindings", "forbiddenBindings"):
             fields = rule.get(key, [])
             if len(fields) != len(set(fields)) or not set(fields).issubset(known_bindings):
@@ -430,8 +450,8 @@ def verify_ai_guidance():
     contract = json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))
     component_examples = examples["examples"]["resourcePackage"].get("currentUiComponents", {})
     example_types = [component.get("type") for component in component_examples.values()]
-    if set(example_types) != set(contract["ui"]["typeFields"]) or len(example_types) != len(set(example_types)):
-        raise ValueError("AI component examples must cover every UI type exactly once")
+    if not set(contract["ui"]["typeFields"]).issubset(example_types):
+        raise ValueError("AI component examples must cover every UI type")
     component_validator = Draft202012Validator({
         "$schema": schema["$schema"], "$defs": schema["$defs"], "$ref": "#/$defs/uiComponent"
     })

@@ -1,5 +1,5 @@
 {
-  "contractVersion": "5.2.1",
+  "contractVersion": "5.3.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -611,6 +611,53 @@
         "choice": [
           "value"
         ]
+      },
+      "valueSemantics": {
+        "defaultRequired": true,
+        "typesByComponent": {
+          "toggle": [
+            "boolean"
+          ],
+          "slider": [
+            "number"
+          ]
+        },
+        "inputTypesByMode": {
+          "text": [
+            "string"
+          ],
+          "multiline": [
+            "string"
+          ],
+          "number": [
+            "number"
+          ],
+          "password": [
+            "string"
+          ]
+        },
+        "choiceSingleTypes": [
+          "string",
+          "enum",
+          "resource"
+        ],
+        "choiceMultipleTypes": [
+          "list"
+        ],
+        "buttonValueActions": [
+          "pickFile",
+          "pickResource"
+        ],
+        "buttonValueTypes": [
+          "resource"
+        ],
+        "maxBytesMinimum": 1,
+        "sliderRequiresRange": true,
+        "sliderRangeOrder": "min<max",
+        "sliderStepPositive": true,
+        "sliderStepAtMostRange": true,
+        "selectionMinDefault": 0,
+        "selectionMinAtMostMax": true
       }
     },
     "bindingFields": [
