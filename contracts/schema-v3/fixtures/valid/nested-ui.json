@@ -55,7 +55,8 @@
               ],
               "valueType": "string",
               "defaultValue": "默认",
-              "hug": true
+              "hug": true,
+              "inputMode": "text"
             }
           ],
           "layout": "row"
