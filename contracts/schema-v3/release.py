@@ -379,8 +379,40 @@ def verify_ai_guidance():
         component_errors = list(component_validator.iter_errors(component))
         if component_errors:
             raise ValueError(f"AI component example is invalid: {name}: {component_errors[0].message}")
+    application_source = examples["examples"]["applicationScript"]["applicationJavaScript"]
+    ui_match = re.search(r"(?ms)^\s*\*\s*@ui\s*$\n(?P<body>.*?)^\s*\*/", application_source)
+    if ui_match is None:
+        raise ValueError("AI application script example must include a checkable @ui declaration")
+    ui_text = "\n".join(re.sub(r"^\s*\*\s?", "", line) for line in ui_match.group("body").splitlines()).strip()
+    application_sets = json.loads(ui_text)
+    if isinstance(application_sets, dict):
+        application_sets = [application_sets]
+    definitions = {
+        path: field_type for path, field_type in re.findall(
+            r"viewModel\.define\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]",
+            application_source,
+        )
+    }
+
+    def verify_application_component(component, owner):
+        component_errors = list(component_validator.iter_errors(component))
+        if component_errors:
+            raise ValueError(f"AI application UI example is invalid: {owner}: {component_errors[0].message}")
+        component_type = component["type"]
+        value_control = component_type in contract["ui"]["validation"]["inputTypes"] or (
+            component_type == "button" and component.get("action") != "emit")
+        if value_control:
+            binding = component.get("bindings", {}).get("value")
+            if not isinstance(binding, dict) or definitions.get(binding.get("path")) != binding.get("type"):
+                raise ValueError(f"AI application UI binding has no matching viewModel.define: {owner}")
+        for index, child in enumerate(component.get("children", [])):
+            verify_application_component(child, f"{owner}.children[{index}]")
+
+    for set_index, ui_set in enumerate(application_sets):
+        for component_index, component in enumerate(ui_set.get("components", [])):
+            verify_application_component(component, f"applicationScript.ui[{set_index}].components[{component_index}]")
     if "defineResourcePackage" not in examples["examples"]["resourcePackage"]["mainJavaScript"] or \
-            "defineQuScript" not in examples["examples"]["applicationScript"]["applicationJavaScript"]:
+            "defineQuScript" not in application_source:
         raise ValueError("AI script examples have no required entry")
     for name in ("README.md", "application-script.md", "resource-package.md"):
         markdown = (ai / name).read_text(encoding="utf-8")

@@ -9,7 +9,7 @@
   ],
   "examples": {
     "applicationScript": {
-      "applicationJavaScript": "/**\n * @id ExampleScript\n * @description ${DESCRIPTION}\n * @interval 0\n */\ndefineQuScript({\n  onStart(qu) {\n  },\n  onInterval(qu) {\n  },\n  onValue(path, value, qu) {\n  },\n  onUiAction(id, qu) {\n  },\n  onStop() {\n  }\n});\n"
+      "applicationJavaScript": "/**\n * @id ExampleScript\n * @description ${DESCRIPTION}\n * @interval 0\n * @observe app.example.enabled\n * @ui\n * {\n *   \"slot\": \"applicationScript\",\n *   \"id\": \"example-settings\",\n *   \"title\": \"示例设置\",\n *   \"scope\": \"persistent\",\n *   \"components\": [\n *     {\n *       \"id\": \"enabled\",\n *       \"type\": \"toggle\",\n *       \"label\": \"启用\",\n *       \"description\": \"控制示例功能\",\n *       \"bindings\": {\n *         \"value\": {\n *           \"path\": \"app.example.enabled\",\n *           \"type\": \"boolean\",\n *           \"default\": true\n *         }\n *       }\n *     }\n *   ]\n * }\n */\nlet enabled = null;\ndefineQuScript({\n  onStart(qu) {\n    enabled = qu.viewModel.define(\n      'app.example.enabled', 'boolean', true,\n      { label: '启用', persistent: true }\n    );\n  },\n  onInterval(qu) {\n  },\n  onValue(path, value, qu) {\n  },\n  onUiAction(id, qu) {\n  },\n  onStop() {\n    enabled = null;\n  }\n});\n"
     },
     "resourcePackage": {
       "manifestJson": {
