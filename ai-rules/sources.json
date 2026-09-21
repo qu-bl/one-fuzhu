@@ -5,13 +5,26 @@
     "resourcePackage": {
       "contract": "contracts/schema-v3/contract.json",
       "release": "contracts/schema-v3/release.json",
-      "sections": ["manifest", "ui", "qvmi", "archive", "resources", "network"],
+      "sections": [
+        "manifest",
+        "ui",
+        "qvmi",
+        "archive",
+        "resources",
+        "network"
+      ],
       "schema": "contracts/schema-v3/resource-package.schema.json"
     },
     "script": {
       "contract": "contracts/schema-v3/contract.json",
       "release": "contracts/schema-v3/release.json",
-      "sections": ["script", "ui", "qvmi", "resources", "network"]
+      "sections": [
+        "script",
+        "ui",
+        "qvmi",
+        "resources",
+        "network"
+      ]
     },
     "translation": {
       "dictionary": "rive-editor/translation.json"
@@ -24,14 +37,26 @@
         "applicationScript": "ai-rules/application-script.md",
         "resourcePackage": "ai-rules/resource-package.md"
       },
-      "release": "ai-rules/rules.json"
+      "release": "ai-rules/rules.json",
+      "generationProfile": "ai-rules/generation-profile.json"
     }
   },
   "consumers": {
-    "apps": ["resourcePackage", "script", "translation"],
+    "apps": [
+      "resourcePackage",
+      "script",
+      "translation"
+    ],
     "aiScripts": {
-      "generateApplicationScript": ["script", "ai"],
-      "generateResourcePackage": ["resourcePackage", "script", "ai"]
+      "generateApplicationScript": [
+        "script",
+        "ai"
+      ],
+      "generateResourcePackage": [
+        "resourcePackage",
+        "script",
+        "ai"
+      ]
     }
   }
 }

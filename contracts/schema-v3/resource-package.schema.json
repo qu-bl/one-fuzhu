@@ -1450,6 +1450,7 @@
             "id",
             "type",
             "label",
+            "valueType",
             "inputMode"
           ],
           "additionalProperties": true,
@@ -1606,7 +1607,8 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "valueType"
           ],
           "additionalProperties": true,
           "propertyNames": {
@@ -1798,7 +1800,8 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "valueType"
           ],
           "additionalProperties": true,
           "propertyNames": {
@@ -2005,6 +2008,7 @@
             "id",
             "type",
             "label",
+            "valueType",
             "selectionMax",
             "presentation"
           ],

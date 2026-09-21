@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "audience": "aiScriptsOnly",
   "contract": "contracts/schema-v3/contract.json",
   "priority": [
@@ -11,7 +11,8 @@
   "workflow": {
     "prepare": [
       "校验 AI 规则发布哈希与共享契约发布哈希，所有资料必须来自同一发布版本。",
-      "把 guidance、当前场景指南、examples、共享契约所需分区、JSON Schema 和用户当前文件的实际内容放入模型上下文。",
+      "把 guidance、当前场景指南、examples、generation-profile 和用户当前文件的实际内容放入模型上下文；完整 JSON Schema 由宿主保留用于机器校验，不默认放入模型上下文。",
+      "只在需要查明 generation-profile 未覆盖的细节时加入共享契约对应分区，禁止无选择地注入完整契约或完整 Schema。",
       "资源包存在 main.riv 时提供真实 Rive 元数据；无法读取时保留当前名称并明确缺少信息，禁止猜测。"
     ],
     "generate": [
@@ -20,10 +21,68 @@
       "禁止从模型记忆补充 contract 中不存在的字段、组件或宿主入口。"
     ],
     "verify": [
-      "输出必须能作为 JSON 解析，且 deliveryFields 中每个文件都是完整字符串。",
-      "resource-package.json 必须通过 resource-package.schema.json，并执行 JSON/JavaScript 交叉检查。",
-      "每个 JavaScript 字面 QVMI 路径都必须具有匹配类型及声明；公共读取、trigger、网络域名和 UI 所有权必须完整。",
-      "校验失败时把文件、JSON 路径、错误码和消息反馈给模型修复；最多两轮，仍失败则返回 reply，不调用 apply_files。"
+      {
+        "id": "delivery-json",
+        "check": "输出能按交付协议解析，deliveryFields 中每个被修改文件都是完整字符串。",
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
+      },
+      {
+        "id": "entry-function",
+        "check": "入口函数与场景 entry 完全一致，且只注册一次。",
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
+      },
+      {
+        "id": "ui-required-fields",
+        "check": "每个 UI 控件满足 generation-profile.ui.requiredByType、oneOfRequiredByType 与 requiredWhen。",
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
+      },
+      {
+        "id": "manifest-schema",
+        "check": "resource-package.json 通过宿主持有的完整 resource-package.schema.json。",
+        "appliesTo": [
+          "resourcePackage"
+        ]
+      },
+      {
+        "id": "qvmi-paths",
+        "check": "每个 JavaScript 字面 QVMI 路径都有匹配类型、权限与声明。",
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
+      },
+      {
+        "id": "cross-file-contract",
+        "check": "JSON 与 JavaScript 的入口、字段、UI 所有权、权限、网络域名和资源声明互相一致。",
+        "appliesTo": [
+          "resourcePackage"
+        ]
+      },
+      {
+        "id": "runtime-capabilities",
+        "check": "宿主操作属于当前场景，网络、持久化、资源和 Rive 能力均满足契约前置条件。",
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
+      },
+      {
+        "id": "host-error-verbatim",
+        "check": "修复轮次逐字保留宿主返回的文件、JSON 路径、错误码和 messageRaw；禁止转述、缩写、改写或脑补。",
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
+      }
     ]
   },
   "shared": {
@@ -64,8 +123,12 @@
     "applicationScript": {
       "guide": "ai-rules/application-script.md",
       "example": "applicationScript",
-      "files": ["application.js"],
-      "deliveryFields": ["applicationJavaScript"],
+      "files": [
+        "application.js"
+      ],
+      "deliveryFields": [
+        "applicationJavaScript"
+      ],
       "entry": "defineQuScript",
       "rules": [
         "只处理应用脚本，不交付资源包 manifestJson 或 mainJavaScript。",
@@ -80,8 +143,14 @@
     "resourcePackage": {
       "guide": "ai-rules/resource-package.md",
       "example": "resourcePackage",
-      "files": ["resource-package.json", "main.js"],
-      "deliveryFields": ["manifestJson", "mainJavaScript"],
+      "files": [
+        "resource-package.json",
+        "main.js"
+      ],
+      "deliveryFields": [
+        "manifestJson",
+        "mainJavaScript"
+      ],
       "entry": "defineResourcePackage",
       "rules": [
         "清单和程序是一份契约；新增字段、UI、权限或绑定时同步修改 JSON 与 JS，只返回实际变动的完整文件。",
@@ -95,5 +164,17 @@
         "清单结构校验通过，不代表 Rive 资产或设备能力已验证。"
       ]
     }
+  },
+  "generationProfile": "ai-rules/generation-profile.json",
+  "hostErrorFeedback": {
+    "requiredFields": [
+      "source",
+      "file",
+      "path",
+      "code",
+      "messageRaw"
+    ],
+    "messagePolicy": "messageRaw 必须逐字采用宿主返回值；模型解释只能写入 explanation，不能替换原文。",
+    "repairPolicy": "修复时逐项引用 path、code 和 messageRaw；最多两轮，仍失败则返回 reply，不调用 apply_files。"
   }
 }

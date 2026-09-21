@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "4.0.1",
+  "contractVersion": "4.1.0",
   "notes": [
     "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
     "不要复制示例中未被用户需求使用的字段或组件。",
-    "manifestJson 对象在 apply_files 交付时序列化为完整 JSON 字符串。"
+    "manifestJson 对象在 apply_files 交付时序列化为完整 JSON 字符串。",
+    "控件固定必填字段、条件必填字段和任选字段组以 generation-profile.json 为准。"
   ],
   "examples": {
     "applicationScript": {
@@ -65,7 +66,10 @@
           "type": "input",
           "label": "名称",
           "description": "输入名称",
-          "propertyPath": ["profile", "name"],
+          "propertyPath": [
+            "profile",
+            "name"
+          ],
           "valueType": "string",
           "defaultValue": "",
           "inputMode": "text"
@@ -75,7 +79,9 @@
           "type": "toggle",
           "label": "启用",
           "description": "控制功能",
-          "propertyPath": ["enabled"],
+          "propertyPath": [
+            "enabled"
+          ],
           "valueType": "boolean",
           "defaultValue": true
         },
@@ -84,7 +90,9 @@
           "type": "slider",
           "label": "数值",
           "description": "调整数值",
-          "propertyPath": ["amount"],
+          "propertyPath": [
+            "amount"
+          ],
           "valueType": "number",
           "defaultValue": 50,
           "min": 0,
@@ -96,15 +104,23 @@
           "type": "choice",
           "label": "模式",
           "description": "选择一种模式",
-          "propertyPath": ["mode"],
+          "propertyPath": [
+            "mode"
+          ],
           "valueType": "enum",
           "defaultValue": "normal",
           "selectionMin": 1,
           "selectionMax": 1,
           "presentation": "list",
           "options": [
-            { "value": "normal", "label": "普通" },
-            { "value": "strong", "label": "增强" }
+            {
+              "value": "normal",
+              "label": "普通"
+            },
+            {
+              "value": "strong",
+              "label": "增强"
+            }
           ]
         },
         "button": {
