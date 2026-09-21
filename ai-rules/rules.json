@@ -3,18 +3,33 @@
   "files": [
     {
       "name": "README.md",
-      "version": "2026.09.21.9",
-      "sha256": "039ad45b98c655aa6a39bf9f45e0d7def6bf594d06361eb37d1d64fb7481938b"
+      "version": "2026.09.21.10",
+      "sha256": "b4319da8a2be6a077868e267f655dadf9c92b7b13ad8f948d392cf67c349629d"
     },
     {
       "name": "guidance.json",
-      "version": "2026.09.21.8",
-      "sha256": "c1cb3108acfdf408e82e9677aa47dcb834a16b801c1d2e4b10233e50bd991ea3"
+      "version": "2026.09.21.10",
+      "sha256": "7d43da0a896a56a2df3d0e9c7925392f4dc601beba9216c9dc3c08f92ba14237"
     },
     {
       "name": "sources.json",
-      "version": "2026.09.21.9",
-      "sha256": "2dd89b6a81648900c4025145eea1c4e9ef7df60f97005928698a603031765f2a"
+      "version": "2026.09.21.10",
+      "sha256": "37ef89697b462528752031dd68c6e46257775358140ca476ebb27f6bced166e4"
+    },
+    {
+      "name": "examples.json",
+      "version": "2026.09.21.1",
+      "sha256": "c557bf6fcceb79b0fa7c33fd086abaae937f7c17786a22a84c54c95969a87425"
+    },
+    {
+      "name": "application-script.md",
+      "version": "2026.09.21.1",
+      "sha256": "5effe6af0bb87ccabfab9ecf2acef08aaa44b87862aced906929adab74dbeee6"
+    },
+    {
+      "name": "resource-package.md",
+      "version": "2026.09.21.1",
+      "sha256": "16a83b9f5553733890a3efbdbe60e5d949b88f89b0491e1247b4320f1b231b23"
     }
   ]
 }
