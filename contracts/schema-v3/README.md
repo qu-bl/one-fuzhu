@@ -9,6 +9,7 @@ UI 的允许字段、逐类型必填字段、任选字段组和条件必填规�
 制作台的工程名长度、资源包 UI 文案长度、Rive 路径长度和脚本声明入口也由本契约发布。
 动态原生 UI 的节点、参数与破坏式升级边界见 [UI_PROTOCOL.md](UI_PROTOCOL.md)。
 动态 UI 的所有运行时绑定统一读取所属作用域的 QVMI；宿主只负责响应式映射和原生组件状态，不创建镜像字段。
+按钮的五种样式和选中态提升规则由 `contract.ui.buttonStyleSemantics` 统一发布。
 修改规则时同时更新有效／无效样例，运行 `python release.py` 生成发布描述。
 GitHub Actions 会重新生成 Schema、校验样例及哈希；检查通过后才应合并。
 

@@ -1,5 +1,5 @@
 {
-  "contractVersion": "5.0.2",
+  "contractVersion": "5.0.3",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -346,6 +346,25 @@
       "republishDerivedUiState": false,
       "nativeComponents": true,
       "groupDisabledRecursively": true
+    },
+    "buttonStyleSemantics": {
+      "plain": "textOnly",
+      "filled": "prominentFilled",
+      "outlined": "transparentWithBorder",
+      "tonal": "lowEmphasisFilled",
+      "danger": "destructiveProminent",
+      "selectedPromotion": {
+        "from": [
+          "plain",
+          "outlined",
+          "tonal"
+        ],
+        "to": "filled",
+        "preserve": [
+          "filled",
+          "danger"
+        ]
+      }
     },
     "validation": {
       "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",

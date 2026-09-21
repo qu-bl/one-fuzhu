@@ -1,4 +1,4 @@
-# 动态原生 UI 协议 5.0.2
+# 动态原生 UI 协议 5.0.3
 
 三端只实现 `group/text/button/toggle/slider/input/choice/spacer` 八种节点，并使用平台原生组件绘制。
 字段、绑定、枚举和限制以 `contract.json` 的 `ui` 段为唯一依据。5.0 是破坏式更新，不解析旧的
@@ -43,7 +43,9 @@
 | `choice` | 单选或多选 | 值、选项、标题、说明、可见、启用、加载、错误 |
 | `spacer` | 固定或弹性空白 | 可见 |
 
-按钮样式为 `plain/filled/outlined/tonal/danger`，不提供图标字段。选择器的
+按钮样式必须保持可辨识的原生语义：`plain` 仅文字，`filled` 为高强调填充，`outlined` 为透明底描边，
+`tonal` 为低强调填充，`danger` 为破坏性高强调填充。`selected=true` 时将 `plain/outlined/tonal`
+提升为 `filled`，同时保留 `filled/danger`。按钮不提供图标字段。选择器的
 `selectionMax=1` 表示单选，大于 1 表示多选。布局继续使用 `gap/padding/align/valign/wrap/scroll/flex/hug`，
 由原生布局在窗口、横竖屏和分栏变化时重新测量。
 
