@@ -184,18 +184,20 @@ def verify_schema_and_fixtures():
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
     if contract["ui"].get("buttonStyleSemantics") != {
-        "plain": "textOnly",
-        "filled": "prominentFilled",
-        "outlined": "transparentWithBorder",
-        "tonal": "lowEmphasisFilled",
-        "danger": "destructiveProminent",
+        "appearancePolicy": "hostNativeOnly",
+        "hostAppearanceOverrides": False,
+        "plain": "nativeText",
+        "filled": "nativeProminent",
+        "outlined": "nativeOutlinedOrNormal",
+        "tonal": "nativeTonalOrNormal",
+        "danger": "nativeDestructiveOrProminent",
         "selectedPromotion": {
             "from": ["plain", "outlined", "tonal"],
             "to": "filled",
             "preserve": ["filled", "danger"],
         },
     }:
-        raise ValueError("button style semantics are incomplete")
+        raise ValueError("button styles must use host-native appearance without overrides")
     if set(ui_validation["enums"]["scope"]) != {"persistent", "runtime"}:
         raise ValueError("UI scopes must retain the two runtime lifetimes")
     archive = contract["archive"]
