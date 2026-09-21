@@ -1,4 +1,4 @@
-# 动态原生 UI 协议 4.2
+# 动态原生 UI 协议 4.3
 
 三端只实现八种节点，并使用各平台原生组件绘制。节点树、字段、枚举和限制均以同目录
 `contract.json` 的 `ui` 段为准；客户端启动后异步更新契约，制作台、检查器和运行时读取同一份缓存。
@@ -11,7 +11,7 @@
 | --- | --- | --- |
 | `group` | 布局和嵌套 | `layout: column/row/stack`、`surface: none/card`、`children`、`gap`、`padding`、`wrap`、`scroll` |
 | `text` | 静态或数据文本 | `text` 或 `textPath`、`size`、`format`；`copyable: true` 启用平台原生选择复制 |
-| `button` | 触发操作或唤起系统选择器 | `action: emit/pickFile/pickResource`、`text`、`style`；选择结果写入 `propertyPath` |
+| `button` | 触发操作或唤起系统选择器 | `action: emit/pickFile/pickResource`；`textPath` 动态文字；`enabledWhen` 控制可用；`loadingPath` 控制加载和禁用；`selectedPath` 控制选中；选择结果写入 `propertyPath` |
 | `toggle` | 布尔开关 | `propertyPath`、`valueType: boolean` |
 | `slider` | 范围数值 | `min`、`max`、`step`、`propertyPath`、`valueType: number` |
 | `input` | 文本、数字、密码或颜色输入 | `inputMode: text/multiline/number/password/color`；`valueType` 必须匹配模式 |
@@ -21,6 +21,11 @@
 `group` 可以任意嵌套。`column` 纵向排列，`row` 横向排列并可用 `wrap` 在窄容器内换行，
 `stack` 叠加子节点；`align`、`valign`、`flex` 和 `hug` 控制剩余空间。布局以组件实际可用宽度计算，
 因此窗口、横竖屏和分栏变化时由原生布局重新测量，不在 JSON 中写设备像素或平台分支。
+
+按钮 `style` 使用语义值 `plain/filled/outlined/tonal/danger`，由各端映射为最接近的原生按钮。
+`normal` 和 `emphasized` 仅作为旧资源的过渡别名，分别等价于 `plain` 和 `filled`。按钮不接受图标字段。
+动态路径由 JS/QVMI 提供：路径尚未返回时显示静态 `text`、保持可用且不进入加载或选中状态；
+`loadingPath` 为真时宿主显示原生进度控件并禁止再次触发。
 
 ## 破坏式边界
 

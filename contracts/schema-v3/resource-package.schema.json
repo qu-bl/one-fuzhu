@@ -811,9 +811,11 @@
                 "action",
                 "copyable",
                 "defaultValue",
+                "enabledWhen",
                 "format",
                 "inputMode",
                 "lines",
+                "loadingPath",
                 "max",
                 "maxBytes",
                 "min",
@@ -824,6 +826,7 @@
                 "presentation",
                 "propertyPath",
                 "secure",
+                "selectedPath",
                 "selectionMax",
                 "selectionMin",
                 "size",
@@ -967,10 +970,12 @@
                 "align",
                 "children",
                 "defaultValue",
+                "enabledWhen",
                 "gap",
                 "inputMode",
                 "layout",
                 "lines",
+                "loadingPath",
                 "max",
                 "maxBytes",
                 "min",
@@ -983,6 +988,7 @@
                 "radius",
                 "scroll",
                 "secure",
+                "selectedPath",
                 "selectionMax",
                 "selectionMin",
                 "space",
@@ -1089,12 +1095,14 @@
                 "children",
                 "copyable",
                 "defaultValue",
+                "enabledWhen",
                 "format",
                 "gap",
                 "hug",
                 "inputMode",
                 "layout",
                 "lines",
+                "loadingPath",
                 "max",
                 "maxBytes",
                 "min",
@@ -1108,6 +1116,7 @@
                 "radius",
                 "scroll",
                 "secure",
+                "selectedPath",
                 "selectionMax",
                 "selectionMin",
                 "size",
@@ -1198,8 +1207,37 @@
             "text": {
               "type": "string"
             },
+            "textPath": {
+              "type": "string"
+            },
+            "format": {
+              "type": "object",
+              "properties": {
+                "decimals": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                },
+                "prefix": {
+                  "type": "string"
+                },
+                "suffix": {
+                  "type": "string"
+                },
+                "percent": {
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "additionalProperties": true
+            },
             "style": {
               "enum": [
+                "plain",
+                "filled",
+                "outlined",
+                "tonal",
+                "danger",
                 "normal",
                 "emphasized"
               ]
@@ -1263,6 +1301,55 @@
               "type": "integer",
               "minimum": 0
             },
+            "enabledWhen": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "equals": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                },
+                "in": {
+                  "type": "array",
+                  "items": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 64
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": true,
+              "anyOf": [
+                {
+                  "required": [
+                    "equals"
+                  ]
+                },
+                {
+                  "required": [
+                    "in"
+                  ]
+                }
+              ]
+            },
+            "loadingPath": {
+              "type": "string"
+            },
+            "selectedPath": {
+              "type": "string"
+            },
             "hug": {
               "type": "boolean"
             }
@@ -1280,7 +1367,6 @@
                 "align",
                 "children",
                 "copyable",
-                "format",
                 "gap",
                 "inputMode",
                 "layout",
@@ -1302,7 +1388,6 @@
                 "space",
                 "step",
                 "surface",
-                "textPath",
                 "valign",
                 "wrap"
               ]
@@ -1468,9 +1553,11 @@
                 "align",
                 "children",
                 "copyable",
+                "enabledWhen",
                 "format",
                 "gap",
                 "layout",
+                "loadingPath",
                 "maxBytes",
                 "multiline",
                 "options",
@@ -1480,6 +1567,7 @@
                 "radius",
                 "scroll",
                 "secure",
+                "selectedPath",
                 "selectionMax",
                 "selectionMin",
                 "size",
@@ -1626,11 +1714,13 @@
                 "align",
                 "children",
                 "copyable",
+                "enabledWhen",
                 "format",
                 "gap",
                 "inputMode",
                 "layout",
                 "lines",
+                "loadingPath",
                 "max",
                 "maxBytes",
                 "min",
@@ -1643,6 +1733,7 @@
                 "radius",
                 "scroll",
                 "secure",
+                "selectedPath",
                 "selectionMax",
                 "selectionMin",
                 "size",
@@ -1820,10 +1911,12 @@
                 "align",
                 "children",
                 "copyable",
+                "enabledWhen",
                 "gap",
                 "inputMode",
                 "layout",
                 "lines",
+                "loadingPath",
                 "maxBytes",
                 "multiline",
                 "options",
@@ -1834,6 +1927,7 @@
                 "radius",
                 "scroll",
                 "secure",
+                "selectedPath",
                 "selectionMax",
                 "selectionMin",
                 "size",
@@ -2042,11 +2136,13 @@
                 "align",
                 "children",
                 "copyable",
+                "enabledWhen",
                 "format",
                 "gap",
                 "inputMode",
                 "layout",
                 "lines",
+                "loadingPath",
                 "max",
                 "maxBytes",
                 "min",
@@ -2056,6 +2152,7 @@
                 "radius",
                 "scroll",
                 "secure",
+                "selectedPath",
                 "size",
                 "space",
                 "step",
