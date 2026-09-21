@@ -800,7 +800,8 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "layout"
           ],
           "additionalProperties": true,
           "propertyNames": {
@@ -1264,7 +1265,8 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "action"
           ],
           "additionalProperties": true,
           "propertyNames": {
@@ -1447,7 +1449,8 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "inputMode"
           ],
           "additionalProperties": true,
           "propertyNames": {
@@ -2001,9 +2004,23 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "selectionMax",
+            "presentation"
           ],
           "additionalProperties": true,
+          "anyOf": [
+            {
+              "required": [
+                "options"
+              ]
+            },
+            {
+              "required": [
+                "optionsPath"
+              ]
+            }
+          ],
           "propertyNames": {
             "not": {
               "enum": [
