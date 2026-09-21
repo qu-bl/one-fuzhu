@@ -1,6 +1,6 @@
 # 千机百变公开规则（schema v3）
 
-这里是鸿蒙、Android、Apple 共用的发布源。规范分类见 [NORMS.md](NORMS.md)。三端读取 `release.json`，按 SHA-256 校验并缓存
+这里是鸿蒙、Android、Apple 共用的发布源。三端读取 `release.json`，按 SHA-256 校验并缓存
 `contract.json`；`resource-package.schema.json` 用于发布时验证资源包结构。公开地址为
 `https://qu-bl.github.io/one-fuzhu/contracts/schema-v3/`。
 
@@ -14,3 +14,5 @@ JavaScript 宿主入口与参数、脚本长度、归档安全限额、资源读
 平台执行器仍负责实现入口、检查本地文件和处理设备权限。
 静态站点只能发布已审核的规则，不能代替设备端执行文件检查、权限或硬件访问。
 规则版本变更若需要新的客户端能力，必须与三端应用版本的发布协调。
+
+云端规则规定可接受的声明和公开能力；原生层仍执行解压、Rive 绘制、音频、传感器、网络传输与权限请求。鸿蒙网络传输器在取得云端契约前使用启动安全限额，加载后切换为契约限额。[平台差异](DIFFERENCES.md)记录不能仅靠字段清单消除的能力和取值差异。

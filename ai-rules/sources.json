@@ -17,12 +17,8 @@
       "dictionary": "rive-editor/translation.json"
     },
     "ai": {
-      "guide": "ai-rules/index.md",
+      "guide": "ai-rules/README.md",
       "guidance": "ai-rules/guidance.json",
-      "scenarioGuides": {
-        "applicationScript": "ai-rules/application-script.md",
-        "resourcePackage": "ai-rules/resource-package.md"
-      },
       "release": "ai-rules/rules.json"
     }
   },
