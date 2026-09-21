@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "4.2.0",
+  "contractVersion": "4.3.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -103,6 +103,8 @@
         "visible",
         "visibleWhen",
         "text",
+        "textPath",
+        "format",
         "style",
         "action",
         "propertyPath",
@@ -110,6 +112,9 @@
         "defaultValue",
         "acceptedFileExtensions",
         "maxBytes",
+        "enabledWhen",
+        "loadingPath",
+        "selectedPath",
         "hug"
       ],
       "input": [
@@ -350,6 +355,11 @@
         "lg"
       ],
       "style": [
+        "plain",
+        "filled",
+        "outlined",
+        "tonal",
+        "danger",
         "normal",
         "emphasized"
       ],
@@ -389,6 +399,10 @@
         "center",
         "bottom"
       ]
+    },
+    "legacyStyleAliases": {
+      "normal": "plain",
+      "emphasized": "filled"
     },
     "limits": {
       "setsMax": 8,

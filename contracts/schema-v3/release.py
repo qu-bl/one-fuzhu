@@ -22,6 +22,11 @@ def verify_ui_generation_rules(contract):
     required = validation.get("requiredByType", {})
     alternatives = validation.get("oneOfRequiredByType", {})
     conditions = validation.get("requiredWhen", [])
+    aliases = validation.get("legacyStyleAliases", {})
+    styles = set(validation["enums"]["style"])
+    if aliases != {"normal": "plain", "emphasized": "filled"} or not set(aliases).issubset(styles) or \
+            not set(aliases.values()).issubset(styles):
+        raise ValueError("ui.legacyStyleAliases is invalid")
     if set(required) != types:
         raise ValueError("ui.requiredByType must cover every component type exactly once")
     for name, fields in required.items():

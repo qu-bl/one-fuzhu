@@ -34,6 +34,7 @@ def build_profile():
             "oneOfRequiredByType": validation["oneOfRequiredByType"],
             "requiredWhen": validation["requiredWhen"],
             "enums": validation["enums"],
+            "legacyStyleAliases": validation["legacyStyleAliases"],
             "limits": validation["limits"],
         },
         "script": {
