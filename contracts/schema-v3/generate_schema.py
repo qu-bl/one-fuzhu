@@ -75,7 +75,12 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
     allowed = common + fields
     properties = {key: ui_properties[key] for key in allowed}
     properties["type"] = {"const": component_type}
-    variant = obj(properties, ["id", "type", "label"])
+    required = ["id", "type", "label"]
+    required += {"group": ["layout"], "button": ["action"], "input": ["inputMode"],
+                 "choice": ["selectionMax", "presentation"]}.get(component_type, [])
+    variant = obj(properties, required)
+    if component_type == "choice":
+        variant["anyOf"] = [{"required": ["options"]}, {"required": ["optionsPath"]}]
     disallowed_known = sorted(set(ui_properties) - set(allowed))
     variant["propertyNames"] = {"not": {"enum": disallowed_known}}
     variants.append(variant)

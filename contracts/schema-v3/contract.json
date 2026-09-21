@@ -1,5 +1,5 @@
 {
-  "contractVersion": "4.0.0",
+  "contractVersion": "4.0.1",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
