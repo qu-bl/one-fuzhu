@@ -1,9 +1,10 @@
-# 动态原生 UI 协议 5.1.0
+# 动态原生 UI 协议 5.2.0
 
 三端只实现 `group/text/button/toggle/slider/input/choice/spacer` 八种节点，并使用平台原生组件绘制。
 字段、绑定、枚举和限制以 `contract.json` 的 `ui` 段为唯一依据。5.0 是破坏式更新，不解析旧的
 `propertyPath`、`valueType`、`defaultValue`、`textPath`、`optionsPath`、`visibleWhen`、
 `enabledWhen`、`loadingPath` 或 `selectedPath`。
+5.2 再次破坏式收口：旧的 `style/size/density/presentation/flex/gap/padding/space/lines` 会直接校验失败。
 
 ## 统一绑定
 
@@ -41,13 +42,16 @@
 | `slider` | 范围数值 | 值、范围、步长、标题、说明、可见、启用、错误 |
 | `input` | 文本、数字、密码或多行文本输入 | 值、标题、说明、占位、可见、启用、只读、错误 |
 | `choice` | 单选或多选 | 值、选项、标题、说明、可见、启用、错误 |
-| `spacer` | 固定或弹性空白 | 可见 |
+| `spacer` | 按剩余空间比例伸缩的空白 | 可见 |
 
-按钮只选择宿主提供的原生样式，不覆盖颜色、背景、边框、圆角或字体。`plain` 选择原生文本按钮，
-`filled` 选择原生强调按钮。按钮不提供图标、加载态、选中态或平台角色字段；选择状态使用 `toggle`
-或 `choice` 表达。选择器的 `selectionMax=1` 表示单选，大于 1 表示多选。布局使用
-`gap/padding/align/valign/scroll/flex/hug`，由原生布局在窗口、横竖屏和分栏变化时重新测量。
-协议不提供卡片表面、圆角、流式换行或颜色选择器，因为三端没有语义一致的原生实现。
+声明只描述内容、值、状态、行为和数据格式，不描述颜色、背景、描边、圆角、字体、字号、密度或按钮
+外观。宿主必须直接使用平台组件的默认外观，不得根据声明添加自绘或外观覆盖。按钮不提供图标、加载态、
+选中态或平台角色字段；选择状态使用 `toggle` 或 `choice` 表达。
+
+选择器的 `selectionMax=1` 表示单选，大于 1 表示多选。布局只允许 `layout/align/valign/scroll/hug`：
+`hug` 表达按内容自适应，其余字段表达容器关系。`spacer` 使用各平台原生弹性占位并自动取得剩余空间。声明不得携带像素、
+点、vp 或其他绝对尺寸，不提供固定间距、内边距、占位尺寸或固定行数。所有实际尺寸和间距由平台原生
+布局自行测量。
 
 ## 失败语义
 

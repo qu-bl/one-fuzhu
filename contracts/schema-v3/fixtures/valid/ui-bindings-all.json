@@ -59,10 +59,9 @@
               }
             },
             {
-              "id": "gap",
+              "id": "flexibleSpace",
               "type": "spacer",
               "label": "间隔",
-              "space": 8,
               "bindings": {
                 "visible": {
                   "path": "ui.visible",
@@ -76,7 +75,6 @@
               "type": "button",
               "label": "选择资源",
               "action": "pickResource",
-              "style": "filled",
               "bindings": {
                 "value": {
                   "path": "ui.resource",
@@ -233,7 +231,6 @@
               "label": "模式",
               "selectionMin": 1,
               "selectionMax": 1,
-              "presentation": "list",
               "bindings": {
                 "value": {
                   "path": "ui.mode",

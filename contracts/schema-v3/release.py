@@ -183,21 +183,24 @@ def verify_schema_and_fixtures():
         "groupDisabledRecursively": True,
         "nativeComponentIntersectionOnly": True,
         "customDrawingAllowed": False,
+        "declarationCarriesAppearance": False,
+        "appearancePolicy": "platformDefaultOnly",
+        "layoutPolicy": "adaptiveRelativeOnly",
+        "absoluteLayoutValuesAllowed": False,
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
-    if contract["ui"].get("buttonStyleSemantics") != {
-        "appearancePolicy": "hostNativeOnly",
-        "hostAppearanceOverrides": False,
-        "plain": "nativeText",
-        "filled": "nativeProminent",
-        "unsupportedAppearancePolicy": "reject",
-    }:
-        raise ValueError("button styles must use host-native appearance without overrides")
-    if ui_validation["enums"]["style"] != ["plain", "filled"] or \
-            ui_validation["enums"]["presentation"] != ["list"] or \
+    forbidden_appearance = {"style", "size", "density", "presentation"}
+    forbidden_absolute_layout = {"flex", "gap", "padding", "space", "lines"}
+    if set(contract["ui"].get("forbiddenDeclarationFields", [])) != forbidden_appearance | forbidden_absolute_layout:
+        raise ValueError("UI contract must publish every removed appearance and absolute-layout field")
+    all_ui_fields = set(contract["ui"]["commonFields"] + contract["ui"]["setFields"])
+    for fields in contract["ui"]["typeFields"].values():
+        all_ui_fields.update(fields)
+    if forbidden_appearance & all_ui_fields or forbidden_absolute_layout & all_ui_fields or \
+            forbidden_appearance & set(ui_validation["enums"]) or \
             "color" in ui_validation["enums"]["inputMode"] or \
             any(field in contract["ui"]["typeFields"]["group"] for field in ("surface", "radius", "wrap")):
-        raise ValueError("UI contract must expose only the three-platform native intersection")
+        raise ValueError("UI declarations must contain only values, states, and adaptive or relative layout")
     if set(ui_validation["enums"]["scope"]) != {"persistent", "runtime"}:
         raise ValueError("UI scopes must retain the two runtime lifetimes")
     archive = contract["archive"]

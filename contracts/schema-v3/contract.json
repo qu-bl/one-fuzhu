@@ -1,5 +1,5 @@
 {
-  "contractVersion": "5.1.0",
+  "contractVersion": "5.2.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -85,8 +85,7 @@
         "id",
         "title",
         "scope",
-        "components",
-        "density"
+        "components"
       ]
     },
     "valueTypes": [
@@ -245,7 +244,6 @@
     "commonFields": [
       "bindings",
       "description",
-      "flex",
       "hug",
       "id",
       "label",
@@ -256,28 +254,21 @@
       "group": [
         "children",
         "layout",
-        "gap",
         "align",
         "valign",
         "scroll",
-        "padding",
         "enabled"
       ],
       "text": [
         "text",
         "format",
-        "size",
         "multiline",
-        "lines",
         "copyable"
       ],
-      "spacer": [
-        "space"
-      ],
+      "spacer": [],
       "button": [
         "text",
         "format",
-        "style",
         "action",
         "acceptedFileExtensions",
         "maxBytes",
@@ -286,7 +277,6 @@
       "input": [
         "placeholder",
         "inputMode",
-        "lines",
         "min",
         "max",
         "step",
@@ -306,7 +296,6 @@
         "options",
         "selectionMin",
         "selectionMax",
-        "presentation",
         "enabled"
       ]
     },
@@ -315,7 +304,6 @@
       "title",
       "scope",
       "components",
-      "density",
       "slot"
     ],
     "conditionFields": [
@@ -344,14 +332,11 @@
       "nativeComponents": true,
       "groupDisabledRecursively": true,
       "nativeComponentIntersectionOnly": true,
-      "customDrawingAllowed": false
-    },
-    "buttonStyleSemantics": {
-      "appearancePolicy": "hostNativeOnly",
-      "hostAppearanceOverrides": false,
-      "plain": "nativeText",
-      "filled": "nativeProminent",
-      "unsupportedAppearancePolicy": "reject"
+      "customDrawingAllowed": false,
+      "declarationCarriesAppearance": false,
+      "appearancePolicy": "platformDefaultOnly",
+      "layoutPolicy": "adaptiveRelativeOnly",
+      "absoluteLayoutValuesAllowed": false
     },
     "validation": {
       "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
@@ -366,36 +351,19 @@
         "extensionsMax": 16,
         "labelMax": 200,
         "idMax": 64,
-        "linesMin": 1,
-        "linesMax": 20,
         "decimalsMin": 0,
-        "decimalsMax": 6,
-        "spaceMax": 200,
-        "paddingMax": 64
+        "decimalsMax": 6
       },
       "enums": {
         "scope": [
           "persistent",
           "runtime"
         ],
-        "density": [
-          "normal",
-          "compact"
-        ],
         "slot": [
           "dialog",
           "scriptUi",
           "applicationScript",
           "packageBuilder"
-        ],
-        "size": [
-          "sm",
-          "md",
-          "lg"
-        ],
-        "style": [
-          "plain",
-          "filled"
         ],
         "layout": [
           "column",
@@ -412,9 +380,6 @@
           "multiline",
           "number",
           "password"
-        ],
-        "presentation": [
-          "list"
         ],
         "align": [
           "start",
@@ -481,8 +446,7 @@
           "id",
           "type",
           "label",
-          "selectionMax",
-          "presentation"
+          "selectionMax"
         ]
       },
       "oneOfRequiredByType": {},
@@ -647,6 +611,17 @@
       "equals",
       "in",
       "format"
+    ],
+    "forbiddenDeclarationFields": [
+      "density",
+      "flex",
+      "gap",
+      "lines",
+      "padding",
+      "presentation",
+      "size",
+      "space",
+      "style"
     ]
   },
   "qvmi": {

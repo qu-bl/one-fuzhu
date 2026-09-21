@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "5.1.0",
+  "contractVersion": "5.2.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -52,20 +52,27 @@
       "nativeComponents": true,
       "groupDisabledRecursively": true,
       "nativeComponentIntersectionOnly": true,
-      "customDrawingAllowed": false
+      "customDrawingAllowed": false,
+      "declarationCarriesAppearance": false,
+      "appearancePolicy": "platformDefaultOnly",
+      "layoutPolicy": "adaptiveRelativeOnly",
+      "absoluteLayoutValuesAllowed": false
     },
-    "buttonStyleSemantics": {
-      "appearancePolicy": "hostNativeOnly",
-      "hostAppearanceOverrides": false,
-      "plain": "nativeText",
-      "filled": "nativeProminent",
-      "unsupportedAppearancePolicy": "reject"
-    },
+    "forbiddenDeclarationFields": [
+      "density",
+      "flex",
+      "gap",
+      "lines",
+      "padding",
+      "presentation",
+      "size",
+      "space",
+      "style"
+    ],
     "allowedFieldsByType": {
       "group": [
         "bindings",
         "description",
-        "flex",
         "hug",
         "id",
         "label",
@@ -73,17 +80,14 @@
         "visible",
         "children",
         "layout",
-        "gap",
         "align",
         "valign",
         "scroll",
-        "padding",
         "enabled"
       ],
       "text": [
         "bindings",
         "description",
-        "flex",
         "hug",
         "id",
         "label",
@@ -91,26 +95,21 @@
         "visible",
         "text",
         "format",
-        "size",
         "multiline",
-        "lines",
         "copyable"
       ],
       "spacer": [
         "bindings",
         "description",
-        "flex",
         "hug",
         "id",
         "label",
         "type",
-        "visible",
-        "space"
+        "visible"
       ],
       "button": [
         "bindings",
         "description",
-        "flex",
         "hug",
         "id",
         "label",
@@ -118,7 +117,6 @@
         "visible",
         "text",
         "format",
-        "style",
         "action",
         "acceptedFileExtensions",
         "maxBytes",
@@ -127,7 +125,6 @@
       "input": [
         "bindings",
         "description",
-        "flex",
         "hug",
         "id",
         "label",
@@ -135,7 +132,6 @@
         "visible",
         "placeholder",
         "inputMode",
-        "lines",
         "min",
         "max",
         "step",
@@ -144,7 +140,6 @@
       "toggle": [
         "bindings",
         "description",
-        "flex",
         "hug",
         "id",
         "label",
@@ -155,7 +150,6 @@
       "slider": [
         "bindings",
         "description",
-        "flex",
         "hug",
         "id",
         "label",
@@ -170,7 +164,6 @@
       "choice": [
         "bindings",
         "description",
-        "flex",
         "hug",
         "id",
         "label",
@@ -179,7 +172,6 @@
         "options",
         "selectionMin",
         "selectionMax",
-        "presentation",
         "enabled"
       ]
     },
@@ -226,8 +218,7 @@
         "id",
         "type",
         "label",
-        "selectionMax",
-        "presentation"
+        "selectionMax"
       ]
     },
     "oneOfRequiredByType": {},
@@ -388,24 +379,11 @@
         "persistent",
         "runtime"
       ],
-      "density": [
-        "normal",
-        "compact"
-      ],
       "slot": [
         "dialog",
         "scriptUi",
         "applicationScript",
         "packageBuilder"
-      ],
-      "size": [
-        "sm",
-        "md",
-        "lg"
-      ],
-      "style": [
-        "plain",
-        "filled"
       ],
       "layout": [
         "column",
@@ -422,9 +400,6 @@
         "multiline",
         "number",
         "password"
-      ],
-      "presentation": [
-        "list"
       ],
       "align": [
         "start",
@@ -448,12 +423,8 @@
       "extensionsMax": 16,
       "labelMax": 200,
       "idMax": 64,
-      "linesMin": 1,
-      "linesMax": 20,
       "decimalsMin": 0,
-      "decimalsMax": 6,
-      "spaceMax": 200,
-      "paddingMax": 64
+      "decimalsMax": 6
     }
   },
   "script": {

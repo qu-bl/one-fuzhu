@@ -52,27 +52,27 @@ ui_properties = {
     "label": {"type": "string", "minLength": 1, "maxLength": UV["limits"]["labelMax"]},
     "description": {"type": "string", "maxLength": UV["limits"]["labelMax"]}, "enabled": boolean,
     "visible": boolean,
-    "flex": {"type": "number", "minimum": 0},
+    "flex": number,
+    # Removed 5.2 fields stay known so old declarations are rejected rather than treated as
+    # harmless third-party extensions.
+    "density": string, "gap": number, "lines": {"type": "integer"}, "padding": number,
+    "presentation": string, "size": string, "space": number, "style": string,
     "text": string, "format": format_shape,
-    "size": {"enum": UV["enums"]["size"]}, "multiline": boolean, "copyable": boolean,
-    "hug": boolean, "space": {"type": "number", "minimum": 0, "maximum": UV["limits"]["spaceMax"]},
-    "placeholder": string, "lines": {"type": "integer", "minimum": UV["limits"]["linesMin"], "maximum": UV["limits"]["linesMax"]},
+    "multiline": boolean, "copyable": boolean,
+    "hug": boolean,
+    "placeholder": string,
     "secure": boolean, "min": number, "max": number, "step": number,
     "options": arr(option, maxItems=UV["limits"]["optionsMax"]),
     "acceptedFileExtensions": arr(string, maxItems=UV["limits"]["extensionsMax"]), "maxBytes": {"type": "integer", "minimum": 0},
-    "style": {"enum": UV["enums"]["style"]},
     "layout": {"enum": UV["enums"]["layout"]},
     "action": {"enum": UV["enums"]["action"]},
     "inputMode": {"enum": UV["enums"]["inputMode"]},
     "selectionMin": {"type": "integer", "minimum": 0, "maximum": UV["limits"]["optionsMax"]},
     "selectionMax": {"type": "integer", "minimum": 1, "maximum": UV["limits"]["optionsMax"]},
-    "presentation": {"enum": UV["enums"]["presentation"]},
     "children": arr({"$ref": "#/$defs/uiComponent"}, maxItems=UV["limits"]["childrenMax"]),
-    "gap": {"type": "number", "minimum": 0},
     "align": {"enum": UV["enums"]["align"]},
     "valign": {"enum": UV["enums"]["valign"]},
     "scroll": boolean,
-    "padding": {"type": "number", "minimum": 0, "maximum": UV["limits"]["paddingMax"]},
 }
 common = CONTRACT["ui"]["commonFields"]
 variants = []
@@ -162,10 +162,10 @@ schema = obj({
     "ui": arr(obj({"id": {"type": "string", "pattern": UV["idPattern"]}, "title": string,
                    "scope": {"enum": UV["enums"]["scope"]},
                    "components": arr({"$ref": "#/$defs/uiComponent"},
-                                     maxItems=UV["limits"]["componentsPerSetMax"]),
-                   "density": {"enum": UV["enums"]["density"]}},
+                                     maxItems=UV["limits"]["componentsPerSetMax"])},
                   ["id", "title", "scope", "components"]), maxItems=UV["limits"]["setsMax"]),
 }, CONTRACT["manifest"]["required"])
+schema["properties"]["ui"]["items"]["propertyNames"] = {"not": {"enum": ["density"]}}
 schema.update({"$schema": "https://json-schema.org/draft/2020-12/schema",
                "title": "千机百变资源包 schema v3",
                "$defs": {"uiComponent": {"oneOf": variants}}})

@@ -28,7 +28,7 @@ def build_profile():
         },
         "ui": {
             "runtimeSemantics": ui["runtimeSemantics"],
-            "buttonStyleSemantics": ui["buttonStyleSemantics"],
+            "forbiddenDeclarationFields": ui["forbiddenDeclarationFields"],
             "allowedFieldsByType": {
                 name: ui["commonFields"] + fields for name, fields in ui["typeFields"].items()
             },
