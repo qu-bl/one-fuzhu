@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "5.0.1",
+  "contractVersion": "5.0.2",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -43,6 +43,15 @@
     "packageScriptEntryFunction": "defineResourcePackage"
   },
   "ui": {
+    "runtimeSemantics": {
+      "dynamicBindingTransport": "qvmi",
+      "bindingScope": "owner",
+      "observeUniquePathsPerComponent": true,
+      "reevaluateAllBindingsForChangedPath": true,
+      "republishDerivedUiState": false,
+      "nativeComponents": true,
+      "groupDisabledRecursively": true
+    },
     "allowedFieldsByType": {
       "group": [
         "bindings",

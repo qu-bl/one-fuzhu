@@ -6,7 +6,7 @@
 2. 保留用户现有的 `@id`；新脚本必须生成符合 `script.idPattern` 且不与其他脚本重复的 `@id`。
 3. 只为脚本自己拥有的新 `app.*` 字段调用 `viewModel.define`；已有公开字段按 `qvmi.fieldTypes` 选择句柄，禁止重新定义。
 4. `@observe`、`@interval` 和 `@ui` 与处理函数保持一致。所有 UI 组件只使用 `contract.ui` 当前类型和字段。
-   每个组件必须写非空静态 `label`；动态 `bindings.label` 不能代替它。所有动态来源只写入组件的 `bindings`；脚本负责更新相应 QVMI 字段。不得生成旧的 `xxxPath`、顶层值绑定或图标字段。
+   每个组件必须写非空静态 `label`；动态 `bindings.label` 不能代替它。所有动态来源只写入组件的 `bindings`；脚本负责更新相应 QVMI 字段。同一状态在多个组件中复用同一路径，每个自有路径只 `define` 一次；不要为父级禁用、加载、选中或文案建立转发字段。不得生成旧的 `xxxPath`、顶层值绑定或图标字段。
 5. 只调用 `script.hostOperations`；操作参数和 options 分别取 `operationArguments` 与 `operationOptionFields`。
 6. 输出后检查 JavaScript 入口、注解、路径类型、写权限、UI 所有权、异步重入和停止清理。
 7. 校验错误逐条修复，最多两轮。仍有错误时返回错误说明，不写入编辑器。
