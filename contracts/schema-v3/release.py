@@ -108,17 +108,17 @@ def verify_schema_and_fixtures():
     if any(len(fields) != len(set(fields)) for fields in qvmi["triggerPayloadFields"].values()):
         raise ValueError("trigger payload fields must be unique")
     verify_ai_source_map(contract)
-    ai_check = subprocess.run(
-        [sys.executable, str(ROOT / "sync_ai_rules.py"), "--check"],
-        capture_output=True, text=True, check=False,
-    )
-    if ai_check.returncode:
-        raise ValueError(ai_check.stderr.strip() or ai_check.stdout.strip())
     rules = json.loads((ROOT.parent.parent / "ai-rules" / "rules.json").read_text(encoding="utf-8"))
+    if rules.get("schemaVersion") != 3:
+        raise ValueError("AI release schema must be version 3")
+    expected_ai_files = {"index.md", "application-script.md", "resource-package.md", "guidance.json", "sources.json"}
+    if {item["name"] for item in rules["files"]} != expected_ai_files or len(rules["files"]) != len(expected_ai_files):
+        raise ValueError("AI release must list exactly the published AI files")
     for item in rules["files"]:
         payload = (ROOT.parent.parent / "ai-rules" / item["name"]).read_bytes()
         if hashlib.sha256(payload).hexdigest() != item["sha256"]:
             raise ValueError(f"AI rule hash is stale: {item['name']}")
+    verify_ai_guidance()
     generated = subprocess.run(
         [sys.executable, str(ROOT / "generate_schema.py"), "--check"],
         capture_output=True, text=True, check=False,
@@ -157,6 +157,8 @@ def verify_ai_source_map(contract):
         raise ValueError("translation must use the published dictionary")
     if sources["ai"].get("guide") != "ai-rules/index.md":
         raise ValueError("AI guide path is invalid")
+    if sources["ai"].get("guidance") != "ai-rules/guidance.json" or sources["ai"].get("release") != "ai-rules/rules.json":
+        raise ValueError("AI guidance or release path is invalid")
     if mapping.get("consumers") != {
         "apps": ["resourcePackage", "script", "translation"],
         "aiScripts": {
@@ -177,6 +179,35 @@ def verify_ai_source_map(contract):
             elif isinstance(value, dict):
                 for path in value.values():
                     check_path(path)
+
+
+def verify_ai_guidance():
+    ai = ROOT.parent.parent / "ai-rules"
+    guidance = json.loads((ai / "guidance.json").read_text(encoding="utf-8"))
+    if (guidance.get("schemaVersion") != 1 or guidance.get("audience") != "aiScriptsOnly" or
+            guidance.get("contract") != "contracts/schema-v3/contract.json"):
+        raise ValueError("AI guidance must reference the published shared contract")
+    shared = guidance.get("shared", {})
+    if not isinstance(shared, dict) or set(shared) != {"delivery", "runtime", "qvmi", "network", "quality"}:
+        raise ValueError("AI guidance has no shared instructions")
+    if any(not isinstance(items, list) or not items or any(not isinstance(item, str) or not item.strip() for item in items)
+           for items in shared.values()):
+        raise ValueError("AI guidance contains an empty shared instruction")
+    scenarios = guidance.get("scenarios", {})
+    if set(scenarios) != {"applicationScript", "resourcePackage"}:
+        raise ValueError("AI guidance must cover both generation scenarios")
+    for name, expected_files, expected_fields in (
+        ("applicationScript", ["application.js"], ["applicationJavaScript"]),
+        ("resourcePackage", ["resource-package.json", "main.js"], ["manifestJson", "mainJavaScript"]),
+    ):
+        scenario = scenarios[name]
+        if (scenario.get("files") != expected_files or scenario.get("deliveryFields") != expected_fields or
+                not isinstance(scenario.get("entry"), str) or not scenario.get("rules")):
+            raise ValueError(f"AI guidance scenario is invalid: {name}")
+    for name in ("index.md", "application-script.md", "resource-package.md"):
+        markdown = (ai / name).read_text(encoding="utf-8")
+        if len(markdown) > 2500 or "BEGIN GENERATED HOST CONTRACT" in markdown:
+            raise ValueError(f"AI guide repeats the contract or is too long: {name}")
 
 
 def main():

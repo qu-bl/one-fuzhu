@@ -18,11 +18,12 @@
     },
     "ai": {
       "guide": "ai-rules/index.md",
-      "legacyScenarioRules": {
+      "guidance": "ai-rules/guidance.json",
+      "scenarioGuides": {
         "applicationScript": "ai-rules/application-script.md",
         "resourcePackage": "ai-rules/resource-package.md"
       },
-      "legacyRelease": "ai-rules/rules.json"
+      "release": "ai-rules/rules.json"
     }
   },
   "consumers": {

@@ -1,17 +1,30 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "files": [
     {
       "name": "application-script.md",
-      "version": "2026.09.21.7",
-      "minAppVersion": "1.0.0",
-      "sha256": "3e9075572a9f4f0262bfa4dc39d1fe46f7d2563878e95904d19df2edc114bd79"
+      "version": "2026.09.21.8",
+      "sha256": "4d4aed5ee79fcdb5272660ef037847973f1728640d5ef45810a158424b076788"
+    },
+    {
+      "name": "guidance.json",
+      "version": "2026.09.21.8",
+      "sha256": "c1cb3108acfdf408e82e9677aa47dcb834a16b801c1d2e4b10233e50bd991ea3"
+    },
+    {
+      "name": "index.md",
+      "version": "2026.09.21.8",
+      "sha256": "897feca21877c00fe128276cf6c49435e61d55576ab867e9ee8e8e00a7c97f15"
     },
     {
       "name": "resource-package.md",
-      "version": "2026.09.21.7",
-      "minAppVersion": "1.0.0",
-      "sha256": "c218d4d95aabb0ea6f8fb39908067ccc90135de7be6dc64b715001e45dcf48ee"
+      "version": "2026.09.21.8",
+      "sha256": "bb7e482036213c733dc6b2e4e3561bdd61a33c5c89fad8b7d7825d73e2bc6bff"
+    },
+    {
+      "name": "sources.json",
+      "version": "2026.09.21.8",
+      "sha256": "9f13f3932ae1f378fbdb178e90144ff756e8b48927d9a58c77b14b4721d86f1a"
     }
   ]
 }
