@@ -43,7 +43,16 @@ number_binding = obj({"path": {"type": "string", "minLength": 1}, "fallback": nu
 list_binding = obj({"path": {"type": "string", "minLength": 1},
                     "fallback": arr(option, maxItems=UV["limits"]["optionsMax"])}, ["path"])
 value_binding = obj({"path": {"type": "string", "minLength": 1}, "type": {"enum": TYPES},
-                     "default": ui_value}, ["path", "type"])
+                     "default": ui_value}, ["path", "type", "default"])
+value_binding["allOf"] = []
+for value_type, default_schema in (
+    ("number", number), ("boolean", boolean), ("list", arr(string)),
+    *((item, string) for item in ("string", "color", "enum", "resource", "image", "artboard")),
+):
+    value_binding["allOf"].append({
+        "if": {"properties": {"type": {"const": value_type}}, "required": ["type"]},
+        "then": {"properties": {"default": default_schema}},
+    })
 binding_shapes = {"condition": condition, "text": text_binding, "number": number_binding,
                   "list": list_binding, "value": value_binding}
 
@@ -92,6 +101,51 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
     if component_type == "choice":
         variant["anyOf"] = [{"required": ["options"]},
                             {"properties": {"bindings": {"required": ["options"]}}, "required": ["bindings"]}]
+    semantics = UV["valueSemantics"]
+    if component_type in semantics["typesByComponent"]:
+        variant.setdefault("allOf", []).append({"properties": {"bindings": {"properties": {
+            "value": {"properties": {"type": {"enum": semantics["typesByComponent"][component_type]}}}
+        }}}})
+    if component_type == "input":
+        for mode, value_types in semantics["inputTypesByMode"].items():
+            variant.setdefault("allOf", []).append({
+                "if": {"properties": {"inputMode": {"const": mode}}, "required": ["inputMode"]},
+                "then": {"properties": {"bindings": {"properties": {"value": {
+                    "properties": {"type": {"enum": value_types}}
+                }}}}}
+            })
+    if component_type == "choice":
+        variant.setdefault("allOf", []).extend([
+            {"if": {"properties": {"selectionMax": {"const": 1}}, "required": ["selectionMax"]},
+             "then": {"properties": {"bindings": {"properties": {"value": {
+                 "properties": {"type": {"enum": semantics["choiceSingleTypes"]}}
+             }}}}}},
+            {"if": {"properties": {"selectionMax": {"minimum": 2}}, "required": ["selectionMax"]},
+             "then": {"properties": {"bindings": {"properties": {"value": {
+                 "properties": {"type": {"enum": semantics["choiceMultipleTypes"]}}
+             }}}}}},
+        ])
+    if component_type == "button":
+        emit_rule = {
+            "if": {"properties": {"action": {"const": "emit"}}, "required": ["action"]},
+            "then": {"properties": {"bindings": {"not": {"required": ["value"]}}}},
+        }
+        picker_rule = {
+            "if": {"properties": {"action": {"enum": semantics["buttonValueActions"]}}, "required": ["action"]},
+            "then": {
+                "required": ["maxBytes", "bindings"],
+                "properties": {
+                    "maxBytes": {"type": "integer", "minimum": semantics["maxBytesMinimum"]},
+                    "bindings": {
+                        "required": ["value"],
+                        "properties": {"value": {
+                            "properties": {"type": {"enum": semantics["buttonValueTypes"]}}
+                        }},
+                    },
+                },
+            },
+        }
+        variant.setdefault("allOf", []).extend([emit_rule, picker_rule])
     disallowed_known = sorted(set(ui_properties) - set(allowed))
     variant["propertyNames"] = {"not": {"enum": disallowed_known}}
     variants.append(variant)

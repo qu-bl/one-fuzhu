@@ -1,4 +1,4 @@
-# 动态原生 UI 协议 5.2.1
+# 动态原生 UI 协议 5.3.0
 
 三端只实现 `group/text/button/toggle/slider/input/choice/spacer` 八种节点，并使用平台原生组件绘制。
 字段、绑定、枚举和限制以 `contract.json` 的 `ui` 段为唯一依据。5.0 是破坏式更新，不解析旧的
@@ -20,6 +20,13 @@
 逐组件固定必填项由 `requiredByType` 和 `requiredBindingsByType` 给出。未取得动态值时必须使用
 `fallback` 或顶层静态值；条件默认值以 `bindingDefaults` 为准。
 每个组件都必须提供非空的静态 `label`，动态 `bindings.label` 只负责运行时替换显示文字，不能代替静态必填值。
+所有值控件的 `bindings.value` 都必须同时提供 `path/type/default`。类型关系由
+`validation.valueSemantics` 统一发布：开关只接受布尔值，滑杆只接受数字，输入框类型跟随
+`inputMode`，单选接受字符串、枚举或资源，多选接受字符串列表，文件与资源选择按钮只接受资源值。
+
+滑杆必须具有 `min/max/step`（可以是静态值，也可以由 number binding 的 fallback 提供），并满足
+`min < max`、`step > 0` 且 `step <= max - min`。选择器满足 `0 <= selectionMin <= selectionMax`；
+文件与资源选择按钮的 `maxBytes` 必须为正数。这些关系由三端按云端语义表执行，不在各端另设一套产品规则。
 
 ## 运行时数据流
 

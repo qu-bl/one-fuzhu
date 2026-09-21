@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "5.2.1",
+  "contractVersion": "5.3.0",
   "notes": [
     "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
     "不要复制示例中未被用户需求使用的字段或组件。",
@@ -145,6 +145,50 @@
           "type": "spacer",
           "label": "间隔",
           "description": "留出空间"
+        },
+        "filePicker": {
+          "id": "sourceFile",
+          "type": "button",
+          "label": "选择文件",
+          "description": "选择一个资源文件",
+          "text": "选择文件",
+          "action": "pickFile",
+          "acceptedFileExtensions": [
+            ".json"
+          ],
+          "maxBytes": 1048576,
+          "bindings": {
+            "value": {
+              "path": "sourceFile",
+              "type": "resource",
+              "default": ""
+            }
+          }
+        },
+        "multipleChoice": {
+          "id": "features",
+          "type": "choice",
+          "label": "功能",
+          "description": "选择一个或多个功能",
+          "selectionMin": 0,
+          "selectionMax": 2,
+          "options": [
+            {
+              "value": "a",
+              "label": "功能 A"
+            },
+            {
+              "value": "b",
+              "label": "功能 B"
+            }
+          ],
+          "bindings": {
+            "value": {
+              "path": "features",
+              "type": "list",
+              "default": []
+            }
+          }
         }
       }
     }
