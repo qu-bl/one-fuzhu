@@ -1,4 +1,4 @@
-# 动态原生 UI 协议 4.1
+# 动态原生 UI 协议 4.2
 
 三端只实现八种节点，并使用各平台原生组件绘制。节点树、字段、枚举和限制均以同目录
 `contract.json` 的 `ui` 段为准；客户端启动后异步更新契约，制作台、检查器和运行时读取同一份缓存。
@@ -10,7 +10,7 @@
 | `type` | 用途 | 关键参数 |
 | --- | --- | --- |
 | `group` | 布局和嵌套 | `layout: column/row/stack`、`surface: none/card`、`children`、`gap`、`padding`、`wrap`、`scroll` |
-| `text` | 静态或数据文本 | `text` 或 `textPath`、`size`、`format` |
+| `text` | 静态或数据文本 | `text` 或 `textPath`、`size`、`format`；`copyable: true` 启用平台原生选择复制 |
 | `button` | 触发操作或唤起系统选择器 | `action: emit/pickFile/pickResource`、`text`、`style`；选择结果写入 `propertyPath` |
 | `toggle` | 布尔开关 | `propertyPath`、`valueType: boolean` |
 | `slider` | 范围数值 | `min`、`max`、`step`、`propertyPath`、`valueType: number` |

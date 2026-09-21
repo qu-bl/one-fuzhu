@@ -46,7 +46,7 @@ ui_properties = {
     "visible": boolean, "visibleWhen": condition,
     "flex": {"type": "number", "minimum": 0},
     "text": string, "textPath": string, "format": format_shape,
-    "size": {"enum": UV["enums"]["size"]}, "multiline": boolean,
+    "size": {"enum": UV["enums"]["size"]}, "multiline": boolean, "copyable": boolean,
     "hug": boolean, "space": {"type": "number", "minimum": 0, "maximum": UV["limits"]["spaceMax"]},
     "propertyPath": ui_path, "valueType": {"enum": TYPES}, "defaultValue": ui_value,
     "placeholder": string, "lines": {"type": "integer", "minimum": UV["limits"]["linesMin"], "maximum": UV["limits"]["linesMax"]},

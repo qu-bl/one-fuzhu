@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "4.1.0",
+  "contractVersion": "4.2.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -79,7 +79,8 @@
         "format",
         "size",
         "multiline",
-        "hug"
+        "hug",
+        "copyable"
       ],
       "spacer": [
         "description",

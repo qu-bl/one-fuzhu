@@ -809,6 +809,7 @@
               "enum": [
                 "acceptedFileExtensions",
                 "action",
+                "copyable",
                 "defaultValue",
                 "format",
                 "inputMode",
@@ -947,6 +948,9 @@
             },
             "hug": {
               "type": "boolean"
+            },
+            "copyable": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -1083,6 +1087,7 @@
                 "action",
                 "align",
                 "children",
+                "copyable",
                 "defaultValue",
                 "format",
                 "gap",
@@ -1274,6 +1279,7 @@
               "enum": [
                 "align",
                 "children",
+                "copyable",
                 "format",
                 "gap",
                 "inputMode",
@@ -1461,6 +1467,7 @@
                 "action",
                 "align",
                 "children",
+                "copyable",
                 "format",
                 "gap",
                 "layout",
@@ -1618,6 +1625,7 @@
                 "action",
                 "align",
                 "children",
+                "copyable",
                 "format",
                 "gap",
                 "inputMode",
@@ -1811,6 +1819,7 @@
                 "action",
                 "align",
                 "children",
+                "copyable",
                 "gap",
                 "inputMode",
                 "layout",
@@ -2032,6 +2041,7 @@
                 "action",
                 "align",
                 "children",
+                "copyable",
                 "format",
                 "gap",
                 "inputMode",
