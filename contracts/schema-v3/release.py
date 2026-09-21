@@ -111,7 +111,7 @@ def verify_schema_and_fixtures():
     rules = json.loads((ROOT.parent.parent / "ai-rules" / "rules.json").read_text(encoding="utf-8"))
     if rules.get("schemaVersion") != 3:
         raise ValueError("AI release schema must be version 3")
-    expected_ai_files = {"index.md", "application-script.md", "resource-package.md", "guidance.json", "sources.json"}
+    expected_ai_files = {"README.md", "guidance.json", "sources.json"}
     if {item["name"] for item in rules["files"]} != expected_ai_files or len(rules["files"]) != len(expected_ai_files):
         raise ValueError("AI release must list exactly the published AI files")
     for item in rules["files"]:
@@ -155,7 +155,7 @@ def verify_ai_source_map(contract):
             raise ValueError(f"{name} references an unknown contract section")
     if sources["translation"].get("dictionary") != "rive-editor/translation.json":
         raise ValueError("translation must use the published dictionary")
-    if sources["ai"].get("guide") != "ai-rules/index.md":
+    if sources["ai"].get("guide") != "ai-rules/README.md":
         raise ValueError("AI guide path is invalid")
     if sources["ai"].get("guidance") != "ai-rules/guidance.json" or sources["ai"].get("release") != "ai-rules/rules.json":
         raise ValueError("AI guidance or release path is invalid")
@@ -204,7 +204,7 @@ def verify_ai_guidance():
         if (scenario.get("files") != expected_files or scenario.get("deliveryFields") != expected_fields or
                 not isinstance(scenario.get("entry"), str) or not scenario.get("rules")):
             raise ValueError(f"AI guidance scenario is invalid: {name}")
-    for name in ("index.md", "application-script.md", "resource-package.md"):
+    for name in ("README.md",):
         markdown = (ai / name).read_text(encoding="utf-8")
         if len(markdown) > 2500 or "BEGIN GENERATED HOST CONTRACT" in markdown:
             raise ValueError(f"AI guide repeats the contract or is too long: {name}")
