@@ -7,7 +7,7 @@
 3. 先列出脚本实际使用的 QVMI 路径及类型，再逐项对应到 `values`、UI 生成字段、`capabilities.observe` 或 `capabilities.trigger`。
 4. JSON 负责文件、字段、权限、绑定、资源和 UI；JavaScript 负责行为。两份文件必须同步生成。
 5. UI 只使用 `generation-profile.ui.allowedFieldsByType` 中的当前组件；逐控件满足 `requiredByType`、`oneOfRequiredByType` 和 `requiredWhen`。布局使用 `group`，空白使用 `spacer`。
-   按钮外观和状态路径写在 JSON；动态文字、启用条件、加载和选中值由 `main.js` 写入相应 QVMI 字段。不得生成图标字段。
+   所有动态来源只写入组件的 `bindings`；`main.js` 负责更新相应 QVMI 字段。不得生成旧的 `xxxPath`、顶层值绑定或图标字段。
 6. 输出后先做 JSON Schema 校验，再检查入口函数、生命周期、路径类型、权限、网络域名、UI 所有权和文件声明。
 7. 校验错误按 JSON 路径逐条修复，宿主的错误码和原始消息必须逐字保留，禁止改写；最多两轮。仍有错误时返回错误说明，不写入编辑器。
 

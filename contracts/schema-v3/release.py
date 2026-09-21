@@ -22,18 +22,25 @@ def verify_ui_generation_rules(contract):
     required = validation.get("requiredByType", {})
     alternatives = validation.get("oneOfRequiredByType", {})
     conditions = validation.get("requiredWhen", [])
-    aliases = validation.get("legacyStyleAliases", {})
-    styles = set(validation["enums"]["style"])
-    if aliases != {"normal": "plain", "emphasized": "filled"} or not set(aliases).issubset(styles) or \
-            not set(aliases.values()).issubset(styles):
-        raise ValueError("ui.legacyStyleAliases is invalid")
+    bindings_by_type = validation.get("bindingsByType", {})
+    required_bindings = validation.get("requiredBindingsByType", {})
+    binding_kinds = validation.get("bindingKinds", {})
+    if set(bindings_by_type) != types or set(required_bindings) != types:
+        raise ValueError("ui binding matrices must cover every component type exactly once")
+    known_bindings = set(binding_kinds)
+    for name in types:
+        allowed_bindings = bindings_by_type[name]
+        if len(allowed_bindings) != len(set(allowed_bindings)) or not set(allowed_bindings).issubset(known_bindings):
+            raise ValueError(f"ui.bindingsByType is invalid: {name}")
+        if not set(required_bindings[name]).issubset(allowed_bindings):
+            raise ValueError(f"ui.requiredBindingsByType is invalid: {name}")
     if set(required) != types:
         raise ValueError("ui.requiredByType must cover every component type exactly once")
     for name, fields in required.items():
         allowed = set(ui["commonFields"] + ui["typeFields"][name])
         if not fields or len(fields) != len(set(fields)) or not set(fields).issubset(allowed):
             raise ValueError(f"ui.requiredByType is invalid: {name}")
-        if not {"id", "type", "label"}.issubset(fields):
+        if not {"id", "type"}.issubset(fields):
             raise ValueError(f"ui.requiredByType omits common identity fields: {name}")
     if not set(alternatives).issubset(types):
         raise ValueError("ui.oneOfRequiredByType references an unknown component type")
@@ -53,6 +60,10 @@ def verify_ui_generation_rules(contract):
         for key in ("required", "forbidden"):
             fields = rule.get(key, [])
             if len(fields) != len(set(fields)) or not set(fields).issubset(known_fields):
+                raise ValueError(f"ui.requiredWhen has invalid {key}: {rule['id']}")
+        for key in ("requiredBindings", "forbiddenBindings"):
+            fields = rule.get(key, [])
+            if len(fields) != len(set(fields)) or not set(fields).issubset(known_bindings):
                 raise ValueError(f"ui.requiredWhen has invalid {key}: {rule['id']}")
 
 
@@ -76,6 +87,11 @@ def verify_example_component(component, contract, owner):
     alternatives = validation["oneOfRequiredByType"].get(component_type, [])
     if alternatives and not any(set(group).issubset(component) for group in alternatives):
         raise ValueError(f"AI component example misses required alternative: {owner}")
+    bindings = component.get("bindings", {})
+    unknown_bindings = set(bindings) - set(validation["bindingsByType"][component_type])
+    missing_bindings = set(validation["requiredBindingsByType"][component_type]) - set(bindings)
+    if unknown_bindings or missing_bindings:
+        raise ValueError(f"AI component example has invalid bindings: {owner}")
     action = component.get("action")
     value_control = component_type in validation["inputTypes"] or (component_type == "button" and action != "emit")
     facts = {
@@ -92,7 +108,14 @@ def verify_example_component(component, contract, owner):
             continue
         missing = set(rule.get("required", [])) - set(component)
         forbidden = set(rule.get("forbidden", [])) & set(component)
-        if missing or forbidden or (rule.get("allowedScopes") and facts["scope"] not in rule["allowedScopes"]):
+        missing_bound = set(rule.get("requiredBindings", [])) - set(bindings)
+        forbidden_bound = set(rule.get("forbiddenBindings", [])) & set(bindings)
+        alternatives = rule.get("oneOf", [])
+        has_alternative = not alternatives or any(
+            (item.startswith("bindings.") and item.removeprefix("bindings.") in bindings) or
+            (not item.startswith("bindings.") and item in component) for item in alternatives)
+        if missing or forbidden or missing_bound or forbidden_bound or not has_alternative or \
+                (rule.get("allowedScopes") and facts["scope"] not in rule["allowedScopes"]):
             raise ValueError(f"AI component example violates {rule['id']}: {owner}")
     for index, child in enumerate(component.get("children", [])):
         verify_example_component(child, contract, f"{owner}.children[{index}]")

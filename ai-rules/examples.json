@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "4.3.0",
+  "contractVersion": "5.0.0",
   "notes": [
     "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
     "不要复制示例中未被用户需求使用的字段或组件。",
@@ -67,49 +67,49 @@
           "type": "input",
           "label": "名称",
           "description": "输入名称",
-          "propertyPath": [
-            "profile",
-            "name"
-          ],
-          "valueType": "string",
-          "defaultValue": "",
-          "inputMode": "text"
+          "inputMode": "text",
+          "bindings": {
+            "value": {
+              "path": "profile.name",
+              "type": "string",
+              "default": ""
+            }
+          }
         },
         "toggle": {
           "id": "enabled",
           "type": "toggle",
           "label": "启用",
           "description": "控制功能",
-          "propertyPath": [
-            "enabled"
-          ],
-          "valueType": "boolean",
-          "defaultValue": true
+          "bindings": {
+            "value": {
+              "path": "enabled",
+              "type": "boolean",
+              "default": true
+            }
+          }
         },
         "slider": {
           "id": "amount",
           "type": "slider",
           "label": "数值",
           "description": "调整数值",
-          "propertyPath": [
-            "amount"
-          ],
-          "valueType": "number",
-          "defaultValue": 50,
           "min": 0,
           "max": 100,
-          "step": 1
+          "step": 1,
+          "bindings": {
+            "value": {
+              "path": "amount",
+              "type": "number",
+              "default": 50
+            }
+          }
         },
         "choice": {
           "id": "mode",
           "type": "choice",
           "label": "模式",
           "description": "选择一种模式",
-          "propertyPath": [
-            "mode"
-          ],
-          "valueType": "enum",
-          "defaultValue": "normal",
           "selectionMin": 1,
           "selectionMax": 1,
           "presentation": "list",
@@ -122,7 +122,14 @@
               "value": "strong",
               "label": "增强"
             }
-          ]
+          ],
+          "bindings": {
+            "value": {
+              "path": "mode",
+              "type": "enum",
+              "default": "normal"
+            }
+          }
         },
         "button": {
           "id": "apply",

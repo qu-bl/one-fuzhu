@@ -1,0 +1,326 @@
+{
+  "schemaVersion": 3,
+  "id": "com.example.clock",
+  "version": "1.0.0",
+  "name": "时钟",
+  "author": "示例作者",
+  "preview": "preview.webp",
+  "rive": {
+    "file": "main.riv",
+    "artboard": "Main",
+    "stateMachine": "State Machine 1",
+    "layout": {
+      "fit": "contain",
+      "alignment": "center"
+    }
+  },
+  "values": [],
+  "capabilities": {
+    "observe": [
+      "system.time.epochMs"
+    ],
+    "trigger": []
+  },
+  "bindings": [],
+  "assets": {
+    "audio": []
+  },
+  "ui": [
+    {
+      "id": "bindings",
+      "title": "动态绑定覆盖",
+      "scope": "persistent",
+      "components": [
+        {
+          "id": "root",
+          "type": "group",
+          "layout": "column",
+          "children": [
+            {
+              "id": "copy",
+              "type": "text",
+              "copyable": true,
+              "bindings": {
+                "text": {
+                  "path": "ui.copy",
+                  "fallback": "可复制文字",
+                  "format": {
+                    "prefix": "[",
+                    "suffix": "]"
+                  }
+                },
+                "visible": {
+                  "path": "ui.visible",
+                  "equals": true,
+                  "fallback": true
+                }
+              }
+            },
+            {
+              "id": "gap",
+              "type": "spacer",
+              "space": 8,
+              "bindings": {
+                "visible": {
+                  "path": "ui.visible",
+                  "equals": true,
+                  "fallback": true
+                }
+              }
+            },
+            {
+              "id": "pick",
+              "type": "button",
+              "label": "选择资源",
+              "action": "pickResource",
+              "style": "tonal",
+              "bindings": {
+                "value": {
+                  "path": "ui.resource",
+                  "type": "resource",
+                  "default": ""
+                },
+                "text": {
+                  "path": "ui.buttonText",
+                  "fallback": "选择资源"
+                },
+                "visible": {
+                  "path": "ui.visible",
+                  "equals": true,
+                  "fallback": true
+                },
+                "enabled": {
+                  "path": "ui.enabled",
+                  "equals": true,
+                  "fallback": true
+                },
+                "loading": {
+                  "path": "ui.loading",
+                  "equals": true,
+                  "fallback": false
+                },
+                "selected": {
+                  "path": "ui.selected",
+                  "equals": true,
+                  "fallback": false
+                },
+                "error": {
+                  "path": "ui.error",
+                  "fallback": ""
+                }
+              }
+            },
+            {
+              "id": "name",
+              "type": "input",
+              "label": "名称",
+              "inputMode": "text",
+              "bindings": {
+                "value": {
+                  "path": "ui.name",
+                  "type": "string",
+                  "default": ""
+                },
+                "label": {
+                  "path": "ui.nameLabel",
+                  "fallback": "名称"
+                },
+                "description": {
+                  "path": "ui.nameHelp",
+                  "fallback": "输入名称"
+                },
+                "placeholder": {
+                  "path": "ui.placeholder",
+                  "fallback": "请输入"
+                },
+                "visible": {
+                  "path": "ui.visible",
+                  "equals": true,
+                  "fallback": true
+                },
+                "enabled": {
+                  "path": "ui.enabled",
+                  "equals": true,
+                  "fallback": true
+                },
+                "readOnly": {
+                  "path": "ui.readOnly",
+                  "equals": true,
+                  "fallback": false
+                },
+                "error": {
+                  "path": "ui.error",
+                  "fallback": ""
+                }
+              }
+            },
+            {
+              "id": "switch",
+              "type": "toggle",
+              "label": "开关",
+              "bindings": {
+                "value": {
+                  "path": "ui.switch",
+                  "type": "boolean",
+                  "default": false
+                },
+                "label": {
+                  "path": "ui.switchLabel",
+                  "fallback": "开关"
+                },
+                "description": {
+                  "path": "ui.switchHelp",
+                  "fallback": "是否启用"
+                },
+                "visible": {
+                  "path": "ui.visible",
+                  "equals": true,
+                  "fallback": true
+                },
+                "enabled": {
+                  "path": "ui.enabled",
+                  "equals": true,
+                  "fallback": true
+                },
+                "error": {
+                  "path": "ui.error",
+                  "fallback": ""
+                }
+              }
+            },
+            {
+              "id": "amount",
+              "type": "slider",
+              "label": "数值",
+              "bindings": {
+                "value": {
+                  "path": "ui.amount",
+                  "type": "number",
+                  "default": 0
+                },
+                "min": {
+                  "path": "ui.min",
+                  "fallback": 0
+                },
+                "max": {
+                  "path": "ui.max",
+                  "fallback": 100
+                },
+                "step": {
+                  "path": "ui.step",
+                  "fallback": 1
+                },
+                "label": {
+                  "path": "ui.amountLabel",
+                  "fallback": "数值"
+                },
+                "description": {
+                  "path": "ui.amountHelp",
+                  "fallback": "拖动调整"
+                },
+                "visible": {
+                  "path": "ui.visible",
+                  "equals": true,
+                  "fallback": true
+                },
+                "enabled": {
+                  "path": "ui.enabled",
+                  "equals": true,
+                  "fallback": true
+                },
+                "error": {
+                  "path": "ui.error",
+                  "fallback": ""
+                }
+              }
+            },
+            {
+              "id": "mode",
+              "type": "choice",
+              "label": "模式",
+              "selectionMin": 1,
+              "selectionMax": 1,
+              "presentation": "list",
+              "bindings": {
+                "value": {
+                  "path": "ui.mode",
+                  "type": "enum",
+                  "default": "a"
+                },
+                "options": {
+                  "path": "ui.options",
+                  "fallback": [
+                    {
+                      "label": "A",
+                      "value": "a"
+                    },
+                    {
+                      "label": "B",
+                      "value": "b"
+                    }
+                  ]
+                },
+                "label": {
+                  "path": "ui.modeLabel",
+                  "fallback": "模式"
+                },
+                "description": {
+                  "path": "ui.modeHelp",
+                  "fallback": "选择模式"
+                },
+                "visible": {
+                  "path": "ui.visible",
+                  "equals": true,
+                  "fallback": true
+                },
+                "enabled": {
+                  "path": "ui.enabled",
+                  "equals": true,
+                  "fallback": true
+                },
+                "loading": {
+                  "path": "ui.loading",
+                  "equals": true,
+                  "fallback": false
+                },
+                "error": {
+                  "path": "ui.error",
+                  "fallback": ""
+                }
+              }
+            }
+          ],
+          "bindings": {
+            "label": {
+              "path": "ui.groupLabel",
+              "fallback": "设置"
+            },
+            "description": {
+              "path": "ui.groupHelp",
+              "fallback": "动态设置"
+            },
+            "visible": {
+              "path": "ui.visible",
+              "equals": true,
+              "fallback": true
+            },
+            "enabled": {
+              "path": "ui.enabled",
+              "equals": true,
+              "fallback": true
+            },
+            "loading": {
+              "path": "ui.loading",
+              "equals": true,
+              "fallback": false
+            },
+            "error": {
+              "path": "ui.error",
+              "fallback": ""
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
