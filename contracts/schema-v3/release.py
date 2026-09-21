@@ -170,6 +170,9 @@ def verify_schema_and_fixtures():
         raise ValueError("manifest and script UI set limits must agree")
     if set(manifest_validation["persistentValueTypes"]) - set(contract["manifest"]["valueTypes"]):
         raise ValueError("persistent value type is not a package value type")
+    if manifest_validation.get("persistentPathPrefix") != "package.storage." or \
+            manifest_validation.get("runtimePathPrefix") != "package.ui.":
+        raise ValueError("resource-package UI value namespaces are incomplete")
     if set(ui_validation["inputTypes"]) - set(contract["ui"]["typeFields"]):
         raise ValueError("input UI type is not a component type")
     verify_ui_generation_rules(contract)
@@ -191,12 +194,18 @@ def verify_schema_and_fixtures():
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
     forbidden_appearance = {"style", "size", "density", "presentation"}
     forbidden_absolute_layout = {"flex", "gap", "padding", "space", "lines"}
-    if set(contract["ui"].get("forbiddenDeclarationFields", [])) != forbidden_appearance | forbidden_absolute_layout:
-        raise ValueError("UI contract must publish every removed appearance and absolute-layout field")
+    forbidden_legacy_binding = {
+        "propertyPath", "valueType", "defaultValue", "textPath", "optionsPath",
+        "visibleWhen", "enabledWhen", "loadingPath", "selectedPath",
+    }
+    if set(contract["ui"].get("forbiddenDeclarationFields", [])) != \
+            forbidden_appearance | forbidden_absolute_layout | forbidden_legacy_binding:
+        raise ValueError("UI contract must publish every removed declaration field")
     all_ui_fields = set(contract["ui"]["commonFields"] + contract["ui"]["setFields"])
     for fields in contract["ui"]["typeFields"].values():
         all_ui_fields.update(fields)
     if forbidden_appearance & all_ui_fields or forbidden_absolute_layout & all_ui_fields or \
+            forbidden_legacy_binding & all_ui_fields or \
             forbidden_appearance & set(ui_validation["enums"]) or \
             "color" in ui_validation["enums"]["inputMode"] or \
             any(field in contract["ui"]["typeFields"]["group"] for field in ("surface", "radius", "wrap")):
@@ -236,6 +245,18 @@ def verify_schema_and_fixtures():
             raise ValueError(f"duplicate option for {operation}")
     if len(script["valueAccessorTypes"]) != len(set(script["valueAccessorTypes"])):
         raise ValueError("valueAccessorTypes must be unique")
+    expected_generation_checks = {
+        "requireHostContractIdentity": True,
+        "hostContractMismatchPolicy": "reject",
+        "observeOnlyWhenOnValueConsumes": True,
+        "uiBindingAloneDoesNotRequireObserve": True,
+        "selfOwnedObservedPathRequiresSource": True,
+        "definitionTypesFromValueAccessorTypes": True,
+        "definitionTypeMustMatchValueBinding": True,
+        "uiValueBindingCreatedByHost": True,
+    }
+    if script["validation"].get("generationChecks") != expected_generation_checks:
+        raise ValueError("application script generation checks are incomplete")
     if not script["idPattern"].startswith("^") or not script["idPattern"].endswith("$"):
         raise ValueError("script.idPattern must match a complete identity")
     re.compile(script["idPattern"])
@@ -366,8 +387,20 @@ def verify_ai_guidance():
            not item["id"] or not item["check"] or not item["appliesTo"] for item in checklist):
         raise ValueError("AI verify checklist is invalid")
     checklist_ids = {item["id"] for item in checklist}
-    if len(checklist_ids) != len(checklist) or not {"host-error-verbatim", "ui-qvmi-dataflow"}.issubset(checklist_ids):
+    required_checks = {
+        "host-error-verbatim", "ui-qvmi-dataflow", "host-contract-identity",
+        "application-observe-closure", "application-definition-types",
+    }
+    if len(checklist_ids) != len(checklist) or not required_checks.issubset(checklist_ids):
         raise ValueError("AI verify checklist ids are incomplete")
+    host_context = guidance.get("hostContractContext", {})
+    if host_context.get("requiredFields") != ["contractVersion", "contractSha256"] or \
+            host_context.get("matchAgainst") != [
+                "contracts/schema-v3/release.json",
+                "ai-rules/generation-profile.json",
+                "ai-rules/examples.json",
+            ] or "禁止 apply_files" not in host_context.get("mismatchPolicy", ""):
+        raise ValueError("AI guidance does not lock generation to the host contract identity")
     feedback = guidance.get("hostErrorFeedback", {})
     if feedback.get("requiredFields") != ["source", "file", "path", "code", "messageRaw"] or \
             "逐字" not in feedback.get("messagePolicy", ""):
@@ -415,12 +448,30 @@ def verify_ai_guidance():
     application_sets = json.loads(ui_text)
     if isinstance(application_sets, dict):
         application_sets = [application_sets]
-    definitions = {
-        path: field_type for path, field_type in re.findall(
-            r"viewModel\.define\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]",
-            application_source,
-        )
-    }
+    definition_pairs = re.findall(
+        r"viewModel\.define\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]",
+        application_source,
+    )
+    definitions = dict(definition_pairs)
+    if len(definitions) != len(definition_pairs):
+        raise ValueError("AI application example defines one QVMI path more than once")
+    accessor_types = set(contract["script"]["valueAccessorTypes"])
+    invalid_definition_types = sorted({field_type for _, field_type in definition_pairs} - accessor_types)
+    if invalid_definition_types:
+        raise ValueError(f"AI application example uses unsupported definition types: {invalid_definition_types}")
+    observed = re.findall(r"(?m)^\s*\*\s*@observe\s+([A-Za-z][A-Za-z0-9.-]*)\s*$", application_source)
+    if len(observed) != len(set(observed)):
+        raise ValueError("AI application example repeats an @observe path")
+    on_value = re.search(r"onValue\s*\([^)]*\)\s*\{(?P<body>.*?)\n\s*\}", application_source, re.S)
+    if observed and on_value is None:
+        raise ValueError("AI application example observes fields without onValue")
+    for path in observed:
+        if path.startswith("app.") and path not in definitions:
+            raise ValueError(f"AI application example observes an app field without a script definition: {path}")
+        if path not in on_value.group("body"):
+            raise ValueError(f"AI application example does not consume observed path in onValue: {path}")
+
+    saw_host_managed_value = False
 
     def verify_application_component(component, owner):
         component_errors = list(component_validator.iter_errors(component))
@@ -431,14 +482,26 @@ def verify_ai_guidance():
             component_type == "button" and component.get("action") != "emit")
         if value_control:
             binding = component.get("bindings", {}).get("value")
-            if not isinstance(binding, dict) or definitions.get(binding.get("path")) != binding.get("type"):
-                raise ValueError(f"AI application UI binding has no matching viewModel.define: {owner}")
+            if not isinstance(binding, dict):
+                raise ValueError(f"AI application UI binding has no value declaration: {owner}")
+            path = binding.get("path")
+            field_type = binding.get("type")
+            if field_type in accessor_types:
+                if definitions.get(path) != field_type:
+                    raise ValueError(f"AI application UI binding has no matching viewModel.define: {owner}")
+            else:
+                nonlocal saw_host_managed_value
+                saw_host_managed_value = True
+                if path in definitions or path in observed:
+                    raise ValueError(f"AI application host-managed UI value is defined or observed by script: {owner}")
         for index, child in enumerate(component.get("children", [])):
             verify_application_component(child, f"{owner}.children[{index}]")
 
     for set_index, ui_set in enumerate(application_sets):
         for component_index, component in enumerate(ui_set.get("components", [])):
             verify_application_component(component, f"applicationScript.ui[{set_index}].components[{component_index}]")
+    if not saw_host_managed_value:
+        raise ValueError("AI application example must cover a host-managed UI value type")
     if "defineResourcePackage" not in examples["examples"]["resourcePackage"]["mainJavaScript"] or \
             "defineQuScript" not in application_source:
         raise ValueError("AI script examples have no required entry")

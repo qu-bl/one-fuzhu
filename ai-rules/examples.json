@@ -1,15 +1,17 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "5.2.0",
+  "contractVersion": "5.2.1",
   "notes": [
     "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
     "不要复制示例中未被用户需求使用的字段或组件。",
     "manifestJson 对象在 apply_files 交付时序列化为完整 JSON 字符串。",
-    "控件固定必填字段、条件必填字段和任选字段组以 generation-profile.json 为准。"
+    "控件固定必填字段、条件必填字段和任选字段组以 generation-profile.json 为准。",
+    "应用脚本示例中的多选 list 由 @ui 值绑定交给宿主管理，不调用 viewModel.define，也不加入 @observe。",
+    "@observe 只列出 onValue 实际消费的字段；UI binding 不需要重复观察。"
   ],
   "examples": {
     "applicationScript": {
-      "applicationJavaScript": "/**\n * @id ExampleScript\n * @description ${DESCRIPTION}\n * @interval 0\n * @observe app.example.enabled\n * @ui\n * {\n *   \"slot\": \"applicationScript\",\n *   \"id\": \"example-settings\",\n *   \"title\": \"示例设置\",\n *   \"scope\": \"persistent\",\n *   \"components\": [\n *     {\n *       \"id\": \"enabled\",\n *       \"type\": \"toggle\",\n *       \"label\": \"启用\",\n *       \"description\": \"控制示例功能\",\n *       \"bindings\": {\n *         \"value\": {\n *           \"path\": \"app.example.enabled\",\n *           \"type\": \"boolean\",\n *           \"default\": true\n *         }\n *       }\n *     }\n *   ]\n * }\n */\nlet enabled = null;\ndefineQuScript({\n  onStart(qu) {\n    enabled = qu.viewModel.define(\n      'app.example.enabled', 'boolean', true,\n      { label: '启用', persistent: true }\n    );\n  },\n  onInterval(qu) {\n  },\n  onValue(path, value, qu) {\n  },\n  onUiAction(id, qu) {\n  },\n  onStop() {\n    enabled = null;\n  }\n});\n"
+      "applicationJavaScript": "/**\n * @id ExampleScript\n * @description ${DESCRIPTION}\n * @interval 0\n * @observe app.example.enabled\n * @ui\n * {\n *   \"slot\": \"applicationScript\",\n *   \"id\": \"example-settings\",\n *   \"title\": \"示例设置\",\n *   \"scope\": \"persistent\",\n *   \"components\": [\n *     {\n *       \"id\": \"enabled\",\n *       \"type\": \"toggle\",\n *       \"label\": \"启用\",\n *       \"description\": \"控制示例功能\",\n *       \"bindings\": {\n *         \"value\": {\n *           \"path\": \"app.example.enabled\",\n *           \"type\": \"boolean\",\n *           \"default\": true\n *         }\n *       }\n *     },\n *     {\n *       \"id\": \"tags\",\n *       \"type\": \"choice\",\n *       \"label\": \"标签\",\n *       \"description\": \"UI 专用多选字段由宿主管理\",\n *       \"selectionMin\": 0,\n *       \"selectionMax\": 2,\n *       \"options\": [\n *         { \"label\": \"原生\", \"value\": \"native\" },\n *         { \"label\": \"动态\", \"value\": \"dynamic\" }\n *       ],\n *       \"bindings\": {\n *         \"value\": {\n *           \"path\": \"app.example.tags\",\n *           \"type\": \"list\",\n *           \"default\": [\"native\"]\n *         }\n *       }\n *     },\n *     {\n *       \"id\": \"status\",\n *       \"type\": \"text\",\n *       \"label\": \"状态\",\n *       \"copyable\": true,\n *       \"bindings\": {\n *         \"text\": {\n *           \"path\": \"app.example.status\",\n *           \"fallback\": \"已启用\"\n *         }\n *       }\n *     }\n *   ]\n * }\n */\nlet enabled = null;\nlet status = null;\n\nfunction updateStatus(value) {\n  if (status) status.value = value ? '已启用' : '已停用';\n}\n\ndefineQuScript({\n  onStart(qu) {\n    enabled = qu.viewModel.define(\n      'app.example.enabled', 'boolean', true,\n      { label: '启用', persistent: true }\n    );\n    status = qu.viewModel.define(\n      'app.example.status', 'string', '已启用',\n      { label: '状态' }\n    );\n    updateStatus(enabled.value);\n  },\n  onInterval() {\n  },\n  onValue(path, value) {\n    if (path === 'app.example.enabled') updateStatus(value);\n  },\n  onUiAction() {\n  },\n  onStop() {\n    enabled = null;\n    status = null;\n  }\n});\n"
     },
     "resourcePackage": {
       "manifestJson": {

@@ -45,8 +45,17 @@ def build_profile():
         "script": {
             "applicationEntryFunction": script["validation"]["entryFunction"],
             "packageEntryFunction": manifest["validation"]["packageScriptEntryFunction"],
+            "annotations": script["annotations"],
+            "valueAccessorTypes": script["valueAccessorTypes"],
+            "definitionOptions": script["definitionOptions"],
+            "generationChecks": script["validation"]["generationChecks"],
             "applicationOnlyOperations": script["applicationOnlyOperations"],
             "hostOperations": script["hostOperations"],
+        },
+        "qvmi": {
+            "fieldTypes": CONTRACT["qvmi"]["fieldTypes"],
+            "writablePublicPaths": CONTRACT["qvmi"]["writablePublicPaths"],
+            "permissionRules": CONTRACT["qvmi"]["permissionRules"],
         },
     }
 
