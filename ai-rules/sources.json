@@ -19,6 +19,11 @@
     "ai": {
       "guide": "ai-rules/README.md",
       "guidance": "ai-rules/guidance.json",
+      "examples": "ai-rules/examples.json",
+      "scenarioGuides": {
+        "applicationScript": "ai-rules/application-script.md",
+        "resourcePackage": "ai-rules/resource-package.md"
+      },
       "release": "ai-rules/rules.json"
     }
   },

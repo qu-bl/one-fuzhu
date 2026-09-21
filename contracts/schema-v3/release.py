@@ -126,7 +126,8 @@ def verify_schema_and_fixtures():
     rules = json.loads((ROOT.parent.parent / "ai-rules" / "rules.json").read_text(encoding="utf-8"))
     if rules.get("schemaVersion") != 3:
         raise ValueError("AI release schema must be version 3")
-    expected_ai_files = {"README.md", "guidance.json", "sources.json"}
+    expected_ai_files = {"README.md", "guidance.json", "sources.json", "examples.json",
+                         "application-script.md", "resource-package.md"}
     if {item["name"] for item in rules["files"]} != expected_ai_files or len(rules["files"]) != len(expected_ai_files):
         raise ValueError("AI release must list exactly the published AI files")
     for item in rules["files"]:
@@ -172,7 +173,12 @@ def verify_ai_source_map(contract):
         raise ValueError("translation must use the published dictionary")
     if sources["ai"].get("guide") != "ai-rules/README.md":
         raise ValueError("AI guide path is invalid")
-    if sources["ai"].get("guidance") != "ai-rules/guidance.json" or sources["ai"].get("release") != "ai-rules/rules.json":
+    if (sources["ai"].get("guidance") != "ai-rules/guidance.json" or
+            sources["ai"].get("examples") != "ai-rules/examples.json" or
+            sources["ai"].get("scenarioGuides") != {
+                "applicationScript": "ai-rules/application-script.md",
+                "resourcePackage": "ai-rules/resource-package.md",
+            } or sources["ai"].get("release") != "ai-rules/rules.json"):
         raise ValueError("AI guidance or release path is invalid")
     if mapping.get("consumers") != {
         "apps": ["resourcePackage", "script", "translation"],
@@ -199,7 +205,7 @@ def verify_ai_source_map(contract):
 def verify_ai_guidance():
     ai = ROOT.parent.parent / "ai-rules"
     guidance = json.loads((ai / "guidance.json").read_text(encoding="utf-8"))
-    if (guidance.get("schemaVersion") != 1 or guidance.get("audience") != "aiScriptsOnly" or
+    if (guidance.get("schemaVersion") != 2 or guidance.get("audience") != "aiScriptsOnly" or
             guidance.get("contract") != "contracts/schema-v3/contract.json"):
         raise ValueError("AI guidance must reference the published shared contract")
     shared = guidance.get("shared", {})
@@ -208,6 +214,10 @@ def verify_ai_guidance():
     if any(not isinstance(items, list) or not items or any(not isinstance(item, str) or not item.strip() for item in items)
            for items in shared.values()):
         raise ValueError("AI guidance contains an empty shared instruction")
+    workflow = guidance.get("workflow", {})
+    if set(workflow) != {"prepare", "generate", "verify"} or any(
+            not isinstance(items, list) or not items for items in workflow.values()):
+        raise ValueError("AI workflow is incomplete")
     scenarios = guidance.get("scenarios", {})
     if set(scenarios) != {"applicationScript", "resourcePackage"}:
         raise ValueError("AI guidance must cover both generation scenarios")
@@ -217,9 +227,23 @@ def verify_ai_guidance():
     ):
         scenario = scenarios[name]
         if (scenario.get("files") != expected_files or scenario.get("deliveryFields") != expected_fields or
-                not isinstance(scenario.get("entry"), str) or not scenario.get("rules")):
+                scenario.get("guide") != f"ai-rules/{'application-script' if name == 'applicationScript' else 'resource-package'}.md" or
+                scenario.get("example") != name or not isinstance(scenario.get("entry"), str) or not scenario.get("rules")):
             raise ValueError(f"AI guidance scenario is invalid: {name}")
-    for name in ("README.md",):
+    examples = json.loads((ai / "examples.json").read_text(encoding="utf-8"))
+    if examples.get("schemaVersion") != 1 or set(examples.get("examples", {})) != {"applicationScript", "resourcePackage"}:
+        raise ValueError("AI examples are incomplete")
+    if examples.get("contractVersion") != json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))["contractVersion"]:
+        raise ValueError("AI examples target a stale contract version")
+    schema = json.loads((ROOT / "resource-package.schema.json").read_text(encoding="utf-8"))
+    example_manifest = examples["examples"]["resourcePackage"]["manifestJson"]
+    errors = list(Draft202012Validator(schema).iter_errors(example_manifest))
+    if errors:
+        raise ValueError(f"AI resource-package example is invalid: {errors[0].message}")
+    if "defineResourcePackage" not in examples["examples"]["resourcePackage"]["mainJavaScript"] or \
+            "defineQuScript" not in examples["examples"]["applicationScript"]["applicationJavaScript"]:
+        raise ValueError("AI script examples have no required entry")
+    for name in ("README.md", "application-script.md", "resource-package.md"):
         markdown = (ai / name).read_text(encoding="utf-8")
         if len(markdown) > 2500 or "BEGIN GENERATED HOST CONTRACT" in markdown:
             raise ValueError(f"AI guide repeats the contract or is too long: {name}")

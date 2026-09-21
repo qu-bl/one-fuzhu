@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "audience": "aiScriptsOnly",
   "contract": "contracts/schema-v3/contract.json",
   "priority": [
@@ -8,6 +8,24 @@
     "本文件中的 AI 生成约束",
     "场景 Markdown 的资料索引"
   ],
+  "workflow": {
+    "prepare": [
+      "校验 AI 规则发布哈希与共享契约发布哈希，所有资料必须来自同一发布版本。",
+      "把 guidance、当前场景指南、examples、共享契约所需分区、JSON Schema 和用户当前文件的实际内容放入模型上下文。",
+      "资源包存在 main.riv 时提供真实 Rive 元数据；无法读取时保留当前名称并明确缺少信息，禁止猜测。"
+    ],
+    "generate": [
+      "先建立路径、类型、权限、UI 所有权和文件之间的对应表，再生成完整文件。",
+      "以 examples 的当前协议骨架起步，只保留业务需要的字段；所有枚举和值从 contract 获取。",
+      "禁止从模型记忆补充 contract 中不存在的字段、组件或宿主入口。"
+    ],
+    "verify": [
+      "输出必须能作为 JSON 解析，且 deliveryFields 中每个文件都是完整字符串。",
+      "resource-package.json 必须通过 resource-package.schema.json，并执行 JSON/JavaScript 交叉检查。",
+      "每个 JavaScript 字面 QVMI 路径都必须具有匹配类型及声明；公共读取、trigger、网络域名和 UI 所有权必须完整。",
+      "校验失败时把文件、JSON 路径、错误码和消息反馈给模型修复；最多两轮，仍失败则返回 reply，不调用 apply_files。"
+    ]
+  },
   "shared": {
     "delivery": [
       "只修改当前场景允许的文件；生成或修复时交付完整文件内容，不提供补丁或省略号。",
@@ -44,6 +62,8 @@
   },
   "scenarios": {
     "applicationScript": {
+      "guide": "ai-rules/application-script.md",
+      "example": "applicationScript",
       "files": ["application.js"],
       "deliveryFields": ["applicationJavaScript"],
       "entry": "defineQuScript",
@@ -58,6 +78,8 @@
       ]
     },
     "resourcePackage": {
+      "guide": "ai-rules/resource-package.md",
+      "example": "resourcePackage",
       "files": ["resource-package.json", "main.js"],
       "deliveryFields": ["manifestJson", "mainJavaScript"],
       "entry": "defineResourcePackage",

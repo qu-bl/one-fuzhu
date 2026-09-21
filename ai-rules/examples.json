@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "4.0.1",
+  "notes": [
+    "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
+    "不要复制示例中未被用户需求使用的字段或组件。",
+    "manifestJson 对象在 apply_files 交付时序列化为完整 JSON 字符串。"
+  ],
+  "examples": {
+    "applicationScript": {
+      "applicationJavaScript": "/**\n * @id ExampleScript\n * @description ${DESCRIPTION}\n * @interval 0\n */\ndefineQuScript({\n  onStart(qu) {\n  },\n  onInterval(qu) {\n  },\n  onValue(path, value, qu) {\n  },\n  onUiAction(id, qu) {\n  },\n  onStop() {\n  }\n});\n"
+    },
+    "resourcePackage": {
+      "manifestJson": {
+        "schemaVersion": 3,
+        "id": "com.example.package",
+        "version": "1.0.0",
+        "name": "${PACKAGE_NAME}",
+        "author": "${AUTHOR}",
+        "description": "${DESCRIPTION}",
+        "preview": "preview.webp",
+        "rive": {
+          "file": "main.riv",
+          "artboard": "${REAL_ARTBOARD}",
+          "stateMachine": "${REAL_STATE_MACHINE}",
+          "layout": {
+            "fit": "contain",
+            "alignment": "center"
+          }
+        },
+        "javascript": {
+          "entry": "main.js",
+          "networkDomains": []
+        },
+        "values": [],
+        "capabilities": {
+          "observe": [],
+          "trigger": []
+        },
+        "bindings": [],
+        "assets": {
+          "audio": []
+        },
+        "ui": []
+      },
+      "mainJavaScript": "let stops = [];\ndefineResourcePackage({\n  activate(qu) {\n    stops = [];\n  },\n  deactivate() {\n    stops.forEach(stop => stop());\n    stops = [];\n  }\n});\n",
+      "currentUiComponents": {
+        "layout": {
+          "id": "layout",
+          "type": "group",
+          "label": "布局",
+          "description": "纵向组合",
+          "layout": "column",
+          "children": []
+        },
+        "displayText": {
+          "id": "summary",
+          "type": "text",
+          "label": "说明",
+          "description": "静态文字",
+          "text": "内容"
+        },
+        "input": {
+          "id": "name",
+          "type": "input",
+          "label": "名称",
+          "description": "输入名称",
+          "propertyPath": ["profile", "name"],
+          "valueType": "string",
+          "defaultValue": "",
+          "inputMode": "text"
+        },
+        "toggle": {
+          "id": "enabled",
+          "type": "toggle",
+          "label": "启用",
+          "description": "控制功能",
+          "propertyPath": ["enabled"],
+          "valueType": "boolean",
+          "defaultValue": true
+        },
+        "slider": {
+          "id": "amount",
+          "type": "slider",
+          "label": "数值",
+          "description": "调整数值",
+          "propertyPath": ["amount"],
+          "valueType": "number",
+          "defaultValue": 50,
+          "min": 0,
+          "max": 100,
+          "step": 1
+        },
+        "choice": {
+          "id": "mode",
+          "type": "choice",
+          "label": "模式",
+          "description": "选择一种模式",
+          "propertyPath": ["mode"],
+          "valueType": "enum",
+          "defaultValue": "normal",
+          "selectionMin": 1,
+          "selectionMax": 1,
+          "presentation": "list",
+          "options": [
+            { "value": "normal", "label": "普通" },
+            { "value": "strong", "label": "增强" }
+          ]
+        },
+        "button": {
+          "id": "apply",
+          "type": "button",
+          "label": "应用",
+          "description": "执行操作",
+          "text": "应用",
+          "action": "emit"
+        },
+        "spacer": {
+          "id": "gap",
+          "type": "spacer",
+          "label": "间隔",
+          "description": "留出空间",
+          "space": 12
+        }
+      }
+    }
+  }
+}
