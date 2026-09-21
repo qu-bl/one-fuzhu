@@ -28,7 +28,7 @@ if os.path.exists(manifest_path):
         previous = {}
 
 files = []
-published = {"index.md", "application-script.md", "resource-package.md", "guidance.json", "sources.json"}
+published = {"README.md", "guidance.json", "sources.json"}
 for name in sorted(published):
     with open(os.path.join(rules_dir, name), "rb") as handle:
         digest = hashlib.sha256(handle.read()).hexdigest()
