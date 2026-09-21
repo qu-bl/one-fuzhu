@@ -41,6 +41,10 @@ def verify_schema_and_fixtures():
     ui_validation = contract["ui"]["validation"]
     if not isinstance(contract["builder"]["projectNameMax"], int) or contract["builder"]["projectNameMax"] < 1:
         raise ValueError("builder project name limit must be positive")
+    builder_pattern = contract["builder"]["projectNamePattern"]
+    if not builder_pattern.startswith("^") or not builder_pattern.endswith("$"):
+        raise ValueError("builder project name pattern must cover the complete name")
+    re.compile(builder_pattern)
     if not re.fullmatch(r"[A-Za-z_$][A-Za-z0-9_$]*", manifest_validation["packageScriptEntryFunction"]):
         raise ValueError("package script entry function must be a JavaScript identifier")
     for section, names in (
