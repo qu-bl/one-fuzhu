@@ -107,17 +107,18 @@ def verify_schema_and_fixtures():
         raise ValueError("each public trigger must declare payload fields")
     if any(len(fields) != len(set(fields)) for fields in qvmi["triggerPayloadFields"].values()):
         raise ValueError("trigger payload fields must be unique")
-    ai_check = subprocess.run(
-        [sys.executable, str(ROOT / "sync_ai_rules.py"), "--check"],
-        capture_output=True, text=True, check=False,
-    )
-    if ai_check.returncode:
-        raise ValueError(ai_check.stderr.strip() or ai_check.stdout.strip())
+    verify_ai_source_map(contract)
     rules = json.loads((ROOT.parent.parent / "ai-rules" / "rules.json").read_text(encoding="utf-8"))
+    if rules.get("schemaVersion") != 3:
+        raise ValueError("AI release schema must be version 3")
+    expected_ai_files = {"index.md", "application-script.md", "resource-package.md", "guidance.json", "sources.json"}
+    if {item["name"] for item in rules["files"]} != expected_ai_files or len(rules["files"]) != len(expected_ai_files):
+        raise ValueError("AI release must list exactly the published AI files")
     for item in rules["files"]:
         payload = (ROOT.parent.parent / "ai-rules" / item["name"]).read_bytes()
         if hashlib.sha256(payload).hexdigest() != item["sha256"]:
             raise ValueError(f"AI rule hash is stale: {item['name']}")
+    verify_ai_guidance()
     generated = subprocess.run(
         [sys.executable, str(ROOT / "generate_schema.py"), "--check"],
         capture_output=True, text=True, check=False,
@@ -136,6 +137,77 @@ def verify_schema_and_fixtures():
             accepted = validator.is_valid(manifest)
             if accepted != (category == "valid"):
                 raise ValueError(f"wrong fixture result: {path}")
+
+
+def verify_ai_source_map(contract):
+    repository = ROOT.parent.parent
+    mapping = json.loads((repository / "ai-rules" / "sources.json").read_text(encoding="utf-8"))
+    if mapping.get("schemaVersion") != 1 or mapping.get("baseUrl") != "https://qu-bl.github.io/one-fuzhu/":
+        raise ValueError("AI source map version or base URL is invalid")
+    sources = mapping.get("sources", {})
+    if set(sources) != {"resourcePackage", "script", "translation", "ai"}:
+        raise ValueError("AI source map must list all four rule families")
+    for name in ("resourcePackage", "script"):
+        source = sources[name]
+        if source.get("contract") != "contracts/schema-v3/contract.json" or source.get("release") != "contracts/schema-v3/release.json":
+            raise ValueError(f"{name} must use the published shared contract")
+        if not set(source.get("sections", [])).issubset(contract) or not source["sections"]:
+            raise ValueError(f"{name} references an unknown contract section")
+    if sources["translation"].get("dictionary") != "rive-editor/translation.json":
+        raise ValueError("translation must use the published dictionary")
+    if sources["ai"].get("guide") != "ai-rules/index.md":
+        raise ValueError("AI guide path is invalid")
+    if sources["ai"].get("guidance") != "ai-rules/guidance.json" or sources["ai"].get("release") != "ai-rules/rules.json":
+        raise ValueError("AI guidance or release path is invalid")
+    if mapping.get("consumers") != {
+        "apps": ["resourcePackage", "script", "translation"],
+        "aiScripts": {
+            "generateApplicationScript": ["script", "ai"],
+            "generateResourcePackage": ["resourcePackage", "script", "ai"],
+        },
+    }:
+        raise ValueError("AI source map has an unsupported consumer")
+    def check_path(path):
+        if not isinstance(path, str) or path.startswith("/") or ".." in Path(path).parts or not (repository / path).is_file():
+            raise ValueError(f"AI source path is unavailable: {path}")
+    for source in sources.values():
+        for key, value in source.items():
+            if key == "sections":
+                continue
+            if isinstance(value, str):
+                check_path(value)
+            elif isinstance(value, dict):
+                for path in value.values():
+                    check_path(path)
+
+
+def verify_ai_guidance():
+    ai = ROOT.parent.parent / "ai-rules"
+    guidance = json.loads((ai / "guidance.json").read_text(encoding="utf-8"))
+    if (guidance.get("schemaVersion") != 1 or guidance.get("audience") != "aiScriptsOnly" or
+            guidance.get("contract") != "contracts/schema-v3/contract.json"):
+        raise ValueError("AI guidance must reference the published shared contract")
+    shared = guidance.get("shared", {})
+    if not isinstance(shared, dict) or set(shared) != {"delivery", "runtime", "qvmi", "network", "quality"}:
+        raise ValueError("AI guidance has no shared instructions")
+    if any(not isinstance(items, list) or not items or any(not isinstance(item, str) or not item.strip() for item in items)
+           for items in shared.values()):
+        raise ValueError("AI guidance contains an empty shared instruction")
+    scenarios = guidance.get("scenarios", {})
+    if set(scenarios) != {"applicationScript", "resourcePackage"}:
+        raise ValueError("AI guidance must cover both generation scenarios")
+    for name, expected_files, expected_fields in (
+        ("applicationScript", ["application.js"], ["applicationJavaScript"]),
+        ("resourcePackage", ["resource-package.json", "main.js"], ["manifestJson", "mainJavaScript"]),
+    ):
+        scenario = scenarios[name]
+        if (scenario.get("files") != expected_files or scenario.get("deliveryFields") != expected_fields or
+                not isinstance(scenario.get("entry"), str) or not scenario.get("rules")):
+            raise ValueError(f"AI guidance scenario is invalid: {name}")
+    for name in ("index.md", "application-script.md", "resource-package.md"):
+        markdown = (ai / name).read_text(encoding="utf-8")
+        if len(markdown) > 2500 or "BEGIN GENERATED HOST CONTRACT" in markdown:
+            raise ValueError(f"AI guide repeats the contract or is too long: {name}")
 
 
 def main():

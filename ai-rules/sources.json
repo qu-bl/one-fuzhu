@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "baseUrl": "https://qu-bl.github.io/one-fuzhu/",
+  "sources": {
+    "resourcePackage": {
+      "contract": "contracts/schema-v3/contract.json",
+      "release": "contracts/schema-v3/release.json",
+      "sections": ["manifest", "ui", "qvmi", "archive", "resources", "network"],
+      "schema": "contracts/schema-v3/resource-package.schema.json"
+    },
+    "script": {
+      "contract": "contracts/schema-v3/contract.json",
+      "release": "contracts/schema-v3/release.json",
+      "sections": ["script", "ui", "qvmi", "resources", "network"]
+    },
+    "translation": {
+      "dictionary": "rive-editor/translation.json"
+    },
+    "ai": {
+      "guide": "ai-rules/index.md",
+      "guidance": "ai-rules/guidance.json",
+      "scenarioGuides": {
+        "applicationScript": "ai-rules/application-script.md",
+        "resourcePackage": "ai-rules/resource-package.md"
+      },
+      "release": "ai-rules/rules.json"
+    }
+  },
+  "consumers": {
+    "apps": ["resourcePackage", "script", "translation"],
+    "aiScripts": {
+      "generateApplicationScript": ["script", "ai"],
+      "generateResourcePackage": ["resourcePackage", "script", "ai"]
+    }
+  }
+}
