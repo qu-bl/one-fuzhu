@@ -675,9 +675,6 @@
               "type": "string",
               "maxLength": 200
             },
-            "hug": {
-              "type": "boolean"
-            },
             "id": {
               "type": "string",
               "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
@@ -725,6 +722,9 @@
               "type": "boolean"
             },
             "enabled": {
+              "type": "boolean"
+            },
+            "hug": {
               "type": "boolean"
             },
             "bindings": {
@@ -986,9 +986,6 @@
               "type": "string",
               "maxLength": 200
             },
-            "hug": {
-              "type": "boolean"
-            },
             "id": {
               "type": "string",
               "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
@@ -1032,6 +1029,9 @@
               "type": "boolean"
             },
             "copyable": {
+              "type": "boolean"
+            },
+            "hug": {
               "type": "boolean"
             },
             "bindings": {
@@ -1173,9 +1173,6 @@
               "type": "string",
               "maxLength": 200
             },
-            "hug": {
-              "type": "boolean"
-            },
             "id": {
               "type": "string",
               "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
@@ -1265,6 +1262,7 @@
                 "flex",
                 "format",
                 "gap",
+                "hug",
                 "inputMode",
                 "layout",
                 "lines",
@@ -1296,9 +1294,6 @@
             "description": {
               "type": "string",
               "maxLength": 200
-            },
-            "hug": {
-              "type": "boolean"
             },
             "id": {
               "type": "string",
@@ -1358,6 +1353,9 @@
               "minimum": 0
             },
             "enabled": {
+              "type": "boolean"
+            },
+            "hug": {
               "type": "boolean"
             },
             "bindings": {
@@ -1628,9 +1626,6 @@
               "type": "string",
               "maxLength": 200
             },
-            "hug": {
-              "type": "boolean"
-            },
             "id": {
               "type": "string",
               "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
@@ -1667,6 +1662,9 @@
               "type": "number"
             },
             "enabled": {
+              "type": "boolean"
+            },
+            "hug": {
               "type": "boolean"
             },
             "bindings": {
@@ -2060,9 +2058,6 @@
               "type": "string",
               "maxLength": 200
             },
-            "hug": {
-              "type": "boolean"
-            },
             "id": {
               "type": "string",
               "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
@@ -2079,6 +2074,9 @@
               "type": "boolean"
             },
             "enabled": {
+              "type": "boolean"
+            },
+            "hug": {
               "type": "boolean"
             },
             "bindings": {
@@ -2392,9 +2390,6 @@
               "type": "string",
               "maxLength": 200
             },
-            "hug": {
-              "type": "boolean"
-            },
             "id": {
               "type": "string",
               "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
@@ -2441,6 +2436,9 @@
               "additionalProperties": true
             },
             "enabled": {
+              "type": "boolean"
+            },
+            "hug": {
               "type": "boolean"
             },
             "bindings": {
@@ -2798,9 +2796,6 @@
               "type": "string",
               "maxLength": 200
             },
-            "hug": {
-              "type": "boolean"
-            },
             "id": {
               "type": "string",
               "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
@@ -2855,6 +2850,9 @@
               "maximum": 64
             },
             "enabled": {
+              "type": "boolean"
+            },
+            "hug": {
               "type": "boolean"
             },
             "bindings": {

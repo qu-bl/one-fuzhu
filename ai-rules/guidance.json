@@ -11,6 +11,7 @@
   "workflow": {
     "prepare": [
       "校验 AI 规则发布哈希与共享契约发布哈希，所有资料必须来自同一发布版本。",
+      "读取宿主实际加载的 contractVersion 与 contractSha256；两者必须和本次已核验 release 完全一致，不一致时返回规则版本错误，禁止生成或写入文件。",
       "把 guidance、当前场景指南、examples、generation-profile 和用户当前文件的实际内容放入模型上下文；完整 JSON Schema 由宿主保留用于机器校验，不默认放入模型上下文。",
       "只在需要查明 generation-profile 未覆盖的细节时加入共享契约对应分区，禁止无选择地注入完整契约或完整 Schema。",
       "资源包存在 main.riv 时提供真实 Rive 元数据；无法读取时保留当前名称并明确缺少信息，禁止猜测。"
@@ -37,6 +38,28 @@
         "appliesTo": [
           "applicationScript",
           "resourcePackage"
+        ]
+      },
+      {
+        "id": "host-contract-identity",
+        "check": "宿主提供的 contractVersion 和 contractSha256 与本次 AI 资料对应的共享契约完全一致；缺失或不一致时停止交付。",
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
+      },
+      {
+        "id": "application-observe-closure",
+        "check": "每个 @observe 路径都被 onValue 实际使用；UI binding 本身不需要 @observe。自有 app.* 观察路径有真实字段来源，且不订阅脚本无法访问的 UI 专用类型。",
+        "appliesTo": [
+          "applicationScript"
+        ]
+      },
+      {
+        "id": "application-definition-types",
+        "check": "每个 viewModel.define 类型属于 generation-profile.script.valueAccessorTypes；与同路径 bindings.value.type 完全一致；非脚本访问类型由宿主管理，不生成伪造 define。",
+        "appliesTo": [
+          "applicationScript"
         ]
       },
       {
@@ -144,7 +167,9 @@
       "rules": [
         "只处理应用脚本，不交付资源包 manifestJson 或 mainJavaScript。",
         "onStart 负责一次性初始化；onValue 和 onInterval 可能异步重入；onStop 做同步清理。不要在 onStart 等待随后才安装的订阅回调。",
+        "@observe 只列出 onValue 确实消费的路径；UI binding 会由宿主自行观察，不因控件绑定而重复加入 @observe。",
         "已有宿主或其他脚本字段直接使用正确类型句柄；只有确需新增的自有 app.* 字段才 define，不能重新定义公开字段。",
+        "viewModel.define 的类型必须属于 script.valueAccessorTypes；绑定类型不在该集合时由宿主管理，不为通过检查改写类型或补造 define。",
         "系统与硬件字段只读；可写公开字段以契约 qvmi.writablePublicPaths 为准。",
         "应用脚本不假定拥有资源包 Rive 会话、包文件、包音频或包 UI。",
         "声明式 UI 先准备绑定字段，再声明组件；弹窗打开完成只表示显示请求已提交，不表示用户确认。",
@@ -170,7 +195,7 @@
         "Rive 画板、状态机、View Model、实例、属性和素材必须使用已知真实名称；不能假装 JSON 或 JS 创建了缺失资产。",
         "包脚本只能读写清单已声明且授权的字段；公共观察和宿主动作须在 capabilities 中声明；网络域名须在 javascript.networkDomains 中声明。",
         "包脚本不调用 viewModel.define，也不能写全局 app.* 或由宿主 UI 拥有的字段。",
-        "UI binding 直接引用包已声明字段或已授权公开 QVMI 字段；不要为 enabled 或文案创建仅用于转发的重复字段。",
+        "UI binding 直接引用包已声明字段或已授权公开 QVMI 字段；资源包 bindings.value.path 写相对路径，persistent 由宿主映射到 package.storage.<path>，runtime 映射到 package.ui.<path>；控件 id 不代替字段路径。不要为 enabled 或文案创建仅用于转发的重复字段。",
         "activate 建立订阅和运行状态，deactivate 清理；不使用应用脚本的元数据调度。",
         "绑定的 QVMI 路径、类型、方向和 Rive 属性必须与清单及真实资产一致。",
         "资源引用限本包与宿主 token，不使用绝对路径；持久数据写入已声明的可写字段。",
@@ -189,5 +214,17 @@
     ],
     "messagePolicy": "messageRaw 必须逐字采用宿主返回值；模型解释只能写入 explanation，不能替换原文。",
     "repairPolicy": "修复时逐项引用 path、code 和 messageRaw；最多两轮，仍失败则返回 reply，不调用 apply_files。"
+  },
+  "hostContractContext": {
+    "requiredFields": [
+      "contractVersion",
+      "contractSha256"
+    ],
+    "matchAgainst": [
+      "contracts/schema-v3/release.json",
+      "ai-rules/generation-profile.json",
+      "ai-rules/examples.json"
+    ],
+    "mismatchPolicy": "返回 reply，逐字报告宿主版本与发布版本，禁止 apply_files。"
   }
 }

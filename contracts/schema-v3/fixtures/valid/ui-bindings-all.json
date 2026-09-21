@@ -56,7 +56,8 @@
                   "equals": true,
                   "fallback": true
                 }
-              }
+              },
+              "description": "可复制文字"
             },
             {
               "id": "flexibleSpace",
@@ -68,13 +69,15 @@
                   "equals": true,
                   "fallback": true
                 }
-              }
+              },
+              "description": "间隔"
             },
             {
               "id": "pick",
               "type": "button",
               "label": "选择资源",
-              "action": "pickResource",
+          "action": "pickResource",
+          "maxBytes": 10485760,
               "bindings": {
                 "value": {
                   "path": "ui.resource",
@@ -99,7 +102,8 @@
                   "path": "ui.error",
                   "fallback": ""
                 }
-              }
+              },
+              "description": "选择资源"
             },
             {
               "id": "name",
@@ -143,7 +147,8 @@
                   "path": "ui.error",
                   "fallback": ""
                 }
-              }
+              },
+              "description": "名称"
             },
             {
               "id": "switch",
@@ -177,7 +182,8 @@
                   "path": "ui.error",
                   "fallback": ""
                 }
-              }
+              },
+              "description": "开关"
             },
             {
               "id": "amount",
@@ -223,7 +229,8 @@
                   "path": "ui.error",
                   "fallback": ""
                 }
-              }
+              },
+              "description": "数值"
             },
             {
               "id": "mode",
@@ -272,7 +279,8 @@
                   "path": "ui.error",
                   "fallback": ""
                 }
-              }
+              },
+              "description": "模式"
             }
           ],
           "bindings": {
@@ -298,7 +306,8 @@
               "path": "ui.error",
               "fallback": ""
             }
-          }
+          },
+          "description": "设置"
         }
       ]
     }

@@ -1,5 +1,5 @@
 {
-  "contractVersion": "5.2.0",
+  "contractVersion": "5.2.1",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -166,6 +166,7 @@
         "list"
       ],
       "persistentPathPrefix": "package.storage.",
+      "runtimePathPrefix": "package.ui.",
       "triggerPathPrefix": "runtime.",
       "forbiddenTriggerPrefixes": [
         "runtime.network.",
@@ -244,7 +245,6 @@
     "commonFields": [
       "bindings",
       "description",
-      "hug",
       "id",
       "label",
       "type",
@@ -257,13 +257,15 @@
         "align",
         "valign",
         "scroll",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "text": [
         "text",
         "format",
         "multiline",
-        "copyable"
+        "copyable",
+        "hug"
       ],
       "spacer": [],
       "button": [
@@ -272,7 +274,8 @@
         "action",
         "acceptedFileExtensions",
         "maxBytes",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "input": [
         "placeholder",
@@ -280,23 +283,27 @@
         "min",
         "max",
         "step",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "toggle": [
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "slider": [
         "min",
         "max",
         "step",
         "format",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "choice": [
         "options",
         "selectionMin",
         "selectionMax",
-        "enabled"
+        "enabled",
+        "hug"
       ]
     },
     "setFields": [
@@ -498,6 +505,9 @@
             "type": "button",
             "valueControl": true
           },
+          "required": [
+            "maxBytes"
+          ],
           "requiredBindings": [
             "value"
           ]
@@ -613,15 +623,24 @@
       "format"
     ],
     "forbiddenDeclarationFields": [
+      "defaultValue",
       "density",
+      "enabledWhen",
       "flex",
       "gap",
       "lines",
+      "loadingPath",
+      "optionsPath",
       "padding",
       "presentation",
+      "propertyPath",
+      "selectedPath",
       "size",
       "space",
-      "style"
+      "style",
+      "textPath",
+      "valueType",
+      "visibleWhen"
     ]
   },
   "qvmi": {
@@ -1061,7 +1080,17 @@
       "persistenceRequiresApplicationScope": false,
       "packageScriptMustMatchManifest": true,
       "editorApplyMaxUtf16Units": 262144,
-      "sourceReadMaxBytes": 1048576
+      "sourceReadMaxBytes": 1048576,
+      "generationChecks": {
+        "requireHostContractIdentity": true,
+        "hostContractMismatchPolicy": "reject",
+        "observeOnlyWhenOnValueConsumes": true,
+        "uiBindingAloneDoesNotRequireObserve": true,
+        "selfOwnedObservedPathRequiresSource": true,
+        "definitionTypesFromValueAccessorTypes": true,
+        "definitionTypeMustMatchValueBinding": true,
+        "uiValueBindingCreatedByHost": true
+      }
     },
     "operationArguments": {
       "values.get": [

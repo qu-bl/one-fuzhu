@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "5.2.0",
+  "contractVersion": "5.2.1",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -59,21 +59,29 @@
       "absoluteLayoutValuesAllowed": false
     },
     "forbiddenDeclarationFields": [
+      "defaultValue",
       "density",
+      "enabledWhen",
       "flex",
       "gap",
       "lines",
+      "loadingPath",
+      "optionsPath",
       "padding",
       "presentation",
+      "propertyPath",
+      "selectedPath",
       "size",
       "space",
-      "style"
+      "style",
+      "textPath",
+      "valueType",
+      "visibleWhen"
     ],
     "allowedFieldsByType": {
       "group": [
         "bindings",
         "description",
-        "hug",
         "id",
         "label",
         "type",
@@ -83,12 +91,12 @@
         "align",
         "valign",
         "scroll",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "text": [
         "bindings",
         "description",
-        "hug",
         "id",
         "label",
         "type",
@@ -96,12 +104,12 @@
         "text",
         "format",
         "multiline",
-        "copyable"
+        "copyable",
+        "hug"
       ],
       "spacer": [
         "bindings",
         "description",
-        "hug",
         "id",
         "label",
         "type",
@@ -110,7 +118,6 @@
       "button": [
         "bindings",
         "description",
-        "hug",
         "id",
         "label",
         "type",
@@ -120,12 +127,12 @@
         "action",
         "acceptedFileExtensions",
         "maxBytes",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "input": [
         "bindings",
         "description",
-        "hug",
         "id",
         "label",
         "type",
@@ -135,22 +142,22 @@
         "min",
         "max",
         "step",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "toggle": [
         "bindings",
         "description",
-        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "slider": [
         "bindings",
         "description",
-        "hug",
         "id",
         "label",
         "type",
@@ -159,12 +166,12 @@
         "max",
         "step",
         "format",
-        "enabled"
+        "enabled",
+        "hug"
       ],
       "choice": [
         "bindings",
         "description",
-        "hug",
         "id",
         "label",
         "type",
@@ -172,7 +179,8 @@
         "options",
         "selectionMin",
         "selectionMax",
-        "enabled"
+        "enabled",
+        "hug"
       ]
     },
     "requiredByType": {
@@ -270,6 +278,9 @@
           "type": "button",
           "valueControl": true
         },
+        "required": [
+          "maxBytes"
+        ],
         "requiredBindings": [
           "value"
         ]
@@ -430,6 +441,56 @@
   "script": {
     "applicationEntryFunction": "defineQuScript",
     "packageEntryFunction": "defineResourcePackage",
+    "annotations": [
+      "description",
+      "id",
+      "interval",
+      "observe",
+      "ui"
+    ],
+    "valueAccessorTypes": [
+      "number",
+      "boolean",
+      "string",
+      "color",
+      "resource",
+      "image",
+      "enum",
+      "trigger",
+      "json",
+      "binary"
+    ],
+    "definitionOptions": {
+      "portable": [
+        "label",
+        "persistent"
+      ],
+      "harmonyAndroidOnly": [
+        "description",
+        "unit",
+        "nullable",
+        "writable",
+        "delivery",
+        "range",
+        "values",
+        "maxLength",
+        "access",
+        "valueLabels",
+        "displayPrecision",
+        "displayMultiplier",
+        "displaySuffix"
+      ]
+    },
+    "generationChecks": {
+      "requireHostContractIdentity": true,
+      "hostContractMismatchPolicy": "reject",
+      "observeOnlyWhenOnValueConsumes": true,
+      "uiBindingAloneDoesNotRequireObserve": true,
+      "selfOwnedObservedPathRequiresSource": true,
+      "definitionTypesFromValueAccessorTypes": true,
+      "definitionTypeMustMatchValueBinding": true,
+      "uiValueBindingCreatedByHost": true
+    },
     "applicationOnlyOperations": [
       "values.define",
       "values.remove",
@@ -468,5 +529,100 @@
       "rive.load",
       "rive.font.set"
     ]
+  },
+  "qvmi": {
+    "fieldTypes": {
+      "app.theme.brand": "color",
+      "system.time.epochMs": "number",
+      "system.appearance.colorMode": "enum",
+      "system.appearance.language": "string",
+      "system.appearance.region": "string",
+      "system.appearance.locale": "string",
+      "system.appearance.timeZone": "string",
+      "system.appearance.is24HourClock": "boolean",
+      "system.appearance.fontSizeScale": "number",
+      "system.appearance.fontWeightScale": "number",
+      "system.appearance.hasPointerDevice": "boolean",
+      "system.appearance.mcc": "string",
+      "system.appearance.mnc": "string",
+      "system.deviceInfo.type": "string",
+      "system.deviceInfo.manufacturer": "string",
+      "system.deviceInfo.brand": "string",
+      "system.deviceInfo.marketName": "string",
+      "system.deviceInfo.productSeries": "string",
+      "system.deviceInfo.productModel": "string",
+      "system.deviceInfo.productModelAlias": "string",
+      "system.deviceInfo.softwareModel": "string",
+      "system.deviceInfo.hardwareModel": "string",
+      "system.deviceInfo.chipType": "string",
+      "system.deviceInfo.abiList": "string",
+      "system.deviceInfo.performanceClass": "number",
+      "system.deviceInfo.displayVersion": "string",
+      "system.deviceInfo.incrementalVersion": "string",
+      "system.deviceInfo.osFullName": "string",
+      "system.deviceInfo.osReleaseType": "string",
+      "system.deviceInfo.securityPatchTag": "string",
+      "system.deviceInfo.osMajorVersion": "number",
+      "system.deviceInfo.osSeniorVersion": "number",
+      "system.deviceInfo.osFeatureVersion": "number",
+      "system.deviceInfo.osBuildVersion": "number",
+      "system.deviceInfo.sdkApiVersion": "number",
+      "system.deviceInfo.sdkMinorApiVersion": "number",
+      "system.deviceInfo.sdkPatchApiVersion": "number",
+      "system.deviceInfo.firstApiVersion": "number",
+      "system.deviceInfo.versionId": "string",
+      "system.deviceInfo.buildType": "string",
+      "system.deviceInfo.buildTime": "string",
+      "system.deviceInfo.distributionOSName": "string",
+      "system.deviceInfo.distributionOSVersion": "string",
+      "system.deviceInfo.distributionOSApiVersion": "number",
+      "system.deviceInfo.distributionOSApiName": "string",
+      "system.deviceInfo.distributionOSReleaseType": "string",
+      "system.deviceInfo.bootCount": "number",
+      "system.deviceInfo.deviceColor": "string",
+      "system.battery.level": "number",
+      "system.battery.isCharging": "boolean",
+      "device.motion.accelerationX": "number",
+      "device.motion.accelerationY": "number",
+      "device.motion.accelerationZ": "number",
+      "device.motion.rotationX": "number",
+      "device.motion.rotationY": "number",
+      "device.motion.rotationZ": "number",
+      "device.motion.pitch": "number",
+      "device.motion.roll": "number",
+      "device.motion.yaw": "number",
+      "device.ambientLight.normalized": "number",
+      "device.proximity.isNear": "boolean",
+      "device.proximity.normalized": "number",
+      "device.location.latitude": "number",
+      "device.location.longitude": "number",
+      "device.location.altitude": "number",
+      "device.location.speed": "number",
+      "device.location.course": "number",
+      "device.location.horizontalAccuracy": "number",
+      "device.screen.width": "number",
+      "device.screen.height": "number",
+      "device.screen.density": "number",
+      "device.screen.orientation": "enum",
+      "device.touch.x": "number",
+      "device.touch.y": "number",
+      "device.touch.isDown": "boolean",
+      "device.touch.phase": "enum",
+      "device.touch.pointerId": "number",
+      "system.network.isConnected": "boolean",
+      "system.network.type": "enum"
+    },
+    "writablePublicPaths": [
+      "app.theme.brand"
+    ],
+    "permissionRules": {
+      "observeRequiresDeclaration": true,
+      "triggerRequiresDeclaration": true,
+      "writeRequiresDeclaredValue": true,
+      "publicHostFieldsReadOnlyExceptWritablePaths": true,
+      "applicationGlobalNamespace": "app.",
+      "packageGlobalNamespace": "package.",
+      "triggerNamespace": "runtime."
+    }
   }
 }
