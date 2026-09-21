@@ -8,8 +8,8 @@
     },
     {
       "name": "guidance.json",
-      "version": "2026.09.21.18",
-      "sha256": "f8c78acddd7a17e6d3b2eb41f7632262770a097f0ee6eb8f8a3d3497a0444301"
+      "version": "2026.09.21.19",
+      "sha256": "9ffee80ee5c43a2f239c9ab325ee5746cea245e7855f995f44ad52dcd34f4c07"
     },
     {
       "name": "sources.json",
@@ -18,13 +18,13 @@
     },
     {
       "name": "examples.json",
-      "version": "2026.09.21.18",
-      "sha256": "3938f33488296abc075d6afaf990db7a0ed10bf22c72048b41cb4dfd73baed56"
+      "version": "2026.09.21.19",
+      "sha256": "dfb18c09b7beeee80501cdc1455d740c2c507257419d956c70c8a92bfd879e57"
     },
     {
       "name": "generation-profile.json",
-      "version": "2026.09.21.18",
-      "sha256": "e722e01fb338647eb0e597e6a321f9eb2d3e58473222203ab17cad6f36adb908"
+      "version": "2026.09.21.19",
+      "sha256": "4829051abc6919a93bdaec8e70145df8942d95166e043626f44f9828b97ee34a"
     },
     {
       "name": "application-script.md",

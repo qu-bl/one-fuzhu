@@ -18,7 +18,7 @@
     "generate": [
       "先建立路径、类型、权限、UI 所有权和文件之间的对应表，再生成完整文件。",
       "以 examples 的当前协议骨架起步，只保留业务需要的字段；所有枚举和值从 contract 获取。",
-      "按钮样式按 generation-profile.ui.buttonStyleSemantics 选择；不要用其他字段或自造组件模拟样式。",
+      "按钮样式按 generation-profile.ui.buttonStyleSemantics 选择；宿主只使用平台原生外观，脚本不要用其他字段模拟颜色、背景、边框、圆角或字体。",
       "禁止从模型记忆补充 contract 中不存在的字段、组件或宿主入口。"
     ],
     "verify": [
