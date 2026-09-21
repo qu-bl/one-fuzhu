@@ -107,6 +107,7 @@ def verify_schema_and_fixtures():
         raise ValueError("each public trigger must declare payload fields")
     if any(len(fields) != len(set(fields)) for fields in qvmi["triggerPayloadFields"].values()):
         raise ValueError("trigger payload fields must be unique")
+    verify_ai_source_map(contract)
     ai_check = subprocess.run(
         [sys.executable, str(ROOT / "sync_ai_rules.py"), "--check"],
         capture_output=True, text=True, check=False,
@@ -136,6 +137,46 @@ def verify_schema_and_fixtures():
             accepted = validator.is_valid(manifest)
             if accepted != (category == "valid"):
                 raise ValueError(f"wrong fixture result: {path}")
+
+
+def verify_ai_source_map(contract):
+    repository = ROOT.parent.parent
+    mapping = json.loads((repository / "ai-rules" / "sources.json").read_text(encoding="utf-8"))
+    if mapping.get("schemaVersion") != 1 or mapping.get("baseUrl") != "https://qu-bl.github.io/one-fuzhu/":
+        raise ValueError("AI source map version or base URL is invalid")
+    sources = mapping.get("sources", {})
+    if set(sources) != {"resourcePackage", "script", "translation", "ai"}:
+        raise ValueError("AI source map must list all four rule families")
+    for name in ("resourcePackage", "script"):
+        source = sources[name]
+        if source.get("contract") != "contracts/schema-v3/contract.json" or source.get("release") != "contracts/schema-v3/release.json":
+            raise ValueError(f"{name} must use the published shared contract")
+        if not set(source.get("sections", [])).issubset(contract) or not source["sections"]:
+            raise ValueError(f"{name} references an unknown contract section")
+    if sources["translation"].get("dictionary") != "rive-editor/translation.json":
+        raise ValueError("translation must use the published dictionary")
+    if sources["ai"].get("guide") != "ai-rules/index.md":
+        raise ValueError("AI guide path is invalid")
+    if mapping.get("consumers") != {
+        "apps": ["resourcePackage", "script", "translation"],
+        "aiScripts": {
+            "generateApplicationScript": ["script", "ai"],
+            "generateResourcePackage": ["resourcePackage", "script", "ai"],
+        },
+    }:
+        raise ValueError("AI source map has an unsupported consumer")
+    def check_path(path):
+        if not isinstance(path, str) or path.startswith("/") or ".." in Path(path).parts or not (repository / path).is_file():
+            raise ValueError(f"AI source path is unavailable: {path}")
+    for source in sources.values():
+        for key, value in source.items():
+            if key == "sections":
+                continue
+            if isinstance(value, str):
+                check_path(value)
+            elif isinstance(value, dict):
+                for path in value.values():
+                    check_path(path)
 
 
 def main():

@@ -1,41 +1,18 @@
-# AI 生成规则（可远程更新）
+# 千机百变规则资料
 
-这个目录是「千机百变」AI 生成脚本所用的规则，App 进入对应页面时后台拉取更新，无需发版即可生效。
+这份目录为相关 AI 脚本提供资料入口。短说明见 [`index.md`](index.md)，机器可读的地址见 [`sources.json`](sources.json)。三端应用代码不加载 AI 规则。
 
-## 目录内容
+| 规则 | 权威资料 | 使用方 |
+| --- | --- | --- |
+| 资源包 | `contracts/schema-v3/contract.json` 的 `manifest`、`ui`、`qvmi`、`archive`、`resources`、`network`，及生成的 Schema | 三端宿主、相关 AI 脚本 |
+| 脚本 | 同一 `contract.json` 的 `script`、`ui`、`qvmi`、`resources`、`network` | 三端宿主、相关 AI 脚本 |
+| 翻译 | `rive-editor/translation.json` | 三端 Rive 编辑器 |
+| AI | `index.md`；过渡期保留两份场景提示词 | 仅相关 AI 脚本 |
 
-| 文件 | 用途 |
-| --- | --- |
-| `application-script.md` | 「应用脚本」场景规则，**自包含**（执行环境 + QVMI + 系统字段 + 日志提醒 + 网络 + 应用脚本规范 + 持久化与身份 + 声明式 UI + 编辑器读写） |
-| `resource-package.md` | 「资源包」场景规则，**自包含**（同上前五节 + 资源包规范） |
-| `rules.json` | 版本清单：`schemaVersion:2` + 每个文件的 `version` / `minAppVersion` / `sha256` |
+`contracts/schema-v3/release.json` 记录契约文件哈希。AI 脚本应取回并核验实际 JSON 内容，再将所需内容和场景说明一起送入模型。单独传 Markdown 链接，不会让没有联网能力的模型获得规则。一个请求内使用同一版契约。
 
-App 拉取地址：`https://qu-bl.github.io/one-fuzhu/ai-rules/`
+## 过渡期文件
 
-## 两个场景完全独立
+`application-script.md` 和 `resource-package.md` 目前仍是完整的独立提示词；`rules.json` 为这两个文件提供版本和 SHA-256。保留它们是为了兼容现有读取方式。待相关 AI 脚本改为读取 `sources.json` 并装配 JSON 后，才能将两份长提示词缩为简短的场景说明。此次新增的索引不代表这个切换已经完成。
 
-- 应用脚本与资源包各有一份**自包含**规则，App 只加载当前场景那一份：应用脚本的提示词里不含资源包内容，反之亦然。
-- 更新也独立：`rules.json` 按文件记录各自的 `version`，App 进入「应用脚本」或「资源包制作台」时只检查、只下载、只通知自己那一份。
-- 代价：两份文件里的**宿主能力事实（QVMI、系统字段表、日志提醒、网络、执行环境）是重复的**，改公共能力时必须两边同步修改，否则会漂移。
-
-## 如何发布一次更新
-
-1. 修改对应的 `.md` 规则文件（改哪个就只动哪个）；
-2. 运行脚本重新生成 `rules.json`：
-   ```bash
-   tools/update-rules.sh            # 本次改动的文件用当前时间做 version
-   # 或指定版本 + 最低 App 版本
-   tools/update-rules.sh 2026.09.12
-   MIN_APP_VERSION=1.1.0 tools/update-rules.sh 2026.09.12
-   ```
-   脚本只给**内容变化**的文件升级 `version`，没变的沿用旧版本。
-3. `git add ai-rules && git commit && git push`；
-4. 等 GitHub Pages CDN 生效（约 10 分钟，`max-age=600`；App 拉取时带 `?t=` 绕过缓存）；
-5. App 下次冷启动进入对应页面即会更新，并弹出通知「应用脚本规则已更新」/「资源包规则已更新」。
-
-## 兼容性约定
-
-- `minAppVersion`：该规则文件要求的最低 App 版本。App 版本低于它时**忽略该文件本次更新**，继续用缓存/内置规则，避免旧 App 拉到不兼容的新规则。
-- 规则的接口事实必须与 App 实际暴露的桥接一致；不兼容的接口变更应通过 `minAppVersion` 配合发版发布。
-- 规则只存在于设备缓存里：App 进入对应页面时拉取并保存；没有缓存时会在发送前提示"规则尚未就绪，请联网后重试"（AI 本来就需要联网，不再内置副本）。
-- 因此**改完规则必须推送并等 Pages 生效**，否则设备上仍是旧规则。
+更新旧提示词时运行 `tools/update-rules.sh`，然后按现有发布流程提交。更新共享契约时运行 `python contracts/schema-v3/release.py`；发布检查会验证契约、索引路径、AI 提示词哈希和资源包样例。
