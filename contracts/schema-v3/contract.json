@@ -1,5 +1,5 @@
 {
-  "contractVersion": "3.2.0",
+  "contractVersion": "3.3.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "manifest": {
     "required": [
@@ -1079,5 +1079,11 @@
     "defaultRedirect": "error",
     "maxRedirects": 5,
     "redirectMustRemainInDeclaredDomains": true
+  },
+  "compatibility": {
+    "unknownObjectFields": "warn",
+    "unavailablePublicCapabilities": "warn",
+    "invalidRequiredFields": "error",
+    "runtimeCapabilityFailure": "error"
   }
 }

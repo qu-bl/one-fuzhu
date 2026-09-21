@@ -30,6 +30,13 @@ def build_release():
 def verify_schema_and_fixtures():
     contract = json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))
     script = contract["script"]
+    if contract.get("compatibility") != {
+        "unknownObjectFields": "warn",
+        "unavailablePublicCapabilities": "warn",
+        "invalidRequiredFields": "error",
+        "runtimeCapabilityFailure": "error",
+    }:
+        raise ValueError("compatibility severity rules are invalid")
     manifest_validation = contract["manifest"]["validation"]
     ui_validation = contract["ui"]["validation"]
     for section, names in (
