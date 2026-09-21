@@ -33,8 +33,11 @@ def build_profile():
             "requiredByType": validation["requiredByType"],
             "oneOfRequiredByType": validation["oneOfRequiredByType"],
             "requiredWhen": validation["requiredWhen"],
+            "bindingsByType": validation["bindingsByType"],
+            "bindingKinds": validation["bindingKinds"],
+            "bindingDefaults": validation["bindingDefaults"],
+            "requiredBindingsByType": validation["requiredBindingsByType"],
             "enums": validation["enums"],
-            "legacyStyleAliases": validation["legacyStyleAliases"],
             "limits": validation["limits"],
         },
         "script": {

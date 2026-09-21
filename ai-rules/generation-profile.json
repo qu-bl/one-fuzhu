@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "4.3.0",
+  "contractVersion": "5.0.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -45,14 +45,14 @@
   "ui": {
     "allowedFieldsByType": {
       "group": [
+        "bindings",
         "description",
-        "enabled",
         "flex",
+        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "visibleWhen",
         "children",
         "layout",
         "surface",
@@ -63,148 +63,124 @@
         "scroll",
         "padding",
         "radius",
-        "hug"
+        "enabled"
       ],
       "text": [
+        "bindings",
         "description",
-        "enabled",
         "flex",
+        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "visibleWhen",
         "text",
-        "textPath",
         "format",
         "size",
         "multiline",
-        "hug",
+        "lines",
         "copyable"
       ],
       "spacer": [
+        "bindings",
         "description",
-        "enabled",
         "flex",
+        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "visibleWhen",
         "space"
       ],
       "button": [
+        "bindings",
         "description",
-        "enabled",
         "flex",
+        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "visibleWhen",
         "text",
-        "textPath",
         "format",
         "style",
         "action",
-        "propertyPath",
-        "valueType",
-        "defaultValue",
         "acceptedFileExtensions",
         "maxBytes",
-        "enabledWhen",
-        "loadingPath",
-        "selectedPath",
-        "hug"
+        "enabled"
       ],
       "input": [
+        "bindings",
         "description",
-        "enabled",
         "flex",
+        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "visibleWhen",
-        "propertyPath",
-        "valueType",
-        "defaultValue",
         "placeholder",
         "inputMode",
         "lines",
         "min",
         "max",
         "step",
-        "hug"
+        "enabled"
       ],
       "toggle": [
+        "bindings",
         "description",
-        "enabled",
         "flex",
+        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "visibleWhen",
-        "propertyPath",
-        "valueType",
-        "defaultValue",
-        "hug"
+        "enabled"
       ],
       "slider": [
+        "bindings",
         "description",
-        "enabled",
         "flex",
+        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "visibleWhen",
-        "propertyPath",
-        "valueType",
-        "defaultValue",
         "min",
         "max",
         "step",
         "format",
-        "hug"
+        "enabled"
       ],
       "choice": [
+        "bindings",
         "description",
-        "enabled",
         "flex",
+        "hug",
         "id",
         "label",
         "type",
         "visible",
-        "visibleWhen",
-        "propertyPath",
-        "valueType",
-        "defaultValue",
         "options",
-        "optionsPath",
         "selectionMin",
         "selectionMax",
         "presentation",
-        "hug"
+        "enabled"
       ]
     },
     "requiredByType": {
       "group": [
         "id",
         "type",
-        "label",
         "layout"
       ],
       "text": [
         "id",
-        "type",
-        "label"
+        "type"
       ],
       "spacer": [
         "id",
-        "type",
-        "label"
+        "type"
       ],
       "button": [
         "id",
@@ -216,72 +192,28 @@
         "id",
         "type",
         "label",
-        "valueType",
         "inputMode"
       ],
       "toggle": [
         "id",
         "type",
-        "label",
-        "valueType"
+        "label"
       ],
       "slider": [
         "id",
         "type",
-        "label",
-        "valueType"
+        "label"
       ],
       "choice": [
         "id",
         "type",
         "label",
-        "valueType",
         "selectionMax",
         "presentation"
       ]
     },
-    "oneOfRequiredByType": {
-      "choice": [
-        [
-          "options"
-        ],
-        [
-          "optionsPath"
-        ]
-      ]
-    },
+    "oneOfRequiredByType": {},
     "requiredWhen": [
-      {
-        "id": "mounted-value-control-path",
-        "when": {
-          "hosting": "mounted",
-          "valueControl": true
-        },
-        "required": [
-          "propertyPath"
-        ]
-      },
-      {
-        "id": "persistent-value-control-path",
-        "when": {
-          "hosting": "selfDrawn",
-          "scope": "persistent",
-          "valueControl": true
-        },
-        "required": [
-          "propertyPath"
-        ]
-      },
-      {
-        "id": "dialog-value-control-default",
-        "when": {
-          "slot": "dialog",
-          "valueControl": true
-        },
-        "required": [
-          "defaultValue"
-        ]
-      },
       {
         "id": "resource-package-description",
         "when": {
@@ -297,21 +229,12 @@
           "context": "resourcePackage",
           "type": "text"
         },
-        "required": [
-          "text"
+        "oneOf": [
+          "text",
+          "bindings.text"
         ],
         "allowedScopes": [
           "persistent"
-        ]
-      },
-      {
-        "id": "resource-package-value-default",
-        "when": {
-          "context": "resourcePackage",
-          "valueControl": true
-        },
-        "required": [
-          "defaultValue"
         ]
       },
       {
@@ -321,19 +244,135 @@
           "type": "button",
           "action": "emit"
         },
-        "required": [
-          "text"
+        "oneOf": [
+          "text",
+          "bindings.text"
         ],
-        "forbidden": [
-          "propertyPath",
-          "valueType",
-          "defaultValue"
+        "forbiddenBindings": [
+          "value"
         ],
         "allowedScopes": [
           "runtime"
         ]
+      },
+      {
+        "id": "file-button-value-binding",
+        "when": {
+          "type": "button",
+          "valueControl": true
+        },
+        "requiredBindings": [
+          "value"
+        ]
       }
     ],
+    "bindingsByType": {
+      "group": [
+        "label",
+        "description",
+        "visible",
+        "enabled",
+        "loading",
+        "error"
+      ],
+      "text": [
+        "text",
+        "visible"
+      ],
+      "spacer": [
+        "visible"
+      ],
+      "button": [
+        "text",
+        "visible",
+        "enabled",
+        "loading",
+        "selected",
+        "error",
+        "value"
+      ],
+      "input": [
+        "value",
+        "label",
+        "description",
+        "placeholder",
+        "visible",
+        "enabled",
+        "readOnly",
+        "error"
+      ],
+      "toggle": [
+        "value",
+        "label",
+        "description",
+        "visible",
+        "enabled",
+        "error"
+      ],
+      "slider": [
+        "value",
+        "min",
+        "max",
+        "step",
+        "label",
+        "description",
+        "visible",
+        "enabled",
+        "error"
+      ],
+      "choice": [
+        "value",
+        "options",
+        "label",
+        "description",
+        "visible",
+        "enabled",
+        "loading",
+        "error"
+      ]
+    },
+    "bindingKinds": {
+      "value": "value",
+      "label": "text",
+      "description": "text",
+      "text": "text",
+      "placeholder": "text",
+      "error": "text",
+      "visible": "condition",
+      "enabled": "condition",
+      "loading": "condition",
+      "selected": "condition",
+      "readOnly": "condition",
+      "options": "list",
+      "min": "number",
+      "max": "number",
+      "step": "number"
+    },
+    "bindingDefaults": {
+      "visible": true,
+      "enabled": true,
+      "loading": false,
+      "selected": false,
+      "readOnly": false
+    },
+    "requiredBindingsByType": {
+      "group": [],
+      "text": [],
+      "spacer": [],
+      "button": [],
+      "input": [
+        "value"
+      ],
+      "toggle": [
+        "value"
+      ],
+      "slider": [
+        "value"
+      ],
+      "choice": [
+        "value"
+      ]
+    },
     "enums": {
       "scope": [
         "persistent",
@@ -359,9 +398,7 @@
         "filled",
         "outlined",
         "tonal",
-        "danger",
-        "normal",
-        "emphasized"
+        "danger"
       ],
       "layout": [
         "column",
@@ -399,10 +436,6 @@
         "center",
         "bottom"
       ]
-    },
-    "legacyStyleAliases": {
-      "normal": "plain",
-      "emphasized": "filled"
     },
     "limits": {
       "setsMax": 8,

@@ -1,5 +1,5 @@
 {
-  "contractVersion": "4.3.0",
+  "contractVersion": "5.0.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -243,14 +243,14 @@
   },
   "ui": {
     "commonFields": [
+      "bindings",
       "description",
-      "enabled",
       "flex",
+      "hug",
       "id",
       "label",
       "type",
-      "visible",
-      "visibleWhen"
+      "visible"
     ],
     "typeFields": {
       "group": [
@@ -264,15 +264,14 @@
         "scroll",
         "padding",
         "radius",
-        "hug"
+        "enabled"
       ],
       "text": [
         "text",
-        "textPath",
         "format",
         "size",
         "multiline",
-        "hug",
+        "lines",
         "copyable"
       ],
       "spacer": [
@@ -280,58 +279,38 @@
       ],
       "button": [
         "text",
-        "textPath",
         "format",
         "style",
         "action",
-        "propertyPath",
-        "valueType",
-        "defaultValue",
         "acceptedFileExtensions",
         "maxBytes",
-        "enabledWhen",
-        "loadingPath",
-        "selectedPath",
-        "hug"
+        "enabled"
       ],
       "input": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
         "placeholder",
         "inputMode",
         "lines",
         "min",
         "max",
         "step",
-        "hug"
+        "enabled"
       ],
       "toggle": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
-        "hug"
+        "enabled"
       ],
       "slider": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
         "min",
         "max",
         "step",
         "format",
-        "hug"
+        "enabled"
       ],
       "choice": [
-        "propertyPath",
-        "valueType",
-        "defaultValue",
         "options",
-        "optionsPath",
         "selectionMin",
         "selectionMax",
         "presentation",
-        "hug"
+        "enabled"
       ]
     },
     "setFields": [
@@ -345,7 +324,8 @@
     "conditionFields": [
       "path",
       "equals",
-      "in"
+      "in",
+      "fallback"
     ],
     "formatFields": [
       "decimals",
@@ -404,9 +384,7 @@
           "filled",
           "outlined",
           "tonal",
-          "danger",
-          "normal",
-          "emphasized"
+          "danger"
         ],
         "layout": [
           "column",
@@ -456,24 +434,19 @@
       ],
       "packageTextScope": "persistent",
       "packageActionScope": "runtime",
-      "persistentInputRequiresPath": true,
-      "dialogInputRequiresDefault": true,
       "requiredByType": {
         "group": [
           "id",
           "type",
-          "label",
           "layout"
         ],
         "text": [
           "id",
-          "type",
-          "label"
+          "type"
         ],
         "spacer": [
           "id",
-          "type",
-          "label"
+          "type"
         ],
         "button": [
           "id",
@@ -485,72 +458,28 @@
           "id",
           "type",
           "label",
-          "valueType",
           "inputMode"
         ],
         "toggle": [
           "id",
           "type",
-          "label",
-          "valueType"
+          "label"
         ],
         "slider": [
           "id",
           "type",
-          "label",
-          "valueType"
+          "label"
         ],
         "choice": [
           "id",
           "type",
           "label",
-          "valueType",
           "selectionMax",
           "presentation"
         ]
       },
-      "oneOfRequiredByType": {
-        "choice": [
-          [
-            "options"
-          ],
-          [
-            "optionsPath"
-          ]
-        ]
-      },
+      "oneOfRequiredByType": {},
       "requiredWhen": [
-        {
-          "id": "mounted-value-control-path",
-          "when": {
-            "hosting": "mounted",
-            "valueControl": true
-          },
-          "required": [
-            "propertyPath"
-          ]
-        },
-        {
-          "id": "persistent-value-control-path",
-          "when": {
-            "hosting": "selfDrawn",
-            "scope": "persistent",
-            "valueControl": true
-          },
-          "required": [
-            "propertyPath"
-          ]
-        },
-        {
-          "id": "dialog-value-control-default",
-          "when": {
-            "slot": "dialog",
-            "valueControl": true
-          },
-          "required": [
-            "defaultValue"
-          ]
-        },
         {
           "id": "resource-package-description",
           "when": {
@@ -566,21 +495,12 @@
             "context": "resourcePackage",
             "type": "text"
           },
-          "required": [
-            "text"
+          "oneOf": [
+            "text",
+            "bindings.text"
           ],
           "allowedScopes": [
             "persistent"
-          ]
-        },
-        {
-          "id": "resource-package-value-default",
-          "when": {
-            "context": "resourcePackage",
-            "valueControl": true
-          },
-          "required": [
-            "defaultValue"
           ]
         },
         {
@@ -590,24 +510,145 @@
             "type": "button",
             "action": "emit"
           },
-          "required": [
-            "text"
+          "oneOf": [
+            "text",
+            "bindings.text"
           ],
-          "forbidden": [
-            "propertyPath",
-            "valueType",
-            "defaultValue"
+          "forbiddenBindings": [
+            "value"
           ],
           "allowedScopes": [
             "runtime"
           ]
+        },
+        {
+          "id": "file-button-value-binding",
+          "when": {
+            "type": "button",
+            "valueControl": true
+          },
+          "requiredBindings": [
+            "value"
+          ]
         }
       ],
-      "legacyStyleAliases": {
-        "normal": "plain",
-        "emphasized": "filled"
+      "bindingsByType": {
+        "group": [
+          "label",
+          "description",
+          "visible",
+          "enabled",
+          "loading",
+          "error"
+        ],
+        "text": [
+          "text",
+          "visible"
+        ],
+        "spacer": [
+          "visible"
+        ],
+        "button": [
+          "text",
+          "visible",
+          "enabled",
+          "loading",
+          "selected",
+          "error",
+          "value"
+        ],
+        "input": [
+          "value",
+          "label",
+          "description",
+          "placeholder",
+          "visible",
+          "enabled",
+          "readOnly",
+          "error"
+        ],
+        "toggle": [
+          "value",
+          "label",
+          "description",
+          "visible",
+          "enabled",
+          "error"
+        ],
+        "slider": [
+          "value",
+          "min",
+          "max",
+          "step",
+          "label",
+          "description",
+          "visible",
+          "enabled",
+          "error"
+        ],
+        "choice": [
+          "value",
+          "options",
+          "label",
+          "description",
+          "visible",
+          "enabled",
+          "loading",
+          "error"
+        ]
+      },
+      "bindingKinds": {
+        "value": "value",
+        "label": "text",
+        "description": "text",
+        "text": "text",
+        "placeholder": "text",
+        "error": "text",
+        "visible": "condition",
+        "enabled": "condition",
+        "loading": "condition",
+        "selected": "condition",
+        "readOnly": "condition",
+        "options": "list",
+        "min": "number",
+        "max": "number",
+        "step": "number"
+      },
+      "bindingDefaults": {
+        "visible": true,
+        "enabled": true,
+        "loading": false,
+        "selected": false,
+        "readOnly": false
+      },
+      "requiredBindingsByType": {
+        "group": [],
+        "text": [],
+        "spacer": [],
+        "button": [],
+        "input": [
+          "value"
+        ],
+        "toggle": [
+          "value"
+        ],
+        "slider": [
+          "value"
+        ],
+        "choice": [
+          "value"
+        ]
       }
-    }
+    },
+    "bindingFields": [
+      "path",
+      "type",
+      "default",
+      "fallback",
+      "equals",
+      "in",
+      "format"
+    ]
   },
   "qvmi": {
     "observable": {

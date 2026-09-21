@@ -29,29 +29,36 @@ boolean = {"type": "boolean"}
 scalar = {"type": ["string", "number", "boolean"]}
 ui_value = {"oneOf": [scalar, arr(string)]}
 path = arr({"type": "string", "minLength": 1}, minItems=1, maxItems=MV["limits"]["rivePropertySegmentsMax"])
-ui_path = arr({"type": "string", "minLength": 1}, minItems=1, maxItems=UV["limits"]["propertyPathSegmentsMax"])
-
-condition = obj({"path": string, "equals": scalar, "in": arr(scalar, minItems=1,
-                                                               maxItems=UV["limits"]["optionsMax"])}, ["path"])
+condition = obj({"path": {"type": "string", "minLength": 1}, "equals": scalar,
+                 "in": arr(scalar, minItems=1, maxItems=UV["limits"]["optionsMax"]),
+                 "fallback": boolean}, ["path"])
 condition["anyOf"] = [{"required": ["equals"]}, {"required": ["in"]}]
 format_shape = obj({"decimals": {"type": "integer", "minimum": UV["limits"]["decimalsMin"], "maximum": UV["limits"]["decimalsMax"]},
                     "prefix": string, "suffix": string, "percent": boolean})
 option = obj({"value": scalar, "resource": string, "label": {"type": "string", "minLength": 1,
                                                            "maxLength": UV["limits"]["labelMax"]}}, ["label"])
+text_binding = obj({"path": {"type": "string", "minLength": 1}, "fallback": string,
+                    "format": format_shape}, ["path"])
+number_binding = obj({"path": {"type": "string", "minLength": 1}, "fallback": number}, ["path"])
+list_binding = obj({"path": {"type": "string", "minLength": 1},
+                    "fallback": arr(option, maxItems=UV["limits"]["optionsMax"])}, ["path"])
+value_binding = obj({"path": {"type": "string", "minLength": 1}, "type": {"enum": TYPES},
+                     "default": ui_value}, ["path", "type"])
+binding_shapes = {"condition": condition, "text": text_binding, "number": number_binding,
+                  "list": list_binding, "value": value_binding}
 
 ui_properties = {
     "id": {"type": "string", "pattern": UV["idPattern"]}, "type": string,
     "label": {"type": "string", "minLength": 1, "maxLength": UV["limits"]["labelMax"]},
     "description": {"type": "string", "maxLength": UV["limits"]["labelMax"]}, "enabled": boolean,
-    "visible": boolean, "visibleWhen": condition, "enabledWhen": condition,
+    "visible": boolean,
     "flex": {"type": "number", "minimum": 0},
-    "text": string, "textPath": string, "loadingPath": string, "selectedPath": string, "format": format_shape,
+    "text": string, "format": format_shape,
     "size": {"enum": UV["enums"]["size"]}, "multiline": boolean, "copyable": boolean,
     "hug": boolean, "space": {"type": "number", "minimum": 0, "maximum": UV["limits"]["spaceMax"]},
-    "propertyPath": ui_path, "valueType": {"enum": TYPES}, "defaultValue": ui_value,
     "placeholder": string, "lines": {"type": "integer", "minimum": UV["limits"]["linesMin"], "maximum": UV["limits"]["linesMax"]},
     "secure": boolean, "min": number, "max": number, "step": number,
-    "options": arr(option, maxItems=UV["limits"]["optionsMax"]), "optionsPath": string,
+    "options": arr(option, maxItems=UV["limits"]["optionsMax"]),
     "acceptedFileExtensions": arr(string, maxItems=UV["limits"]["extensionsMax"]), "maxBytes": {"type": "integer", "minimum": 0},
     "style": {"enum": UV["enums"]["style"]},
     "layout": {"enum": UV["enums"]["layout"]},
@@ -73,13 +80,20 @@ common = CONTRACT["ui"]["commonFields"]
 variants = []
 for component_type, fields in CONTRACT["ui"]["typeFields"].items():
     allowed = common + fields
-    properties = {key: ui_properties[key] for key in allowed}
+    properties = {key: ui_properties[key] for key in allowed if key != "bindings"}
+    allowed_bindings = UV["bindingsByType"][component_type]
+    binding_properties = {key: binding_shapes[UV["bindingKinds"][key]] for key in allowed_bindings}
+    required_bindings = UV["requiredBindingsByType"][component_type]
+    properties["bindings"] = obj(binding_properties, required_bindings, extra=False)
     properties["type"] = {"const": component_type}
     required = UV["requiredByType"][component_type]
     variant = obj(properties, required)
     alternatives = UV["oneOfRequiredByType"].get(component_type)
     if alternatives:
         variant["anyOf"] = [{"required": fields} for fields in alternatives]
+    if component_type == "choice":
+        variant["anyOf"] = [{"required": ["options"]},
+                            {"properties": {"bindings": {"required": ["options"]}}, "required": ["bindings"]}]
     disallowed_known = sorted(set(ui_properties) - set(allowed))
     variant["propertyNames"] = {"not": {"enum": disallowed_known}}
     variants.append(variant)
