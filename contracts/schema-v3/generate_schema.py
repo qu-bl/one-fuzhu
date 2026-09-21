@@ -62,7 +62,6 @@ ui_properties = {
     "acceptedFileExtensions": arr(string, maxItems=UV["limits"]["extensionsMax"]), "maxBytes": {"type": "integer", "minimum": 0},
     "style": {"enum": UV["enums"]["style"]},
     "layout": {"enum": UV["enums"]["layout"]},
-    "surface": {"enum": UV["enums"]["surface"]},
     "action": {"enum": UV["enums"]["action"]},
     "inputMode": {"enum": UV["enums"]["inputMode"]},
     "selectionMin": {"type": "integer", "minimum": 0, "maximum": UV["limits"]["optionsMax"]},
@@ -72,9 +71,8 @@ ui_properties = {
     "gap": {"type": "number", "minimum": 0},
     "align": {"enum": UV["enums"]["align"]},
     "valign": {"enum": UV["enums"]["valign"]},
-    "wrap": boolean, "scroll": boolean,
+    "scroll": boolean,
     "padding": {"type": "number", "minimum": 0, "maximum": UV["limits"]["paddingMax"]},
-    "radius": {"type": "number", "minimum": 0, "maximum": UV["limits"]["radiusMax"]},
 }
 common = CONTRACT["ui"]["commonFields"]
 variants = []

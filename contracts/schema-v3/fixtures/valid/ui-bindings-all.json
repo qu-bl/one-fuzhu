@@ -76,7 +76,7 @@
               "type": "button",
               "label": "选择资源",
               "action": "pickResource",
-              "style": "tonal",
+              "style": "filled",
               "bindings": {
                 "value": {
                   "path": "ui.resource",
@@ -96,16 +96,6 @@
                   "path": "ui.enabled",
                   "equals": true,
                   "fallback": true
-                },
-                "loading": {
-                  "path": "ui.loading",
-                  "equals": true,
-                  "fallback": false
-                },
-                "selected": {
-                  "path": "ui.selected",
-                  "equals": true,
-                  "fallback": false
                 },
                 "error": {
                   "path": "ui.error",
@@ -281,11 +271,6 @@
                   "equals": true,
                   "fallback": true
                 },
-                "loading": {
-                  "path": "ui.loading",
-                  "equals": true,
-                  "fallback": false
-                },
                 "error": {
                   "path": "ui.error",
                   "fallback": ""
@@ -311,11 +296,6 @@
               "path": "ui.enabled",
               "equals": true,
               "fallback": true
-            },
-            "loading": {
-              "path": "ui.loading",
-              "equals": true,
-              "fallback": false
             },
             "error": {
               "path": "ui.error",
