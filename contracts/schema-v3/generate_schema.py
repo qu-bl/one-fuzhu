@@ -12,7 +12,9 @@ MV = CONTRACT["manifest"]["validation"]
 UV = CONTRACT["ui"]["validation"]
 
 
-def obj(properties, required=(), *, extra=False):
+def obj(properties, required=(), *, extra=None):
+    if extra is None:
+        extra = CONTRACT["compatibility"]["unknownObjectFields"] == "warn"
     return {"type": "object", "properties": properties, "required": list(required),
             "additionalProperties": extra}
 
@@ -66,7 +68,10 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
     allowed = common + fields
     properties = {key: ui_properties[key] for key in allowed}
     properties["type"] = {"const": component_type}
-    variants.append(obj(properties, ["id", "type", "label"]))
+    variant = obj(properties, ["id", "type", "label"])
+    disallowed_known = sorted(set(ui_properties) - set(allowed))
+    variant["propertyNames"] = {"not": {"enum": disallowed_known}}
+    variants.append(variant)
 
 layout = obj({
     "fit": {"enum": MV["rive"]["fits"]},
