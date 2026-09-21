@@ -39,7 +39,7 @@
       },
       {
         "id": "ui-required-fields",
-        "check": "每个 UI 控件满足 generation-profile.ui.requiredByType、oneOfRequiredByType 与 requiredWhen。",
+        "check": "每个 UI 控件都有非空静态 label，并满足 generation-profile.ui.requiredByType、oneOfRequiredByType 与 requiredWhen；bindings.label 不能代替静态 label。",
         "appliesTo": [
           "applicationScript",
           "resourcePackage"

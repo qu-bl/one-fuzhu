@@ -1,5 +1,5 @@
 {
-  "contractVersion": "5.0.0",
+  "contractVersion": "5.0.1",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -438,15 +438,18 @@
         "group": [
           "id",
           "type",
-          "layout"
+          "layout",
+          "label"
         ],
         "text": [
           "id",
-          "type"
+          "type",
+          "label"
         ],
         "spacer": [
           "id",
-          "type"
+          "type",
+          "label"
         ],
         "button": [
           "id",
