@@ -183,6 +183,19 @@ def verify_schema_and_fixtures():
         "groupDisabledRecursively": True,
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
+    if contract["ui"].get("buttonStyleSemantics") != {
+        "plain": "textOnly",
+        "filled": "prominentFilled",
+        "outlined": "transparentWithBorder",
+        "tonal": "lowEmphasisFilled",
+        "danger": "destructiveProminent",
+        "selectedPromotion": {
+            "from": ["plain", "outlined", "tonal"],
+            "to": "filled",
+            "preserve": ["filled", "danger"],
+        },
+    }:
+        raise ValueError("button style semantics are incomplete")
     if set(ui_validation["enums"]["scope"]) != {"persistent", "runtime"}:
         raise ValueError("UI scopes must retain the two runtime lifetimes")
     archive = contract["archive"]
