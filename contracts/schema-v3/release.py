@@ -15,6 +15,84 @@ ROOT = Path(__file__).resolve().parent
 FILES = ("contract.json", "resource-package.schema.json")
 
 
+def verify_ui_generation_rules(contract):
+    ui = contract["ui"]
+    validation = ui["validation"]
+    types = set(ui["typeFields"])
+    required = validation.get("requiredByType", {})
+    alternatives = validation.get("oneOfRequiredByType", {})
+    conditions = validation.get("requiredWhen", [])
+    if set(required) != types:
+        raise ValueError("ui.requiredByType must cover every component type exactly once")
+    for name, fields in required.items():
+        allowed = set(ui["commonFields"] + ui["typeFields"][name])
+        if not fields or len(fields) != len(set(fields)) or not set(fields).issubset(allowed):
+            raise ValueError(f"ui.requiredByType is invalid: {name}")
+        if not {"id", "type", "label"}.issubset(fields):
+            raise ValueError(f"ui.requiredByType omits common identity fields: {name}")
+    if not set(alternatives).issubset(types):
+        raise ValueError("ui.oneOfRequiredByType references an unknown component type")
+    for name, groups in alternatives.items():
+        allowed = set(ui["commonFields"] + ui["typeFields"][name])
+        if not groups or any(not group or not set(group).issubset(allowed) for group in groups):
+            raise ValueError(f"ui.oneOfRequiredByType is invalid: {name}")
+    ids = [rule.get("id") for rule in conditions]
+    if not ids or len(ids) != len(set(ids)) or any(not isinstance(item, str) or not item for item in ids):
+        raise ValueError("ui.requiredWhen must have unique nonempty ids")
+    known_fields = set(ui["commonFields"])
+    for fields in ui["typeFields"].values():
+        known_fields.update(fields)
+    for rule in conditions:
+        if not isinstance(rule.get("when"), dict) or not rule["when"]:
+            raise ValueError(f"ui.requiredWhen has no condition: {rule['id']}")
+        for key in ("required", "forbidden"):
+            fields = rule.get(key, [])
+            if len(fields) != len(set(fields)) or not set(fields).issubset(known_fields):
+                raise ValueError(f"ui.requiredWhen has invalid {key}: {rule['id']}")
+
+
+def condition_matches(when, facts):
+    return all(facts.get(key) == value for key, value in when.items())
+
+
+def verify_example_component(component, contract, owner):
+    ui = contract["ui"]
+    validation = ui["validation"]
+    component_type = component.get("type")
+    if component_type not in ui["typeFields"]:
+        raise ValueError(f"AI component example has unknown type: {owner}")
+    allowed = set(ui["commonFields"] + ui["typeFields"][component_type])
+    unknown = set(component) - allowed
+    if unknown:
+        raise ValueError(f"AI component example has fields outside contract: {owner}: {sorted(unknown)}")
+    missing = set(validation["requiredByType"][component_type]) - set(component)
+    if missing:
+        raise ValueError(f"AI component example misses required fields: {owner}: {sorted(missing)}")
+    alternatives = validation["oneOfRequiredByType"].get(component_type, [])
+    if alternatives and not any(set(group).issubset(component) for group in alternatives):
+        raise ValueError(f"AI component example misses required alternative: {owner}")
+    action = component.get("action")
+    value_control = component_type in validation["inputTypes"] or (component_type == "button" and action != "emit")
+    facts = {
+        "context": "resourcePackage",
+        "hosting": "selfDrawn",
+        "scope": "runtime" if component_type == "button" and action == "emit" else "persistent",
+        "slot": None,
+        "type": component_type,
+        "action": action,
+        "valueControl": value_control,
+    }
+    for rule in validation["requiredWhen"]:
+        if not condition_matches(rule["when"], facts):
+            continue
+        missing = set(rule.get("required", [])) - set(component)
+        forbidden = set(rule.get("forbidden", [])) & set(component)
+        if missing or forbidden or (rule.get("allowedScopes") and facts["scope"] not in rule["allowedScopes"]):
+            raise ValueError(f"AI component example violates {rule['id']}: {owner}")
+    for index, child in enumerate(component.get("children", [])):
+        verify_example_component(child, contract, f"{owner}.children[{index}]")
+
+
 def build_release():
     contract = json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))
     return {
@@ -66,6 +144,7 @@ def verify_schema_and_fixtures():
         raise ValueError("persistent value type is not a package value type")
     if set(ui_validation["inputTypes"]) - set(contract["ui"]["typeFields"]):
         raise ValueError("input UI type is not a component type")
+    verify_ui_generation_rules(contract)
     if set(ui_validation["enums"]["scope"]) != {"persistent", "runtime"}:
         raise ValueError("UI scopes must retain the two runtime lifetimes")
     archive = contract["archive"]
@@ -127,7 +206,7 @@ def verify_schema_and_fixtures():
     if rules.get("schemaVersion") != 3:
         raise ValueError("AI release schema must be version 3")
     expected_ai_files = {"README.md", "guidance.json", "sources.json", "examples.json",
-                         "application-script.md", "resource-package.md"}
+                         "generation-profile.json", "application-script.md", "resource-package.md"}
     if {item["name"] for item in rules["files"]} != expected_ai_files or len(rules["files"]) != len(expected_ai_files):
         raise ValueError("AI release must list exactly the published AI files")
     for item in rules["files"]:
@@ -135,6 +214,12 @@ def verify_schema_and_fixtures():
         if hashlib.sha256(payload).hexdigest() != item["sha256"]:
             raise ValueError(f"AI rule hash is stale: {item['name']}")
     verify_ai_guidance()
+    generated_profile = subprocess.run(
+        [sys.executable, str(ROOT / "generate_ai_profile.py"), "--check"],
+        capture_output=True, text=True, check=False,
+    )
+    if generated_profile.returncode:
+        raise ValueError(generated_profile.stderr.strip() or generated_profile.stdout.strip())
     generated = subprocess.run(
         [sys.executable, str(ROOT / "generate_schema.py"), "--check"],
         capture_output=True, text=True, check=False,
@@ -175,6 +260,7 @@ def verify_ai_source_map(contract):
         raise ValueError("AI guide path is invalid")
     if (sources["ai"].get("guidance") != "ai-rules/guidance.json" or
             sources["ai"].get("examples") != "ai-rules/examples.json" or
+            sources["ai"].get("generationProfile") != "ai-rules/generation-profile.json" or
             sources["ai"].get("scenarioGuides") != {
                 "applicationScript": "ai-rules/application-script.md",
                 "resourcePackage": "ai-rules/resource-package.md",
@@ -205,8 +291,9 @@ def verify_ai_source_map(contract):
 def verify_ai_guidance():
     ai = ROOT.parent.parent / "ai-rules"
     guidance = json.loads((ai / "guidance.json").read_text(encoding="utf-8"))
-    if (guidance.get("schemaVersion") != 2 or guidance.get("audience") != "aiScriptsOnly" or
-            guidance.get("contract") != "contracts/schema-v3/contract.json"):
+    if (guidance.get("schemaVersion") != 3 or guidance.get("audience") != "aiScriptsOnly" or
+            guidance.get("contract") != "contracts/schema-v3/contract.json" or
+            guidance.get("generationProfile") != "ai-rules/generation-profile.json"):
         raise ValueError("AI guidance must reference the published shared contract")
     shared = guidance.get("shared", {})
     if not isinstance(shared, dict) or set(shared) != {"delivery", "runtime", "qvmi", "network", "quality"}:
@@ -218,6 +305,17 @@ def verify_ai_guidance():
     if set(workflow) != {"prepare", "generate", "verify"} or any(
             not isinstance(items, list) or not items for items in workflow.values()):
         raise ValueError("AI workflow is incomplete")
+    checklist = workflow["verify"]
+    if any(not isinstance(item, dict) or set(item) != {"id", "check", "appliesTo"} or
+           not item["id"] or not item["check"] or not item["appliesTo"] for item in checklist):
+        raise ValueError("AI verify checklist is invalid")
+    if len({item["id"] for item in checklist}) != len(checklist) or "host-error-verbatim" not in {
+            item["id"] for item in checklist}:
+        raise ValueError("AI verify checklist ids are incomplete")
+    feedback = guidance.get("hostErrorFeedback", {})
+    if feedback.get("requiredFields") != ["source", "file", "path", "code", "messageRaw"] or \
+            "逐字" not in feedback.get("messagePolicy", ""):
+        raise ValueError("AI host errors are not preserved verbatim")
     scenarios = guidance.get("scenarios", {})
     if set(scenarios) != {"applicationScript", "resourcePackage"}:
         raise ValueError("AI guidance must cover both generation scenarios")
@@ -240,6 +338,19 @@ def verify_ai_guidance():
     errors = list(Draft202012Validator(schema).iter_errors(example_manifest))
     if errors:
         raise ValueError(f"AI resource-package example is invalid: {errors[0].message}")
+    contract = json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))
+    component_examples = examples["examples"]["resourcePackage"].get("currentUiComponents", {})
+    example_types = [component.get("type") for component in component_examples.values()]
+    if set(example_types) != set(contract["ui"]["typeFields"]) or len(example_types) != len(set(example_types)):
+        raise ValueError("AI component examples must cover every UI type exactly once")
+    component_validator = Draft202012Validator({
+        "$schema": schema["$schema"], "$defs": schema["$defs"], "$ref": "#/$defs/uiComponent"
+    })
+    for name, component in component_examples.items():
+        verify_example_component(component, contract, f"currentUiComponents.{name}")
+        component_errors = list(component_validator.iter_errors(component))
+        if component_errors:
+            raise ValueError(f"AI component example is invalid: {name}: {component_errors[0].message}")
     if "defineResourcePackage" not in examples["examples"]["resourcePackage"]["mainJavaScript"] or \
             "defineQuScript" not in examples["examples"]["applicationScript"]["applicationJavaScript"]:
         raise ValueError("AI script examples have no required entry")

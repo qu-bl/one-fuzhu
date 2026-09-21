@@ -1,0 +1,454 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "4.1.0",
+  "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
+  "manifest": {
+    "required": [
+      "schemaVersion",
+      "id",
+      "version",
+      "name",
+      "author",
+      "preview",
+      "rive",
+      "values",
+      "capabilities",
+      "bindings",
+      "assets",
+      "ui"
+    ],
+    "optional": [
+      "description",
+      "javascript",
+      "$schema"
+    ],
+    "fixedFiles": {
+      "preview": "preview.webp",
+      "rive": "main.riv",
+      "javascript": "main.js"
+    },
+    "valueTypes": [
+      "number",
+      "string",
+      "boolean",
+      "color",
+      "trigger",
+      "enum",
+      "resource",
+      "image",
+      "artboard",
+      "list",
+      "viewModel"
+    ],
+    "packageScriptEntryFunction": "defineResourcePackage"
+  },
+  "ui": {
+    "allowedFieldsByType": {
+      "group": [
+        "description",
+        "enabled",
+        "flex",
+        "id",
+        "label",
+        "type",
+        "visible",
+        "visibleWhen",
+        "children",
+        "layout",
+        "surface",
+        "gap",
+        "align",
+        "valign",
+        "wrap",
+        "scroll",
+        "padding",
+        "radius",
+        "hug"
+      ],
+      "text": [
+        "description",
+        "enabled",
+        "flex",
+        "id",
+        "label",
+        "type",
+        "visible",
+        "visibleWhen",
+        "text",
+        "textPath",
+        "format",
+        "size",
+        "multiline",
+        "hug"
+      ],
+      "spacer": [
+        "description",
+        "enabled",
+        "flex",
+        "id",
+        "label",
+        "type",
+        "visible",
+        "visibleWhen",
+        "space"
+      ],
+      "button": [
+        "description",
+        "enabled",
+        "flex",
+        "id",
+        "label",
+        "type",
+        "visible",
+        "visibleWhen",
+        "text",
+        "style",
+        "action",
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "acceptedFileExtensions",
+        "maxBytes",
+        "hug"
+      ],
+      "input": [
+        "description",
+        "enabled",
+        "flex",
+        "id",
+        "label",
+        "type",
+        "visible",
+        "visibleWhen",
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "placeholder",
+        "inputMode",
+        "lines",
+        "min",
+        "max",
+        "step",
+        "hug"
+      ],
+      "toggle": [
+        "description",
+        "enabled",
+        "flex",
+        "id",
+        "label",
+        "type",
+        "visible",
+        "visibleWhen",
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "hug"
+      ],
+      "slider": [
+        "description",
+        "enabled",
+        "flex",
+        "id",
+        "label",
+        "type",
+        "visible",
+        "visibleWhen",
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "min",
+        "max",
+        "step",
+        "format",
+        "hug"
+      ],
+      "choice": [
+        "description",
+        "enabled",
+        "flex",
+        "id",
+        "label",
+        "type",
+        "visible",
+        "visibleWhen",
+        "propertyPath",
+        "valueType",
+        "defaultValue",
+        "options",
+        "optionsPath",
+        "selectionMin",
+        "selectionMax",
+        "presentation",
+        "hug"
+      ]
+    },
+    "requiredByType": {
+      "group": [
+        "id",
+        "type",
+        "label",
+        "layout"
+      ],
+      "text": [
+        "id",
+        "type",
+        "label"
+      ],
+      "spacer": [
+        "id",
+        "type",
+        "label"
+      ],
+      "button": [
+        "id",
+        "type",
+        "label",
+        "action"
+      ],
+      "input": [
+        "id",
+        "type",
+        "label",
+        "valueType",
+        "inputMode"
+      ],
+      "toggle": [
+        "id",
+        "type",
+        "label",
+        "valueType"
+      ],
+      "slider": [
+        "id",
+        "type",
+        "label",
+        "valueType"
+      ],
+      "choice": [
+        "id",
+        "type",
+        "label",
+        "valueType",
+        "selectionMax",
+        "presentation"
+      ]
+    },
+    "oneOfRequiredByType": {
+      "choice": [
+        [
+          "options"
+        ],
+        [
+          "optionsPath"
+        ]
+      ]
+    },
+    "requiredWhen": [
+      {
+        "id": "mounted-value-control-path",
+        "when": {
+          "hosting": "mounted",
+          "valueControl": true
+        },
+        "required": [
+          "propertyPath"
+        ]
+      },
+      {
+        "id": "persistent-value-control-path",
+        "when": {
+          "hosting": "selfDrawn",
+          "scope": "persistent",
+          "valueControl": true
+        },
+        "required": [
+          "propertyPath"
+        ]
+      },
+      {
+        "id": "dialog-value-control-default",
+        "when": {
+          "slot": "dialog",
+          "valueControl": true
+        },
+        "required": [
+          "defaultValue"
+        ]
+      },
+      {
+        "id": "resource-package-description",
+        "when": {
+          "context": "resourcePackage"
+        },
+        "required": [
+          "description"
+        ]
+      },
+      {
+        "id": "resource-package-text-content",
+        "when": {
+          "context": "resourcePackage",
+          "type": "text"
+        },
+        "required": [
+          "text"
+        ],
+        "allowedScopes": [
+          "persistent"
+        ]
+      },
+      {
+        "id": "resource-package-value-default",
+        "when": {
+          "context": "resourcePackage",
+          "valueControl": true
+        },
+        "required": [
+          "defaultValue"
+        ]
+      },
+      {
+        "id": "resource-package-emit-button",
+        "when": {
+          "context": "resourcePackage",
+          "type": "button",
+          "action": "emit"
+        },
+        "required": [
+          "text"
+        ],
+        "forbidden": [
+          "propertyPath",
+          "valueType",
+          "defaultValue"
+        ],
+        "allowedScopes": [
+          "runtime"
+        ]
+      }
+    ],
+    "enums": {
+      "scope": [
+        "persistent",
+        "runtime"
+      ],
+      "density": [
+        "normal",
+        "compact"
+      ],
+      "slot": [
+        "dialog",
+        "scriptUi",
+        "applicationScript",
+        "packageBuilder"
+      ],
+      "size": [
+        "sm",
+        "md",
+        "lg"
+      ],
+      "style": [
+        "normal",
+        "emphasized"
+      ],
+      "layout": [
+        "column",
+        "row",
+        "stack"
+      ],
+      "surface": [
+        "none",
+        "card"
+      ],
+      "action": [
+        "emit",
+        "pickFile",
+        "pickResource"
+      ],
+      "inputMode": [
+        "text",
+        "multiline",
+        "number",
+        "password",
+        "color"
+      ],
+      "presentation": [
+        "list",
+        "segmented",
+        "menu"
+      ],
+      "align": [
+        "start",
+        "center",
+        "end"
+      ],
+      "valign": [
+        "top",
+        "center",
+        "bottom"
+      ]
+    },
+    "limits": {
+      "setsMax": 8,
+      "componentsPerSetMax": 32,
+      "childrenMax": 32,
+      "depthMax": 6,
+      "optionsMax": 64,
+      "listItemsMax": 64,
+      "propertyPathSegmentsMax": 8,
+      "extensionsMax": 16,
+      "labelMax": 200,
+      "idMax": 64,
+      "linesMin": 1,
+      "linesMax": 20,
+      "decimalsMin": 0,
+      "decimalsMax": 6,
+      "spaceMax": 200,
+      "paddingMax": 64,
+      "radiusMax": 64
+    }
+  },
+  "script": {
+    "applicationEntryFunction": "defineQuScript",
+    "packageEntryFunction": "defineResourcePackage",
+    "applicationOnlyOperations": [
+      "values.define",
+      "values.remove",
+      "values.list",
+      "ui.declare",
+      "ui.clear",
+      "editor.read",
+      "editor.apply"
+    ],
+    "hostOperations": [
+      "values.get",
+      "values.define",
+      "values.remove",
+      "values.list",
+      "values.set",
+      "values.observe",
+      "values.trigger",
+      "ui.open",
+      "ui.declare",
+      "ui.clear",
+      "editor.read",
+      "editor.apply",
+      "network.request",
+      "network.download",
+      "network.upload",
+      "network.stream",
+      "network.webSocket.open",
+      "network.webSocket.send",
+      "network.webSocket.close",
+      "persistence.save",
+      "persistence.restore",
+      "resources.token",
+      "resources.readText",
+      "resources.readBinary",
+      "rive.state",
+      "rive.load",
+      "rive.font.set"
+    ]
+  }
+}

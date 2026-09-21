@@ -1,5 +1,5 @@
 {
-  "contractVersion": "4.0.1",
+  "contractVersion": "4.1.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -446,7 +446,152 @@
       "packageTextScope": "persistent",
       "packageActionScope": "runtime",
       "persistentInputRequiresPath": true,
-      "dialogInputRequiresDefault": true
+      "dialogInputRequiresDefault": true,
+      "requiredByType": {
+        "group": [
+          "id",
+          "type",
+          "label",
+          "layout"
+        ],
+        "text": [
+          "id",
+          "type",
+          "label"
+        ],
+        "spacer": [
+          "id",
+          "type",
+          "label"
+        ],
+        "button": [
+          "id",
+          "type",
+          "label",
+          "action"
+        ],
+        "input": [
+          "id",
+          "type",
+          "label",
+          "valueType",
+          "inputMode"
+        ],
+        "toggle": [
+          "id",
+          "type",
+          "label",
+          "valueType"
+        ],
+        "slider": [
+          "id",
+          "type",
+          "label",
+          "valueType"
+        ],
+        "choice": [
+          "id",
+          "type",
+          "label",
+          "valueType",
+          "selectionMax",
+          "presentation"
+        ]
+      },
+      "oneOfRequiredByType": {
+        "choice": [
+          [
+            "options"
+          ],
+          [
+            "optionsPath"
+          ]
+        ]
+      },
+      "requiredWhen": [
+        {
+          "id": "mounted-value-control-path",
+          "when": {
+            "hosting": "mounted",
+            "valueControl": true
+          },
+          "required": [
+            "propertyPath"
+          ]
+        },
+        {
+          "id": "persistent-value-control-path",
+          "when": {
+            "hosting": "selfDrawn",
+            "scope": "persistent",
+            "valueControl": true
+          },
+          "required": [
+            "propertyPath"
+          ]
+        },
+        {
+          "id": "dialog-value-control-default",
+          "when": {
+            "slot": "dialog",
+            "valueControl": true
+          },
+          "required": [
+            "defaultValue"
+          ]
+        },
+        {
+          "id": "resource-package-description",
+          "when": {
+            "context": "resourcePackage"
+          },
+          "required": [
+            "description"
+          ]
+        },
+        {
+          "id": "resource-package-text-content",
+          "when": {
+            "context": "resourcePackage",
+            "type": "text"
+          },
+          "required": [
+            "text"
+          ],
+          "allowedScopes": [
+            "persistent"
+          ]
+        },
+        {
+          "id": "resource-package-value-default",
+          "when": {
+            "context": "resourcePackage",
+            "valueControl": true
+          },
+          "required": [
+            "defaultValue"
+          ]
+        },
+        {
+          "id": "resource-package-emit-button",
+          "when": {
+            "context": "resourcePackage",
+            "type": "button",
+            "action": "emit"
+          },
+          "required": [
+            "text"
+          ],
+          "forbidden": [
+            "propertyPath",
+            "valueType",
+            "defaultValue"
+          ],
+          "allowedScopes": [
+            "runtime"
+          ]
+        }
+      ]
     }
   },
   "qvmi": {

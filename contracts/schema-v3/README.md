@@ -5,14 +5,15 @@
 `https://qu-bl.github.io/one-fuzhu/contracts/schema-v3/`。
 
 `contract.json` 是资源包、UI、QVMI、JS、归档、资源读取与网络的共同规则，JSON Schema 是由它生成的资源包结构规则。
+UI 的允许字段、逐类型必填字段、任选字段组和条件必填规则都由 `contract.ui.validation` 发布；Schema、AI 精简索引和示例发布检查从这里派生，不再各自维护必填表。
 制作台的工程名长度、资源包 UI 文案长度、Rive 路径长度和脚本声明入口也由本契约发布。
 动态原生 UI 的节点、参数与破坏式升级边界见 [UI_PROTOCOL.md](UI_PROTOCOL.md)。
 修改规则时同时更新有效／无效样例，运行 `python release.py` 生成发布描述。
 GitHub Actions 会重新生成 Schema、校验样例及哈希；检查通过后才应合并。
 
 三端运行时从云端读取资源包字段与格式、UI 字段与限额、公开 QVMI 路径／类型／写权限、
-JavaScript 宿主入口与参数、脚本长度、归档安全限额、资源读取与网络限额。AI 场景说明仅指向
-本契约及 `ai-rules/guidance.json`，不复制宿主字段清单；发布检查同时验证 AI 资料的哈希。
+JavaScript 宿主入口与参数、脚本长度、归档安全限额、资源读取与网络限额。AI 生成默认读取
+由契约生成的 `ai-rules/generation-profile.json`，完整 Schema 留给宿主校验；发布检查同时验证 AI 资料的哈希与示例字段。
 平台执行器仍负责实现入口、检查本地文件和处理设备权限。
 静态站点只能发布已审核的规则，不能代替设备端执行文件检查、权限或硬件访问。
 规则版本变更若需要新的客户端能力，必须与三端应用版本的发布协调。

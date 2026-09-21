@@ -1,7 +1,9 @@
-# 动态原生 UI 协议 4.0
+# 动态原生 UI 协议 4.1
 
 三端只实现八种节点，并使用各平台原生组件绘制。节点树、字段、枚举和限制均以同目录
 `contract.json` 的 `ui` 段为准；客户端启动后异步更新契约，制作台、检查器和运行时读取同一份缓存。
+`typeFields` 是允许字段白名单，`validation.requiredByType` 是逐类型固定必填字段，
+`oneOfRequiredByType` 表示必须满足的字段组选项，`requiredWhen` 表达宿主、作用域和动作造成的条件必填项。
 
 ## 节点
 
