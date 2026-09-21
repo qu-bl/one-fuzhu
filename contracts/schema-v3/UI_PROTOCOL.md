@@ -18,6 +18,7 @@
 允许的绑定键由 `validation.bindingsByType` 给出，绑定种类由 `bindingKinds` 给出，
 逐组件固定必填项由 `requiredByType` 和 `requiredBindingsByType` 给出。未取得动态值时必须使用
 `fallback` 或顶层静态值；条件默认值以 `bindingDefaults` 为准。
+每个组件都必须提供非空的静态 `label`，动态 `bindings.label` 只负责运行时替换显示文字，不能代替静态必填值。
 
 ## 组件职责
 

@@ -1016,7 +1016,8 @@
           "required": [
             "id",
             "type",
-            "layout"
+            "layout",
+            "label"
           ],
           "additionalProperties": true,
           "propertyNames": {
@@ -1212,7 +1213,8 @@
           },
           "required": [
             "id",
-            "type"
+            "type",
+            "label"
           ],
           "additionalProperties": true,
           "propertyNames": {
@@ -1339,7 +1341,8 @@
           },
           "required": [
             "id",
-            "type"
+            "type",
+            "label"
           ],
           "additionalProperties": true,
           "propertyNames": {
