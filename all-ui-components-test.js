@@ -1,6 +1,6 @@
 /**
  * @id AllNativeUiLab54
- * @description 千机百变动态原生 UI 5.4.0 全量组件与状态测试
+ * @description 千机百变动态原生 UI 5.4.1 全量组件与状态测试
  * @interval 0
  * @ui
  * [

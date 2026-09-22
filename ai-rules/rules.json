@@ -8,23 +8,23 @@
     },
     {
       "name": "application-script.md",
-      "version": "2026.09.22.0122",
-      "sha256": "06aa34848b1e0db1f73e57c5c7c75ff5c01551967926e01b3e03c675cdaedaf7"
+      "version": "2026.09.22.1930",
+      "sha256": "1938bb015b5a696dbdce0919b4ecdeda52efcbf42c1c51d1306b5ede988316c9"
     },
     {
       "name": "examples.json",
-      "version": "2026.09.22.0540",
-      "sha256": "5d569b31daa0cd83d7648cea2341dc5e94da1e566a71dd12acfa251304c28398"
+      "version": "2026.09.22.1930",
+      "sha256": "075d946f82ac41c695e3dff2b7086a13742cab9d92f6f8e5d7dba296f34362f2"
     },
     {
       "name": "generation-profile.json",
-      "version": "2026.09.22.0540",
-      "sha256": "92e6b0063b435bf534ddcef17789616caf1ef5196dce4af27daeee726da855e4"
+      "version": "2026.09.22.1930",
+      "sha256": "4e2720344b8d6707fd211cf03b52f388a92e48e80efa1436e019bc3838877636"
     },
     {
       "name": "guidance.json",
-      "version": "2026.09.22.0122",
-      "sha256": "98d52526413df32ae36dbe1e7d8bda269de057ae4b69f105cc9ffa15eb78a73e"
+      "version": "2026.09.22.1930",
+      "sha256": "0bcd4260471d094521adfbe40bd0d08abaa5f3027502839eb4f0c0a51ab293f6"
     },
     {
       "name": "resource-package.md",
