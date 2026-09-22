@@ -221,11 +221,9 @@ function createCard(item) {
 }
 
 function bindEvents() {
-  document.querySelectorAll("[data-contact]").forEach(button => {
-    button.addEventListener("click", event => openDialog(CONTACT, event.currentTarget));
-  });
-  if (!accessDialog) return;
-  $(".dialog-close")?.addEventListener("click", closeDialog);
+  $("#contact-button").addEventListener("click", event => openDialog(CONTACT, event.currentTarget));
+  $("#creator-contact-button").addEventListener("click", event => openDialog(CONTACT, event.currentTarget));
+  $(".dialog-close").addEventListener("click", closeDialog);
   accessDialog.addEventListener("cancel", event => {
     event.preventDefault();
     closeDialog();
@@ -242,7 +240,6 @@ function bindEvents() {
 
 async function initialize() {
   bindEvents();
-  if (!caseTemplate || !caseGrid || !emptyState) return;
   try {
     const response = await fetch("./data/content.json", { cache: "no-cache" });
     if (!response.ok) throw new Error("内容请求失败：" + response.status);

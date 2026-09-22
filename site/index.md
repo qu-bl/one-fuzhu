@@ -59,6 +59,5 @@ KWGT 和 KLWP 主要用于小组件与动态壁纸。千机百变侧重由 Rive 
 ## 页面
 
 - [首页](https://qu-bl.github.io/one-fuzhu/site/)
-- [作品](https://qu-bl.github.io/one-fuzhu/site/showcase.html)
 - [用户服务协议](https://qu-bl.github.io/one-fuzhu/site/terms.html)
 - [隐私政策](https://qu-bl.github.io/one-fuzhu/site/privacy.html)
