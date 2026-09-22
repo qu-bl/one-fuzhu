@@ -1,11 +1,95 @@
 {
   "schemaVersion": 1,
+  "banners": [
+    {
+      "id": "discover",
+      "label": "发现创意",
+      "title": "让创意动起来，\n让屏幕有个性。",
+      "summary": "发现设计师的互动作品与趣味工具，让每一块屏幕，都有属于自己的精彩。",
+      "linkLabel": "探索创意作品",
+      "action": "showcase",
+      "visible": true
+    },
+    {
+      "id": "custom",
+      "label": "设计定制",
+      "title": "你的想法，\n值得被做出来。",
+      "summary": "从角色形象到互动界面，与设计师一起，把你的想法变成可以体验的作品。欢迎聊聊定制需求。",
+      "linkLabel": "聊聊定制需求",
+      "access": {
+        "title": "聊聊你的定制想法",
+        "summary": "角色形象、互动界面与屏幕定制。",
+        "items": [
+          {
+            "platform": "qq",
+            "label": "创作者交流群",
+            "value": "862835994"
+          }
+        ]
+      },
+      "visible": true
+    },
+    {
+      "id": "shaped",
+      "label": "异形屏幕",
+      "title": "不规则的屏幕，\n不设限的创意。",
+      "summary": "圆屏、长条屏，都能拥有自己的表情。探索拟人角色、触碰回应与 AI 陪伴的定制可能。",
+      "linkLabel": "交流屏幕设计",
+      "access": {
+        "title": "为你的屏幕设计",
+        "summary": "异形屏幕、拟人角色与 AI 陪伴设计。",
+        "items": [
+          {
+            "platform": "qq",
+            "label": "创作者交流群",
+            "value": "862835994"
+          }
+        ]
+      },
+      "visible": true
+    },
+    {
+      "id": "learn",
+      "label": "学习创作",
+      "title": "让作品集，\n不止于效果图。",
+      "summary": "从易懂的制作步骤出发，把静态设计变成能操作的作品。学习、投稿，让你的创作能力更容易被看见。",
+      "linkLabel": "制作指南与投稿",
+      "access": {
+        "title": "开始你的第一件互动作品",
+        "summary": "制作指南筹备中，欢迎加入创作者交流群。",
+        "items": [
+          {
+            "platform": "kdocs",
+            "label": "金山文档",
+            "value": "正式链接待发布",
+            "copyable": false
+          },
+          {
+            "platform": "qq",
+            "label": "创作者交流群",
+            "value": "862835994"
+          }
+        ]
+      },
+      "visible": true
+    },
+    {
+      "id": "tools",
+      "label": "趣味工具",
+      "title": "给屏幕，\n添一点好玩。",
+      "summary": "从互动角色到专注计时，挑选喜欢的趣味工具，了解购买与加载方式，把创意带进日常。",
+      "linkLabel": "发现趣味工具",
+      "action": "showcase",
+      "category": "趣味工具",
+      "visible": true
+    }
+  ],
   "cards": [
     {
       "id": "audio-orbit",
-      "name": "鸿蒙版内测招募",
-      "summary": "探索声音、动画与互动在鸿蒙设备上的新体验，欢迎参与共创。",
-      "details": "千机百变鸿蒙版正在招募内测参与者。本次内测围绕音频、Rive 动画与互动实验展开，欢迎体验并反馈运行效果。",
+      "name": "鸿蒙版千机百变招募内测中",
+      "summary": "欢迎共创",
+      "details": "",
       "partnerName": "官方",
       "category": "全新发布",
       "platforms": [
@@ -31,14 +115,13 @@
         "platform": "bilibili",
         "id": "BV1cjYk6MEj1",
         "aspectRatio": 1.7777
-      },
-      "description": "千机百变鸿蒙版正在招募内测参与者。本次内测聚焦声音轨道（音频）与 Rive 动画结合的交互实验，探索异形屏与拟人角色在鸿蒙平台上的互动可能。感兴趣的用户可通过官网或创作者交流群报名，与团队一起打磨产品。"
+      }
     },
     {
       "id": "image-binding-cards",
-      "name": "Rive 中文系列课程",
-      "summary": "Rive 101 官方课程中文译制版，从基础概念到互动制作。",
-      "details": "Rive 中文系列课程由千机百变译制，讲解动画、状态机与互动设计的核心方法，适合从入门开始系统学习。",
+      "name": "RIVE中文系列课程",
+      "summary": "rive101系列官方课，中文译制版",
+      "details": "",
       "partnerName": "千机百变官方",
       "category": "模板与示例",
       "platforms": [
@@ -63,14 +146,13 @@
             "url": "<iframe src=\"//player.bilibili.com/player.html?isOutside=true&aid=117300673910614&bvid=BV1MYeY6bEtU&cid=42041410389&p=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"></iframe>"
           }
         ]
-      },
-      "description": "RIVE 中文系列课程是千机百变官方出品的 rive101 系列官方课中文译制版，覆盖 Rive 动画的核心概念、状态机与创作方法，适合希望系统学习 Rive 动画与互动设计的中文用户。课程通过哔哩哔哩发布并持续更新。"
+      }
     },
     {
       "id": "sensor-compass",
       "name": "感应罗盘",
-      "summary": "把方向与传感器数据，转化为具有生命感的指针反馈。",
-      "details": "感应罗盘使用 Rive 状态机呈现方向变化，把设备传感器数据转化为连续、直观的动画反馈。",
+      "summary": "将方向与传感器信息转换成具有生命感的指针反馈。",
+      "details": "",
       "partnerName": "示例伙伴 F",
       "category": "趣味工具",
       "platforms": [
@@ -92,14 +174,13 @@
         ]
       },
       "featured": true,
-      "visible": true,
-      "description": "感应罗盘将设备的方位与传感器信息实时转换成带有生命感的指针反馈，是运用 Rive 状态机制作的角色化交互示例。支持 Android 与 Apple 平台，适合用于拟人角色、异形屏与互动装置中的方向与姿态表达。"
+      "visible": true
     },
     {
       "id": "focus-controller",
       "name": "专注节奏控制器",
-      "summary": "用倒计时、阶段状态与轻量反馈，组成一件桌面专注工具。",
-      "details": "专注节奏控制器把倒计时与阶段状态连接到动画反馈，帮助用户看见当前的专注与休息节奏。",
+      "summary": "把倒计时、阶段状态和轻量反馈组合成一件桌面工具。",
+      "details": "",
       "partnerName": "示例伙伴 G",
       "category": "趣味工具",
       "platforms": [
@@ -122,14 +203,13 @@
         ]
       },
       "featured": false,
-      "visible": true,
-      "description": "专注节奏控制器把倒计时、阶段状态与轻量反馈组合成一件桌面工具，帮助用户管理专注与休息节奏。使用 JavaScript 与状态机实现，支持鸿蒙与 Apple 平台。"
+      "visible": true
     },
     {
       "id": "liquid-switch",
       "name": "液态开关组件",
-      "summary": "围绕按压、拖动与状态变化设计的 Rive 互动组件。",
-      "details": "液态开关组件用 Rive 表达按压、拖动和状态切换，可作为互动界面中的基础组件重复使用。",
+      "summary": "围绕按压、拖动和状态变化设计的高反馈交互组件。",
+      "details": "",
       "partnerName": "示例伙伴 H",
       "category": "互动组件",
       "platforms": [
@@ -157,8 +237,7 @@
         ]
       },
       "featured": false,
-      "visible": true,
-      "description": "液态开关组件是围绕按压、拖动和状态变化设计的高反馈交互组件，使用 Rive 制作，可作为可复用的界面组件用于互动项目。支持 Apple、Android 与鸿蒙平台。"
+      "visible": true
     },
     {
       "id": "card-1789178404623",
@@ -170,7 +249,7 @@
         "HarmonyOS"
       ],
       "tags": [],
-      "visible": false
+      "visible": true
     }
   ]
 }
