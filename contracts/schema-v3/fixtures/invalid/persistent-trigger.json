@@ -16,7 +16,7 @@
   },
   "values": [
     {
-      "path": "package.storage.count",
+      "path": "package.ui.count",
       "type": "trigger",
       "writable": true,
       "persistent": true

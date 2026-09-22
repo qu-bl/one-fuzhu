@@ -174,49 +174,14 @@
           "writable": {
             "type": "boolean"
           },
-          "persistent": {
-            "type": "boolean"
-          }
+          "persistent": false
         },
         "required": [
           "path",
           "type",
-          "writable",
-          "persistent"
+          "writable"
         ],
         "additionalProperties": true,
-        "if": {
-          "properties": {
-            "persistent": {
-              "const": true
-            }
-          },
-          "required": [
-            "persistent"
-          ]
-        },
-        "then": {
-          "properties": {
-            "path": {
-              "pattern": "^package\\.storage\\.[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*$"
-            },
-            "type": {
-              "enum": [
-                "number",
-                "string",
-                "boolean",
-                "color",
-                "enum",
-                "resource",
-                "image",
-                "list"
-              ]
-            },
-            "writable": {
-              "const": true
-            }
-          }
-        },
         "allOf": [
           {
             "if": {

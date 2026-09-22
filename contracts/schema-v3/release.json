@@ -1,8 +1,8 @@
 {
-  "contractVersion": "6.0.0",
+  "contractVersion": "7.0.0",
   "schemaVersion": 3,
   "files": {
-    "contract.json": "f3e3b37ead14d1be69a4754b223cb4252bccd9acf44851473be20cbfff26aab8",
-    "resource-package.schema.json": "de7debc20ce956472356418a5b838152a9e7ae221caa0c7e50a3aa83b384197d"
+    "contract.json": "a43a36a6f779ad08ca65c29883adff4489f340d6e5d5dcb9c8db9ab78c97ccef",
+    "resource-package.schema.json": "e5646bb3f63704a2b344662ea8fec9de0286d960d71ec2b02882d60d1a2f36b0"
   }
 }
