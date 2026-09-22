@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "7.0.0",
+  "contractVersion": "8.0.0",
   "notes": [
     "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
     "不要复制示例中未被用户需求使用的字段或组件。",
@@ -12,7 +12,7 @@
   ],
   "examples": {
     "applicationScript": {
-      "applicationJavaScript": "/**\n * @id ExampleScript\n * @description ${DESCRIPTION}\n * @interval 0\n * @observe app.example.enabled\n * @ui\n * {\n *   \"slot\": \"applicationScript\",\n *   \"id\": \"example-settings\",\n *   \"title\": \"示例设置\",\n *   \"scope\": \"persistent\",\n *   \"components\": [\n *     {\n *       \"id\": \"enabled\",\n *       \"type\": \"toggle\",\n *       \"label\": \"启用\",\n *       \"description\": \"控制示例功能\",\n *       \"bindings\": {\n *         \"value\": {\n *           \"path\": \"app.example.enabled\",\n *           \"type\": \"boolean\",\n *           \"default\": true\n *         }\n *       }\n *     },\n *     {\n *       \"id\": \"tags\",\n *       \"type\": \"choice\",\n *       \"label\": \"标签\",\n *       \"description\": \"UI 专用多选字段由宿主管理\",\n *       \"selectionMin\": 0,\n *       \"selectionMax\": 2,\n *       \"options\": [\n *         { \"label\": \"原生\", \"value\": \"native\" },\n *         { \"label\": \"动态\", \"value\": \"dynamic\" }\n *       ],\n *       \"bindings\": {\n *         \"value\": {\n *           \"path\": \"app.example.tags\",\n *           \"type\": \"list\",\n *           \"default\": [\"native\"]\n *         }\n *       }\n *     },\n *     {\n *       \"id\": \"status\",\n *       \"type\": \"text\",\n *       \"label\": \"状态\",\n *       \"copyable\": true,\n *       \"bindings\": {\n *         \"text\": {\n *           \"path\": \"app.example.status\",\n *           \"fallback\": \"已启用\"\n *         }\n *       }\n *     }\n *   ]\n * }\n */\nlet enabled = null;\nlet status = null;\n\nfunction updateStatus(value) {\n  if (status) status.value = value ? '已启用' : '已停用';\n}\n\ndefineQuScript({\n  onStart(qu) {\n    enabled = qu.viewModel.define(\n      'app.example.enabled', 'boolean', qu.storage.get('enabled', true),\n      { label: '启用' }\n    );\n    status = qu.viewModel.define(\n      'app.example.status', 'string', '已启用',\n      { label: '状态' }\n    );\n    updateStatus(enabled.value);\n  },\n  onInterval() {\n  },\n  onValue(path, value) {\n    if (path === 'app.example.enabled') { qu.storage.set('enabled', value); updateStatus(value); }\n  },\n  onUiAction() {\n  },\n  onStop() {\n    enabled = null;\n    status = null;\n  }\n});\n"
+      "applicationJavaScript": "/**\n * @id ExampleScript\n * @description ${DESCRIPTION}\n * @interval 0\n * @observe app.example.enabled\n * @ui\n * {\n *   \"slot\": \"applicationScript\",\n *   \"id\": \"example-settings\",\n *   \"title\": \"示例设置\",\n *   \"scope\": \"persistent\",\n *   \"components\": [\n *     {\n *       \"id\": \"enabled\",\n *       \"type\": \"toggle\",\n *       \"label\": \"启用\",\n *       \"description\": \"控制示例功能\",\n *       \"bindings\": {\n *         \"value\": {\n *           \"path\": \"app.example.enabled\",\n *           \"type\": \"boolean\",\n *           \"default\": true\n *         }\n *       }\n *     },\n *     {\n *       \"id\": \"tags\",\n *       \"type\": \"choice\",\n *       \"label\": \"标签\",\n *       \"description\": \"UI 专用多选字段由宿主管理\",\n *       \"options\": [\n *         {\n *           \"label\": \"原生\",\n *           \"value\": \"native\"\n *         },\n *         {\n *           \"label\": \"动态\",\n *           \"value\": \"dynamic\"\n *         }\n *       ],\n *       \"bindings\": {\n *         \"value\": {\n *           \"path\": \"app.example.tags\",\n *           \"type\": \"list\",\n *           \"default\": [\n *             \"native\"\n *           ]\n *         }\n *       }\n *     },\n *     {\n *       \"id\": \"status\",\n *       \"type\": \"text\",\n *       \"label\": \"状态\",\n *       \"copyable\": true,\n *       \"bindings\": {\n *         \"text\": {\n *           \"path\": \"app.example.status\",\n *           \"fallback\": \"已启用\"\n *         }\n *       }\n *     }\n *   ]\n * }\n */\nlet enabled = null;\nlet status = null;\n\nfunction updateStatus(value) {\n  if (status) status.value = value ? '已启用' : '已停用';\n}\n\ndefineQuScript({\n  onStart(qu) {\n    enabled = qu.viewModel.define(\n      'app.example.enabled', 'boolean', qu.storage.get('enabled', true),\n      { label: '启用' }\n    );\n    status = qu.viewModel.define(\n      'app.example.status', 'string', '已启用',\n      { label: '状态' }\n    );\n    updateStatus(enabled.value);\n  },\n  onInterval() {\n  },\n  onValue(path, value) {\n    if (path === 'app.example.enabled') { qu.storage.set('enabled', value); updateStatus(value); }\n  },\n  onUiAction() {\n  },\n  onStop() {\n    enabled = null;\n    status = null;\n  }\n});\n"
     },
     "resourcePackage": {
       "manifestJson": {
@@ -134,8 +134,6 @@
           "type": "choice",
           "label": "模式",
           "description": "选择一种模式",
-          "selectionMin": 1,
-          "selectionMax": 1,
           "options": [
             {
               "value": "normal",
@@ -192,8 +190,6 @@
           "type": "choice",
           "label": "功能",
           "description": "选择一个或多个功能",
-          "selectionMin": 0,
-          "selectionMax": 2,
           "options": [
             {
               "value": "a",

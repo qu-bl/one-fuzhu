@@ -112,16 +112,17 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
                 }}}}}
             })
     if component_type == "choice":
-        variant.setdefault("allOf", []).extend([
-            {"if": {"properties": {"selectionMax": {"const": 1}}, "required": ["selectionMax"]},
-             "then": {"properties": {"bindings": {"properties": {"value": {
-                 "properties": {"type": {"enum": semantics["choiceSingleTypes"]}}
-             }}}}}},
-            {"if": {"properties": {"selectionMax": {"minimum": 2}}, "required": ["selectionMax"]},
-             "then": {"properties": {"bindings": {"properties": {"value": {
-                 "properties": {"type": {"enum": semantics["choiceMultipleTypes"]}}
-             }}}}}},
-        ])
+        variant.setdefault("allOf", []).append({"properties": {"bindings": {"properties": {
+            "value": {"properties": {"type": {
+                "enum": semantics["choiceSingleTypes"] + semantics["choiceMultipleTypes"]
+            }}}
+        }}}})
+    if component_type == "group":
+        for field, layouts in UV["layoutFieldApplicability"].items():
+            variant.setdefault("allOf", []).append({
+                "if": {"required": [field]},
+                "then": {"properties": {"layout": {"enum": layouts}}, "required": ["layout"]},
+            })
     if component_type == "button":
         emit_rule = {
             "if": {"properties": {"action": {"const": "emit"}}, "required": ["action"]},

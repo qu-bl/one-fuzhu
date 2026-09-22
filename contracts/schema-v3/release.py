@@ -62,6 +62,10 @@ def verify_ui_generation_rules(contract):
             fields = rule.get(key, [])
             if len(fields) != len(set(fields)) or not set(fields).issubset(known_fields):
                 raise ValueError(f"ui.requiredWhen has invalid {key}: {rule['id']}")
+        for key in ("requiredBindings", "forbiddenBindings"):
+            fields = rule.get(key, [])
+            if len(fields) != len(set(fields)) or not set(fields).issubset(known_bindings):
+                raise ValueError(f"ui.requiredWhen has invalid {key}: {rule['id']}")
     expected_semantics = {
         "defaultRequired": True,
         "typesByComponent": {"toggle": ["boolean"], "slider": ["number"]},
@@ -69,22 +73,23 @@ def verify_ui_generation_rules(contract):
                              "number": ["number"], "password": ["string"]},
         "choiceSingleTypes": ["string", "enum", "resource"],
         "choiceMultipleTypes": ["list"],
-        "buttonValueActions": ["pickFile", "pickResource"],
+        "choiceModeByValueType": {
+            "string": "single", "enum": "single", "resource": "single", "list": "multiple"
+        },
+        "buttonValueActions": ["pickFile"],
         "buttonValueTypes": ["resource"],
         "maxBytesMinimum": 1,
         "sliderRequiresRange": True,
         "sliderRangeOrder": "min<max",
         "sliderStepPositive": True,
         "sliderStepAtMostRange": True,
-        "selectionMinDefault": 0,
-        "selectionMinAtMostMax": True,
     }
     if semantics != expected_semantics:
         raise ValueError("ui.valueSemantics is incomplete")
-        for key in ("requiredBindings", "forbiddenBindings"):
-            fields = rule.get(key, [])
-            if len(fields) != len(set(fields)) or not set(fields).issubset(known_bindings):
-                raise ValueError(f"ui.requiredWhen has invalid {key}: {rule['id']}")
+    if validation.get("layoutFieldApplicability") != {
+        "align": ["column", "stack"], "valign": ["stack"], "scroll": ["column"]
+    }:
+        raise ValueError("ui.layoutFieldApplicability is incomplete")
 
 
 def condition_matches(when, facts):
@@ -223,14 +228,15 @@ def verify_schema_and_fixtures():
         "propertyPath", "valueType", "defaultValue", "textPath", "optionsPath",
         "visibleWhen", "enabledWhen", "loadingPath", "selectedPath",
     }
+    forbidden_removed_semantics = {"multiline", "selectionMin", "selectionMax"}
     if set(contract["ui"].get("forbiddenDeclarationFields", [])) != \
-            forbidden_appearance | forbidden_absolute_layout | forbidden_legacy_binding:
+            forbidden_appearance | forbidden_absolute_layout | forbidden_legacy_binding | forbidden_removed_semantics:
         raise ValueError("UI contract must publish every removed declaration field")
     all_ui_fields = set(contract["ui"]["commonFields"] + contract["ui"]["setFields"])
     for fields in contract["ui"]["typeFields"].values():
         all_ui_fields.update(fields)
     if forbidden_appearance & all_ui_fields or forbidden_absolute_layout & all_ui_fields or \
-            forbidden_legacy_binding & all_ui_fields or \
+            forbidden_legacy_binding & all_ui_fields or forbidden_removed_semantics & all_ui_fields or \
             forbidden_appearance & set(ui_validation["enums"]) or \
             "color" in ui_validation["enums"]["inputMode"] or \
             any(field in contract["ui"]["typeFields"]["group"] for field in ("surface", "radius", "wrap")):

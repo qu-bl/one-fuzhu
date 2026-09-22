@@ -1,5 +1,5 @@
 {
-  "contractVersion": "7.0.0",
+  "contractVersion": "8.0.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -248,14 +248,11 @@
         "align",
         "valign",
         "scroll",
-        "enabled",
-        "hug"
+        "enabled"
       ],
       "text": [
         "text",
-        "multiline",
-        "copyable",
-        "hug"
+        "copyable"
       ],
       "spacer": [],
       "button": [
@@ -269,9 +266,6 @@
       "input": [
         "placeholder",
         "inputMode",
-        "min",
-        "max",
-        "step",
         "enabled",
         "hug"
       ],
@@ -288,8 +282,6 @@
       ],
       "choice": [
         "options",
-        "selectionMin",
-        "selectionMax",
         "enabled",
         "hug"
       ]
@@ -362,8 +354,7 @@
         ],
         "action": [
           "emit",
-          "pickFile",
-          "pickResource"
+          "pickFile"
         ],
         "inputMode": [
           "text",
@@ -435,8 +426,7 @@
         "choice": [
           "id",
           "type",
-          "label",
-          "selectionMax"
+          "label"
         ]
       },
       "oneOfRequiredByType": {},
@@ -627,9 +617,14 @@
         "choiceMultipleTypes": [
           "list"
         ],
+        "choiceModeByValueType": {
+          "string": "single",
+          "enum": "single",
+          "resource": "single",
+          "list": "multiple"
+        },
         "buttonValueActions": [
-          "pickFile",
-          "pickResource"
+          "pickFile"
         ],
         "buttonValueTypes": [
           "resource"
@@ -638,9 +633,19 @@
         "sliderRequiresRange": true,
         "sliderRangeOrder": "min<max",
         "sliderStepPositive": true,
-        "sliderStepAtMostRange": true,
-        "selectionMinDefault": 0,
-        "selectionMinAtMostMax": true
+        "sliderStepAtMostRange": true
+      },
+      "layoutFieldApplicability": {
+        "align": [
+          "column",
+          "stack"
+        ],
+        "valign": [
+          "stack"
+        ],
+        "scroll": [
+          "column"
+        ]
       }
     },
     "bindingFields": [
@@ -660,11 +665,14 @@
       "gap",
       "lines",
       "loadingPath",
+      "multiline",
       "optionsPath",
       "padding",
       "presentation",
       "propertyPath",
       "selectedPath",
+      "selectionMax",
+      "selectionMin",
       "size",
       "space",
       "style",

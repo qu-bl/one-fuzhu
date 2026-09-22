@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "7.0.0",
+  "contractVersion": "8.0.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -70,11 +70,14 @@
       "gap",
       "lines",
       "loadingPath",
+      "multiline",
       "optionsPath",
       "padding",
       "presentation",
       "propertyPath",
       "selectedPath",
+      "selectionMax",
+      "selectionMin",
       "size",
       "space",
       "style",
@@ -95,8 +98,7 @@
         "align",
         "valign",
         "scroll",
-        "enabled",
-        "hug"
+        "enabled"
       ],
       "text": [
         "bindings",
@@ -106,9 +108,7 @@
         "type",
         "visible",
         "text",
-        "multiline",
-        "copyable",
-        "hug"
+        "copyable"
       ],
       "spacer": [
         "bindings",
@@ -141,9 +141,6 @@
         "visible",
         "placeholder",
         "inputMode",
-        "min",
-        "max",
-        "step",
         "enabled",
         "hug"
       ],
@@ -178,8 +175,6 @@
         "type",
         "visible",
         "options",
-        "selectionMin",
-        "selectionMax",
         "enabled",
         "hug"
       ]
@@ -226,8 +221,7 @@
       "choice": [
         "id",
         "type",
-        "label",
-        "selectionMax"
+        "label"
       ]
     },
     "oneOfRequiredByType": {},
@@ -418,9 +412,14 @@
       "choiceMultipleTypes": [
         "list"
       ],
+      "choiceModeByValueType": {
+        "string": "single",
+        "enum": "single",
+        "resource": "single",
+        "list": "multiple"
+      },
       "buttonValueActions": [
-        "pickFile",
-        "pickResource"
+        "pickFile"
       ],
       "buttonValueTypes": [
         "resource"
@@ -429,9 +428,19 @@
       "sliderRequiresRange": true,
       "sliderRangeOrder": "min<max",
       "sliderStepPositive": true,
-      "sliderStepAtMostRange": true,
-      "selectionMinDefault": 0,
-      "selectionMinAtMostMax": true
+      "sliderStepAtMostRange": true
+    },
+    "layoutFieldApplicability": {
+      "align": [
+        "column",
+        "stack"
+      ],
+      "valign": [
+        "stack"
+      ],
+      "scroll": [
+        "column"
+      ]
     },
     "enums": {
       "scope": [
@@ -451,8 +460,7 @@
       ],
       "action": [
         "emit",
-        "pickFile",
-        "pickResource"
+        "pickFile"
       ],
       "inputMode": [
         "text",

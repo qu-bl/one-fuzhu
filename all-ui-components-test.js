@@ -1,8 +1,8 @@
 /**
- * @id AllNativeUiLab70
- * @description 千机百变动态原生 UI 7.0.0 全量组件与状态测试
+ * @id AllNativeUiLab80
+ * @description 千机百变动态原生 UI 8.0.0 全量组件与状态测试
  * @interval 0
- * @observe app.uiLab70.numberValue
+ * @observe app.uiLab80.numberValue
  * @ui
  * [
  *   {
@@ -17,9 +17,7 @@
  *         "label": "布局说明",
  *         "description": "覆盖 column、row、stack 与相对对齐",
  *         "text": "所有尺寸与间距均由三端原生布局决定。",
- *         "multiline": true,
- *         "copyable": true,
- *         "hug": true
+ *         "copyable": true
  *       },
  *       {
  *         "id": "stateControls",
@@ -35,7 +33,7 @@
  *             "hug": true,
  *             "bindings": {
  *               "value": {
- *                 "path": "app.uiLab70.showSection",
+ *                 "path": "app.uiLab80.showSection",
  *                 "type": "boolean",
  *                 "default": true
  *               }
@@ -49,7 +47,7 @@
  *             "hug": true,
  *             "bindings": {
  *               "value": {
- *                 "path": "app.uiLab70.sectionEnabled",
+ *                 "path": "app.uiLab80.sectionEnabled",
  *                 "type": "boolean",
  *                 "default": true
  *               }
@@ -63,19 +61,15 @@
  *             "hug": true,
  *             "bindings": {
  *               "value": {
- *                 "path": "app.uiLab70.readOnly",
+ *                 "path": "app.uiLab80.readOnly",
  *                 "type": "boolean",
  *                 "default": false
  *               }
  *             }
  *           }
  *         ],
- *         "align": "start",
- *         "valign": "center",
- *         "scroll": false,
  *         "enabled": true,
- *         "visible": true,
- *         "hug": true
+ *         "visible": true
  *       },
  *       {
  *         "id": "errorEditor",
@@ -87,7 +81,7 @@
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.errorText",
+ *             "path": "app.uiLab80.errorText",
  *             "type": "string",
  *             "default": ""
  *           }
@@ -109,8 +103,7 @@
  *                 "id": "startText",
  *                 "type": "text",
  *                 "label": "起始文本",
- *                 "text": "Start / Top",
- *                 "hug": true
+ *                 "text": "Start / Top"
  *               },
  *               {
  *                 "id": "startSpace",
@@ -127,11 +120,7 @@
  *               }
  *             ],
  *             "description": "align=start，valign=top",
- *             "align": "start",
- *             "valign": "top",
- *             "scroll": false,
- *             "enabled": true,
- *             "hug": true
+ *             "enabled": true
  *           },
  *           {
  *             "id": "rowCenter",
@@ -143,8 +132,7 @@
  *                 "id": "centerText",
  *                 "type": "text",
  *                 "label": "居中文本",
- *                 "text": "Center / Center",
- *                 "hug": true
+ *                 "text": "Center / Center"
  *               },
  *               {
  *                 "id": "centerSpace",
@@ -161,11 +149,7 @@
  *               }
  *             ],
  *             "description": "align=center，valign=center",
- *             "align": "center",
- *             "valign": "center",
- *             "scroll": false,
- *             "enabled": true,
- *             "hug": true
+ *             "enabled": true
  *           },
  *           {
  *             "id": "rowEnd",
@@ -177,8 +161,7 @@
  *                 "id": "endText",
  *                 "type": "text",
  *                 "label": "末端文本",
- *                 "text": "End / Bottom",
- *                 "hug": true
+ *                 "text": "End / Bottom"
  *               },
  *               {
  *                 "id": "endSpace",
@@ -195,11 +178,7 @@
  *               }
  *             ],
  *             "description": "align=end，valign=bottom",
- *             "align": "end",
- *             "valign": "bottom",
- *             "scroll": false,
- *             "enabled": true,
- *             "hug": false
+ *             "enabled": true
  *           },
  *           {
  *             "id": "stackDemo",
@@ -212,55 +191,47 @@
  *                 "type": "text",
  *                 "label": "叠加底层",
  *                 "text": "底层原生文本",
- *                 "multiline": false,
- *                 "copyable": false,
- *                 "hug": true
+ *                 "copyable": false
  *               },
  *               {
  *                 "id": "stackTop",
  *                 "type": "text",
  *                 "label": "叠加上层",
  *                 "text": "上层原生文本",
- *                 "multiline": false,
- *                 "copyable": true,
- *                 "hug": true
+ *                 "copyable": true
  *               }
  *             ],
  *             "description": "两个原生文本使用 stack 关系布局",
  *             "align": "center",
  *             "valign": "center",
- *             "scroll": false,
- *             "enabled": true,
- *             "hug": true
+ *             "enabled": true
  *           }
  *         ],
  *         "description": "标签、说明、可见、启用与错误全部经 QVMI 绑定",
  *         "align": "start",
- *         "valign": "top",
  *         "scroll": true,
  *         "enabled": true,
- *         "hug": false,
  *         "bindings": {
  *           "label": {
- *             "path": "app.uiLab70.groupLabel",
+ *             "path": "app.uiLab80.groupLabel",
  *             "fallback": "动态布局测试区"
  *           },
  *           "description": {
- *             "path": "app.uiLab70.groupDescription",
+ *             "path": "app.uiLab80.groupDescription",
  *             "fallback": "动态组说明"
  *           },
  *           "visible": {
- *             "path": "app.uiLab70.showSection",
+ *             "path": "app.uiLab80.showSection",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "enabled": {
- *             "path": "app.uiLab70.sectionEnabled",
+ *             "path": "app.uiLab80.sectionEnabled",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "error": {
- *             "path": "app.uiLab70.errorText",
+ *             "path": "app.uiLab80.errorText",
  *             "fallback": ""
  *           }
  *         }
@@ -280,9 +251,7 @@
  *         "description": "最小静态文本",
  *         "text": "静态文本内容",
  *         "visible": true,
- *         "multiline": false,
- *         "copyable": false,
- *         "hug": false
+ *         "copyable": false
  *       },
  *       {
  *         "id": "copyText",
@@ -290,9 +259,7 @@
  *         "label": "可复制多行文本",
  *         "description": "长按或选择后复制",
  *         "text": "第一行\n第二行\n第三行",
- *         "multiline": true,
- *         "copyable": true,
- *         "hug": true
+ *         "copyable": true
  *       },
  *       {
  *         "id": "dynamicTextEditor",
@@ -303,7 +270,7 @@
  *         "inputMode": "text",
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.dynamicText",
+ *             "path": "app.uiLab80.dynamicText",
  *             "type": "string",
  *             "default": "动态文本"
  *           }
@@ -315,15 +282,13 @@
  *         "label": "动态文本",
  *         "description": "bindings.text 与 bindings.visible",
  *         "copyable": true,
- *         "multiline": true,
- *         "hug": true,
  *         "bindings": {
  *           "text": {
- *             "path": "app.uiLab70.dynamicText",
+ *             "path": "app.uiLab80.dynamicText",
  *             "fallback": "动态文本"
  *           },
  *           "visible": {
- *             "path": "app.uiLab70.showSection",
+ *             "path": "app.uiLab80.showSection",
  *             "fallback": true,
  *             "equals": true
  *           }
@@ -338,7 +303,7 @@
  *         "inputMode": "text",
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.buttonText",
+ *             "path": "app.uiLab80.buttonText",
  *             "type": "string",
  *             "default": "动态执行"
  *           }
@@ -367,21 +332,21 @@
  *         "hug": false,
  *         "bindings": {
  *           "text": {
- *             "path": "app.uiLab70.buttonText",
+ *             "path": "app.uiLab80.buttonText",
  *             "fallback": "动态执行"
  *           },
  *           "visible": {
- *             "path": "app.uiLab70.showSection",
+ *             "path": "app.uiLab80.showSection",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "enabled": {
- *             "path": "app.uiLab70.sectionEnabled",
+ *             "path": "app.uiLab80.sectionEnabled",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "error": {
- *             "path": "app.uiLab70.errorText",
+ *             "path": "app.uiLab80.errorText",
  *             "fallback": ""
  *           }
  *         }
@@ -412,7 +377,7 @@
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.file",
+ *             "path": "app.uiLab80.file",
  *             "type": "resource",
  *             "default": ""
  *           }
@@ -424,13 +389,13 @@
  *         "label": "选择资源",
  *         "description": "唤起宿主资源选择器",
  *         "text": "选择资源",
- *         "action": "pickResource",
+ *         "action": "pickFile",
  *         "maxBytes": 10485760,
  *         "enabled": true,
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.resource",
+ *             "path": "app.uiLab80.resource",
  *             "type": "resource",
  *             "default": ""
  *           }
@@ -465,39 +430,39 @@
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.textValue",
+ *             "path": "app.uiLab80.textValue",
  *             "type": "string",
  *             "default": "千机百变"
  *           },
  *           "label": {
- *             "path": "app.uiLab70.inputLabel",
+ *             "path": "app.uiLab80.inputLabel",
  *             "fallback": "单行文本"
  *           },
  *           "description": {
- *             "path": "app.uiLab70.inputDescription",
+ *             "path": "app.uiLab80.inputDescription",
  *             "fallback": "动态输入说明"
  *           },
  *           "placeholder": {
- *             "path": "app.uiLab70.placeholder",
+ *             "path": "app.uiLab80.placeholder",
  *             "fallback": "请输入文字"
  *           },
  *           "visible": {
- *             "path": "app.uiLab70.showSection",
+ *             "path": "app.uiLab80.showSection",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "enabled": {
- *             "path": "app.uiLab70.sectionEnabled",
+ *             "path": "app.uiLab80.sectionEnabled",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "readOnly": {
- *             "path": "app.uiLab70.readOnly",
+ *             "path": "app.uiLab80.readOnly",
  *             "fallback": false,
  *             "equals": true
  *           },
  *           "error": {
- *             "path": "app.uiLab70.errorText",
+ *             "path": "app.uiLab80.errorText",
  *             "fallback": ""
  *           }
  *         }
@@ -513,7 +478,7 @@
  *         "hug": false,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.notesValue",
+ *             "path": "app.uiLab80.notesValue",
  *             "type": "string",
  *             "default": "第一行\n第二行"
  *           }
@@ -526,14 +491,11 @@
  *         "description": "包含最小值、最大值和步长",
  *         "placeholder": "0 至 100",
  *         "inputMode": "number",
- *         "min": 0,
- *         "max": 100,
- *         "step": 0.5,
  *         "enabled": true,
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.numberValue",
+ *             "path": "app.uiLab80.numberValue",
  *             "type": "number",
  *             "default": 25
  *           }
@@ -550,7 +512,7 @@
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.passwordValue",
+ *             "path": "app.uiLab80.passwordValue",
  *             "type": "string",
  *             "default": ""
  *           }
@@ -565,12 +527,12 @@
  *         "inputMode": "text",
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.readOnlyValue",
+ *             "path": "app.uiLab80.readOnlyValue",
  *             "type": "string",
  *             "default": "测试只读"
  *           },
  *           "readOnly": {
- *             "path": "app.uiLab70.readOnly",
+ *             "path": "app.uiLab80.readOnly",
  *             "fallback": false,
  *             "equals": true
  *           }
@@ -586,7 +548,7 @@
  *         "enabled": false,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.disabledInput",
+ *             "path": "app.uiLab80.disabledInput",
  *             "type": "string",
  *             "default": "禁用状态"
  *           }
@@ -610,7 +572,7 @@
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.toggleOn",
+ *             "path": "app.uiLab80.toggleOn",
  *             "type": "boolean",
  *             "default": true
  *           }
@@ -625,7 +587,7 @@
  *         "hug": false,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.toggleOff",
+ *             "path": "app.uiLab80.toggleOff",
  *             "type": "boolean",
  *             "default": false
  *           }
@@ -640,30 +602,30 @@
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.toggleDynamic",
+ *             "path": "app.uiLab80.toggleDynamic",
  *             "type": "boolean",
  *             "default": true
  *           },
  *           "label": {
- *             "path": "app.uiLab70.toggleLabel",
+ *             "path": "app.uiLab80.toggleLabel",
  *             "fallback": "动态开关"
  *           },
  *           "description": {
- *             "path": "app.uiLab70.toggleDescription",
+ *             "path": "app.uiLab80.toggleDescription",
  *             "fallback": "动态说明"
  *           },
  *           "visible": {
- *             "path": "app.uiLab70.showSection",
+ *             "path": "app.uiLab80.showSection",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "enabled": {
- *             "path": "app.uiLab70.sectionEnabled",
+ *             "path": "app.uiLab80.sectionEnabled",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "error": {
- *             "path": "app.uiLab70.errorText",
+ *             "path": "app.uiLab80.errorText",
  *             "fallback": ""
  *           }
  *         }
@@ -676,7 +638,7 @@
  *         "enabled": false,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.toggleDisabled",
+ *             "path": "app.uiLab80.toggleDisabled",
  *             "type": "boolean",
  *             "default": false
  *           }
@@ -695,7 +657,7 @@
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.sliderValue",
+ *             "path": "app.uiLab80.sliderValue",
  *             "type": "number",
  *             "default": 50
  *           }
@@ -713,7 +675,7 @@
  *         "hug": false,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.ratioValue",
+ *             "path": "app.uiLab80.ratioValue",
  *             "type": "number",
  *             "default": 0.5
  *           }
@@ -731,42 +693,42 @@
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.sliderDynamic",
+ *             "path": "app.uiLab80.sliderDynamic",
  *             "type": "number",
  *             "default": 25
  *           },
  *           "min": {
- *             "path": "app.uiLab70.sliderMin",
+ *             "path": "app.uiLab80.sliderMin",
  *             "fallback": 0
  *           },
  *           "max": {
- *             "path": "app.uiLab70.sliderMax",
+ *             "path": "app.uiLab80.sliderMax",
  *             "fallback": 100
  *           },
  *           "step": {
- *             "path": "app.uiLab70.sliderStep",
+ *             "path": "app.uiLab80.sliderStep",
  *             "fallback": 5
  *           },
  *           "label": {
- *             "path": "app.uiLab70.sliderLabel",
+ *             "path": "app.uiLab80.sliderLabel",
  *             "fallback": "动态范围滑杆"
  *           },
  *           "description": {
- *             "path": "app.uiLab70.sliderDescription",
+ *             "path": "app.uiLab80.sliderDescription",
  *             "fallback": "动态滑杆说明"
  *           },
  *           "visible": {
- *             "path": "app.uiLab70.showSection",
+ *             "path": "app.uiLab80.showSection",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "enabled": {
- *             "path": "app.uiLab70.sectionEnabled",
+ *             "path": "app.uiLab80.sectionEnabled",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "error": {
- *             "path": "app.uiLab70.errorText",
+ *             "path": "app.uiLab80.errorText",
  *             "fallback": ""
  *           }
  *         }
@@ -782,7 +744,7 @@
  *         "enabled": false,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.sliderDisabled",
+ *             "path": "app.uiLab80.sliderDisabled",
  *             "type": "number",
  *             "default": 0
  *           }
@@ -800,7 +762,7 @@
  *         "id": "singleString",
  *         "type": "choice",
  *         "label": "字符串单选",
- *         "description": "selectionMax=1，type=string",
+ *         "description": "type=string，自动单选",
  *         "options": [
  *           {
  *             "value": "one",
@@ -815,14 +777,12 @@
  *             "label": "选项三"
  *           }
  *         ],
- *         "selectionMin": 1,
- *         "selectionMax": 1,
  *         "visible": true,
  *         "enabled": true,
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.choiceString",
+ *             "path": "app.uiLab80.choiceString",
  *             "type": "string",
  *             "default": "one"
  *           }
@@ -832,7 +792,7 @@
  *         "id": "singleEnum",
  *         "type": "choice",
  *         "label": "枚举单选",
- *         "description": "selectionMax=1，type=enum",
+ *         "description": "type=enum，自动单选",
  *         "options": [
  *           {
  *             "value": "normal",
@@ -847,13 +807,11 @@
  *             "label": "专家"
  *           }
  *         ],
- *         "selectionMin": 1,
- *         "selectionMax": 1,
  *         "enabled": true,
  *         "hug": false,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.choiceEnum",
+ *             "path": "app.uiLab80.choiceEnum",
  *             "type": "enum",
  *             "default": "normal"
  *           }
@@ -867,7 +825,7 @@
  *         "text": "高级或专家模式下可见",
  *         "bindings": {
  *           "visible": {
- *             "path": "app.uiLab70.choiceEnum",
+ *             "path": "app.uiLab80.choiceEnum",
  *             "fallback": false,
  *             "in": [
  *               "advanced",
@@ -891,13 +849,11 @@
  *             "resource": "resource-b"
  *           }
  *         ],
- *         "selectionMin": 0,
- *         "selectionMax": 1,
  *         "enabled": true,
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.choiceResource",
+ *             "path": "app.uiLab80.choiceResource",
  *             "type": "resource",
  *             "default": ""
  *           }
@@ -907,7 +863,7 @@
  *         "id": "multiChoice",
  *         "type": "choice",
  *         "label": "自由多选",
- *         "description": "selectionMin=0，selectionMax=3，type=list",
+ *         "description": "type=list，自动多选",
  *         "options": [
  *           {
  *             "value": "rive",
@@ -926,13 +882,11 @@
  *             "label": "自适应布局"
  *           }
  *         ],
- *         "selectionMin": 0,
- *         "selectionMax": 3,
  *         "enabled": true,
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.multiChoice",
+ *             "path": "app.uiLab80.multiChoice",
  *             "type": "list",
  *             "default": [
  *               "rive",
@@ -960,12 +914,10 @@
  *             "label": "C"
  *           }
  *         ],
- *         "selectionMin": 2,
- *         "selectionMax": 2,
  *         "enabled": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.exactMultiChoice",
+ *             "path": "app.uiLab80.exactMultiChoice",
  *             "type": "list",
  *             "default": [
  *               "a",
@@ -989,18 +941,16 @@
  *             "label": "回退 B"
  *           }
  *         ],
- *         "selectionMin": 1,
- *         "selectionMax": 1,
  *         "enabled": true,
  *         "hug": true,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.dynamicChoice",
+ *             "path": "app.uiLab80.dynamicChoice",
  *             "type": "string",
  *             "default": "fallback-a"
  *           },
  *           "options": {
- *             "path": "app.uiLab70.dynamicOptions",
+ *             "path": "app.uiLab80.dynamicOptions",
  *             "fallback": [
  *               {
  *                 "value": "fallback-a",
@@ -1013,25 +963,25 @@
  *             ]
  *           },
  *           "label": {
- *             "path": "app.uiLab70.choiceLabel",
+ *             "path": "app.uiLab80.choiceLabel",
  *             "fallback": "动态选项"
  *           },
  *           "description": {
- *             "path": "app.uiLab70.choiceDescription",
+ *             "path": "app.uiLab80.choiceDescription",
  *             "fallback": "动态选择说明"
  *           },
  *           "visible": {
- *             "path": "app.uiLab70.showSection",
+ *             "path": "app.uiLab80.showSection",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "enabled": {
- *             "path": "app.uiLab70.sectionEnabled",
+ *             "path": "app.uiLab80.sectionEnabled",
  *             "fallback": true,
  *             "equals": true
  *           },
  *           "error": {
- *             "path": "app.uiLab70.errorText",
+ *             "path": "app.uiLab80.errorText",
  *             "fallback": ""
  *           }
  *         }
@@ -1047,12 +997,10 @@
  *             "label": "锁定"
  *           }
  *         ],
- *         "selectionMin": 1,
- *         "selectionMax": 1,
  *         "enabled": false,
  *         "bindings": {
  *           "value": {
- *             "path": "app.uiLab70.disabledChoice",
+ *             "path": "app.uiLab80.disabledChoice",
  *             "type": "string",
  *             "default": "locked"
  *           }
@@ -1078,7 +1026,7 @@
  *             "visible": true,
  *             "bindings": {
  *               "visible": {
- *                 "path": "app.uiLab70.showSection",
+ *                 "path": "app.uiLab80.showSection",
  *                 "fallback": true,
  *                 "equals": true
  *               }
@@ -1099,11 +1047,7 @@
  *           }
  *         ],
  *         "description": "左右文本之间由原生弹性占位分隔",
- *         "align": "center",
- *         "valign": "center",
- *         "scroll": false,
- *         "enabled": true,
- *         "hug": true
+ *         "enabled": true
  *       }
  *     ]
  *   }
@@ -1114,52 +1058,52 @@ let uiValues = [];
 defineQuScript({
   onStart(qu) {
     uiValues = [
-      qu.viewModel.define('app.uiLab70.showSection', 'boolean', true, { label: '显示测试区' }),
-      qu.viewModel.define('app.uiLab70.sectionEnabled', 'boolean', true, { label: '启用测试区' }),
-      qu.viewModel.define('app.uiLab70.readOnly', 'boolean', false, { label: '输入只读' }),
-      qu.viewModel.define('app.uiLab70.errorText', 'string', '', { label: '统一错误文字' }),
-      qu.viewModel.define('app.uiLab70.groupLabel', 'string', '动态布局测试区', { label: '动态分组标题' }),
-      qu.viewModel.define('app.uiLab70.groupDescription', 'string', '动态组说明', { label: '动态分组说明' }),
-      qu.viewModel.define('app.uiLab70.dynamicText', 'string', '动态文本', { label: '动态文本' }),
-      qu.viewModel.define('app.uiLab70.buttonText', 'string', '动态执行', { label: '动态按钮文字' }),
-      qu.viewModel.define('app.uiLab70.file', 'resource', '', { label: '已选文件' }),
-      qu.viewModel.define('app.uiLab70.resource', 'resource', '', { label: '已选资源' }),
-      qu.viewModel.define('app.uiLab70.inputLabel', 'string', '单行文本', { label: '输入框标题' }),
-      qu.viewModel.define('app.uiLab70.inputDescription', 'string', '动态输入说明', { label: '输入框说明' }),
-      qu.viewModel.define('app.uiLab70.placeholder', 'string', '请输入文字', { label: '输入框占位' }),
-      qu.viewModel.define('app.uiLab70.textValue', 'string', '千机百变', { label: '单行文本值' }),
-      qu.viewModel.define('app.uiLab70.notesValue', 'string', '第一行\n第二行', { label: '多行文本值' }),
-      qu.viewModel.define('app.uiLab70.numberValue', 'number', qu.storage.get('numberValue', 25), { label: '数字输入值' }),
-      qu.viewModel.define('app.uiLab70.passwordValue', 'string', '', { label: '密码输入值' }),
-      qu.viewModel.define('app.uiLab70.readOnlyValue', 'string', '测试只读', { label: '只读输入值' }),
-      qu.viewModel.define('app.uiLab70.disabledInput', 'string', '禁用状态', { label: '禁用输入值' }),
-      qu.viewModel.define('app.uiLab70.toggleOn', 'boolean', true, { label: '默认开启' }),
-      qu.viewModel.define('app.uiLab70.toggleOff', 'boolean', false, { label: '默认关闭' }),
-      qu.viewModel.define('app.uiLab70.toggleDynamic', 'boolean', true, { label: '动态开关' }),
-      qu.viewModel.define('app.uiLab70.toggleDisabled', 'boolean', false, { label: '禁用开关' }),
-      qu.viewModel.define('app.uiLab70.toggleLabel', 'string', '动态开关', { label: '动态开关标题' }),
-      qu.viewModel.define('app.uiLab70.toggleDescription', 'string', '动态说明', { label: '动态开关说明' }),
-      qu.viewModel.define('app.uiLab70.sliderValue', 'number', 50, { label: '基础滑杆' }),
-      qu.viewModel.define('app.uiLab70.ratioValue', 'number', 0.5, { label: '百分比滑杆' }),
-      qu.viewModel.define('app.uiLab70.sliderDynamic', 'number', 25, { label: '动态范围滑杆' }),
-      qu.viewModel.define('app.uiLab70.sliderDisabled', 'number', 0, { label: '禁用滑杆' }),
-      qu.viewModel.define('app.uiLab70.sliderMin', 'number', 0, { label: '滑杆最小值' }),
-      qu.viewModel.define('app.uiLab70.sliderMax', 'number', 100, { label: '滑杆最大值' }),
-      qu.viewModel.define('app.uiLab70.sliderStep', 'number', 5, { label: '滑杆步长' }),
-      qu.viewModel.define('app.uiLab70.sliderLabel', 'string', '动态范围滑杆', { label: '滑杆标题' }),
-      qu.viewModel.define('app.uiLab70.sliderDescription', 'string', '动态滑杆说明', { label: '滑杆说明' }),
-      qu.viewModel.define('app.uiLab70.choiceString', 'string', 'one', { label: '字符串单选' }),
-      qu.viewModel.define('app.uiLab70.choiceEnum', 'enum', 'normal', { label: '枚举单选' }),
-      qu.viewModel.define('app.uiLab70.choiceResource', 'resource', '', { label: '资源单选' }),
-      qu.viewModel.define('app.uiLab70.dynamicChoice', 'string', 'fallback-a', { label: '动态选项' }),
-      qu.viewModel.define('app.uiLab70.disabledChoice', 'string', 'locked', { label: '禁用选择器' }),
-      qu.viewModel.define('app.uiLab70.choiceLabel', 'string', '动态选项', { label: '选择器标题' }),
-      qu.viewModel.define('app.uiLab70.choiceDescription', 'string', '动态选择说明', { label: '选择器说明' })
+      qu.viewModel.define('app.uiLab80.showSection', 'boolean', true, { label: '显示测试区' }),
+      qu.viewModel.define('app.uiLab80.sectionEnabled', 'boolean', true, { label: '启用测试区' }),
+      qu.viewModel.define('app.uiLab80.readOnly', 'boolean', false, { label: '输入只读' }),
+      qu.viewModel.define('app.uiLab80.errorText', 'string', '', { label: '统一错误文字' }),
+      qu.viewModel.define('app.uiLab80.groupLabel', 'string', '动态布局测试区', { label: '动态分组标题' }),
+      qu.viewModel.define('app.uiLab80.groupDescription', 'string', '动态组说明', { label: '动态分组说明' }),
+      qu.viewModel.define('app.uiLab80.dynamicText', 'string', '动态文本', { label: '动态文本' }),
+      qu.viewModel.define('app.uiLab80.buttonText', 'string', '动态执行', { label: '动态按钮文字' }),
+      qu.viewModel.define('app.uiLab80.file', 'resource', '', { label: '已选文件' }),
+      qu.viewModel.define('app.uiLab80.resource', 'resource', '', { label: '已选资源' }),
+      qu.viewModel.define('app.uiLab80.inputLabel', 'string', '单行文本', { label: '输入框标题' }),
+      qu.viewModel.define('app.uiLab80.inputDescription', 'string', '动态输入说明', { label: '输入框说明' }),
+      qu.viewModel.define('app.uiLab80.placeholder', 'string', '请输入文字', { label: '输入框占位' }),
+      qu.viewModel.define('app.uiLab80.textValue', 'string', '千机百变', { label: '单行文本值' }),
+      qu.viewModel.define('app.uiLab80.notesValue', 'string', '第一行\n第二行', { label: '多行文本值' }),
+      qu.viewModel.define('app.uiLab80.numberValue', 'number', qu.storage.get('numberValue', 25), { label: '数字输入值' }),
+      qu.viewModel.define('app.uiLab80.passwordValue', 'string', '', { label: '密码输入值' }),
+      qu.viewModel.define('app.uiLab80.readOnlyValue', 'string', '测试只读', { label: '只读输入值' }),
+      qu.viewModel.define('app.uiLab80.disabledInput', 'string', '禁用状态', { label: '禁用输入值' }),
+      qu.viewModel.define('app.uiLab80.toggleOn', 'boolean', true, { label: '默认开启' }),
+      qu.viewModel.define('app.uiLab80.toggleOff', 'boolean', false, { label: '默认关闭' }),
+      qu.viewModel.define('app.uiLab80.toggleDynamic', 'boolean', true, { label: '动态开关' }),
+      qu.viewModel.define('app.uiLab80.toggleDisabled', 'boolean', false, { label: '禁用开关' }),
+      qu.viewModel.define('app.uiLab80.toggleLabel', 'string', '动态开关', { label: '动态开关标题' }),
+      qu.viewModel.define('app.uiLab80.toggleDescription', 'string', '动态说明', { label: '动态开关说明' }),
+      qu.viewModel.define('app.uiLab80.sliderValue', 'number', 50, { label: '基础滑杆' }),
+      qu.viewModel.define('app.uiLab80.ratioValue', 'number', 0.5, { label: '百分比滑杆' }),
+      qu.viewModel.define('app.uiLab80.sliderDynamic', 'number', 25, { label: '动态范围滑杆' }),
+      qu.viewModel.define('app.uiLab80.sliderDisabled', 'number', 0, { label: '禁用滑杆' }),
+      qu.viewModel.define('app.uiLab80.sliderMin', 'number', 0, { label: '滑杆最小值' }),
+      qu.viewModel.define('app.uiLab80.sliderMax', 'number', 100, { label: '滑杆最大值' }),
+      qu.viewModel.define('app.uiLab80.sliderStep', 'number', 5, { label: '滑杆步长' }),
+      qu.viewModel.define('app.uiLab80.sliderLabel', 'string', '动态范围滑杆', { label: '滑杆标题' }),
+      qu.viewModel.define('app.uiLab80.sliderDescription', 'string', '动态滑杆说明', { label: '滑杆说明' }),
+      qu.viewModel.define('app.uiLab80.choiceString', 'string', 'one', { label: '字符串单选' }),
+      qu.viewModel.define('app.uiLab80.choiceEnum', 'enum', 'normal', { label: '枚举单选' }),
+      qu.viewModel.define('app.uiLab80.choiceResource', 'resource', '', { label: '资源单选' }),
+      qu.viewModel.define('app.uiLab80.dynamicChoice', 'string', 'fallback-a', { label: '动态选项' }),
+      qu.viewModel.define('app.uiLab80.disabledChoice', 'string', 'locked', { label: '禁用选择器' }),
+      qu.viewModel.define('app.uiLab80.choiceLabel', 'string', '动态选项', { label: '选择器标题' }),
+      qu.viewModel.define('app.uiLab80.choiceDescription', 'string', '动态选择说明', { label: '选择器说明' })
     ];
   },
   onInterval() {},
   onValue(path, value) {
-    if (path === 'app.uiLab70.numberValue') qu.storage.set('numberValue', value);
+    if (path === 'app.uiLab80.numberValue') qu.storage.set('numberValue', value);
   },
   onUiAction() {},
   onStop() {

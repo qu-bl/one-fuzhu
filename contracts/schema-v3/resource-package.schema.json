@@ -689,9 +689,6 @@
             "enabled": {
               "type": "boolean"
             },
-            "hug": {
-              "type": "boolean"
-            },
             "bindings": {
               "type": "object",
               "properties": {
@@ -849,6 +846,66 @@
             "label"
           ],
           "additionalProperties": true,
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "align"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "layout": {
+                    "enum": [
+                      "column",
+                      "stack"
+                    ]
+                  }
+                },
+                "required": [
+                  "layout"
+                ]
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "valign"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "layout": {
+                    "enum": [
+                      "stack"
+                    ]
+                  }
+                },
+                "required": [
+                  "layout"
+                ]
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "scroll"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "layout": {
+                    "enum": [
+                      "column"
+                    ]
+                  }
+                },
+                "required": [
+                  "layout"
+                ]
+              }
+            }
+          ],
           "propertyNames": {
             "not": {
               "enum": [
@@ -859,6 +916,7 @@
                 "flex",
                 "format",
                 "gap",
+                "hug",
                 "inputMode",
                 "lines",
                 "max",
@@ -906,13 +964,7 @@
             "text": {
               "type": "string"
             },
-            "multiline": {
-              "type": "boolean"
-            },
             "copyable": {
-              "type": "boolean"
-            },
-            "hug": {
               "type": "boolean"
             },
             "bindings": {
@@ -1004,12 +1056,14 @@
                 "flex",
                 "format",
                 "gap",
+                "hug",
                 "inputMode",
                 "layout",
                 "lines",
                 "max",
                 "maxBytes",
                 "min",
+                "multiline",
                 "options",
                 "padding",
                 "placeholder",
@@ -1177,8 +1231,7 @@
             "action": {
               "enum": [
                 "emit",
-                "pickFile",
-                "pickResource"
+                "pickFile"
               ]
             },
             "acceptedFileExtensions": {
@@ -1591,8 +1644,7 @@
                 "properties": {
                   "action": {
                     "enum": [
-                      "pickFile",
-                      "pickResource"
+                      "pickFile"
                     ]
                   }
                 },
@@ -1695,15 +1747,6 @@
                 "number",
                 "password"
               ]
-            },
-            "min": {
-              "type": "number"
-            },
-            "max": {
-              "type": "number"
-            },
-            "step": {
-              "type": "number"
             },
             "enabled": {
               "type": "boolean"
@@ -2288,7 +2331,9 @@
                 "gap",
                 "layout",
                 "lines",
+                "max",
                 "maxBytes",
+                "min",
                 "multiline",
                 "options",
                 "padding",
@@ -2299,6 +2344,7 @@
                 "selectionMin",
                 "size",
                 "space",
+                "step",
                 "style",
                 "text",
                 "valign"
@@ -3340,16 +3386,6 @@
               },
               "maxItems": 64
             },
-            "selectionMin": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 64
-            },
-            "selectionMax": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 64
-            },
             "enabled": {
               "type": "boolean"
             },
@@ -3775,8 +3811,7 @@
           "required": [
             "id",
             "type",
-            "label",
-            "selectionMax"
+            "label"
           ],
           "additionalProperties": true,
           "anyOf": [
@@ -3800,58 +3835,18 @@
           ],
           "allOf": [
             {
-              "if": {
-                "properties": {
-                  "selectionMax": {
-                    "const": 1
-                  }
-                },
-                "required": [
-                  "selectionMax"
-                ]
-              },
-              "then": {
-                "properties": {
-                  "bindings": {
-                    "properties": {
-                      "value": {
-                        "properties": {
-                          "type": {
-                            "enum": [
-                              "string",
-                              "enum",
-                              "resource"
-                            ]
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "selectionMax": {
-                    "minimum": 2
-                  }
-                },
-                "required": [
-                  "selectionMax"
-                ]
-              },
-              "then": {
-                "properties": {
-                  "bindings": {
-                    "properties": {
-                      "value": {
-                        "properties": {
-                          "type": {
-                            "enum": [
-                              "list"
-                            ]
-                          }
+              "properties": {
+                "bindings": {
+                  "properties": {
+                    "value": {
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "string",
+                            "enum",
+                            "resource",
+                            "list"
+                          ]
                         }
                       }
                     }
@@ -3884,6 +3879,8 @@
                 "presentation",
                 "scroll",
                 "secure",
+                "selectionMax",
+                "selectionMin",
                 "size",
                 "space",
                 "step",
