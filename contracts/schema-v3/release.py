@@ -212,7 +212,7 @@ def verify_schema_and_fixtures():
         "absoluteLayoutValuesAllowed": False,
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
-    forbidden_appearance = {"style", "size", "density", "presentation"}
+    forbidden_appearance = {"style", "size", "density", "presentation", "format"}
     forbidden_absolute_layout = {"flex", "gap", "padding", "space", "lines"}
     forbidden_legacy_binding = {
         "propertyPath", "valueType", "defaultValue", "textPath", "optionsPath",

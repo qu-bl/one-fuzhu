@@ -13,13 +13,13 @@
     },
     {
       "name": "examples.json",
-      "version": "2026.09.22.0122",
-      "sha256": "ac9270df0029b36d943cef4872a418a9934423214356baa5b12d7e6837d84b5b"
+      "version": "2026.09.22.0540",
+      "sha256": "5d569b31daa0cd83d7648cea2341dc5e94da1e566a71dd12acfa251304c28398"
     },
     {
       "name": "generation-profile.json",
-      "version": "2026.09.22.0135",
-      "sha256": "c3eb32c0b963485e5e46465adf26092af1b4df429f16e7dfd7dff33493fa2d53"
+      "version": "2026.09.22.0540",
+      "sha256": "92e6b0063b435bf534ddcef17789616caf1ef5196dce4af27daeee726da855e4"
     },
     {
       "name": "guidance.json",

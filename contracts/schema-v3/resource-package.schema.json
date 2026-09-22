@@ -739,27 +739,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -776,27 +755,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -907,27 +865,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -1004,27 +941,6 @@
             "text": {
               "type": "string"
             },
-            "format": {
-              "type": "object",
-              "properties": {
-                "decimals": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 6
-                },
-                "prefix": {
-                  "type": "string"
-                },
-                "suffix": {
-                  "type": "string"
-                },
-                "percent": {
-                  "type": "boolean"
-                }
-              },
-              "required": [],
-              "additionalProperties": true
-            },
             "multiline": {
               "type": "boolean"
             },
@@ -1046,27 +962,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -1142,6 +1037,7 @@
                 "density",
                 "enabled",
                 "flex",
+                "format",
                 "gap",
                 "inputMode",
                 "layout",
@@ -1313,27 +1209,6 @@
             "text": {
               "type": "string"
             },
-            "format": {
-              "type": "object",
-              "properties": {
-                "decimals": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 6
-                },
-                "prefix": {
-                  "type": "string"
-                },
-                "suffix": {
-                  "type": "string"
-                },
-                "percent": {
-                  "type": "boolean"
-                }
-              },
-              "required": [],
-              "additionalProperties": true
-            },
             "action": {
               "enum": [
                 "emit",
@@ -1370,27 +1245,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -1501,27 +1355,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -1840,6 +1673,7 @@
                 "copyable",
                 "density",
                 "flex",
+                "format",
                 "gap",
                 "inputMode",
                 "layout",
@@ -2147,27 +1981,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -2184,27 +1997,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -2221,27 +2013,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -2399,27 +2170,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -2854,27 +2604,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -2891,27 +2620,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -3022,27 +2730,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -3149,27 +2836,6 @@
             },
             "step": {
               "type": "number"
-            },
-            "format": {
-              "type": "object",
-              "properties": {
-                "decimals": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 6
-                },
-                "prefix": {
-                  "type": "string"
-                },
-                "suffix": {
-                  "type": "string"
-                },
-                "percent": {
-                  "type": "boolean"
-                }
-              },
-              "required": [],
-              "additionalProperties": true
             },
             "enabled": {
               "type": "boolean"
@@ -3460,27 +3126,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -3497,27 +3142,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -3628,27 +3252,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -3698,6 +3301,7 @@
                 "copyable",
                 "density",
                 "flex",
+                "format",
                 "gap",
                 "inputMode",
                 "layout",
@@ -4063,27 +3667,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -4100,27 +3683,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -4231,27 +3793,6 @@
                     },
                     "fallback": {
                       "type": "string"
-                    },
-                    "format": {
-                      "type": "object",
-                      "properties": {
-                        "decimals": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        },
-                        "prefix": {
-                          "type": "string"
-                        },
-                        "suffix": {
-                          "type": "string"
-                        },
-                        "percent": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [],
-                      "additionalProperties": true
                     }
                   },
                   "required": [

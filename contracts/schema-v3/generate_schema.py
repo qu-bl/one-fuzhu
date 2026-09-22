@@ -33,12 +33,9 @@ condition = obj({"path": {"type": "string", "minLength": 1}, "equals": scalar,
                  "in": arr(scalar, minItems=1, maxItems=UV["limits"]["optionsMax"]),
                  "fallback": boolean}, ["path"])
 condition["anyOf"] = [{"required": ["equals"]}, {"required": ["in"]}]
-format_shape = obj({"decimals": {"type": "integer", "minimum": UV["limits"]["decimalsMin"], "maximum": UV["limits"]["decimalsMax"]},
-                    "prefix": string, "suffix": string, "percent": boolean})
 option = obj({"value": scalar, "resource": string, "label": {"type": "string", "minLength": 1,
                                                            "maxLength": UV["limits"]["labelMax"]}}, ["label"])
-text_binding = obj({"path": {"type": "string", "minLength": 1}, "fallback": string,
-                    "format": format_shape}, ["path"])
+text_binding = obj({"path": {"type": "string", "minLength": 1}, "fallback": string}, ["path"])
 number_binding = obj({"path": {"type": "string", "minLength": 1}, "fallback": number}, ["path"])
 list_binding = obj({"path": {"type": "string", "minLength": 1},
                     "fallback": arr(option, maxItems=UV["limits"]["optionsMax"])}, ["path"])
@@ -66,7 +63,7 @@ ui_properties = {
     # harmless third-party extensions.
     "density": string, "gap": number, "lines": {"type": "integer"}, "padding": number,
     "presentation": string, "size": string, "space": number, "style": string,
-    "text": string, "format": format_shape,
+    "text": string, "format": {"type": "object"},
     "multiline": boolean, "copyable": boolean,
     "hug": boolean,
     "placeholder": string,
