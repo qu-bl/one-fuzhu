@@ -71,8 +71,6 @@ def verify_ui_generation_rules(contract):
         "typesByComponent": {"toggle": ["boolean"], "slider": ["number"]},
         "inputTypesByMode": {"text": ["string"], "multiline": ["string"],
                              "number": ["number"], "password": ["string"]},
-        "choiceSingleTypes": ["string", "enum", "resource"],
-        "choiceMultipleTypes": ["list"],
         "choiceModeByValueType": {
             "string": "single", "enum": "single", "resource": "single", "list": "multiple"
         },

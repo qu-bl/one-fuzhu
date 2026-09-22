@@ -404,14 +404,6 @@
           "string"
         ]
       },
-      "choiceSingleTypes": [
-        "string",
-        "enum",
-        "resource"
-      ],
-      "choiceMultipleTypes": [
-        "list"
-      ],
       "choiceModeByValueType": {
         "string": "single",
         "enum": "single",

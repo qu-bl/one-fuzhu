@@ -114,7 +114,7 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
     if component_type == "choice":
         variant.setdefault("allOf", []).append({"properties": {"bindings": {"properties": {
             "value": {"properties": {"type": {
-                "enum": semantics["choiceSingleTypes"] + semantics["choiceMultipleTypes"]
+                "enum": list(semantics["choiceModeByValueType"])
             }}}
         }}}})
     if component_type == "group":
