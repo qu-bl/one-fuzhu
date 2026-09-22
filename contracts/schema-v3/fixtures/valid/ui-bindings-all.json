@@ -72,7 +72,7 @@
               "id": "pick",
               "type": "button",
               "label": "选择资源",
-              "action": "pickResource",
+              "action": "pickFile",
               "maxBytes": 10485760,
               "bindings": {
                 "value": {
@@ -232,8 +232,6 @@
               "id": "mode",
               "type": "choice",
               "label": "模式",
-              "selectionMin": 1,
-              "selectionMax": 1,
               "bindings": {
                 "value": {
                   "path": "ui.mode",

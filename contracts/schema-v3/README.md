@@ -7,7 +7,7 @@
 `contract.json` 是资源包、UI、QVMI、JS、归档、资源读取与网络的共同规则，JSON Schema 是由它生成的资源包结构规则。
 UI 的允许字段、逐类型必填字段、任选字段组和条件必填规则都由 `contract.ui.validation` 发布；Schema、AI 精简索引和示例发布检查从这里派生，不再各自维护必填表。
 制作台的工程名长度、资源包 UI 文案长度、Rive 路径长度和脚本声明入口也由本契约发布。
-动态原生 UI 的节点、参数与破坏式升级边界见 [UI_PROTOCOL.md](UI_PROTOCOL.md)。
+动态原生 UI 的八种组件、布局、绑定、动作与破坏式升级边界见 [UI_PROTOCOL.md](UI_PROTOCOL.md)。
 动态 UI 的所有运行时绑定统一读取所属作用域的 QVMI；宿主只负责响应式映射和原生组件状态，不创建镜像字段。
 资源包值绑定使用相对路径：所有资源包 UI 值统一映射到运行时 `package.ui.<path>`；控件 `id` 不参与字段命名。
 应用脚本的 `@observe` 只用于 `onValue` 实际消费的字段，UI binding 不需要重复观察。`viewModel.define`

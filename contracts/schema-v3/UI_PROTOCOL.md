@@ -1,71 +1,113 @@
-# 动态原生 UI 协议 5.4.0
+# 三端动态原生 UI 规范 8.0.0
 
-三端只实现 `group/text/button/toggle/slider/input/choice/spacer` 八种节点，并使用平台原生组件绘制。
-字段、绑定、枚举和限制以 `contract.json` 的 `ui` 段为唯一依据。5.0 是破坏式更新，不解析旧的
-`propertyPath`、`valueType`、`defaultValue`、`textPath`、`optionsPath`、`visibleWhen`、
-`enabledWhen`、`loadingPath` 或 `selectedPath`。
-5.2 再次破坏式收口：旧的 `style/size/density/presentation/flex/gap/padding/space/lines` 会直接校验失败。
-5.4 移除三端宿主没有共同实现的 `format`；数值和文本由平台原生组件直接呈现。
+本规范是 Apple、Android、鸿蒙动态 UI 的共同最小集合。权威机器规则位于
+[`contract.json`](contract.json) 的 `ui` 段；本文用于说明它能表达什么。
 
-## 统一绑定
+## 设计原则
 
-静态值位于组件顶层，动态来源全部位于 `bindings`。路径统一使用点分字符串。
+- **短板原则**：任一端无法用含义相同的原生能力实现，字段就不进入公共协议。
+- **原生组件**：宿主直接使用平台默认组件和默认外观，不接收颜色、字体、圆角、描边、背景、图标等样式。
+- **自适应布局**：不接收像素、点、vp、固定间距、固定尺寸或绝对坐标。
+- **数据与 UI 分离**：声明描述组件和绑定；动态值通过当前脚本或资源包作用域的 QVMI 传递。
+- **运行与持久化分离**：QVMI 和 UI 随所有者停止而释放；跨冷启动数据由脚本显式使用 `qu.storage` 保存。
+- **云端为准**：制作台、检查器和运行时读取同一份已校验云端契约。
 
-- `value`：`path/type/default`，用于输入、开关、滑杆、选择器和选择文件按钮。
-- `text`：`path/fallback`，用于文本、按钮文字、标题、说明、占位和错误。
-- `condition`：`path + equals/in + fallback`，用于可见、启用和只读。
-- `list`：`path/fallback`，用于动态选项。
-- `number`：`path/fallback`，用于动态最小值、最大值和步长。
+## 八种组件
 
-允许的绑定键由 `validation.bindingsByType` 给出，绑定种类由 `bindingKinds` 给出，
-逐组件固定必填项由 `requiredByType` 和 `requiredBindingsByType` 给出。未取得动态值时必须使用
-`fallback` 或顶层静态值；条件默认值以 `bindingDefaults` 为准。
-每个组件都必须提供非空的静态 `label`，动态 `bindings.label` 只负责运行时替换显示文字，不能代替静态必填值。
-所有值控件的 `bindings.value` 都必须同时提供 `path/type/default`。类型关系由
-`validation.valueSemantics` 统一发布：开关只接受布尔值，滑杆只接受数字，输入框类型跟随
-`inputMode`，单选接受字符串、枚举或资源，多选接受字符串列表，文件与资源选择按钮只接受资源值。
+所有组件共有 `id`、`type`、非空 `label`，并可带 `description`、`visible`、`bindings`。
 
-滑杆必须具有 `min/max/step`（可以是静态值，也可以由 number binding 的 fallback 提供），并满足
-`min < max`、`step > 0` 且 `step <= max - min`。选择器满足 `0 <= selectionMin <= selectionMax`；
-文件与资源选择按钮的 `maxBytes` 必须为正数。这些关系由三端按云端语义表执行，不在各端另设一套产品规则。
-
-## 运行时数据流
-
-所有动态绑定都直接观察当前脚本或资源包所属作用域中的 QVMI 字段。宿主将 QVMI 值转换为原生组件状态，
-不得把 `enabled`、文案或父级布局状态重新发布为另一组 QVMI 字段。
-脚本停止时，宿主移除该脚本的 UI，并释放该脚本创建或为其 UI 创建的全部 QVMI 字段。
-需要跨冷启动恢复的数据一律由脚本使用 `qu.storage` 单独保存；任何 UI scope 和 QVMI 字段均不表示数据持久化。
-资源包的 `bindings.value.path` 使用相对路径：无论 UI scope 为 `persistent` 还是 `runtime`，均映射为运行时 `package.ui.<path>`；控件 `id` 只负责标识控件，不能代替绑定路径。
-同一组件内多个绑定引用同一路径时，宿主只建立一次观察；该路径变化后重新计算所有引用它的绑定。
-
-`group` 的禁用结果属于宿主渲染状态：支持原生继承的平台直接在容器应用，其他平台在渲染树内部传递
-计算结果，但不得写回 QVMI。叶子控件自身的有效启用状态由静态 `enabled`、动态 `bindings.enabled`
-和祖先分组状态共同决定。
-
-## 组件职责
-
-| 类型 | 职责 | 动态能力摘要 |
+| 类型 | 用途 | 可用静态字段 |
 | --- | --- | --- |
-| `group` | `column/row/stack` 布局、嵌套和滚动 | 标题、说明、可见、整体启用、错误 |
-| `text` | 文本展示 | 文本、可见；`copyable` 启用原生选择复制 |
-| `button` | 触发操作或系统文件/资源选择器 | 文字、可见、启用、错误、选择结果 |
-| `toggle` | 布尔开关 | 值、标题、说明、可见、启用、错误 |
-| `slider` | 范围数值 | 值、范围、步长、标题、说明、可见、启用、错误 |
-| `input` | 文本、数字、密码或多行文本输入 | 值、标题、说明、占位、可见、启用、只读、错误 |
-| `choice` | 单选或多选 | 值、选项、标题、说明、可见、启用、错误 |
-| `spacer` | 按剩余空间比例伸缩的空白 | 可见 |
+| `group` | 分组、嵌套和布局 | `children`、`layout`、`align`、`valign`、`scroll`、`enabled` |
+| `text` | 展示文字 | `text`、`copyable` |
+| `button` | 触发事件或打开系统文件选择器 | `text`、`action`、`acceptedFileExtensions`、`maxBytes`、`enabled`、`hug` |
+| `toggle` | 布尔开关 | `enabled`、`hug` |
+| `slider` | 范围数值 | `min`、`max`、`step`、`enabled`、`hug` |
+| `input` | 文本、多行文本、数字或密码输入 | `placeholder`、`inputMode`、`enabled`、`hug` |
+| `choice` | 单选或多选 | `options`、`enabled`、`hug` |
+| `spacer` | 使用剩余空间的弹性空白 | 无专属字段 |
 
-声明只描述内容、值、状态、行为和数据类型，不描述颜色、背景、描边、圆角、字体、字号、密度或按钮
-外观。宿主必须直接使用平台组件的默认外观，不得根据声明添加自绘或外观覆盖。按钮不提供图标、加载态、
-选中态或平台角色字段；选择状态使用 `toggle` 或 `choice` 表达。
+`hug` 只用于交互控件，表示按内容自适应；它不是尺寸。`text` 使用原生文字的自然换行，
+因此不提供 `multiline`。输入框通过 `inputMode=multiline` 表示多行输入。
 
-选择器的 `selectionMax=1` 表示单选，大于 1 表示多选。布局只允许 `layout/align/valign/scroll/hug`：
-`hug` 表达按内容自适应，其余字段表达容器关系。`spacer` 使用各平台原生弹性占位并自动取得剩余空间。声明不得携带像素、
-点、vp 或其他绝对尺寸，不提供固定间距、内边距、占位尺寸或固定行数。所有实际尺寸和间距由平台原生
-布局自行测量。
+## 布局
 
-## 失败语义
+`group.layout` 必填，只允许以下三种值：
 
-路径暂时无值时使用回退值；读取失败或类型不匹配时警告并保留上一份有效值。
-`group.enabled=false` 递归禁用子组件。未知第三方扩展字段只警告；
-已知字段结构、必填项、绑定类型或枚举错误属于协议错误，检查器阻止对应组件运行。
+| `layout` | 含义 | 可用布局字段 |
+| --- | --- | --- |
+| `column` | 子组件从上到下排列 | `align`、`scroll` |
+| `row` | 子组件从左到右排列 | 无 |
+| `stack` | 子组件叠加 | `align`、`valign` |
+
+- `align`：`start`、`center`、`end`。
+- `valign`：`top`、`center`、`bottom`。
+- `scroll`：仅 `column` 可启用原生滚动。
+- `spacer`：使用原生弹性布局占据剩余空间。
+- `group.enabled=false`：其全部后代在宿主渲染状态中禁用，不写回 QVMI。
+
+字段放在不适用的布局中属于协议错误。组件间距、边距和实际尺寸全部由平台自行测量。
+
+## 值控件与选择模式
+
+`input`、`toggle`、`slider`、`choice` 必须声明 `bindings.value`，其中包含
+`path`、`type`、`default`。选择文件的按钮也必须声明该绑定。
+
+| 组件 | 值类型规则 |
+| --- | --- |
+| `toggle` | 仅 `boolean` |
+| `slider` | 仅 `number`；必须满足 `min < max`、`step > 0`、`step <= max - min` |
+| `input` | `text/multiline/password` 对应 `string`；`number` 对应 `number` |
+| `choice` | `string/enum/resource` 自动使用单选；`list` 自动使用多选 |
+| 文件按钮 | 仅 `resource`，且 `maxBytes` 为正数 |
+
+`choice` 不再声明选择数量。宿主仅根据绑定类型选择原生单选或多选组件。
+
+## 动态绑定
+
+静态回退值位于组件顶层；动态值位于 `bindings`。路径使用点分字符串。
+
+| 绑定 | 结构 | 用途 |
+| --- | --- | --- |
+| `value` | `path/type/default` | 值控件和文件选择结果 |
+| `text` | `path/fallback` | 文本与按钮文字 |
+| `label`、`description`、`placeholder`、`error` | `path/fallback` | 相应文案 |
+| `visible`、`enabled`、`readOnly` | `path + equals/in + fallback` | 条件状态 |
+| `options` | `path/fallback` | 动态选择项 |
+| `min`、`max`、`step` | `path/fallback` | 滑杆动态范围 |
+
+每种组件可用的绑定键由 `validation.bindingsByType` 给出。动态值暂不可用时使用
+`fallback` 或静态值；类型错误时警告并保留上一份有效状态。同一组件多次引用同一路径时，宿主只观察一次。
+
+## 按钮动作
+
+| `action` | 行为 |
+| --- | --- |
+| `emit` | 触发 `onUiAction`，不允许 `bindings.value` |
+| `pickFile` | 打开系统原生文件选择器，把结果写入 `resource` 值绑定 |
+
+文件类型由 `acceptedFileExtensions` 限制，大小由 `maxBytes` 限制。协议不区分“文件”和“资源”两种选择器，
+因为三端都由同一类系统原生选择界面完成。
+
+## UI 集合
+
+集合字段为 `id`、`title`、`scope`、`slot`、`components`。
+
+- `scope=persistent`：UI 在所有者本次运行期间持续挂载。
+- `scope=runtime`：UI 用于本次临时交互。
+- `scope` 只控制挂载周期，不保存数据。
+- 应用脚本使用 `slot` 指定宿主位置；资源包自绘面板不声明 `slot`。
+
+## 已删除的差异字段
+
+8.0.0 删除下列公共能力，旧声明会直接校验失败：
+
+- `choice.selectionMin`、`choice.selectionMax`：三端没有一致的数量限制行为。
+- `input.min`、`input.max`、`input.step`：三端数字输入行为不一致；这些字段只保留给 `slider`。
+- `text.multiline`：三端原生文字均可自然换行，不需要额外开关。
+- `group.hug`、`text.hug`：三端容器和文字的测量语义不一致。
+- `button.action=pickResource`：与 `pickFile` 没有可观察的共同差异。
+- `row.align`、所有非 `stack` 的 `valign`、所有非 `column` 的 `scroll`：三端布局含义不一致。
+
+此前已删除的样式、绝对布局和旧绑定字段继续列在 `ui.forbiddenDeclarationFields` 中。
+未知的第三方扩展字段只产生兼容性警告；已知字段用错组件、缺少必填项、类型不匹配或枚举错误会阻止该 UI 运行。

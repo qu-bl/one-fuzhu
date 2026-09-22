@@ -40,6 +40,7 @@ def build_profile():
             "bindingDefaults": validation["bindingDefaults"],
             "requiredBindingsByType": validation["requiredBindingsByType"],
             "valueSemantics": validation["valueSemantics"],
+            "layoutFieldApplicability": validation["layoutFieldApplicability"],
             "enums": validation["enums"],
             "limits": validation["limits"],
         },

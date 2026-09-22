@@ -43,7 +43,6 @@
               "label": "标题",
               "description": "标题文字",
               "text": "你好",
-              "hug": true,
               "platformDecoration": 4
             },
             {
