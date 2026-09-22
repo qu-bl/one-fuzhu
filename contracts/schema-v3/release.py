@@ -283,6 +283,13 @@ def verify_schema_and_fixtures():
     if not isinstance(script["minimumIntervalMs"], int) or script["minimumIntervalMs"] < 1:
         raise ValueError("script.minimumIntervalMs must be positive")
     qvmi = contract["qvmi"]
+    if qvmi.get("lifecycle") != {
+        "fieldExistsWhileOwnerActive": True,
+        "releaseOnOwnerStop": True,
+        "persistentStoresValueOnly": True,
+        "restoreAfterRedeclaration": True,
+    }:
+        raise ValueError("QVMI lifecycle must release fields on stop and persist values only")
     public_paths = {f"{group}.{name}" for group, fields in qvmi["observable"].items() for name in fields}
     if len(public_paths) != sum(map(len, qvmi["observable"].values())):
         raise ValueError("public QVMI paths must be unique")

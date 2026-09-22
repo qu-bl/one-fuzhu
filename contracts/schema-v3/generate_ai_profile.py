@@ -54,6 +54,7 @@ def build_profile():
             "hostOperations": script["hostOperations"],
         },
         "qvmi": {
+            "lifecycle": CONTRACT["qvmi"]["lifecycle"],
             "fieldTypes": CONTRACT["qvmi"]["fieldTypes"],
             "writablePublicPaths": CONTRACT["qvmi"]["writablePublicPaths"],
             "permissionRules": CONTRACT["qvmi"]["permissionRules"],

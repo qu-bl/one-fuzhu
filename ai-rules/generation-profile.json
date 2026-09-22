@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "5.4.0",
+  "contractVersion": "5.4.1",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -574,6 +574,12 @@
     ]
   },
   "qvmi": {
+    "lifecycle": {
+      "fieldExistsWhileOwnerActive": true,
+      "releaseOnOwnerStop": true,
+      "persistentStoresValueOnly": true,
+      "restoreAfterRedeclaration": true
+    },
     "fieldTypes": {
       "app.theme.brand": "color",
       "system.time.epochMs": "number",
