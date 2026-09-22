@@ -13,8 +13,8 @@ UI 的允许字段、逐类型必填字段、任选字段组和条件必填规�
 `package.ui.<path>`；控件 `id` 不参与字段命名。
 应用脚本的 `@observe` 只用于 `onValue` 实际消费的字段，UI binding 不需要重复观察。`viewModel.define`
 只能使用 `script.valueAccessorTypes`，并与同路径值绑定保持同型；其他 UI 值类型由宿主管理。
-`qvmi.lifecycle` 规定脚本字段只在所有者会话存活期间存在。`persistent` 只保存字段值：脚本停止时字段仍须
-释放，再次启动并重新声明同路径同类型字段后，宿主才恢复保存值。
+`qvmi.lifecycle` 规定应用脚本创建的字段和 UI 只在所有者会话存活期间存在，脚本停止时全部释放。
+应用脚本的跨冷启动数据使用独立的 `qu.storage` 本地 JSON 存储；应用脚本的 QVMI 不承担数据持久化。
 `contract.ui.runtimeSemantics` 要求声明只携带值、状态、行为与相对或自适应布局；所有组件外观、尺寸和实际间距均由平台原生默认值决定。
 修改规则时同时更新有效／无效样例，运行 `python release.py` 生成发布描述。
 GitHub Actions 会重新生成 Schema、校验样例及哈希；检查通过后才应合并。

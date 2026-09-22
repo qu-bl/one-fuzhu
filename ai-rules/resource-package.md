@@ -6,6 +6,7 @@
 2. 读取用户当前的两份文本文件以及真实 Rive 元数据。缺少 Rive 元数据时，不新建或改写画板、状态机、View Model、实例、属性路径。
 3. 先列出脚本实际使用的 QVMI 路径及类型，再逐项对应到 `values`、UI 生成字段、`capabilities.observe` 或 `capabilities.trigger`。
 4. JSON 负责文件、字段、权限、绑定、资源和 UI；JavaScript 负责行为。两份文件必须同步生成。
+   脚本私有且需要跨冷启动恢复的数据使用 `qu.storage`；清单声明的 `persistent` 绑定仍由宿主管理包状态，不能改用脚本 `define(..., { persistent: true })`。
 5. UI 只使用 `generation-profile.ui.allowedFieldsByType` 中的当前组件；逐控件满足 `requiredByType`、`oneOfRequiredByType`、`requiredWhen` 和 `valueSemantics`。布局使用 `group`，空白使用 `spacer`。
    每个组件必须写非空静态 `label`；动态 `bindings.label` 不能代替它。所有动态来源只写入组件的 `bindings`；`main.js` 负责更新相应 QVMI 字段。同一状态在多个组件中复用同一路径；不要为父级禁用、加载、选中或文案声明仅用于转发的重复字段。不得生成旧的 `xxxPath`、顶层值绑定或图标字段。
    `bindings.value.path` 写资源包内的相对路径：`persistent` 由宿主映射到 `package.storage.<path>`，`runtime` 映射到 `package.ui.<path>`。控件 `id` 只标识控件，不代替字段路径。

@@ -110,7 +110,7 @@
       },
       {
         "id": "runtime-capabilities",
-        "check": "宿主操作属于当前场景，网络、持久化、资源和 Rive 能力均满足契约前置条件。",
+        "check": "宿主操作属于当前场景，网络、本地存储、资源和 Rive 能力均满足契约前置条件。",
         "appliesTo": [
           "applicationScript",
           "resourcePackage"
@@ -145,7 +145,7 @@
       "UI bindings 是 QVMI 的消费者；同一状态被多个组件或多个 binding 使用时复用同一路径，不为宿主布局传播另建镜像字段。",
       "属性句柄不是字段当前值；读取 .value 可能得到 undefined，表示尚未发布，不能伪造默认硬件数据。",
       "写入已有可写字段用 .value = next；修改对象或数组后须整体赋回。不要把 define 当成写入已有字段的前置步骤。",
-      "persistent 只保存字段值，不让字段脱离脚本会话永久存在；脚本停止时字段释放，下次启动重新声明后再恢复类型相容的值。",
+      "应用脚本创建的 QVMI 字段和 UI 只属于当前运行会话，脚本停止后全部释放；跨冷启动数据使用脚本私有的 qu.storage。",
       "手动订阅要在停止时取消。订阅可能补发缓存值，回调不必然代表一次新业务事件。",
       "宿主 trigger 是动作，不是可读写的普通状态；调用 Promise 要处理失败。"
     ],
@@ -183,7 +183,7 @@
         "应用脚本不假定拥有资源包 Rive 会话、包文件、包音频或包 UI。",
         "声明式 UI 先准备绑定字段，再声明组件；弹窗打开完成只表示显示请求已提交，不表示用户确认。",
         "脚本自有 UI binding 路径只 define 一次并保持类型一致；公开 QVMI 字段直接使用，宿主负责把绑定结果映射到原生组件。",
-        "持久化仅用于明确声明的自有字段；保存成功不代表云端同步完成。",
+        "跨冷启动数据使用 qu.storage.get/set/remove/clear/keys；QVMI define 不接受 persistent，脚本启动时主动读取所需数据。",
         "值控件必须按 generation-profile.ui.valueSemantics 检查 path/type/default、输入模式、数值范围、选择数量和文件选择上限，禁止等宿主报错后猜测。"
       ]
     },
@@ -208,7 +208,7 @@
         "UI binding 直接引用包已声明字段或已授权公开 QVMI 字段；资源包 bindings.value.path 写相对路径，persistent 由宿主映射到 package.storage.<path>，runtime 映射到 package.ui.<path>；控件 id 不代替字段路径。不要为 enabled 或文案创建仅用于转发的重复字段。",
         "activate 建立订阅和运行状态，deactivate 清理；不使用应用脚本的元数据调度。",
         "绑定的 QVMI 路径、类型、方向和 Rive 属性必须与清单及真实资产一致。",
-        "资源引用限本包与宿主 token，不使用绝对路径；持久数据写入已声明的可写字段。",
+        "资源引用限本包与宿主 token，不使用绝对路径；脚本私有的跨冷启动数据写入 qu.storage。",
         "清单结构校验通过，不代表 Rive 资产或设备能力已验证。",
         "值控件必须按 generation-profile.ui.valueSemantics 检查 path/type/default、输入模式、数值范围、选择数量和文件选择上限，禁止等宿主报错后猜测。"
       ]

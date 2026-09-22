@@ -52,6 +52,7 @@ def build_profile():
             "generationChecks": script["validation"]["generationChecks"],
             "applicationOnlyOperations": script["applicationOnlyOperations"],
             "hostOperations": script["hostOperations"],
+            "storage": script["storage"],
         },
         "qvmi": {
             "lifecycle": CONTRACT["qvmi"]["lifecycle"],

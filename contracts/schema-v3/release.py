@@ -210,6 +210,8 @@ def verify_schema_and_fixtures():
         "appearancePolicy": "platformDefaultOnly",
         "layoutPolicy": "adaptiveRelativeOnly",
         "absoluteLayoutValuesAllowed": False,
+        "uiRemovedOnOwnerStop": True,
+        "applicationScopeDoesNotPersistData": True,
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
     forbidden_appearance = {"style", "size", "density", "presentation", "format"}
@@ -265,6 +267,19 @@ def verify_schema_and_fixtures():
             raise ValueError(f"duplicate option for {operation}")
     if len(script["valueAccessorTypes"]) != len(set(script["valueAccessorTypes"])):
         raise ValueError("valueAccessorTypes must be unique")
+    storage = script.get("storage", {})
+    if storage != {
+        "keyPattern": "^[A-Za-z][A-Za-z0-9._-]{0,127}$",
+        "keyMaxChars": 128,
+        "valueMaxBytes": 65536,
+        "totalMaxBytes": 1048576,
+        "valueKinds": ["null", "boolean", "number", "string", "array", "object"],
+        "writeThrough": True,
+        "survivesColdStart": True,
+        "isolatedByOwner": True,
+    }:
+        raise ValueError("script storage must be isolated, write-through JSON storage")
+    re.compile(storage["keyPattern"])
     expected_generation_checks = {
         "requireHostContractIdentity": True,
         "hostContractMismatchPolicy": "reject",
@@ -286,10 +301,10 @@ def verify_schema_and_fixtures():
     if qvmi.get("lifecycle") != {
         "fieldExistsWhileOwnerActive": True,
         "releaseOnOwnerStop": True,
-        "persistentStoresValueOnly": True,
-        "restoreAfterRedeclaration": True,
+        "applicationStorageIndependentFromQvmi": True,
+        "uiRemovedOnOwnerStop": True,
     }:
-        raise ValueError("QVMI lifecycle must release fields on stop and persist values only")
+        raise ValueError("QVMI lifecycle must be independent from durable script storage")
     public_paths = {f"{group}.{name}" for group, fields in qvmi["observable"].items() for name in fields}
     if len(public_paths) != sum(map(len, qvmi["observable"].values())):
         raise ValueError("public QVMI paths must be unique")
