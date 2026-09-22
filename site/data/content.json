@@ -110,12 +110,7 @@
         ]
       },
       "featured": true,
-      "visible": true,
-      "video": {
-        "platform": "bilibili",
-        "id": "BV1cjYk6MEj1",
-        "aspectRatio": 1.7777
-      }
+      "visible": true
     },
     {
       "id": "image-binding-cards",
@@ -133,20 +128,7 @@
         "课程系列"
       ],
       "featured": true,
-      "visible": true,
-      "video": {
-        "platform": "bilibili",
-        "id": "BV1MYeY6bEtU",
-        "aspectRatio": 1.7777
-      },
-      "access": {
-        "items": [
-          {
-            "platform": "bilibili",
-            "url": "<iframe src=\"//player.bilibili.com/player.html?isOutside=true&aid=117300673910614&bvid=BV1MYeY6bEtU&cid=42041410389&p=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"></iframe>"
-          }
-        ]
-      }
+      "visible": true
     },
     {
       "id": "sensor-compass",
