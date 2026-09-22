@@ -1,13 +1,14 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "6.0.0",
+  "contractVersion": "7.0.0",
   "notes": [
     "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
     "不要复制示例中未被用户需求使用的字段或组件。",
     "manifestJson 对象在 apply_files 交付时序列化为完整 JSON 字符串。",
     "控件固定必填字段、条件必填字段和任选字段组以 generation-profile.json 为准。",
     "应用脚本示例中的多选 list 由 @ui 值绑定交给宿主管理，不调用 viewModel.define，也不加入 @observe。",
-    "@observe 只列出 onValue 实际消费的字段；UI binding 不需要重复观察。"
+    "@observe 只列出 onValue 实际消费的字段；UI binding 不需要重复观察。",
+    "所有 QVMI 均为纯运行时数据；示例中的 UI scope 只控制挂载方式，跨冷启动值必须由脚本显式使用 qu.storage 保存和恢复。"
   ],
   "examples": {
     "applicationScript": {
@@ -44,9 +45,30 @@
         "assets": {
           "audio": []
         },
-        "ui": []
+        "ui": [
+          {
+            "id": "Settings",
+            "title": "设置",
+            "scope": "persistent",
+            "components": [
+              {
+                "id": "Enabled",
+                "type": "toggle",
+                "label": "启用",
+                "description": "当前运行会话中的开关状态",
+                "bindings": {
+                  "value": {
+                    "path": "settings.enabled",
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              }
+            ]
+          }
+        ]
       },
-      "mainJavaScript": "let stops = [];\ndefineResourcePackage({\n  activate(qu) {\n    stops = [];\n  },\n  deactivate() {\n    stops.forEach(stop => stop());\n    stops = [];\n  }\n});\n",
+      "mainJavaScript": "let enabled = null;\nlet stopEnabled = null;\n\ndefineResourcePackage({\n  activate(qu) {\n    enabled = qu.viewModel.boolean('package.ui.settings.enabled');\n    enabled.value = qu.storage.get('settings.enabled', true);\n    stopEnabled = enabled.observe(value => {\n      qu.storage.set('settings.enabled', value);\n    });\n  },\n  deactivate() {\n    if (stopEnabled) stopEnabled();\n    stopEnabled = null;\n    enabled = null;\n  }\n});\n",
       "currentUiComponents": {
         "layout": {
           "id": "layout",

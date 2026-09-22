@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "6.0.0",
+  "contractVersion": "7.0.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -58,7 +58,8 @@
       "layoutPolicy": "adaptiveRelativeOnly",
       "absoluteLayoutValuesAllowed": false,
       "uiRemovedOnOwnerStop": true,
-      "applicationScopeDoesNotPersistData": true
+      "scopeControlsMountOnly": true,
+      "scopeDoesNotPersistData": true
     },
     "forbiddenDeclarationFields": [
       "defaultValue",
@@ -596,9 +597,10 @@
   },
   "qvmi": {
     "lifecycle": {
+      "allFieldsRuntimeOnly": true,
       "fieldExistsWhileOwnerActive": true,
       "releaseOnOwnerStop": true,
-      "applicationStorageIndependentFromQvmi": true,
+      "storageIndependentFromQvmi": true,
       "uiRemovedOnOwnerStop": true
     },
     "fieldTypes": {
