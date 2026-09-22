@@ -1,5 +1,5 @@
 {
-  "contractVersion": "5.3.0",
+  "contractVersion": "5.4.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -262,7 +262,6 @@
       ],
       "text": [
         "text",
-        "format",
         "multiline",
         "copyable",
         "hug"
@@ -270,7 +269,6 @@
       "spacer": [],
       "button": [
         "text",
-        "format",
         "action",
         "acceptedFileExtensions",
         "maxBytes",
@@ -294,7 +292,6 @@
         "min",
         "max",
         "step",
-        "format",
         "enabled",
         "hug"
       ],
@@ -318,12 +315,6 @@
       "equals",
       "in",
       "fallback"
-    ],
-    "formatFields": [
-      "decimals",
-      "prefix",
-      "suffix",
-      "percent"
     ],
     "optionFields": [
       "value",
@@ -357,9 +348,7 @@
         "propertyPathSegmentsMax": 8,
         "extensionsMax": 16,
         "labelMax": 200,
-        "idMax": 64,
-        "decimalsMin": 0,
-        "decimalsMax": 6
+        "idMax": 64
       },
       "enums": {
         "scope": [
@@ -666,14 +655,14 @@
       "default",
       "fallback",
       "equals",
-      "in",
-      "format"
+      "in"
     ],
     "forbiddenDeclarationFields": [
       "defaultValue",
       "density",
       "enabledWhen",
       "flex",
+      "format",
       "gap",
       "lines",
       "loadingPath",

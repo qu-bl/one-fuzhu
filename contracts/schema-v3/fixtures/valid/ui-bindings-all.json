@@ -45,11 +45,7 @@
               "bindings": {
                 "text": {
                   "path": "ui.copy",
-                  "fallback": "可复制文字",
-                  "format": {
-                    "prefix": "[",
-                    "suffix": "]"
-                  }
+                  "fallback": "可复制文字"
                 },
                 "visible": {
                   "path": "ui.visible",
@@ -76,8 +72,8 @@
               "id": "pick",
               "type": "button",
               "label": "选择资源",
-          "action": "pickResource",
-          "maxBytes": 10485760,
+              "action": "pickResource",
+              "maxBytes": 10485760,
               "bindings": {
                 "value": {
                   "path": "ui.resource",

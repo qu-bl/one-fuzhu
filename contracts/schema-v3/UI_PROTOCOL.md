@@ -1,17 +1,18 @@
-# 动态原生 UI 协议 5.3.0
+# 动态原生 UI 协议 5.4.0
 
 三端只实现 `group/text/button/toggle/slider/input/choice/spacer` 八种节点，并使用平台原生组件绘制。
 字段、绑定、枚举和限制以 `contract.json` 的 `ui` 段为唯一依据。5.0 是破坏式更新，不解析旧的
 `propertyPath`、`valueType`、`defaultValue`、`textPath`、`optionsPath`、`visibleWhen`、
 `enabledWhen`、`loadingPath` 或 `selectedPath`。
 5.2 再次破坏式收口：旧的 `style/size/density/presentation/flex/gap/padding/space/lines` 会直接校验失败。
+5.4 移除三端宿主没有共同实现的 `format`；数值和文本由平台原生组件直接呈现。
 
 ## 统一绑定
 
 静态值位于组件顶层，动态来源全部位于 `bindings`。路径统一使用点分字符串。
 
 - `value`：`path/type/default`，用于输入、开关、滑杆、选择器和选择文件按钮。
-- `text`：`path/fallback/format`，用于文本、按钮文字、标题、说明、占位和错误。
+- `text`：`path/fallback`，用于文本、按钮文字、标题、说明、占位和错误。
 - `condition`：`path + equals/in + fallback`，用于可见、启用和只读。
 - `list`：`path/fallback`，用于动态选项。
 - `number`：`path/fallback`，用于动态最小值、最大值和步长。
@@ -53,7 +54,7 @@
 | `choice` | 单选或多选 | 值、选项、标题、说明、可见、启用、错误 |
 | `spacer` | 按剩余空间比例伸缩的空白 | 可见 |
 
-声明只描述内容、值、状态、行为和数据格式，不描述颜色、背景、描边、圆角、字体、字号、密度或按钮
+声明只描述内容、值、状态、行为和数据类型，不描述颜色、背景、描边、圆角、字体、字号、密度或按钮
 外观。宿主必须直接使用平台组件的默认外观，不得根据声明添加自绘或外观覆盖。按钮不提供图标、加载态、
 选中态或平台角色字段；选择状态使用 `toggle` 或 `choice` 表达。
 
