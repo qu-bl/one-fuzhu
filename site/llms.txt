@@ -1,0 +1,33 @@
+# 千机百变（Qianji Baibian）
+
+> 千机百变（应用包名 com.bolin.one）是由 qu-bl 开发与运营的创意设计与互动内容工具，面向鸿蒙（HarmonyOS）、Android 与 Apple 平台，提供 Rive 动画预览与调试、脚本运行、资源包制作与可选同步能力。官方网站收录官方与伙伴们的互动作品、趣味工具与学习内容，让创意动起来，让屏幕有个性。
+
+## 品牌信息
+
+- 官网：https://qu-bl.github.io/one-fuzhu/site/
+- 开发者：qu-bl（GitHub：https://github.com/qu-bl）
+- 联系邮箱：156405968@qq.com
+- 创作者交流群（QQ）：862835994
+- 支持平台：鸿蒙 HarmonyOS、Android、Apple
+- 主要能力：Rive 调试台、Rive 在线编辑器、数据流检查器与运行时分析仪、应用脚本（JavaScript）、资源包制作台、端云同步（华为云 / iCloud / WebDAV）
+- 数据与隐私：基础功能无需账号与密码，数据以明文保存在本机；不使用第三方广告或行为追踪服务
+
+## 官方页面
+
+- [首页（创意橱柜）](https://qu-bl.github.io/one-fuzhu/site/): 千机百变官网首页，展示官方与伙伴们的互动作品、趣味工具与学习内容。
+- [首页 Markdown 版](https://qu-bl.github.io/one-fuzhu/site/index.md): 官网核心内容的 Markdown 版本，含品牌信息、作品列表与常见问题，供 Agent 直接读取。
+- [用户服务协议](https://qu-bl.github.io/one-fuzhu/site/terms.html): 千机百变用户服务协议，含服务内容与平台支持说明。
+- [隐私政策](https://qu-bl.github.io/one-fuzhu/site/privacy.html): 千机百变隐私政策，含数据处理、权限与同步说明。
+
+## 作品与项目
+
+- [鸿蒙版千机百变招募内测中](https://qu-bl.github.io/one-fuzhu/site/cases/audio-orbit.html): 千机百变鸿蒙版内测招募，聚焦音频、Rive 与交互实验方向。
+- [RIVE中文系列课程](https://qu-bl.github.io/one-fuzhu/site/cases/image-binding-cards.html): rive101 系列官方课中文译制版，千机百变官方出品，哔哩哔哩观看。
+- [感应罗盘](https://qu-bl.github.io/one-fuzhu/site/cases/sensor-compass.html): 将方向与传感器信息转换成具有生命感的指针反馈，Rive 状态机实现，支持 Android 与 Apple。
+- [专注节奏控制器](https://qu-bl.github.io/one-fuzhu/site/cases/focus-controller.html): 把倒计时、阶段状态和轻量反馈组合成桌面工具，支持鸿蒙与 Apple。
+- [液态开关组件](https://qu-bl.github.io/one-fuzhu/site/cases/liquid-switch.html): 围绕按压、拖动和状态变化设计的高反馈交互组件，Rive 实现。
+
+## Optional
+
+- [qu-bl GitHub](https://github.com/qu-bl): 开发者 qu-bl 的 GitHub 主页。
+- [千机百变 GitHub Pages](https://qu-bl.github.io/one-fuzhu/site/): 网站托管地址（项目库 one-fuzhu）。
