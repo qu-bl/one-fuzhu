@@ -83,28 +83,19 @@
     ]
   }
   </script>
-  <!-- GEO:ITEMLIST:START -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","@id":"https://qu-bl.github.io/one-fuzhu/site/#showcase","name":"千机百变创意橱柜作品","itemListElement":[{"@type":"ListItem","position":1,"name":"鸿蒙版内测招募","url":"https://qu-bl.github.io/one-fuzhu/site/cases/audio-orbit.html","description":"千机百变鸿蒙版正在招募内测参与者。本次内测聚焦声音轨道（音频）与 Rive 动画结合的交互实验，探索异形屏与拟人角色在鸿蒙平台上的互动可能。感兴趣的用户可通过官网或创作者交流群报名，与团队一起打磨产品。"},{"@type":"ListItem","position":2,"name":"Rive 中文系列课程","url":"https://qu-bl.github.io/one-fuzhu/site/cases/image-binding-cards.html","description":"RIVE 中文系列课程是千机百变官方出品的 rive101 系列官方课中文译制版，覆盖 Rive 动画的核心概念、状态机与创作方法，适合希望系统学习 Rive 动画与互动设计的中文用户。课程通过哔哩哔哩发布并持续更新。"},{"@type":"ListItem","position":3,"name":"感应罗盘","url":"https://qu-bl.github.io/one-fuzhu/site/cases/sensor-compass.html","description":"感应罗盘将设备的方位与传感器信息实时转换成带有生命感的指针反馈，是运用 Rive 状态机制作的角色化交互示例。支持 Android 与 Apple 平台，适合用于拟人角色、异形屏与互动装置中的方向与姿态表达。"},{"@type":"ListItem","position":4,"name":"专注节奏控制器","url":"https://qu-bl.github.io/one-fuzhu/site/cases/focus-controller.html","description":"专注节奏控制器把倒计时、阶段状态与轻量反馈组合成一件桌面工具，帮助用户管理专注与休息节奏。使用 JavaScript 与状态机实现，支持鸿蒙与 Apple 平台。"},{"@type":"ListItem","position":5,"name":"液态开关组件","url":"https://qu-bl.github.io/one-fuzhu/site/cases/liquid-switch.html","description":"液态开关组件是围绕按压、拖动和状态变化设计的高反馈交互组件，使用 Rive 制作，可作为可复用的界面组件用于互动项目。支持 Apple、Android 与鸿蒙平台。"}]}</script>
-<!-- GEO:ITEMLIST:END -->
-  <link rel="stylesheet" href="./styles.css?v=61">
+  <link rel="stylesheet" href="./styles.css?v=62">
   <script src="./theme.js?v=59"></script>
-  <script src="./app.js?v=61" defer></script>
+  <script src="./app.js?v=62" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
 
-  <header class="top-app-bar">
+  <header class="top-app-bar top-app-bar--simple">
     <a class="brand" href="./index.html" aria-label="千机百变首页">
       <img src="./assets/favicon.svg" alt="">
       <span>千机百变</span>
     </a>
-    <nav class="top-nav" aria-label="页面导航">
-      <a href="#capabilities">能力</a>
-      <a href="#showcase">作品</a>
-      <a href="#platforms">平台</a>
-      <a href="#faq">问答</a>
-    </nav>
-    <a class="button button--tonal top-action" href="#showcase">浏览作品</a>
+    <a class="button button--tonal top-action" href="./showcase.html">浏览作品</a>
   </header>
 
   <main id="main-content">
@@ -114,8 +105,8 @@
         <h1 id="hero-title">让每一块屏幕，<span>都能感知与回应。</span></h1>
         <p class="hero-summary">千机百变把动画、触摸、传感器和实时数据连接起来。一次创作，可以在三端呈现，也可以适配圆屏、长条屏与不同设备形态。</p>
         <div class="hero-actions">
-          <a class="button button--filled" href="#showcase">看看正在发生的创意</a>
-          <button class="button button--outlined" id="contact-button" type="button">加入创作者群</button>
+          <a class="button button--filled" href="./showcase.html">看看正在发生的创意</a>
+          <button class="button button--outlined" data-contact type="button">加入创作者群</button>
         </div>
         <ul class="hero-chips" aria-label="核心特点">
           <li>实时互动</li>
@@ -168,21 +159,6 @@
           <p>中文课程、调试台、在线编辑器、应用脚本与资源包制作台连接成完整流程。</p>
           <div class="supporting-chips"><span>学习</span><span>调试</span><span>发布</span></div>
         </article>
-      </div>
-    </section>
-
-    <section class="section showcase-section" id="showcase" aria-labelledby="showcase-title">
-      <div class="section-heading section-heading--row">
-        <div>
-          <p class="label-large">创意橱柜</p>
-          <h2 id="showcase-title">正在发生的创意</h2>
-        </div>
-        <p>课程、实验与可复用组件都在这里。选择一项即可查看介绍和访问方式。</p>
-      </div>
-      <div class="case-grid" id="case-grid" role="list"></div>
-      <div class="empty-state" id="empty-state" hidden>
-        <strong>内容暂时无法载入</strong>
-        <p>请稍后刷新页面。</p>
       </div>
     </section>
 
@@ -243,8 +219,8 @@
         <p>官方 Rive 中文课程适合入门，创作者群可以交流资源包、脚本、交互设计与三端适配。</p>
       </div>
       <div class="creator-actions">
-        <button class="button button--filled" id="creator-contact-button" type="button">加入创作者群</button>
-        <a class="button button--tonal" href="#showcase">查看课程与示例</a>
+        <button class="button button--filled" data-contact type="button">加入创作者群</button>
+        <a class="button button--tonal" href="./showcase.html">查看课程与示例</a>
       </div>
     </section>
 
@@ -288,25 +264,12 @@
     <span>© 2026 qu-bl</span>
   </footer>
 
-  <template id="case-template">
-    <article class="case-card" role="listitem">
-      <button class="case-card-trigger" type="button">
-        <span class="case-topline"><span class="case-category"></span><span class="case-arrow" aria-hidden="true">↗</span></span>
-        <span class="case-copy">
-          <span class="case-title"></span>
-          <span class="case-summary"></span>
-        </span>
-        <span class="case-platforms" aria-label="支持系统"></span>
-        <span class="case-tags" aria-label="关键词"></span>
-      </button>
-    </article>
-  </template>
 
   <dialog class="access-dialog" id="access-dialog" aria-labelledby="access-title">
     <div class="access-sheet">
       <header class="access-header">
         <div>
-          <p class="label-large">作品详情</p>
+          <p class="label-large">联系与交流</p>
           <h2 id="access-title"></h2>
         </div>
         <button class="dialog-close" type="button" aria-label="关闭">×</button>

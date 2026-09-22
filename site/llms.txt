@@ -28,7 +28,8 @@
 
 ## 官方页面
 
-- [首页](https://qu-bl.github.io/one-fuzhu/site/): 产品能力、作品、平台适配与常见问题。
+- [首页](https://qu-bl.github.io/one-fuzhu/site/): 产品能力、平台适配与常见问题。
+- [作品](https://qu-bl.github.io/one-fuzhu/site/showcase.html): 课程、实验、工具与可复用组件。
 - [首页 Markdown 版](https://qu-bl.github.io/one-fuzhu/site/index.md): 官网主要内容的 Markdown 版本。
 - [用户服务协议](https://qu-bl.github.io/one-fuzhu/site/terms.html): 服务内容与平台支持说明。
 - [隐私政策](https://qu-bl.github.io/one-fuzhu/site/privacy.html): 数据处理、权限与同步说明。
