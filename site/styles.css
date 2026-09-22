@@ -139,30 +139,16 @@ button:focus-visible, a:focus-visible, summary:focus-visible {
   white-space: nowrap;
 }
 .brand img { width: 34px; height: 34px; border-radius: 11px; }
-.top-app-bar--simple { justify-content: space-between; }
-
-/* Inner pages */
-.page-hero {
-  width: min(var(--page-max), 100%);
-  margin-inline: auto;
-  padding: clamp(88px, 12vw, 152px) var(--page-pad) 24px;
-}
-.page-hero h1 {
-  max-width: 900px;
-  margin-bottom: 24px;
-  font-size: clamp(48px, 8vw, 86px);
-  font-weight: 700;
-  line-height: 1.06;
-  letter-spacing: -.055em;
-}
-.page-hero > p:last-child {
-  max-width: 720px;
-  margin: 0;
+.top-nav { display: flex; flex: 1; justify-content: center; gap: 4px; }
+.top-nav a {
+  padding: 9px 14px;
+  border-radius: 20px;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: clamp(18px, 2vw, 21px);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
 }
-.page-hero--compact { padding-bottom: 0; }
-.section--first { padding-top: clamp(56px, 7vw, 88px); }
+.top-nav a:hover { background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); }
 
 /* Material buttons */
 .button {
@@ -659,9 +645,9 @@ button:focus-visible, a:focus-visible, summary:focus-visible {
   :root { --page-pad: 20px; --section-gap: 88px; }
   body { background: var(--md-sys-color-surface); }
   .top-app-bar { top: 8px; width: calc(100% - 16px); margin-top: 8px; }
+  .top-nav { display: none; }
   .brand { flex: 1; }
   .top-action { min-height: 44px; padding-inline: 18px; }
-  .page-hero { padding-top: 72px; }
   .hero { min-height: 0; padding-top: 64px; }
   .hero h1 { font-size: clamp(46px, 14vw, 68px); }
   .hero-summary { font-size: 18px; }

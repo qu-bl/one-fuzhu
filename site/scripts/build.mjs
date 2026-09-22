@@ -237,7 +237,7 @@ function indexMarkdown() {
   for (const f of FAQ) {
     lines.push(`### ${f.q}`, "", f.a, "");
   }
-  lines.push("## 页面", "", `- [首页](${BASE}/)`, `- [作品](${BASE}/showcase.html)`, `- [用户服务协议](${BASE}/terms.html)`, `- [隐私政策](${BASE}/privacy.html)`, "");
+  lines.push("## 页面", "", `- [首页](${BASE}/)`, `- [用户服务协议](${BASE}/terms.html)`, `- [隐私政策](${BASE}/privacy.html)`, "");
   return lines.join("\n");
 }
 
@@ -246,7 +246,6 @@ function indexMarkdown() {
 function sitemap() {
   const urls = [
     { loc: `${BASE}/`, priority: "1.0", freq: "weekly" },
-    { loc: `${BASE}/showcase.html`, priority: "0.9", freq: "weekly" },
     { loc: `${BASE}/terms.html`, priority: "0.4", freq: "yearly" },
     { loc: `${BASE}/privacy.html`, priority: "0.4", freq: "yearly" },
     ...cards.map((c) => ({ loc: `${BASE}/cases/${slugOf(c.id)}.html`, priority: "0.7", freq: "monthly" })),
@@ -266,7 +265,7 @@ function itemListJson() {
   const list = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "@id": `${BASE}/showcase.html#showcase`,
+    "@id": `${BASE}/#showcase`,
     name: "千机百变创意橱柜作品",
     itemListElement: cards.map((c, i) => ({
       "@type": "ListItem",
@@ -297,18 +296,17 @@ console.log("✓ sitemap.xml");
 writeFileSync(join(root, "index.md"), indexMarkdown());
 console.log("✓ index.md");
 
+// 更新 index.html 中的 ItemList JSON-LD
+const indexPath = join(root, "index.html");
+const html = readFileSync(indexPath, "utf8");
 const startMark = "<!-- GEO:ITEMLIST:START -->";
 const endMark = "<!-- GEO:ITEMLIST:END -->";
-for (const file of ["showcase.html"]) {
-  const path = join(root, file);
-  const html = readFileSync(path, "utf8");
-  const start = html.indexOf(startMark);
-  const end = html.indexOf(endMark);
-  if (start === -1 || end === -1) {
-    console.warn(`⚠ 未在 ${file} 中找到 GEO:ITEMLIST 标记，跳过 ItemList 注入`);
-    continue;
-  }
+const start = html.indexOf(startMark);
+const end = html.indexOf(endMark);
+if (start === -1 || end === -1) {
+  console.warn("⚠ 未在 index.html 中找到 GEO:ITEMLIST 标记，跳过 ItemList 注入");
+} else {
   const patched = html.slice(0, start + startMark.length) + "\n" + itemListJson() + "\n" + html.slice(end);
-  writeFileSync(path, patched);
-  console.log(`✓ ${file} ItemList JSON-LD 已更新`);
+  writeFileSync(indexPath, patched);
+  console.log("✓ index.html ItemList JSON-LD 已更新");
 }
