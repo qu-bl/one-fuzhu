@@ -88,8 +88,8 @@
     {
       "id": "audio-orbit",
       "name": "鸿蒙版千机百变招募内测中",
-      "summary": "欢迎共创",
-      "details": "",
+      "summary": "鸿蒙版千机百变正在招募内测参与者，探索声音轨道交互实验，欢迎共创。",
+      "details": "千机百变鸿蒙版内测招募：围绕音频、Rive 与交互实验方向，探索声音与动画结合的互动体验。",
       "partnerName": "官方",
       "category": "全新发布",
       "platforms": [
@@ -115,13 +115,14 @@
         "platform": "bilibili",
         "id": "BV1cjYk6MEj1",
         "aspectRatio": 1.7777
-      }
+      },
+      "description": "千机百变鸿蒙版正在招募内测参与者。本次内测聚焦声音轨道（音频）与 Rive 动画结合的交互实验，探索异形屏与拟人角色在鸿蒙平台上的互动可能。感兴趣的用户可通过官网或创作者交流群报名，与团队一起打磨产品。"
     },
     {
       "id": "image-binding-cards",
       "name": "RIVE中文系列课程",
       "summary": "rive101系列官方课，中文译制版",
-      "details": "",
+      "details": "RIVE 中文系列课程（rive101 系列官方课，中文译制版）由千机百变官方出品，讲解 Rive 动画制作与互动设计的基础与进阶内容，支持在哔哩哔哩观看。",
       "partnerName": "千机百变官方",
       "category": "模板与示例",
       "platforms": [
@@ -146,13 +147,14 @@
             "url": "<iframe src=\"//player.bilibili.com/player.html?isOutside=true&aid=117300673910614&bvid=BV1MYeY6bEtU&cid=42041410389&p=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"></iframe>"
           }
         ]
-      }
+      },
+      "description": "RIVE 中文系列课程是千机百变官方出品的 rive101 系列官方课中文译制版，覆盖 Rive 动画的核心概念、状态机与创作方法，适合希望系统学习 Rive 动画与互动设计的中文用户。课程通过哔哩哔哩发布并持续更新。"
     },
     {
       "id": "sensor-compass",
       "name": "感应罗盘",
       "summary": "将方向与传感器信息转换成具有生命感的指针反馈。",
-      "details": "",
+      "details": "感应罗盘是一款趣味工具：把方向与传感器信息转换成具有生命感的指针反馈。使用 Rive 状态机实现，支持 Android 与 Apple 平台。",
       "partnerName": "示例伙伴 F",
       "category": "趣味工具",
       "platforms": [
@@ -174,13 +176,14 @@
         ]
       },
       "featured": true,
-      "visible": true
+      "visible": true,
+      "description": "感应罗盘将设备的方位与传感器信息实时转换成带有生命感的指针反馈，是运用 Rive 状态机制作的角色化交互示例。支持 Android 与 Apple 平台，适合用于拟人角色、异形屏与互动装置中的方向与姿态表达。"
     },
     {
       "id": "focus-controller",
       "name": "专注节奏控制器",
       "summary": "把倒计时、阶段状态和轻量反馈组合成一件桌面工具。",
-      "details": "",
+      "details": "专注节奏控制器是一款桌面趣味工具：将倒计时、阶段状态和轻量反馈组合在一起，帮助用户掌控专注节奏。支持鸿蒙（HarmonyOS）与 Apple 平台。",
       "partnerName": "示例伙伴 G",
       "category": "趣味工具",
       "platforms": [
@@ -203,13 +206,14 @@
         ]
       },
       "featured": false,
-      "visible": true
+      "visible": true,
+      "description": "专注节奏控制器把倒计时、阶段状态与轻量反馈组合成一件桌面工具，帮助用户管理专注与休息节奏。使用 JavaScript 与状态机实现，支持鸿蒙与 Apple 平台。"
     },
     {
       "id": "liquid-switch",
       "name": "液态开关组件",
       "summary": "围绕按压、拖动和状态变化设计的高反馈交互组件。",
-      "details": "",
+      "details": "液态开关组件是一款高反馈交互组件：围绕按压、拖动与状态变化设计，使用 Rive 实现，适合作为互动界面中的可复用组件。",
       "partnerName": "示例伙伴 H",
       "category": "互动组件",
       "platforms": [
@@ -237,7 +241,8 @@
         ]
       },
       "featured": false,
-      "visible": true
+      "visible": true,
+      "description": "液态开关组件是围绕按压、拖动和状态变化设计的高反馈交互组件，使用 Rive 制作，可作为可复用的界面组件用于互动项目。支持 Apple、Android 与鸿蒙平台。"
     },
     {
       "id": "card-1789178404623",
@@ -249,7 +254,7 @@
         "HarmonyOS"
       ],
       "tags": [],
-      "visible": true
+      "visible": false
     }
   ]
 }
