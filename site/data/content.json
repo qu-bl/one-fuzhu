@@ -89,7 +89,8 @@
       "id": "audio-orbit",
       "name": "鸿蒙版千机百变招募内测中",
       "summary": "欢迎共创",
-      "details": "",
+      "description": "鸿蒙版千机百变正在招募内测参与者，探索声音轨道交互实验。",
+      "details": "鸿蒙版千机百变正在招募内测参与者，探索声音轨道交互实验，欢迎共创。",
       "partnerName": "官方",
       "category": "全新发布",
       "platforms": [
@@ -121,7 +122,8 @@
       "id": "image-binding-cards",
       "name": "RIVE中文系列课程",
       "summary": "rive101系列官方课，中文译制版",
-      "details": "",
+      "description": "rive101 系列官方课程的中文译制版，从 Rive 基础到互动设计，适合零基础与进阶创作者。",
+      "details": "rive101 系列官方课程的中文译制版，从 Rive 基础到互动设计，配合调试台与编辑器，适合零基础到进阶创作者。",
       "partnerName": "千机百变官方",
       "category": "模板与示例",
       "platforms": [
@@ -152,7 +154,8 @@
       "id": "sensor-compass",
       "name": "感应罗盘",
       "summary": "将方向与传感器信息转换成具有生命感的指针反馈。",
-      "details": "",
+      "description": "将方向与传感器信息转换成具有生命感的指针反馈，用 Rive 状态机表达传感器数据。",
+      "details": "将方向与传感器信息转换成具有生命感的指针反馈，用 Rive 状态机让传感器数据动起来，适用于 Android 与 Apple 平台。",
       "partnerName": "示例伙伴 F",
       "category": "趣味工具",
       "platforms": [
@@ -180,7 +183,8 @@
       "id": "focus-controller",
       "name": "专注节奏控制器",
       "summary": "把倒计时、阶段状态和轻量反馈组合成一件桌面工具。",
-      "details": "",
+      "description": "把倒计时、阶段状态和轻量反馈组合成一件桌面工具，由 JavaScript 与 Rive 状态机驱动。",
+      "details": "把倒计时、阶段状态和轻量反馈组合成一件桌面工具，由 JavaScript 与 Rive 状态机共同驱动，适用于鸿蒙与 Apple 平台。",
       "partnerName": "示例伙伴 G",
       "category": "趣味工具",
       "platforms": [
@@ -209,7 +213,8 @@
       "id": "liquid-switch",
       "name": "液态开关组件",
       "summary": "围绕按压、拖动和状态变化设计的高反馈交互组件。",
-      "details": "",
+      "description": "围绕按压、拖动和状态变化设计的高反馈交互组件，演示 Rive 状态机与触摸交互的结合。",
+      "details": "围绕按压、拖动和状态变化设计的高反馈交互组件，演示 Rive 状态机与触摸交互的结合，支持 Apple、Android 与鸿蒙平台。",
       "partnerName": "示例伙伴 H",
       "category": "互动组件",
       "platforms": [
@@ -249,7 +254,7 @@
         "HarmonyOS"
       ],
       "tags": [],
-      "visible": true
+      "visible": false
     }
   ]
 }

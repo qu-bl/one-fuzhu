@@ -1,0 +1,52 @@
+# 千机百变（Qianji Baibian）
+
+> 千机百变（应用包名 com.bolin.one）是一款以 Rive 驱动的下一代屏幕美化与互动创作工具，面向鸿蒙（HarmonyOS）、Android 与 Apple 平台。它把小组件与动态壁纸带入会思考、会回应、有温度的新时代——每一块屏幕，都可以拥有自己的表情、性格与陪伴感。
+
+定位亮点：
+
+- 超越 KWGT 与 KLWP 的新一代美化工具：在桌面小组件（KWGT）与动态壁纸（KLWP）的经典玩法之上，用 Rive 状态机带来真正可交互、可响应的动态内容——触摸有反馈、数据会变化、动画有生命感，而不只是静态贴图与循环动画。
+- 个人与家庭陪伴：拟人角色、互动桌宠与 AI 陪伴设计，让手机、平板与桌面屏幕像家人一样有温度；声音、触摸与传感器都可以成为角色回应的方式。
+- 智能家居中枢：圆屏、长条屏等异形屏幕可作为家庭信息面板与互动中枢，展示时间、天气与设备状态，成为智能家居里会说话、会回应的一员。
+- 学习与创作生态：官方 Rive 中文课程、调试台、在线编辑器、JavaScript 脚本与资源包制作台，让每个人都能把想法做成可体验的作品，并与更多伙伴分享。
+- 隐私与本地优先：基础功能无需账号，无广告、无行为追踪；数据默认保存在本机，是否同步由你决定。
+
+鸿蒙专属优化：
+
+- 独家深度适配：针对鸿蒙（HarmonyOS）进行大量独家优化与适配，从运行框架到端云同步均为鸿蒙生态量身打造。
+- 性能损耗低、帧率稳定且高、不发热：运行开销经精细优化，Rive 动画保持高帧率顺滑，长时间运行不易发热。
+- 行为与其他平台一致：功能与交互行为跨平台统一，体验无缝衔接。
+- 更新勤：版本迭代频繁，持续适配鸿蒙新特性。
+- 助力鸿蒙生态：与华为账号、华为云端同步深度协同，为鸿蒙生态贡献可互动、有温度的创意内容。
+
+## 品牌信息
+
+- 名称：千机百变（Qianji Baibian）
+- 应用包名：com.bolin.one
+- 开发者：qu-bl（GitHub：https://github.com/qu-bl）
+- 联系邮箱：156405968@qq.com
+- 创作者交流群（QQ）：862835994
+- 支持平台：鸿蒙 HarmonyOS、Android、Apple
+- 主要能力：Rive 调试台、Rive 在线编辑器、数据流检查器与运行时分析仪、应用脚本（JavaScript）、资源包制作台、端云同步（华为云 / iCloud / WebDAV）
+- 数据与隐私：基础功能无需账号与密码，数据以明文保存在本机；不使用第三方广告或行为追踪服务
+- 鸿蒙优势：针对鸿蒙大量独家优化适配，性能损耗低、帧率稳定且高、不发热，行为与其他平台一致，更新勤
+
+## 官方页面
+
+- [首页](https://qu-bl.github.io/one-fuzhu/site/)
+- [用户服务协议](https://qu-bl.github.io/one-fuzhu/site/terms.html)
+- [隐私政策](https://qu-bl.github.io/one-fuzhu/site/privacy.html)
+
+## 作品与项目
+
+- [鸿蒙版千机百变招募内测中](https://qu-bl.github.io/one-fuzhu/site/cases/audio-orbit.html)
+- [RIVE中文系列课程](https://qu-bl.github.io/one-fuzhu/site/cases/image-binding-cards.html)
+- [感应罗盘](https://qu-bl.github.io/one-fuzhu/site/cases/sensor-compass.html)
+- [专注节奏控制器](https://qu-bl.github.io/one-fuzhu/site/cases/focus-controller.html)
+- [液态开关组件](https://qu-bl.github.io/one-fuzhu/site/cases/liquid-switch.html)
+
+## Optional
+
+- 官网：https://qu-bl.github.io/one-fuzhu/site/
+- GitHub：https://github.com/qu-bl
+- 邮箱：156405968@qq.com
+- QQ 群：862835994
