@@ -1,5 +1,5 @@
 {
-  "contractVersion": "5.4.1",
+  "contractVersion": "6.0.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -334,7 +334,9 @@
       "declarationCarriesAppearance": false,
       "appearancePolicy": "platformDefaultOnly",
       "layoutPolicy": "adaptiveRelativeOnly",
-      "absoluteLayoutValuesAllowed": false
+      "absoluteLayoutValuesAllowed": false,
+      "uiRemovedOnOwnerStop": true,
+      "applicationScopeDoesNotPersistData": true
     },
     "validation": {
       "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
@@ -983,8 +985,8 @@
     "lifecycle": {
       "fieldExistsWhileOwnerActive": true,
       "releaseOnOwnerStop": true,
-      "persistentStoresValueOnly": true,
-      "restoreAfterRedeclaration": true
+      "applicationStorageIndependentFromQvmi": true,
+      "uiRemovedOnOwnerStop": true
     }
   },
   "script": {
@@ -1011,8 +1013,7 @@
     ],
     "definitionOptions": {
       "portable": [
-        "label",
-        "persistent"
+        "label"
       ],
       "harmonyAndroidOnly": [
         "description",
@@ -1091,8 +1092,11 @@
       "network.webSocket.open",
       "network.webSocket.send",
       "network.webSocket.close",
-      "persistence.save",
-      "persistence.restore",
+      "storage.get",
+      "storage.set",
+      "storage.remove",
+      "storage.clear",
+      "storage.keys",
       "resources.token",
       "resources.readText",
       "resources.readBinary",
@@ -1119,7 +1123,6 @@
       "observeCanWildcard": true,
       "applicationOnlyOperationsRequireApplicationScope": true,
       "networkRequiresDeclaredDomain": true,
-      "persistenceRequiresApplicationScope": false,
       "packageScriptMustMatchManifest": true,
       "editorApplyMaxUtf16Units": 262144,
       "sourceReadMaxBytes": 1048576,
@@ -1132,7 +1135,8 @@
         "definitionTypesFromValueAccessorTypes": true,
         "definitionTypeMustMatchValueBinding": true,
         "uiValueBindingCreatedByHost": true
-      }
+      },
+      "storageAvailableToAllScriptScopes": true
     },
     "operationArguments": {
       "values.get": [
@@ -1210,8 +1214,6 @@
         "code",
         "reason"
       ],
-      "persistence.save": [],
-      "persistence.restore": [],
       "resources.token": [
         "resourceId"
       ],
@@ -1228,7 +1230,37 @@
       "rive.font.set": [
         "propertyPath",
         "resourceId"
-      ]
+      ],
+      "storage.get": [
+        "key",
+        "fallback"
+      ],
+      "storage.set": [
+        "key",
+        "value"
+      ],
+      "storage.remove": [
+        "key"
+      ],
+      "storage.clear": [],
+      "storage.keys": []
+    },
+    "storage": {
+      "keyPattern": "^[A-Za-z][A-Za-z0-9._-]{0,127}$",
+      "keyMaxChars": 128,
+      "valueMaxBytes": 65536,
+      "totalMaxBytes": 1048576,
+      "valueKinds": [
+        "null",
+        "boolean",
+        "number",
+        "string",
+        "array",
+        "object"
+      ],
+      "writeThrough": true,
+      "survivesColdStart": true,
+      "isolatedByOwner": true
     }
   },
   "archive": {

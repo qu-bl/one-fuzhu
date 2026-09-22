@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "5.4.1",
+  "contractVersion": "6.0.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -56,7 +56,9 @@
       "declarationCarriesAppearance": false,
       "appearancePolicy": "platformDefaultOnly",
       "layoutPolicy": "adaptiveRelativeOnly",
-      "absoluteLayoutValuesAllowed": false
+      "absoluteLayoutValuesAllowed": false,
+      "uiRemovedOnOwnerStop": true,
+      "applicationScopeDoesNotPersistData": true
     },
     "forbiddenDeclarationFields": [
       "defaultValue",
@@ -505,8 +507,7 @@
     ],
     "definitionOptions": {
       "portable": [
-        "label",
-        "persistent"
+        "label"
       ],
       "harmonyAndroidOnly": [
         "description",
@@ -563,22 +564,42 @@
       "network.webSocket.open",
       "network.webSocket.send",
       "network.webSocket.close",
-      "persistence.save",
-      "persistence.restore",
+      "storage.get",
+      "storage.set",
+      "storage.remove",
+      "storage.clear",
+      "storage.keys",
       "resources.token",
       "resources.readText",
       "resources.readBinary",
       "rive.state",
       "rive.load",
       "rive.font.set"
-    ]
+    ],
+    "storage": {
+      "keyPattern": "^[A-Za-z][A-Za-z0-9._-]{0,127}$",
+      "keyMaxChars": 128,
+      "valueMaxBytes": 65536,
+      "totalMaxBytes": 1048576,
+      "valueKinds": [
+        "null",
+        "boolean",
+        "number",
+        "string",
+        "array",
+        "object"
+      ],
+      "writeThrough": true,
+      "survivesColdStart": true,
+      "isolatedByOwner": true
+    }
   },
   "qvmi": {
     "lifecycle": {
       "fieldExistsWhileOwnerActive": true,
       "releaseOnOwnerStop": true,
-      "persistentStoresValueOnly": true,
-      "restoreAfterRedeclaration": true
+      "applicationStorageIndependentFromQvmi": true,
+      "uiRemovedOnOwnerStop": true
     },
     "fieldTypes": {
       "app.theme.brand": "color",
