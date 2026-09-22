@@ -34,9 +34,8 @@
 所有动态绑定都直接观察当前脚本或资源包所属作用域中的 QVMI 字段。宿主将 QVMI 值转换为原生组件状态，
 不得把 `enabled`、文案或父级布局状态重新发布为另一组 QVMI 字段。
 脚本停止时，宿主移除该脚本的 UI，并释放该脚本创建或为其 UI 创建的全部 QVMI 字段。
-应用脚本需要跨冷启动恢复的数据由 `qu.storage` 单独保存；应用脚本的 UI scope 和 QVMI 字段均不表示数据持久化。
-资源包的 `bindings.value.path` 使用相对路径：`persistent` 映射为 `package.storage.<path>`，
-`runtime` 映射为 `package.ui.<path>`；控件 `id` 只负责标识控件，不能代替绑定路径。
+需要跨冷启动恢复的数据一律由脚本使用 `qu.storage` 单独保存；任何 UI scope 和 QVMI 字段均不表示数据持久化。
+资源包的 `bindings.value.path` 使用相对路径：无论 UI scope 为 `persistent` 还是 `runtime`，均映射为运行时 `package.ui.<path>`；控件 `id` 只负责标识控件，不能代替绑定路径。
 同一组件内多个绑定引用同一路径时，宿主只建立一次观察；该路径变化后重新计算所有引用它的绑定。
 
 `group` 的禁用结果属于宿主渲染状态：支持原生继承的平台直接在容器应用，其他平台在渲染树内部传递

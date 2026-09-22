@@ -16,11 +16,10 @@
   },
   "values": [
     {
-      "path": "package.storage.count",
+      "path": "package.ui.count",
       "type": "input",
       "defaultValue": "zero",
       "writable": true,
-      "persistent": true,
       "inputMode": "number"
     }
   ],

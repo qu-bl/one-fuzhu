@@ -27,9 +27,9 @@
 | `deviceColor` | 空串 | 空串 | 鸿蒙提供机身颜色，其他两端占位 |
 | `bootCount` | Android 全局启动次数，读取不到为 `0` | `0` | Apple 占位；Android 来源与权限环境不同 |
 
-已修复的差异：Android 补全了 15 个 `deviceInfo` 字段并把 `buildTime` 改为字符串；三端 `distributionOSApiVersion` 统一为数字；鸿蒙与 Apple 补齐名称、说明和默认值类型限制；Apple 补上纯域名检查；鸿蒙递归检查嵌套资源引用；三端脚本 `@id` 现在拒绝尾随非空白字符。Apple／Android 的脚本身份清理和 Android 持久字段空值恢复也已修复。
+已修复的差异：Android 补全了 15 个 `deviceInfo` 字段并把 `buildTime` 改为字符串；三端 `distributionOSApiVersion` 统一为数字；鸿蒙与 Apple 补齐名称、说明和默认值类型限制；Apple 补上纯域名检查；鸿蒙递归检查嵌套资源引用；三端脚本 `@id` 现在拒绝尾随非空白字符。三端 QVMI 现在统一为纯运行时数据通道，跨冷启动数据统一使用独立脚本存储。
 
-`qu.viewModel.define` 的扩展选项仍有平台差异：`label` 与 `persistent` 三端通用；`description`、`unit`、`nullable`、`writable`、`delivery`、`range`、`values`、`maxLength`、`access`、`valueLabels`、`displayPrecision`、`displayMultiplier`、`displaySuffix` 目前由鸿蒙和 Android 实现，Apple 不接受。此差异已写入云端契约并由调用端按平台执行。
+`qu.viewModel.define` 的扩展选项仍有平台差异：`label` 三端通用；`description`、`unit`、`nullable`、`writable`、`delivery`、`range`、`values`、`maxLength`、`access`、`valueLabels`、`displayPrecision`、`displayMultiplier`、`displaySuffix` 目前由鸿蒙和 Android 实现，Apple 不接受。此差异已写入云端契约并由调用端按平台执行。
 
 音频触发参数曾有差异：鸿蒙使用 `audio`／`policy`／`volume`，Android 和 Apple 使用 `id`／`options`。三端现都接受两种写法，云端规则推荐前者并将后者标记为兼容写法。
 

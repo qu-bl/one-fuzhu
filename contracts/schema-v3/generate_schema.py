@@ -161,13 +161,8 @@ rive["dependentRequired"] = {"viewModel": ["instance"], "instance": ["viewModel"
 
 value = obj({"path": {"type": "string", "pattern": MV["patterns"]["packageValuePath"]},
              "type": {"enum": TYPES}, "defaultValue": ui_value,
-             "writable": boolean, "persistent": boolean},
-            ["path", "type", "writable", "persistent"])
-value["if"] = {"properties": {"persistent": {"const": True}}, "required": ["persistent"]}
-value["then"] = {"properties": {
-    "path": {"pattern": "^" + MV["persistentPathPrefix"].replace(".", "\\.") + "[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*$"},
-    "type": {"enum": MV["persistentValueTypes"]},
-    "writable": {"const": True}}}
+             "writable": boolean, "persistent": False},
+            ["path", "type", "writable"])
 value["allOf"] = []
 for value_type, default_schema in (
     ("number", number), ("boolean", boolean), ("list", arr(string)),

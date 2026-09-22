@@ -1,5 +1,5 @@
 {
-  "contractVersion": "6.0.0",
+  "contractVersion": "7.0.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -47,8 +47,7 @@
         "path",
         "type",
         "defaultValue",
-        "writable",
-        "persistent"
+        "writable"
       ],
       "capabilities": [
         "observe",
@@ -155,17 +154,6 @@
         "uiSetsMax": 8
       },
       "packageScriptEntryFunction": "defineResourcePackage",
-      "persistentValueTypes": [
-        "number",
-        "string",
-        "boolean",
-        "color",
-        "enum",
-        "resource",
-        "image",
-        "list"
-      ],
-      "persistentPathPrefix": "package.storage.",
       "runtimePathPrefix": "package.ui.",
       "triggerPathPrefix": "runtime.",
       "forbiddenTriggerPrefixes": [
@@ -238,7 +226,10 @@
         "viewModelAndInstanceTogether": true,
         "bindingsRequireViewModel": true,
         "layoutScaleFactorPositive": true
-      }
+      },
+      "forbiddenValueFields": [
+        "persistent"
+      ]
     }
   },
   "ui": {
@@ -336,7 +327,8 @@
       "layoutPolicy": "adaptiveRelativeOnly",
       "absoluteLayoutValuesAllowed": false,
       "uiRemovedOnOwnerStop": true,
-      "applicationScopeDoesNotPersistData": true
+      "scopeControlsMountOnly": true,
+      "scopeDoesNotPersistData": true
     },
     "validation": {
       "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
@@ -983,9 +975,10 @@
       "triggerNamespace": "runtime."
     },
     "lifecycle": {
+      "allFieldsRuntimeOnly": true,
       "fieldExistsWhileOwnerActive": true,
       "releaseOnOwnerStop": true,
-      "applicationStorageIndependentFromQvmi": true,
+      "storageIndependentFromQvmi": true,
       "uiRemovedOnOwnerStop": true
     }
   },

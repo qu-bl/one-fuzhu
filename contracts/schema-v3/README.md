@@ -9,12 +9,11 @@ UI 的允许字段、逐类型必填字段、任选字段组和条件必填规�
 制作台的工程名长度、资源包 UI 文案长度、Rive 路径长度和脚本声明入口也由本契约发布。
 动态原生 UI 的节点、参数与破坏式升级边界见 [UI_PROTOCOL.md](UI_PROTOCOL.md)。
 动态 UI 的所有运行时绑定统一读取所属作用域的 QVMI；宿主只负责响应式映射和原生组件状态，不创建镜像字段。
-资源包值绑定使用相对路径：常驻 UI 映射到 `package.storage.<path>`，临时 UI 映射到
-`package.ui.<path>`；控件 `id` 不参与字段命名。
+资源包值绑定使用相对路径：所有资源包 UI 值统一映射到运行时 `package.ui.<path>`；控件 `id` 不参与字段命名。
 应用脚本的 `@observe` 只用于 `onValue` 实际消费的字段，UI binding 不需要重复观察。`viewModel.define`
 只能使用 `script.valueAccessorTypes`，并与同路径值绑定保持同型；其他 UI 值类型由宿主管理。
 `qvmi.lifecycle` 规定应用脚本创建的字段和 UI 只在所有者会话存活期间存在，脚本停止时全部释放。
-应用脚本的跨冷启动数据使用独立的 `qu.storage` 本地 JSON 存储；应用脚本的 QVMI 不承担数据持久化。
+所有脚本的跨冷启动数据使用独立的 `qu.storage` 本地 JSON 存储；任何 QVMI 字段都不承担数据持久化。
 `contract.ui.runtimeSemantics` 要求声明只携带值、状态、行为与相对或自适应布局；所有组件外观、尺寸和实际间距均由平台原生默认值决定。
 修改规则时同时更新有效／无效样例，运行 `python release.py` 生成发布描述。
 GitHub Actions 会重新生成 Schema、校验样例及哈希；检查通过后才应合并。

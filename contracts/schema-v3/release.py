@@ -188,11 +188,13 @@ def verify_schema_and_fixtures():
             raise ValueError("validation limits must be nonnegative integers")
     if manifest_validation["limits"]["uiSetsMax"] != ui_validation["limits"]["setsMax"]:
         raise ValueError("manifest and script UI set limits must agree")
-    if set(manifest_validation["persistentValueTypes"]) - set(contract["manifest"]["valueTypes"]):
-        raise ValueError("persistent value type is not a package value type")
-    if manifest_validation.get("persistentPathPrefix") != "package.storage." or \
-            manifest_validation.get("runtimePathPrefix") != "package.ui.":
-        raise ValueError("resource-package UI value namespaces are incomplete")
+    if manifest_validation.get("runtimePathPrefix") != "package.ui.":
+        raise ValueError("resource-package UI runtime namespace is incomplete")
+    if "persistent" in contract["manifest"]["nested"]["values[]"] or \
+            "persistentPathPrefix" in manifest_validation or "persistentValueTypes" in manifest_validation:
+        raise ValueError("QVMI declarations must not contain persistence metadata")
+    if manifest_validation.get("forbiddenValueFields") != ["persistent"]:
+        raise ValueError("removed QVMI persistence fields must be rejected explicitly")
     if set(ui_validation["inputTypes"]) - set(contract["ui"]["typeFields"]):
         raise ValueError("input UI type is not a component type")
     verify_ui_generation_rules(contract)
@@ -211,7 +213,8 @@ def verify_schema_and_fixtures():
         "layoutPolicy": "adaptiveRelativeOnly",
         "absoluteLayoutValuesAllowed": False,
         "uiRemovedOnOwnerStop": True,
-        "applicationScopeDoesNotPersistData": True,
+        "scopeControlsMountOnly": True,
+        "scopeDoesNotPersistData": True,
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
     forbidden_appearance = {"style", "size", "density", "presentation", "format"}
@@ -299,9 +302,10 @@ def verify_schema_and_fixtures():
         raise ValueError("script.minimumIntervalMs must be positive")
     qvmi = contract["qvmi"]
     if qvmi.get("lifecycle") != {
+        "allFieldsRuntimeOnly": True,
         "fieldExistsWhileOwnerActive": True,
         "releaseOnOwnerStop": True,
-        "applicationStorageIndependentFromQvmi": True,
+        "storageIndependentFromQvmi": True,
         "uiRemovedOnOwnerStop": True,
     }:
         raise ValueError("QVMI lifecycle must be independent from durable script storage")
