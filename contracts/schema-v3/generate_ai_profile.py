@@ -49,6 +49,7 @@ def build_profile():
             "packageEntryFunction": manifest["validation"]["packageScriptEntryFunction"],
             "annotations": script["annotations"],
             "valueAccessorTypes": script["valueAccessorTypes"],
+            "valueAccessorSemantics": script["valueAccessorSemantics"],
             "definitionOptions": script["definitionOptions"],
             "generationChecks": script["validation"]["generationChecks"],
             "applicationOnlyOperations": script["applicationOnlyOperations"],

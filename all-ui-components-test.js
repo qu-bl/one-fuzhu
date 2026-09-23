@@ -1,6 +1,6 @@
 /**
  * @id AllNativeUiFourSlots80
- * @description 千机百变动态原生 UI 8.0.0 四位置全量测试
+ * @description 千机百变动态原生 UI 8.0.1 四位置全量测试
  * @interval 0
  * @observe app.uiLab80.numberValue
  * @ui

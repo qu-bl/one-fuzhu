@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "8.0.0",
+  "contractVersion": "8.0.1",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -506,6 +506,16 @@
       "json",
       "binary"
     ],
+    "valueAccessorSemantics": {
+      "json": {
+        "acceptedKinds": [
+          "object",
+          "array"
+        ],
+        "objectRuntimeType": "json",
+        "arrayRuntimeType": "list"
+      }
+    },
     "definitionOptions": {
       "portable": [
         "label"

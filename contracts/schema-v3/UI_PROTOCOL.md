@@ -1,4 +1,4 @@
-# 三端动态原生 UI 规范 8.0.0
+# 三端动态原生 UI 规范 8.0.1
 
 本规范是 Apple、Android、鸿蒙动态 UI 的共同最小集合。权威机器规则位于
 [`contract.json`](contract.json) 的 `ui` 段；本文用于说明它能表达什么。
@@ -78,6 +78,8 @@
 
 每种组件可用的绑定键由 `validation.bindingsByType` 给出。动态值暂不可用时使用
 `fallback` 或静态值；类型错误时警告并保留上一份有效状态。同一组件多次引用同一路径时，宿主只观察一次。
+动态 `options` 可由脚本使用 `viewModel.define(path, "json", optionsArray)` 提供；三端必须把该数组建立为
+原生 QVMI `list` 字段。`json` 对象仍建立为 `json` 字段。
 
 ## 按钮动作
 
