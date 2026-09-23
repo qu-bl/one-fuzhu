@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "8.0.2",
+  "contractVersion": "8.0.3",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -55,6 +55,7 @@
       "customDrawingAllowed": false,
       "declarationCarriesAppearance": false,
       "appearancePolicy": "platformDefaultOnly",
+      "explicitAppearanceVariantSelectionAllowed": false,
       "visibleValueControlLabels": true,
       "hostOwnsSafeAreaSpacingAndScrolling": true,
       "platformDefaultAppearanceMayDiffer": true,

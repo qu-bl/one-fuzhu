@@ -213,6 +213,7 @@ def verify_schema_and_fixtures():
         "customDrawingAllowed": False,
         "declarationCarriesAppearance": False,
         "appearancePolicy": "platformDefaultOnly",
+        "explicitAppearanceVariantSelectionAllowed": False,
         "visibleValueControlLabels": True,
         "hostOwnsSafeAreaSpacingAndScrolling": True,
         "platformDefaultAppearanceMayDiffer": True,
