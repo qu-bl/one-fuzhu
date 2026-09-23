@@ -274,6 +274,14 @@ def verify_schema_and_fixtures():
             raise ValueError(f"duplicate option for {operation}")
     if len(script["valueAccessorTypes"]) != len(set(script["valueAccessorTypes"])):
         raise ValueError("valueAccessorTypes must be unique")
+    if script.get("valueAccessorSemantics") != {
+        "json": {
+            "acceptedKinds": ["object", "array"],
+            "objectRuntimeType": "json",
+            "arrayRuntimeType": "list",
+        }
+    }:
+        raise ValueError("json accessor semantics must be identical on all hosts")
     storage = script.get("storage", {})
     if storage != {
         "keyPattern": "^[A-Za-z][A-Za-z0-9._-]{0,127}$",
