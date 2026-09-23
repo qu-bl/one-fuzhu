@@ -43,6 +43,7 @@
 - `align`：`start`、`center`、`end`。
 - `valign`：`top`、`center`、`bottom`。
 - `scroll`：仅 `column` 可启用原生滚动。
+- 宿主页面已有纵向滚动时，内层 `scroll=true` 由最近的上级原生滚动容器承接，不再创建同向嵌套滚动。
 - `spacer`：使用原生弹性布局占据剩余空间。
 - `group.enabled=false`：其全部后代在宿主渲染状态中禁用，不写回 QVMI。
 
