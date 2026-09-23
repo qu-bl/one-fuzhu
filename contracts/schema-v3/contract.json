@@ -1,5 +1,5 @@
 {
-  "contractVersion": "8.0.1",
+  "contractVersion": "8.0.2",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -316,6 +316,9 @@
       "customDrawingAllowed": false,
       "declarationCarriesAppearance": false,
       "appearancePolicy": "platformDefaultOnly",
+      "visibleValueControlLabels": true,
+      "hostOwnsSafeAreaSpacingAndScrolling": true,
+      "platformDefaultAppearanceMayDiffer": true,
       "layoutPolicy": "adaptiveRelativeOnly",
       "absoluteLayoutValuesAllowed": false,
       "uiRemovedOnOwnerStop": true,
