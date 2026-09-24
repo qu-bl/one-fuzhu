@@ -23,8 +23,8 @@
     },
     {
       "name": "guidance.json",
-      "version": "2026.09.22.2140",
-      "sha256": "7f5a247e06f4ce935451349ccc6c7fc3d49fa3b2aa432a4bde8fe1953770a225"
+      "version": "2026.09.24.1000",
+      "sha256": "4e30c30dfdafdd1ea81b2db0abc86be69f9f15e0f7ce18ed2255f027c4359e03"
     },
     {
       "name": "resource-package.md",
