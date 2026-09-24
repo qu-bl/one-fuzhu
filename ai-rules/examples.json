@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "8.0.4",
+  "contractVersion": "8.0.5",
   "notes": [
     "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
     "不要复制示例中未被用户需求使用的字段或组件。",
-    "manifestJson 对象在 apply_files 交付时序列化为完整 JSON 字符串。",
+    "修改现有文件默认使用 edits；每个 oldText 必须是当前文件中恰好出现一次的原文。",
+    "只有新建文件或大幅重写时才使用 apply_files，并把完整文本放入对应交付字段。",
     "控件固定必填字段、条件必填字段和任选字段组以 generation-profile.json 为准。",
     "应用脚本示例中的多选 list 由 @ui 值绑定交给宿主管理，不调用 viewModel.define，也不加入 @observe。",
     "@observe 只列出 onValue 实际消费的字段；UI binding 不需要重复观察。",
@@ -208,6 +209,47 @@
             }
           }
         }
+      }
+    }
+  },
+  "deliveryExamples": {
+    "discussion": {
+      "reply": "说明或追问，不写入编辑器。",
+      "edits": null,
+      "apply_files": null
+    },
+    "applicationEdit": {
+      "reply": "已调整提示文字。",
+      "edits": [
+        {
+          "file": "applicationJavaScript",
+          "oldText": "setStatus('正在加载');",
+          "newText": "setStatus('正在加载模型');"
+        }
+      ],
+      "apply_files": null
+    },
+    "resourcePackageEdit": {
+      "reply": "已同步修改清单标题和脚本文案。",
+      "edits": [
+        {
+          "file": "manifestJson",
+          "oldText": "\"name\": \"旧标题\"",
+          "newText": "\"name\": \"新标题\""
+        },
+        {
+          "file": "mainJavaScript",
+          "oldText": "setLabel('旧标题');",
+          "newText": "setLabel('新标题');"
+        }
+      ],
+      "apply_files": null
+    },
+    "newApplicationScript": {
+      "reply": "已生成新应用脚本。",
+      "edits": null,
+      "apply_files": {
+        "applicationJavaScript": "/** @id application:example */\\ndefineQuScript({ onStart() {} });"
       }
     }
   }

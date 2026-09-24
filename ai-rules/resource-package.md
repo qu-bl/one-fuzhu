@@ -14,4 +14,4 @@
 6. 输出后先做 JSON Schema 校验，再检查入口函数、生命周期、路径类型、权限、网络域名、UI 所有权和文件声明。
 7. 校验错误按 JSON 路径逐条修复，宿主的错误码和原始消息必须逐字保留，禁止改写；最多两轮。仍有错误时返回错误说明，不写入编辑器。
 
-交付对象只允许包含 `manifestJson` 与 `mainJavaScript`，值为完整文件字符串。禁止省略号、Markdown 代码围栏和虚构的 Rive 名称。
+普通修改使用 `edits`，每项的 `file` 只允许 `manifestJson` 或 `mainJavaScript`，`oldText` 必须非空且在当前演进中的对应文件恰好出现一次，多项按数组顺序应用。只有新建文件或大幅重写时才使用 `apply_files` 交付完整文件字符串。`edits` 与 `apply_files` 必须互斥；只讨论时两者均为 `null`。禁止省略号、Markdown 代码围栏和虚构的 Rive 名称。

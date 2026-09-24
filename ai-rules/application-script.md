@@ -14,4 +14,4 @@
 6. 输出后建立 `@observe → onValue`、`bindings.value → 字段来源`、`viewModel.define → valueAccessorTypes` 三张对应表；再检查入口、注解、写权限、UI 所有权、异步重入和停止清理。
 7. 校验错误逐条修复，最多两轮。仍有错误时返回错误说明，不写入编辑器。
 
-交付对象只允许包含 `applicationJavaScript`，值为完整脚本字符串。禁止输出资源包文件、Markdown 代码围栏或模型记忆中的旧 API。
+普通修改使用 `edits`，每项只允许 `file: "applicationJavaScript"`、非空且在当前源码中恰好出现一次的 `oldText`、替换后的 `newText`；多项按数组顺序应用。只有新建脚本或大幅重写时才使用 `apply_files.applicationJavaScript` 交付完整脚本。`edits` 与 `apply_files` 必须互斥；只讨论时两者均为 `null`。禁止输出资源包文件、Markdown 代码围栏、省略号或模型记忆中的旧 API。
