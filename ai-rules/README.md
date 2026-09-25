@@ -1,10 +1,29 @@
 # 千机百变 AI 资料入口
 
-本文件只规定如何找到并使用资料，不重复抄写字段表或取值。完整路径见同目录的 [`sources.json`](sources.json)。
+千机百变有自己的资源包、脚本、QVMI 和动态 UI 协议。需要生成、修改或解释这些内容时，先读取轻量路由：
 
-1. **资源包规则**：读取 `contracts/schema-v3/release.json`，按其中的 SHA-256 核验 `contract.json`；资源包结构参考 `resource-package.schema.json`。查询 `manifest`、`ui`、`qvmi`、`archive`、`resources`、`network`。
-2. **脚本规则**：读取同一份已核验的 `contract.json`，查询 `script`、`ui`、`qvmi`、`resources`、`network`。应用脚本与资源包脚本的能力差异以 `script.applicationOnlyOperations` 等字段为准。
-3. **翻译规则**：Rive 编辑器词典在 `rive-editor/translation.json`。仅用于编辑器翻译，不作为宿主 API 或资源包字段来源。
-4. **AI 规则**：仅供对应的 AI 脚本调用。先按 `ai-rules/rules.json` 校验本目录全部文件，再读取 `guidance.json`、`generation-profile.json`、对应场景 Markdown 和 `examples.json`。资源包使用 `resource-package.md`，应用脚本使用 `application-script.md`。
+给 AI 的最短提示：`千机百变使用特殊协议；需要适配时先读取 https://qu-bl.github.io/one-fuzhu/ai-rules/README.md，并按其中路由按需取资料。当前上下文已有相同 version 与 sha256 的资料时无需重复读取。`
 
-相关 AI 脚本必须把 guidance、场景指南、generation-profile、examples、用户当前文件，以及宿主实际加载的 `contractVersion` 和 `contractSha256` 放入模型上下文，不能只传 URL。宿主身份与本次发布不一致时停止生成。修改现有文件默认交付 `edits` 精确替换；新建文件或大幅重写才交付 `apply_files` 完整文件，两种方式不能同时出现。AI 脚本须在写入前确认当前文件仍与请求时一致，并把整批替换验证通过后通过现有编辑入口一次写入。完整 Schema 留在宿主执行机器校验，只有相关片段随错误进入修复上下文。动态 UI binding 由宿主直接观察所属作用域的 QVMI，不需要重复写入 `@observe`；`@observe` 只声明 `onValue` 实际消费且脚本可访问的路径。`viewModel.define` 类型必须来自 `script.valueAccessorTypes`，并与同路径值绑定一致。失败时必须逐字保留宿主的路径、错误码和原始消息，最多修复两轮，仍失败则只返回错误而不写入编辑器。三端应用代码不加载 AI 规则，也不为该交付格式增加字段、接口或分支。拉取失败时可使用已核验缓存；没有缓存时提示规则未就绪。每次请求只使用同一发布版本，JSON 与文字冲突时以已核验 JSON 为准。
+- 资料发布清单：[`rules.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/rules.json)
+- 按需读取路由：[`context-map.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/context-map.json)
+- 四类规则位置：[`sources.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/sources.json)
+
+如果当前对话已经包含同一文件在 `rules.json` 中的 **version 和 sha256**，并且本轮没有涉及新的主题，可以继续使用，不必重复读取。只有“以前看过”、文件名相同、模型记忆或版本无法核对时，必须重新读取。模型自身不能访问链接时，由调用脚本拉取、核验并只注入本轮所需片段。
+
+## 按任务读取
+
+1. 先确认场景：应用脚本或资源包。
+2. 读取 [`guidance.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/guidance.json) 中的交付协议、当前场景和本轮相关检查项。
+3. 按 `context-map.json` 命中的主题，读取 [`generation-profile.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/generation-profile.json) 或 [`contract.json`](https://qu-bl.github.io/one-fuzhu/contracts/schema-v3/contract.json) 的对应分区。
+4. 应用脚本的场景步骤在 [`application-script.md`](https://qu-bl.github.io/one-fuzhu/ai-rules/application-script.md)；资源包在 [`resource-package.md`](https://qu-bl.github.io/one-fuzhu/ai-rules/resource-package.md)。首次适配、完整新建、大幅重写或语法不确定时读取，普通局部修改无需重复加入上下文。
+5. [`examples.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/examples.json) 只用于完整新建、大幅重写、明确索要示例或语法不确定的任务。
+
+## 主题范围
+
+- UI：只读取 UI 分区。
+- QVMI、RVMI、字段、绑定、状态和事件：读取 QVMI 与脚本值访问器分区。
+- 网络：读取 network 分区。
+- 持久化：读取 script.storage。
+- Rive、图片、音频、字体和包内文件：读取 resources；资源包同时读取 manifest。
+
+完整 JSON Schema 留给宿主机器校验，不放进模型上下文。宿主报错时只加入原始路径、错误码和原文。现有文件默认返回 `edits` 精确替换；新建或大幅重写才返回 `apply_files`。三端应用不加载 AI 资料，也不为 AI 交付格式增加专用代码。

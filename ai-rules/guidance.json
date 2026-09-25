@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "audience": "aiScriptsOnly",
   "contract": "contracts/schema-v3/contract.json",
   "priority": [
@@ -52,13 +52,14 @@
     "prepare": [
       "校验 AI 规则发布哈希与共享契约发布哈希，所有资料必须来自同一发布版本。",
       "读取宿主实际加载的 contractVersion 与 contractSha256；两者必须和本次已核验 release 完全一致，不一致时返回规则版本错误，禁止生成或写入文件。",
-      "把 guidance、当前场景指南、examples、generation-profile 和用户当前文件的实际内容放入模型上下文；完整 JSON Schema 由宿主保留用于机器校验，不默认放入模型上下文。",
-      "只在需要查明 generation-profile 未覆盖的细节时加入共享契约对应分区，禁止无选择地注入完整契约或完整 Schema。",
+      "先读取 context-map.json，只把 guidance 的交付协议、当前场景、本轮命中的主题与相关检查项放入模型上下文。",
+      "generation-profile 和共享契约只加入本轮命中的分区；场景指南只在首次适配、完整新建、大幅重写或语法不确定时加入；examples 只在 context-map 指定的条件下加入。",
+      "当前对话已含同一文件在 rules.json 中的 version 与 sha256，且本轮没有命中新主题时可以复用；禁止依靠模型记忆、文件名或旧版本跳过读取。完整 JSON Schema 只由宿主机器校验。",
       "资源包存在 main.riv 时提供真实 Rive 元数据；无法读取时保留当前名称并明确缺少信息，禁止猜测。"
     ],
     "generate": [
       "先建立路径、类型、权限、UI 所有权和文件之间的对应表，再生成完整文件。",
-      "以 examples 的当前协议骨架起步，只保留业务需要的字段；所有枚举和值从 contract 获取。",
+      "完整新建、大幅重写或语法不确定时才以 examples 的当前协议骨架起步；普通修改直接保留当前文件结构。所有枚举和值从本轮已读取的权威分区获取。",
       "UI 只描述内容、值、状态、行为和数据格式；不得声明颜色、背景、描边、圆角、字体、字号、密度或按钮外观，宿主直接使用平台默认样式。",
       "布局只使用 layout/align/valign/scroll/hug；页面本身不滚动，column 的 scroll=true 取得剩余高度并在内部滚动，可组成顶部固定、中部滚动、底部固定的页面；hug 是内容自适应，spacer 自动取得剩余空间，row 空间不足由宿主自适应并保留全部子组件；禁止比例数值、固定尺寸、间距、内边距、占位尺寸、固定行数或人为换行点。",
       "禁止从模型记忆补充 contract 中不存在的字段、组件或宿主入口。"
@@ -256,6 +257,14 @@
     }
   },
   "generationProfile": "ai-rules/generation-profile.json",
+  "contextLoading": {
+    "map": "ai-rules/context-map.json",
+    "mode": "topicSelective",
+    "examples": "conditional",
+    "scenarioGuide": "conditional",
+    "schema": "hostOnly",
+    "reuseCondition": "当前对话已含同一文件的 version 与 sha256，且没有命中新主题。"
+  },
   "hostErrorFeedback": {
     "requiredFields": [
       "source",
@@ -274,7 +283,10 @@
     ],
     "matchAgainst": [
       "contracts/schema-v3/release.json",
-      "ai-rules/generation-profile.json",
+      "ai-rules/context-map.json",
+      "ai-rules/generation-profile.json"
+    ],
+    "conditionalMatchAgainst": [
       "ai-rules/examples.json"
     ],
     "mismatchPolicy": "返回 reply，逐字报告宿主版本与发布版本，禁止 apply_files，也禁止 edits。"

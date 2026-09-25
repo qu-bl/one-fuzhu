@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "8.0.5",
+  "purpose": "AI 按任务读取资料的轻量路由；文件版本和 SHA-256 以 ai-rules/rules.json 为准。",
+  "entry": "ai-rules/README.md",
+  "release": "ai-rules/rules.json",
+  "always": {
+    "guidance": [
+      "priority",
+      "deliveryProtocol",
+      "hostErrorFeedback",
+      "hostContractContext",
+      "scenarios.<current>"
+    ],
+    "profile": [
+      "script.<currentEntryFunction>",
+      "script.annotations",
+      "script.generationChecks"
+    ]
+  },
+  "topics": {
+    "ui": {
+      "keywords": [
+        "ui",
+        "界面",
+        "布局",
+        "控件",
+        "按钮",
+        "输入框",
+        "开关",
+        "滑杆",
+        "选择",
+        "弹窗",
+        "分栏",
+        "侧栏"
+      ],
+      "read": [
+        "ai-rules/generation-profile.json#/ui"
+      ],
+      "fallbackWhenProfileInsufficient": [
+        "contracts/schema-v3/contract.json#/ui"
+      ]
+    },
+    "qvmi": {
+      "keywords": [
+        "qvmi",
+        "rvmi",
+        "viewmodel",
+        "binding",
+        "绑定",
+        "字段",
+        "状态",
+        "事件",
+        "触发"
+      ],
+      "read": [
+        "ai-rules/generation-profile.json#/qvmi",
+        "ai-rules/generation-profile.json#/script/valueAccessorTypes",
+        "ai-rules/generation-profile.json#/script/valueAccessorSemantics",
+        "ai-rules/generation-profile.json#/script/definitionOptions"
+      ],
+      "fallbackWhenProfileInsufficient": [
+        "contracts/schema-v3/contract.json#/qvmi"
+      ]
+    },
+    "network": {
+      "keywords": [
+        "network",
+        "http",
+        "websocket",
+        "api",
+        "联网",
+        "网络",
+        "请求",
+        "接口",
+        "流式"
+      ],
+      "read": [
+        "ai-rules/guidance.json#/shared/network",
+        "contracts/schema-v3/contract.json#/network"
+      ]
+    },
+    "storage": {
+      "keywords": [
+        "storage",
+        "persist",
+        "存储",
+        "缓存",
+        "保存",
+        "持久化",
+        "冷启动"
+      ],
+      "read": [
+        "ai-rules/generation-profile.json#/script/storage"
+      ]
+    },
+    "resources": {
+      "keywords": [
+        "rive",
+        "资源",
+        "文件",
+        "图片",
+        "音频",
+        "字体",
+        "素材",
+        "resource"
+      ],
+      "read": [
+        "contracts/schema-v3/contract.json#/resources"
+      ]
+    }
+  },
+  "scenarioGuides": {
+    "applicationScript": "ai-rules/application-script.md",
+    "resourcePackage": "ai-rules/resource-package.md"
+  },
+  "examples": {
+    "file": "ai-rules/examples.json",
+    "readWhen": [
+      "newFile",
+      "largeRewrite",
+      "explicitExampleRequest",
+      "syntaxUncertain"
+    ]
+  },
+  "skipPolicy": {
+    "allowedWhen": "当前对话已含同一文件的 version 与 sha256，且本轮没有命中新主题。",
+    "forbiddenWhen": "只有文件名、旧版本、模型记忆或无法核对 sha256。"
+  },
+  "schemaPolicy": "完整 JSON Schema 只由宿主做机器校验，不放入模型上下文；失败时只回传宿主原始错误。"
+}

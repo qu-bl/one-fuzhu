@@ -2,7 +2,7 @@
 
 只用于生成或修复应用脚本。入口、注解、宿主操作、参数、UI 和 QVMI 字段全部从同一版 `contract.json` 读取。
 
-1. 读取并核验 `release.json`、`contract.json`、`guidance.json`、`generation-profile.json` 和 `examples.json`，同时读取当前编辑器完整源码。宿主必须提供实际加载的 `contractVersion` 与 `contractSha256`；任一缺失或与本次发布不一致时停止生成。
+1. 按 `context-map.json` 核验并读取 guidance 的基础段、当前场景以及本轮命中的 generation-profile 或 contract 分区，同时读取当前编辑器完整源码。只有完整新建、大幅重写、明确索要示例或语法不确定时读取 `examples.json`。宿主实际加载的 `contractVersion` 与 `contractSha256` 必须和本次发布一致。
 2. 保留用户现有的 `@id`；新脚本必须生成符合 `script.idPattern` 且不与其他脚本重复的 `@id`。
 3. 只为脚本自己拥有且脚本确实读写的新 `app.*` 字段调用 `viewModel.define`；类型必须属于 `generation-profile.script.valueAccessorTypes`。已有公开字段禁止重新定义；UI 绑定类型不在该集合时由宿主管理，不能改写类型或补造 `define`。
    `json` 初值可为对象或数组；数组必须按 `valueAccessorSemantics.json.arrayRuntimeType` 建成原生 `list` 字段，供动态选项等列表绑定直接观察。

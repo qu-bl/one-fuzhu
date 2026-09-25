@@ -2,7 +2,7 @@
 
 只用于生成或修复 `resource-package.json` 与 `main.js`。字段、枚举、限制和宿主入口全部从同一版 `contract.json` 读取，不在本文重复维护。
 
-1. 读取并核验 `release.json`、`contract.json`、`guidance.json`、`generation-profile.json` 和 `examples.json`；宿主必须提供实际加载的 `contractVersion` 与 `contractSha256`，并与本次发布完全一致。完整 `resource-package.schema.json` 由宿主执行，不默认放入模型上下文。
+1. 按 `context-map.json` 核验并读取 guidance 的基础段、当前场景、manifest 以及本轮命中的 generation-profile 或 contract 分区。只有完整新建、大幅重写、明确索要示例或语法不确定时读取 `examples.json`。宿主实际加载的 `contractVersion` 与 `contractSha256` 必须和本次发布一致；完整 Schema 只由宿主执行。
 2. 读取用户当前的两份文本文件以及真实 Rive 元数据。缺少 Rive 元数据时，不新建或改写画板、状态机、View Model、实例、属性路径。
 3. 先列出脚本实际使用的 QVMI 路径及类型，再逐项对应到 `values`、UI 生成字段、`capabilities.observe` 或 `capabilities.trigger`。
 4. JSON 负责文件、字段、权限、绑定、资源和 UI；JavaScript 负责行为。两份文件必须同步生成。

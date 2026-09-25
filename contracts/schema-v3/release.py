@@ -348,7 +348,7 @@ def verify_schema_and_fixtures():
     rules = json.loads((ROOT.parent.parent / "ai-rules" / "rules.json").read_text(encoding="utf-8"))
     if rules.get("schemaVersion") != 3:
         raise ValueError("AI release schema must be version 3")
-    expected_ai_files = {"README.md", "guidance.json", "sources.json", "examples.json",
+    expected_ai_files = {"README.md", "context-map.json", "guidance.json", "sources.json", "examples.json",
                          "generation-profile.json", "application-script.md", "resource-package.md"}
     if {item["name"] for item in rules["files"]} != expected_ai_files or len(rules["files"]) != len(expected_ai_files):
         raise ValueError("AI release must list exactly the published AI files")
@@ -386,7 +386,7 @@ def verify_schema_and_fixtures():
 def verify_ai_source_map(contract):
     repository = ROOT.parent.parent
     mapping = json.loads((repository / "ai-rules" / "sources.json").read_text(encoding="utf-8"))
-    if mapping.get("schemaVersion") != 1 or mapping.get("baseUrl") != "https://qu-bl.github.io/one-fuzhu/":
+    if mapping.get("schemaVersion") != 2 or mapping.get("baseUrl") != "https://qu-bl.github.io/one-fuzhu/":
         raise ValueError("AI source map version or base URL is invalid")
     sources = mapping.get("sources", {})
     if set(sources) != {"resourcePackage", "script", "translation", "ai"}:
@@ -399,7 +399,7 @@ def verify_ai_source_map(contract):
             raise ValueError(f"{name} references an unknown contract section")
     if sources["translation"].get("dictionary") != "rive-editor/translation.json":
         raise ValueError("translation must use the published dictionary")
-    if sources["ai"].get("guide") != "ai-rules/README.md":
+    if sources["ai"].get("guide") != "ai-rules/README.md" or sources["ai"].get("contextMap") != "ai-rules/context-map.json":
         raise ValueError("AI guide path is invalid")
     if (sources["ai"].get("guidance") != "ai-rules/guidance.json" or
             sources["ai"].get("examples") != "ai-rules/examples.json" or
@@ -434,7 +434,7 @@ def verify_ai_source_map(contract):
 def verify_ai_guidance():
     ai = ROOT.parent.parent / "ai-rules"
     guidance = json.loads((ai / "guidance.json").read_text(encoding="utf-8"))
-    if (guidance.get("schemaVersion") != 3 or guidance.get("audience") != "aiScriptsOnly" or
+    if (guidance.get("schemaVersion") != 4 or guidance.get("audience") != "aiScriptsOnly" or
             guidance.get("contract") != "contracts/schema-v3/contract.json" or
             guidance.get("generationProfile") != "ai-rules/generation-profile.json"):
         raise ValueError("AI guidance must reference the published shared contract")
@@ -463,14 +463,27 @@ def verify_ai_guidance():
     if host_context.get("requiredFields") != ["contractVersion", "contractSha256"] or \
             host_context.get("matchAgainst") != [
                 "contracts/schema-v3/release.json",
+                "ai-rules/context-map.json",
                 "ai-rules/generation-profile.json",
-                "ai-rules/examples.json",
-            ] or "禁止 apply_files" not in host_context.get("mismatchPolicy", ""):
+            ] or host_context.get("conditionalMatchAgainst") != ["ai-rules/examples.json"] or \
+            "禁止 apply_files" not in host_context.get("mismatchPolicy", ""):
         raise ValueError("AI guidance does not lock generation to the host contract identity")
     feedback = guidance.get("hostErrorFeedback", {})
     if feedback.get("requiredFields") != ["source", "file", "path", "code", "messageRaw"] or \
             "逐字" not in feedback.get("messagePolicy", ""):
         raise ValueError("AI host errors are not preserved verbatim")
+    loading = guidance.get("contextLoading", {})
+    if (loading.get("map") != "ai-rules/context-map.json" or
+            loading.get("examples") != "conditional" or
+            loading.get("schema") != "hostOnly" or
+            "version" not in loading.get("reuseCondition", "") or
+            "sha256" not in loading.get("reuseCondition", "")):
+        raise ValueError("AI context loading policy is incomplete")
+    context_map = json.loads((ai / "context-map.json").read_text(encoding="utf-8"))
+    if (context_map.get("schemaVersion") != 1 or
+            context_map.get("contractVersion") != json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))["contractVersion"] or
+            set(context_map.get("topics", {})) != {"ui", "qvmi", "network", "storage", "resources"}):
+        raise ValueError("AI context map is invalid")
     scenarios = guidance.get("scenarios", {})
     if set(scenarios) != {"applicationScript", "resourcePackage"}:
         raise ValueError("AI guidance must cover both generation scenarios")
