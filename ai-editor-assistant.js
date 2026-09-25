@@ -9,438 +9,155 @@
  * @observe app.aiSupport.appIncludeCurrent
  * @observe app.aiSupport.packageIncludeManifest
  * @observe app.aiSupport.packageIncludeScript
- * @observe app.aiSupport.appDraft
- * @observe app.aiSupport.packageDraft
  * @ui
- * [
- *   {
- *     "slot": "scriptUi",
- *     "id": "ai-assistant-settings",
- *     "title": "AI 配置",
- *     "components": [
- *       {
- *         "type": "group",
- *         "id": "serviceSettings",
- *         "label": "服务",
- *         "description": "连接兼容 OpenAI Responses API 的服务。服务地址会保存，密钥只在本次脚本运行期间保留。",
- *         "layout": "column",
- *         "children": [
- *           {
- *             "type": "input",
- *             "id": "endpoint",
- *             "label": "接口",
- *             "description": "填写完整的 HTTPS 请求地址。修改后会自动重新读取模型列表。",
- *             "placeholder": "OpenAI 兼容接口地址",
- *             "inputMode": "text",
- *             "bindings": {
- *               "value": {
- *                 "path": "app.aiSupport.endpoint",
- *                 "type": "string",
- *                 "default": "https://api.openai.com/v1/responses"
- *               }
+ * {
+ *   "slot": "scriptUi",
+ *   "id": "ai-assistant-settings",
+ *   "title": "配置",
+ *   "scope": "persistent",
+ *   "components": [
+ *     {
+ *       "type": "group",
+ *       "id": "serviceSettings",
+ *       "label": "服务",
+ *       "description": "支持 OpenAI 兼容接口；服务地址与模型会保存。",
+ *       "layout": "column",
+ *       "children": [
+ *         {
+ *           "type": "input",
+ *           "id": "endpoint",
+ *           "label": "接口",
+ *           "placeholder": "https://api.openai.com/v1",
+ *           "inputMode": "text",
+ *           "bindings": {
+ *             "value": {
+ *               "path": "app.aiSupport.endpoint",
+ *               "type": "string",
+ *               "default": "https://api.openai.com/v1"
  *             }
- *           },
- *           {
- *             "type": "input",
- *             "id": "apiKey",
- *             "label": "密钥",
- *             "description": "用于访问服务；脚本停止后清除，不写入持久化存储。",
- *             "placeholder": "API Key",
- *             "inputMode": "password",
- *             "bindings": {
- *               "value": {
- *                 "path": "app.aiSupport.apiKey",
- *                 "type": "string",
- *                 "default": ""
- *               }
- *             }
- *           }
- *         ]
- *       },
- *       {
- *         "type": "group",
- *         "id": "modelSettings",
- *         "label": "模型",
- *         "description": "填写服务信息后自动读取可用模型，也可以手动刷新。",
- *         "layout": "column",
- *         "children": [
- *           {
- *             "type": "choice",
- *             "id": "model",
- *             "label": "使用模型",
- *             "description": "选择应用脚本与资源包对话共同使用的模型。",
- *             "bindings": {
- *               "value": {
- *                 "path": "app.aiSupport.model",
- *                 "type": "enum",
- *                 "default": ""
- *               },
- *               "options": {
- *                 "path": "app.aiSupport.modelOptions",
- *                 "type": "string",
- *                 "fallback": []
- *               },
- *               "enabled": {
- *                 "path": "app.aiSupport.modelLoading",
- *                 "type": "boolean",
- *                 "equals": false,
- *                 "fallback": true
- *               }
- *             }
- *           },
- *           {
- *             "type": "text",
- *             "id": "modelStatus",
- *             "label": "模型状态",
- *             "copyable": true,
- *             "bindings": {
- *               "text": {
- *                 "path": "app.aiSupport.modelStatus",
- *                 "type": "string",
- *                 "fallback": "等待填写服务地址"
- *               }
- *             }
- *           },
- *           {
- *             "type": "button",
- *             "action": "emit",
- *             "id": "reloadModels",
- *             "label": "刷新模型",
- *             "text": "刷新",
- *             "hug": true
- *           }
- *         ]
- *       },
- *       {
- *         "type": "group",
- *         "id": "assistantOptions",
- *         "label": "选项",
- *         "description": "选择生成结果的处理方式，以及每次请求要附带的编辑器内容。",
- *         "layout": "column",
- *         "children": [
- *           {
- *             "type": "toggle",
- *             "id": "autoApply",
- *             "label": "自动应用",
- *             "description": "生成并通过校验后直接写入对应编辑器；关闭后需要在对话区确认应用。",
- *             "hug": true,
- *             "bindings": {
- *               "value": {
- *                 "path": "app.aiSupport.autoApply",
- *                 "type": "boolean",
- *                 "default": false
- *               }
- *             }
- *           },
- *           {
- *             "type": "toggle",
- *             "id": "appIncludeCurrent",
- *             "label": "当前脚本",
- *             "description": "应用脚本对话时附带编辑器中的现有脚本，便于修改和续写。",
- *             "hug": true,
- *             "bindings": {
- *               "value": {
- *                 "path": "app.aiSupport.appIncludeCurrent",
- *                 "type": "boolean",
- *                 "default": true
- *               }
- *             }
- *           },
- *           {
- *             "type": "toggle",
- *             "id": "packageIncludeManifest",
- *             "label": "资源清单",
- *             "description": "资源包对话时附带当前 resource-package.json。",
- *             "hug": true,
- *             "bindings": {
- *               "value": {
- *                 "path": "app.aiSupport.packageIncludeManifest",
- *                 "type": "boolean",
- *                 "default": true
- *               }
- *             }
- *           },
- *           {
- *             "type": "toggle",
- *             "id": "packageIncludeScript",
- *             "label": "资源脚本",
- *             "description": "资源包对话时附带当前 main.js。",
- *             "hug": true,
- *             "bindings": {
- *               "value": {
- *                 "path": "app.aiSupport.packageIncludeScript",
- *                 "type": "boolean",
- *                 "default": true
- *               }
- *             }
- *           }
- *         ]
- *       }
- *     ]
- *   },
- *   {
- *     "slot": "applicationScript",
- *     "id": "ai-application-conversation",
- *     "title": "",
- *     "components": [
- *       {
- *         "type": "group",
- *         "id": "appConversation",
- *         "label": "消息",
- *         "layout": "column",
- *         "scroll": true,
- *         "bindings": {
- *           "label": {
- *             "path": "app.aiSupport.blankLabel",
- *             "fallback": ""
  *           }
  *         },
- *         "children": [
- *           {
- *             "type": "text",
- *             "id": "appTranscript",
- *             "label": "对话记录",
- *             "copyable": true,
- *             "bindings": {
- *               "text": {
- *                 "path": "app.aiSupport.appTranscript",
- *                 "type": "string",
- *                 "fallback": ""
- *               }
+ *         {
+ *           "type": "input",
+ *           "id": "apiKey",
+ *           "label": "密钥",
+ *           "description": "仅保留到脚本停止。",
+ *           "placeholder": "API Key",
+ *           "inputMode": "password",
+ *           "bindings": {
+ *             "value": {
+ *               "path": "app.aiSupport.apiKey",
+ *               "type": "string",
+ *               "default": ""
  *             }
  *           }
- *         ]
- *       },
- *       {
- *         "type": "text",
- *         "id": "appBusyStatus",
- *         "label": "状态",
- *         "bindings": {
- *           "text": {
- *             "path": "app.aiSupport.appStatus",
- *             "type": "string",
- *             "fallback": "正在处理…"
- *           },
- *           "visible": {
- *             "path": "app.aiSupport.busy",
- *             "type": "boolean",
- *             "equals": true,
- *             "fallback": false
+ *         },
+ *         {
+ *           "type": "choice",
+ *           "id": "model",
+ *           "label": "模型",
+ *           "bindings": {
+ *             "value": {
+ *               "path": "app.aiSupport.model",
+ *               "type": "enum",
+ *               "default": ""
+ *             },
+ *             "options": {
+ *               "path": "app.aiSupport.modelOptions",
+ *               "fallback": []
+ *             },
+ *             "enabled": {
+ *               "path": "app.aiSupport.modelLoading",
+ *               "equals": false,
+ *               "fallback": true
+ *             }
+ *           }
+ *         },
+ *         {
+ *           "type": "text",
+ *           "id": "modelStatus",
+ *           "label": "状态",
+ *           "copyable": true,
+ *           "bindings": {
+ *             "text": {
+ *               "path": "app.aiSupport.modelStatus",
+ *               "fallback": "等待连接"
+ *             }
+ *           }
+ *         },
+ *         {
+ *           "type": "button",
+ *           "id": "reloadModels",
+ *           "label": "刷新模型",
+ *           "text": "刷新模型",
+ *           "action": "emit",
+ *           "hug": true
+ *         }
+ *       ]
+ *     },
+ *     {
+ *       "type": "group",
+ *       "id": "assistantOptions",
+ *       "label": "上下文",
+ *       "layout": "column",
+ *       "children": [
+ *         {
+ *           "type": "toggle",
+ *           "id": "autoApply",
+ *           "label": "自动应用结果",
+ *           "hug": true,
+ *           "bindings": {
+ *             "value": {
+ *               "path": "app.aiSupport.autoApply",
+ *               "type": "boolean",
+ *               "default": false
+ *             }
+ *           }
+ *         },
+ *         {
+ *           "type": "toggle",
+ *           "id": "appIncludeCurrent",
+ *           "label": "附带当前应用脚本",
+ *           "hug": true,
+ *           "bindings": {
+ *             "value": {
+ *               "path": "app.aiSupport.appIncludeCurrent",
+ *               "type": "boolean",
+ *               "default": true
+ *             }
+ *           }
+ *         },
+ *         {
+ *           "type": "toggle",
+ *           "id": "packageIncludeManifest",
+ *           "label": "附带资源包清单",
+ *           "hug": true,
+ *           "bindings": {
+ *             "value": {
+ *               "path": "app.aiSupport.packageIncludeManifest",
+ *               "type": "boolean",
+ *               "default": true
+ *             }
+ *           }
+ *         },
+ *         {
+ *           "type": "toggle",
+ *           "id": "packageIncludeScript",
+ *           "label": "附带资源包脚本",
+ *           "hug": true,
+ *           "bindings": {
+ *             "value": {
+ *               "path": "app.aiSupport.packageIncludeScript",
+ *               "type": "boolean",
+ *               "default": true
+ *             }
  *           }
  *         }
- *       },
- *       {
- *         "type": "group",
- *         "id": "appComposer",
- *         "label": "输入",
- *         "layout": "row",
- *         "bindings": {
- *           "label": {
- *             "path": "app.aiSupport.blankLabel",
- *             "fallback": ""
- *           }
- *         },
- *         "children": [
- *           {
- *             "type": "input",
- *             "id": "appDraft",
- *             "label": "消息",
- *             "inputMode": "multiline",
- *             "bindings": {
- *               "label": {
- *                 "path": "app.aiSupport.blankLabel",
- *                 "fallback": ""
- *               },
- *               "value": {
- *                 "path": "app.aiSupport.appDraft",
- *                 "type": "string",
- *                 "default": ""
- *               },
- *               "enabled": {
- *                 "path": "app.aiSupport.busy",
- *                 "type": "boolean",
- *                 "equals": false,
- *                 "fallback": true
- *               }
- *             }
- *           },
- *           {
- *             "type": "button",
- *             "action": "emit",
- *             "id": "applyApplicationResult",
- *             "label": "应用结果",
- *             "text": "应用",
- *             "hug": true,
- *             "bindings": {
- *               "visible": {
- *                 "path": "app.aiSupport.appHasResult",
- *                 "type": "boolean",
- *                 "equals": true,
- *                 "fallback": false
- *               }
- *             }
- *           },
- *           {
- *             "type": "button",
- *             "action": "emit",
- *             "id": "clearApplicationChat",
- *             "label": "清空对话",
- *             "text": "清空",
- *             "hug": true
- *           },
- *           {
- *             "type": "button",
- *             "action": "emit",
- *             "id": "sendApplicationMessage",
- *             "label": "发送消息",
- *             "text": "发送",
- *             "hug": true,
- *             "bindings": {
- *               "enabled": {
- *                 "path": "app.aiSupport.busy",
- *                 "type": "boolean",
- *                 "equals": false,
- *                 "fallback": true
- *               }
- *             }
- *           }
- *         ]
- *       }
- *     ]
- *   },
- *   {
- *     "slot": "packageBuilder",
- *     "id": "ai-package-conversation",
- *     "title": "",
- *     "components": [
- *       {
- *         "type": "group",
- *         "id": "packageConversation",
- *         "label": "消息",
- *         "layout": "column",
- *         "scroll": true,
- *         "bindings": {
- *           "label": {
- *             "path": "app.aiSupport.blankLabel",
- *             "fallback": ""
- *           }
- *         },
- *         "children": [
- *           {
- *             "type": "text",
- *             "id": "packageTranscript",
- *             "label": "对话记录",
- *             "copyable": true,
- *             "bindings": {
- *               "text": {
- *                 "path": "app.aiSupport.packageTranscript",
- *                 "type": "string",
- *                 "fallback": ""
- *               }
- *             }
- *           }
- *         ]
- *       },
- *       {
- *         "type": "text",
- *         "id": "packageBusyStatus",
- *         "label": "状态",
- *         "bindings": {
- *           "text": {
- *             "path": "app.aiSupport.packageStatus",
- *             "type": "string",
- *             "fallback": "正在处理…"
- *           },
- *           "visible": {
- *             "path": "app.aiSupport.busy",
- *             "type": "boolean",
- *             "equals": true,
- *             "fallback": false
- *           }
- *         }
- *       },
- *       {
- *         "type": "group",
- *         "id": "packageComposer",
- *         "label": "输入",
- *         "layout": "row",
- *         "bindings": {
- *           "label": {
- *             "path": "app.aiSupport.blankLabel",
- *             "fallback": ""
- *           }
- *         },
- *         "children": [
- *           {
- *             "type": "input",
- *             "id": "packageDraft",
- *             "label": "消息",
- *             "inputMode": "multiline",
- *             "bindings": {
- *               "label": {
- *                 "path": "app.aiSupport.blankLabel",
- *                 "fallback": ""
- *               },
- *               "value": {
- *                 "path": "app.aiSupport.packageDraft",
- *                 "type": "string",
- *                 "default": ""
- *               },
- *               "enabled": {
- *                 "path": "app.aiSupport.busy",
- *                 "type": "boolean",
- *                 "equals": false,
- *                 "fallback": true
- *               }
- *             }
- *           },
- *           {
- *             "type": "button",
- *             "action": "emit",
- *             "id": "applyPackageResult",
- *             "label": "应用结果",
- *             "text": "应用",
- *             "hug": true,
- *             "bindings": {
- *               "visible": {
- *                 "path": "app.aiSupport.packageHasResult",
- *                 "type": "boolean",
- *                 "equals": true,
- *                 "fallback": false
- *               }
- *             }
- *           },
- *           {
- *             "type": "button",
- *             "action": "emit",
- *             "id": "clearPackageChat",
- *             "label": "清空对话",
- *             "text": "清空",
- *             "hug": true
- *           },
- *           {
- *             "type": "button",
- *             "action": "emit",
- *             "id": "sendPackageMessage",
- *             "label": "发送消息",
- *             "text": "发送",
- *             "hug": true,
- *             "bindings": {
- *               "enabled": {
- *                 "path": "app.aiSupport.busy",
- *                 "type": "boolean",
- *                 "equals": false,
- *                 "fallback": true
- *               }
- *             }
- *           }
- *         ]
- *       }
- *     ]
- *   }
- * ]
+ *       ]
+ *     }
+ *   ]
+ * }
  */
-
 const RULE_BASE = 'https://qu-bl.github.io/one-fuzhu/';
 const MAX_REQUEST_CHARS = 100000;
 const MAX_OUTPUT_TOKENS = 16384;
@@ -455,6 +172,125 @@ let stopped = false;
 let modelLoadPendingAt = 0;
 let modelLoading = false;
 let lastModelSource = '';
+
+function hiddenLabel() {
+  return { label: { path: PREFIX + 'blankLabel', fallback: '' } };
+}
+
+function messageRow(prefix, entry, index) {
+  const message = {
+    type: 'text',
+    id: prefix + 'Message' + index,
+    label: entry.role === 'user' ? '用户消息' : '回复',
+    text: entry.content,
+    copyable: true
+  };
+  const space = {
+    type: 'spacer',
+    id: prefix + 'MessageSpace' + index,
+    label: '消息间隔'
+  };
+  return {
+    type: 'group',
+    id: prefix + 'MessageRow' + index,
+    label: entry.role === 'user' ? '用户消息' : '回复',
+    layout: 'row',
+    bindings: hiddenLabel(),
+    children: entry.role === 'user' ? [space, message] : [message, space]
+  };
+}
+
+function conversationSet(target) {
+  const isApplication = target === 'applicationScript';
+  const prefix = isApplication ? 'app' : 'package';
+  const title = isApplication ? '应用脚本' : '资源包';
+  const rows = histories[target].map(function (entry, index) {
+    return messageRow(prefix, entry, index);
+  });
+  return {
+    slot: isApplication ? 'applicationScript' : 'packageBuilder',
+    id: prefix + '-conversation',
+    title: '',
+    scope: 'persistent',
+    components: [
+      {
+        type: 'group',
+        id: prefix + 'History',
+        label: '对话',
+        layout: 'column',
+        scroll: true,
+        bindings: hiddenLabel(),
+        children: rows
+      },
+      {
+        type: 'text',
+        id: prefix + 'BusyStatus',
+        label: '状态',
+        bindings: {
+          text: { path: PREFIX + prefix + 'Status', fallback: '正在处理…' },
+          visible: { path: PREFIX + 'busy', equals: true, fallback: false }
+        }
+      },
+      {
+        type: 'group',
+        id: prefix + 'Composer',
+        label: '输入',
+        layout: 'row',
+        bindings: {
+          label: { path: PREFIX + 'blankLabel', fallback: '' },
+          enabled: { path: PREFIX + 'busy', equals: false, fallback: true }
+        },
+        children: [
+          {
+            type: 'input',
+            id: prefix + 'Draft',
+            label: '消息',
+            placeholder: '输入内容',
+            inputMode: 'multiline',
+            bindings: {
+              label: { path: PREFIX + 'blankLabel', fallback: '' },
+              value: { path: PREFIX + prefix + 'Draft', type: 'string', default: '' }
+            }
+          },
+          {
+            type: 'button',
+            id: isApplication ? 'applyApplicationResult' : 'applyPackageResult',
+            label: '应用结果',
+            text: '应用',
+            action: 'emit',
+            hug: true,
+            bindings: {
+              visible: { path: PREFIX + prefix + 'HasResult', equals: true, fallback: false }
+            }
+          },
+          {
+            type: 'button',
+            id: isApplication ? 'clearApplicationChat' : 'clearPackageChat',
+            label: '清空对话',
+            text: '清空',
+            action: 'emit',
+            hug: true
+          },
+          {
+            type: 'button',
+            id: isApplication ? 'sendApplicationMessage' : 'sendPackageMessage',
+            label: '发送消息',
+            text: '发送',
+            action: 'emit',
+            hug: true
+          }
+        ]
+      }
+    ]
+  };
+}
+
+function refreshConversationUI(qu) {
+  qu.ui.declare([
+    conversationSet('applicationScript'),
+    conversationSet('resourcePackage')
+  ]);
+}
 
 function fieldText(field) {
   return field && typeof field.value === 'string' ? field.value.trim() : '';
@@ -1113,19 +949,10 @@ function loadHistory(qu, target) {
   }
 }
 
-function transcript(target) {
-  const list = histories[target];
-  if (!list || list.length === 0) return '';
-  return list.map(function (entry) {
-    return (entry.role === 'user' ? '你' : 'AI') + '\n' + entry.content;
-  }).join('\n\n');
-}
-
 function publishTranscript(qu, target) {
   const prefix = targetPrefix(target);
-  const field = fields[prefix + 'Transcript'];
-  if (field) field.value = transcript(target);
   qu.storage.set(prefix + 'History', JSON.stringify(histories[target]));
+  refreshConversationUI(qu);
 }
 
 function appendMessage(qu, target, role, content) {
@@ -1234,13 +1061,9 @@ async function generate(qu, target) {
 
 function ownedField(qu, name, type, initial, label) {
   const path = PREFIX + name;
-  try {
-    return qu.viewModel.define(path, type, initial, { label: label });
-  } catch (_existing) {
-    if (type === 'boolean') return qu.viewModel.boolean(path);
-    if (type === 'json') return qu.viewModel.json(path);
-    return qu.viewModel.string(path);
-  }
+  const field = qu.viewModel.define(path, type, initial, { label: label });
+  if (!field.created) field.value = initial;
+  return field;
 }
 
 defineQuScript({
@@ -1251,23 +1074,22 @@ defineQuScript({
     lastModelSource = '';
     fields = {};
     fields.blankLabel = ownedField(qu, 'blankLabel', 'string', '', '空白标签');
-    fields.endpoint = ownedField(qu, 'endpoint', 'string', qu.storage.get('endpoint', ''), '服务地址');
+    fields.endpoint = ownedField(qu, 'endpoint', 'string',
+      qu.storage.get('endpoint', 'https://api.openai.com/v1'), '服务地址');
     const storedModel = String(qu.storage.get('model', '') || '').trim();
-    fields.model = ownedField(qu, 'model', 'string', storedModel, '模型');
+    fields.model = ownedField(qu, 'model', 'enum', storedModel, '模型');
     fields.apiKey = ownedField(qu, 'apiKey', 'string', '', 'API 密钥');
     fields.modelOptions = ownedField(qu, 'modelOptions', 'json', storedModel ? [storedModel] : [], '可用模型');
     fields.modelLoading = ownedField(qu, 'modelLoading', 'boolean', false, '正在加载模型');
     fields.modelStatus = ownedField(qu, 'modelStatus', 'string', '等待填写服务地址', '模型加载状态');
-    fields.autoApply = ownedField(qu, 'autoApply', 'boolean', qu.storage.get('autoApply', true), '生成后直接写入编辑器');
+    fields.autoApply = ownedField(qu, 'autoApply', 'boolean', qu.storage.get('autoApply', false), '生成后直接写入编辑器');
     fields.busy = ownedField(qu, 'busy', 'boolean', false, 'AI 正在处理');
     fields.ruleStatus = ownedField(qu, 'ruleStatus', 'string', '尚未检查云端规则', '规则状态');
-    fields.appDraft = ownedField(qu, 'appDraft', 'string', qu.storage.get('appDraft', ''), '应用脚本消息');
-    fields.appTranscript = ownedField(qu, 'appTranscript', 'string', '', '应用脚本对话内容');
+    fields.appDraft = ownedField(qu, 'appDraft', 'string', '', '应用脚本消息');
     fields.appStatus = ownedField(qu, 'appStatus', 'string', '待命', '应用脚本对话状态');
     fields.appHasResult = ownedField(qu, 'appHasResult', 'boolean', false, '应用脚本已有结果');
     fields.appIncludeCurrent = ownedField(qu, 'appIncludeCurrent', 'boolean', qu.storage.get('appIncludeCurrent', true), '发送当前应用脚本');
-    fields.packageDraft = ownedField(qu, 'packageDraft', 'string', qu.storage.get('packageDraft', ''), '资源包消息');
-    fields.packageTranscript = ownedField(qu, 'packageTranscript', 'string', '', '资源包对话内容');
+    fields.packageDraft = ownedField(qu, 'packageDraft', 'string', '', '资源包消息');
     fields.packageStatus = ownedField(qu, 'packageStatus', 'string', '待命', '资源包对话状态');
     fields.packageHasResult = ownedField(qu, 'packageHasResult', 'boolean', false, '资源包已有结果');
     fields.packageIncludeManifest = ownedField(qu, 'packageIncludeManifest', 'boolean', qu.storage.get('packageIncludeManifest', true), '发送资源包清单');
@@ -1275,8 +1097,7 @@ defineQuScript({
 
     histories.applicationScript = loadHistory(qu, 'applicationScript');
     histories.resourcePackage = loadHistory(qu, 'resourcePackage');
-    fields.appTranscript.value = transcript('applicationScript');
-    fields.packageTranscript.value = transcript('resourcePackage');
+    refreshConversationUI(qu);
     scheduleModelLoad(300);
   },
 
@@ -1287,9 +1108,7 @@ defineQuScript({
       'app.aiSupport.autoApply': 'autoApply',
       'app.aiSupport.appIncludeCurrent': 'appIncludeCurrent',
       'app.aiSupport.packageIncludeManifest': 'packageIncludeManifest',
-      'app.aiSupport.packageIncludeScript': 'packageIncludeScript',
-      'app.aiSupport.appDraft': 'appDraft',
-      'app.aiSupport.packageDraft': 'packageDraft'
+      'app.aiSupport.packageIncludeScript': 'packageIncludeScript'
     };
     const key = keys[path];
     if (key) qu.storage.set(key, value);
