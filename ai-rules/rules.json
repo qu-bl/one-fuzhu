@@ -3,13 +3,18 @@
   "files": [
     {
       "name": "README.md",
-      "version": "2026.09.24.04",
-      "sha256": "0acda9a0d8bd1a4c28c09efe0e6c956476eb8281e8b84516ec33239eeb253c95"
+      "version": "2026.09.25",
+      "sha256": "aea1ba60742a7c9e3054300d987730164a576cccdf9da3ee87859dc8b4889ead"
     },
     {
       "name": "application-script.md",
-      "version": "2026.09.24.04",
-      "sha256": "8b6aaf517029402bbdc52013ebff78a86fb40ac9a0ec23f53bbcf9b531f3ffee"
+      "version": "2026.09.25",
+      "sha256": "85bd3b89568cf52c5872a666cb567c25a6c1492884ef3e6f5a14845cd3322fcd"
+    },
+    {
+      "name": "context-map.json",
+      "version": "2026.09.25",
+      "sha256": "537b44ddc92e9c99b94e8b7571a4dc91721fd1ddf113e63cc961f321e0f451b4"
     },
     {
       "name": "examples.json",
@@ -23,18 +28,18 @@
     },
     {
       "name": "guidance.json",
-      "version": "2026.09.24.04",
-      "sha256": "793e9a386da1a1373d6e54af2caf3c644643c2c417cf4cf15d579a63b5f2e345"
+      "version": "2026.09.25",
+      "sha256": "508b7b8dae6a725b5abd2bdce6477b741bdfd79b79e5c8b87172abab047a9825"
     },
     {
       "name": "resource-package.md",
-      "version": "2026.09.24.04",
-      "sha256": "cb9e282c06783673ce5085dda5d7ed995d9547dec62c230659ad5b72fca9c4f5"
+      "version": "2026.09.25",
+      "sha256": "9649dcecf152f384f896b0c8f1c04f7ef48609aefab7d58f4f8071980dafbacd"
     },
     {
       "name": "sources.json",
-      "version": "2026.09.21.14",
-      "sha256": "0bfbfd2d58c9342ad8749bd523f3a0bdbff0d0e1923eefbdd87dafd84a406cfb"
+      "version": "2026.09.25",
+      "sha256": "763c33f8bb8b3f8e044cb5162deaaa16e580e0b38f6ff4ad0cd8a7298c6b3d90"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "baseUrl": "https://qu-bl.github.io/one-fuzhu/",
   "sources": {
     "resourcePackage": {
@@ -31,6 +31,7 @@
     },
     "ai": {
       "guide": "ai-rules/README.md",
+      "contextMap": "ai-rules/context-map.json",
       "guidance": "ai-rules/guidance.json",
       "examples": "ai-rules/examples.json",
       "scenarioGuides": {
