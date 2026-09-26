@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "8.0.5",
+  "contractVersion": "9.0.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -613,6 +613,64 @@
       "isolatedByOwner": true
     }
   },
+  "network": {
+    "scheme": "https",
+    "requiresDeclaredDomain": true,
+    "requestMaxBytes": 1048576,
+    "responseMaxBytes": 1048576,
+    "transferMaxBytes": 67108864,
+    "streamMaxBytes": 16777216,
+    "redirectModes": [
+      "error",
+      "follow"
+    ],
+    "defaultRedirect": "error",
+    "maxRedirects": 5,
+    "redirectMustRemainInDeclaredDomains": true,
+    "requestMethods": [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "HEAD",
+      "OPTIONS"
+    ],
+    "bodyMethods": [
+      "POST",
+      "PUT",
+      "PATCH"
+    ],
+    "uploadMethods": [
+      "POST",
+      "PUT",
+      "PATCH"
+    ],
+    "streamMethods": [
+      "GET",
+      "POST"
+    ],
+    "responseTypes": [
+      "text",
+      "json",
+      "binary"
+    ],
+    "webSocketScheme": "wss",
+    "defaultRequestMethod": "GET",
+    "defaultUploadMethod": "POST",
+    "defaultStreamMethod": "GET",
+    "minimumTimeoutMs": 1000,
+    "defaultRequestTimeoutMs": 10000,
+    "defaultTransferTimeoutMs": 30000,
+    "redirectStatusCodes": [
+      301,
+      302,
+      303,
+      307,
+      308
+    ],
+    "defaultResponseType": "text"
+  },
   "qvmi": {
     "lifecycle": {
       "allFieldsRuntimeOnly": true,
@@ -713,6 +771,382 @@
       "applicationGlobalNamespace": "app.",
       "packageGlobalNamespace": "package.",
       "triggerNamespace": "runtime."
+    },
+    "fieldMetadata": {
+      "app.theme.brand": {
+        "delivery": "state"
+      },
+      "system.time.epochMs": {
+        "delivery": "state",
+        "unit": "ms",
+        "displayPrecision": 0
+      },
+      "system.appearance.colorMode": {
+        "delivery": "state",
+        "values": [
+          "light",
+          "dark"
+        ]
+      },
+      "system.appearance.language": {
+        "delivery": "state"
+      },
+      "system.appearance.region": {
+        "delivery": "state"
+      },
+      "system.appearance.locale": {
+        "delivery": "state"
+      },
+      "system.appearance.timeZone": {
+        "delivery": "state"
+      },
+      "system.appearance.is24HourClock": {
+        "delivery": "state"
+      },
+      "system.appearance.fontSizeScale": {
+        "delivery": "state"
+      },
+      "system.appearance.fontWeightScale": {
+        "delivery": "state"
+      },
+      "system.appearance.hasPointerDevice": {
+        "delivery": "state"
+      },
+      "system.appearance.mcc": {
+        "delivery": "state"
+      },
+      "system.appearance.mnc": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.type": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.manufacturer": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.brand": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.marketName": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.productSeries": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.productModel": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.productModelAlias": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.softwareModel": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.hardwareModel": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.chipType": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.abiList": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.performanceClass": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.displayVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.incrementalVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.osFullName": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.osReleaseType": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.securityPatchTag": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.osMajorVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.osSeniorVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.osFeatureVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.osBuildVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.sdkApiVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.sdkMinorApiVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.sdkPatchApiVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.firstApiVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.versionId": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.buildType": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.buildTime": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.distributionOSName": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.distributionOSVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.distributionOSApiVersion": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.distributionOSApiName": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.distributionOSReleaseType": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.bootCount": {
+        "delivery": "state"
+      },
+      "system.deviceInfo.deviceColor": {
+        "delivery": "state"
+      },
+      "system.battery.level": {
+        "delivery": "state",
+        "unit": "percent",
+        "range": [
+          0,
+          100
+        ],
+        "displayPrecision": 0,
+        "displaySuffix": "%"
+      },
+      "system.battery.isCharging": {
+        "delivery": "state"
+      },
+      "device.motion.accelerationX": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.motion.accelerationY": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.motion.accelerationZ": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.motion.rotationX": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.motion.rotationY": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.motion.rotationZ": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.motion.pitch": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.motion.roll": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.motion.yaw": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          -1,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.ambientLight.normalized": {
+        "delivery": "state",
+        "unit": "normalized",
+        "range": [
+          0,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.proximity.isNear": {
+        "delivery": "state"
+      },
+      "device.proximity.normalized": {
+        "delivery": "state",
+        "unit": "normalized",
+        "range": [
+          0,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.location.latitude": {
+        "delivery": "state",
+        "unit": "degree",
+        "range": [
+          -90,
+          90
+        ],
+        "displayPrecision": 6
+      },
+      "device.location.longitude": {
+        "delivery": "state",
+        "unit": "degree",
+        "range": [
+          -180,
+          180
+        ],
+        "displayPrecision": 6
+      },
+      "device.location.altitude": {
+        "delivery": "state",
+        "unit": "meter",
+        "displayPrecision": 1
+      },
+      "device.location.speed": {
+        "delivery": "state",
+        "unit": "m/s",
+        "displayPrecision": 2
+      },
+      "device.location.course": {
+        "delivery": "state",
+        "unit": "degree",
+        "range": [
+          0,
+          360
+        ],
+        "displayPrecision": 1
+      },
+      "device.location.horizontalAccuracy": {
+        "delivery": "state",
+        "unit": "meter",
+        "displayPrecision": 1
+      },
+      "device.screen.width": {
+        "delivery": "state",
+        "unit": "logicalPixel",
+        "displayPrecision": 0
+      },
+      "device.screen.height": {
+        "delivery": "state",
+        "unit": "logicalPixel",
+        "displayPrecision": 0
+      },
+      "device.screen.density": {
+        "delivery": "state"
+      },
+      "device.screen.orientation": {
+        "delivery": "state",
+        "values": [
+          "portrait",
+          "landscape",
+          "unknown"
+        ]
+      },
+      "device.touch.x": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          0,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.touch.y": {
+        "delivery": "stream",
+        "unit": "normalized",
+        "range": [
+          0,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.touch.isDown": {
+        "delivery": "stream"
+      },
+      "device.touch.phase": {
+        "delivery": "event",
+        "values": [
+          "down",
+          "move",
+          "up",
+          "cancel"
+        ]
+      },
+      "device.touch.pointerId": {
+        "delivery": "stream"
+      },
+      "system.network.isConnected": {
+        "delivery": "state"
+      },
+      "system.network.type": {
+        "delivery": "state",
+        "values": [
+          "none",
+          "wifi",
+          "cellular",
+          "ethernet",
+          "other"
+        ]
+      }
     }
   }
 }

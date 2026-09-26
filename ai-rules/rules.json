@@ -13,18 +13,18 @@
     },
     {
       "name": "context-map.json",
-      "version": "2026.09.25",
-      "sha256": "537b44ddc92e9c99b94e8b7571a4dc91721fd1ddf113e63cc961f321e0f451b4"
+      "version": "2026.09.26.1716",
+      "sha256": "78740dc44fec8b8205769dc0f6a5ec25c5c33c84623617562e60cb4bb0ace24a"
     },
     {
       "name": "examples.json",
-      "version": "2026.09.24.04",
-      "sha256": "aee54e0110b43ae9b33d8d01919353a37d9350e72d8ae40a116f4aa68132402a"
+      "version": "2026.09.26.1716",
+      "sha256": "8c8ebdb9d82daa9b9cf895eac42ade7cb7141576ae6a97adac2b30e38af84657"
     },
     {
       "name": "generation-profile.json",
-      "version": "2026.09.24.04",
-      "sha256": "ab56aadd2d0095ac9ddd753c61bb8b951989fa50d2c40cd39fc8735e251dbf1b"
+      "version": "2026.09.26.1722",
+      "sha256": "5fb9e46f1c971fb6bc4cbd327082b5db0a1b4b754ff846ac8880e18f8031c2c1"
     },
     {
       "name": "guidance.json",
