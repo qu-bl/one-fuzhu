@@ -387,6 +387,15 @@ def verify_schema_and_fixtures():
     if not (0 < translation.get("minimumEntries", 0) <= translation.get("maximumEntries", 0)) or \
             translation.get("maximumBytes", 0) <= 0 or translation.get("unmatchedTermsMax", 0) <= 0:
         raise ValueError("Rive editor translation limits are invalid")
+    dictionary_bytes = dictionary.read_bytes()
+    dictionary_value = json.loads(dictionary_bytes)
+    forbidden_keys = set(translation.get("forbiddenKeys", []))
+    if len(dictionary_bytes) > translation["maximumBytes"] or not isinstance(dictionary_value, dict) or \
+            not translation["minimumEntries"] <= len(dictionary_value) <= translation["maximumEntries"] or \
+            any(not isinstance(key, str) or not key.strip() or key in forbidden_keys or
+                not isinstance(value, str) or not value.strip()
+                for key, value in dictionary_value.items()):
+        raise ValueError("Rive editor translation dictionary is invalid")
     verify_ai_source_map(contract)
     rules = json.loads((ROOT.parent.parent / "ai-rules" / "rules.json").read_text(encoding="utf-8"))
     if rules.get("schemaVersion") != 3:
