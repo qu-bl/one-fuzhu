@@ -1,4 +1,4 @@
-# 三端动态原生 UI 规范 8.0.5
+# 三端动态原生 UI 规范 9.0.0
 
 本规范是 Apple、Android、鸿蒙动态 UI 的共同最小集合。权威机器规则位于
 [`contract.json`](contract.json) 的 `ui` 段；本文用于说明它能表达什么。

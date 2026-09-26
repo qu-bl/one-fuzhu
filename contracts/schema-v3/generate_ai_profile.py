@@ -56,11 +56,13 @@ def build_profile():
             "hostOperations": script["hostOperations"],
             "storage": script["storage"],
         },
+        "network": CONTRACT["network"],
         "qvmi": {
             "lifecycle": CONTRACT["qvmi"]["lifecycle"],
             "fieldTypes": CONTRACT["qvmi"]["fieldTypes"],
             "writablePublicPaths": CONTRACT["qvmi"]["writablePublicPaths"],
             "permissionRules": CONTRACT["qvmi"]["permissionRules"],
+            "fieldMetadata": CONTRACT["qvmi"]["fieldMetadata"],
         },
     }
 

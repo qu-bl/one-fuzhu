@@ -336,6 +336,11 @@ def verify_schema_and_fixtures():
         raise ValueError("public QVMI paths must be unique")
     if set(qvmi["fieldTypes"]) != public_paths:
         raise ValueError("each public QVMI path must declare exactly one type")
+    if set(qvmi.get("fieldMetadata", {})) != public_paths:
+        raise ValueError("each public QVMI path must declare exactly one metadata record")
+    if any(metadata.get("delivery") not in {"state", "event", "stream"}
+           for metadata in qvmi["fieldMetadata"].values()):
+        raise ValueError("public QVMI delivery is invalid")
     if not set(qvmi["writablePublicPaths"]).issubset(public_paths):
         raise ValueError("writable QVMI paths must be public paths")
     if not set(qvmi["fieldTypes"].values()).issubset(script["valueAccessorTypes"]):
@@ -346,6 +351,42 @@ def verify_schema_and_fixtures():
         raise ValueError("each public trigger must declare payload fields")
     if any(len(fields) != len(set(fields)) for fields in qvmi["triggerPayloadFields"].values()):
         raise ValueError("trigger payload fields must be unique")
+    network = contract["network"]
+    for name in ("requestMethods", "bodyMethods", "uploadMethods", "streamMethods", "responseTypes",
+                 "redirectModes", "redirectStatusCodes"):
+        if not network.get(name) or len(network[name]) != len(set(network[name])):
+            raise ValueError(f"network list must contain unique values: {name}")
+    if not set(network["bodyMethods"]).issubset(network["requestMethods"]) or \
+            not set(network["uploadMethods"]).issubset(network["requestMethods"]) or \
+            not set(network["streamMethods"]).issubset(network["requestMethods"]):
+        raise ValueError("network operation methods must be request methods")
+    for name, group in (("defaultRequestMethod", "requestMethods"),
+                        ("defaultUploadMethod", "uploadMethods"),
+                        ("defaultStreamMethod", "streamMethods"),
+                        ("defaultResponseType", "responseTypes"),
+                        ("defaultRedirect", "redirectModes")):
+        if network.get(name) not in network[group]:
+            raise ValueError(f"network default is not allowed: {name}")
+    for name in ("minimumTimeoutMs", "defaultRequestTimeoutMs", "defaultTransferTimeoutMs"):
+        if not isinstance(network.get(name), int) or network[name] < 1:
+            raise ValueError(f"network timeout must be positive: {name}")
+    if network["defaultRequestTimeoutMs"] < network["minimumTimeoutMs"] or \
+            network["defaultTransferTimeoutMs"] < network["minimumTimeoutMs"]:
+        raise ValueError("network default timeout cannot be below the minimum")
+    display_scale = contract.get("host", {}).get("packageDisplayScale", {})
+    if not (display_scale.get("minimum", 0) < display_scale.get("default", 0) <
+            display_scale.get("maximum", 0)) or display_scale.get("step", 0) <= 0:
+        raise ValueError("package display scale rules are invalid")
+    translation = contract.get("translation", {}).get("riveEditor", {})
+    dictionary = ROOT.parent.parent / "rive-editor" / "translation.json"
+    if translation.get("url") != "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json" or \
+            translation.get("sha256") != hashlib.sha256(dictionary.read_bytes()).hexdigest() or \
+            translation.get("loadPolicy") != "firstUseOncePerColdStart" or \
+            translation.get("fontPolicy") != "platformDefault":
+        raise ValueError("Rive editor translation delivery rules are invalid")
+    if not (0 < translation.get("minimumEntries", 0) <= translation.get("maximumEntries", 0)) or \
+            translation.get("maximumBytes", 0) <= 0 or translation.get("unmatchedTermsMax", 0) <= 0:
+        raise ValueError("Rive editor translation limits are invalid")
     verify_ai_source_map(contract)
     rules = json.loads((ROOT.parent.parent / "ai-rules" / "rules.json").read_text(encoding="utf-8"))
     if rules.get("schemaVersion") != 3:
