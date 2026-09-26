@@ -255,9 +255,11 @@ def verify_schema_and_fixtures():
             raise ValueError(f"archive limit must be a positive integer: {name}")
     if archive["maxSingleFileBytes"] > archive["maxTotalBytes"]:
         raise ValueError("single archive file cannot exceed total archive size")
-    for name in ("forbiddenRootSegments", "forbiddenSegments", "windowsDeviceNames"):
+    for name in ("forbiddenRootSegments", "forbiddenSegments", "reservedDeviceNames", "windowsDeviceNames"):
         if not archive[name] or len(archive[name]) != len(set(archive[name])):
             raise ValueError(f"archive list must contain unique values: {name}")
+    if archive["reservedDeviceNames"] != archive["windowsDeviceNames"]:
+        raise ValueError("archive reserved device name aliases must match")
     for section, names in (
         (contract["resources"], ("readTextMaxBytes", "readBinaryMaxBytes", "riveImageMaxBytes", "riveAssetMaxBytes")),
         (contract["network"], ("requestMaxBytes", "responseMaxBytes", "transferMaxBytes", "streamMaxBytes")),
