@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "10.0.0",
+  "contractVersion": "10.0.1",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -549,6 +549,7 @@
     "generationChecks": {
       "requireHostContractIdentity": true,
       "hostContractMismatchPolicy": "reject",
+      "preserveApplicationIdOnUpdate": true,
       "observeOnlyWhenOnValueConsumes": true,
       "uiBindingAloneDoesNotRequireObserve": true,
       "selfOwnedObservedPathRequiresSource": true,
@@ -760,7 +761,11 @@
       ],
       "writeThrough": true,
       "survivesColdStart": true,
-      "isolatedByOwner": true
+      "survivesAppUpdate": true,
+      "isolatedByOwner": true,
+      "applicationOwnerIdentity": "@id",
+      "resourcePackageOwnerIdentity": "manifest.id",
+      "ownerIdentityMustRemainStableAcrossUpdates": true
     }
   },
   "network": {

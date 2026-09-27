@@ -20,7 +20,7 @@
  *       "type": "group",
  *       "id": "serviceSettings",
  *       "label": "服务",
- *       "description": "支持 OpenAI Chat Completions tools 标准接口；服务地址与模型会保存。",
+ *       "description": "支持 OpenAI Chat Completions tools 标准接口；连接配置与模型会保存。",
  *       "layout": "column",
  *       "children": [
  *         {
@@ -1004,6 +1004,7 @@ function clearConversation(qu, target) {
 
 function persistSettings(qu) {
   qu.storage.set('endpoint', fieldText(fields.endpoint));
+  qu.storage.set('apiKey', fieldText(fields.apiKey));
   qu.storage.set('model', fieldText(fields.model));
   qu.storage.set('autoApply', fields.autoApply && fields.autoApply.value === true);
   qu.storage.set('appIncludeCurrent', fields.appIncludeCurrent && fields.appIncludeCurrent.value === true);
@@ -1108,7 +1109,8 @@ defineQuScript({
       '服务地址');
     const storedModel = String(qu.storage.get('model', '') || '').trim();
     fields.model = ownedField(qu, 'model', 'enum', storedModel, '模型');
-    fields.apiKey = ownedField(qu, 'apiKey', 'string', '', 'API 密钥');
+    fields.apiKey = ownedField(qu, 'apiKey', 'string',
+      String(qu.storage.get('apiKey', '') || ''), 'API 密钥');
     fields.modelOptions = ownedField(qu, 'modelOptions', 'json', storedModel ? [storedModel] : [], '可用模型');
     fields.modelLoading = ownedField(qu, 'modelLoading', 'boolean', false, '正在加载模型');
     fields.modelStatus = ownedField(qu, 'modelStatus', 'string', '等待填写服务地址', '模型加载状态');
@@ -1133,6 +1135,7 @@ defineQuScript({
   onValue(path, value, qu) {
     const keys = {
       'app.aiSupport.endpoint': 'endpoint',
+      'app.aiSupport.apiKey': 'apiKey',
       'app.aiSupport.model': 'model',
       'app.aiSupport.autoApply': 'autoApply',
       'app.aiSupport.appIncludeCurrent': 'appIncludeCurrent',

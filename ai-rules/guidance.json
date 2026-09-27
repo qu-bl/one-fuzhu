@@ -78,7 +78,7 @@
       },
       {
         "id": "application-required-id",
-        "check": "应用脚本身份满足本轮生成摘要，文件名不作为身份兜底。",
+        "check": "应用脚本身份满足本轮生成摘要，文件名不作为身份兜底；修改已有脚本时保持 @id 不变。",
         "appliesTo": [
           "applicationScript"
         ]

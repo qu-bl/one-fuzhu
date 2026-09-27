@@ -301,13 +301,18 @@ def verify_schema_and_fixtures():
         "valueKinds": ["null", "boolean", "number", "string", "array", "object"],
         "writeThrough": True,
         "survivesColdStart": True,
+        "survivesAppUpdate": True,
         "isolatedByOwner": True,
+        "applicationOwnerIdentity": "@id",
+        "resourcePackageOwnerIdentity": "manifest.id",
+        "ownerIdentityMustRemainStableAcrossUpdates": True,
     }:
         raise ValueError("script storage must be isolated, write-through JSON storage")
     re.compile(storage["keyPattern"])
     expected_generation_checks = {
         "requireHostContractIdentity": True,
         "hostContractMismatchPolicy": "reject",
+        "preserveApplicationIdOnUpdate": True,
         "observeOnlyWhenOnValueConsumes": True,
         "uiBindingAloneDoesNotRequireObserve": True,
         "selfOwnedObservedPathRequiresSource": True,
