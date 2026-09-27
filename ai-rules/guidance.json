@@ -45,8 +45,10 @@
       "fullFileAllowedFor": [
         "newFile",
         "largeRewrite"
-      ]
-    }
+      ],
+      "emptyDelivery": "只讨论或缺少必要信息时，edits 使用空数组且 apply_files 使用空对象。"
+    },
+    "transport": "调用端提供 submit_result 时必须使用该工具提交；不要把长代码再次包装进消息正文 JSON。"
   },
   "workflow": {
     "prepare": [
@@ -62,7 +64,7 @@
     "verify": [
       {
         "id": "delivery-json",
-        "check": "输出符合 deliveryProtocol，edits 与 apply_files 互斥，替换文本在当前演进文件中恰好匹配一次。",
+        "check": "使用调用端提供的 submit_result；edits 与 apply_files 最多一个非空，替换文本在当前演进文件中恰好匹配一次。",
         "appliesTo": [
           "applicationScript",
           "resourcePackage"
