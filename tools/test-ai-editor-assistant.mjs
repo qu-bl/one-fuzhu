@@ -12,10 +12,15 @@ globalThis.aiTest = {
   parseAssistantReply,
   safeHistory,
   utf8Bytes,
+  sha256Hex,
   completionInfo,
   requestWithRules,
+  refreshRuleLibrary,
+  readRule,
   setRequestCompletion(value) { requestCompletion = value; },
-  setReadRule(value) { readRule = value; }
+  setReadRule(value) { readRule = value; },
+  setRequestText(value) { requestText = value; },
+  clearRuleLibrary() { ruleLibrary = null; }
 };`, context);
 
 const api = context.aiTest;
@@ -55,6 +60,41 @@ const history = api.safeHistory(Array.from({ length: 30 }, (_, index) => ({
 assert.ok(history.length <= 12);
 assert.ok(api.utf8Bytes(JSON.stringify(history)).length <= 24000);
 
+let directory = '{"version":1}';
+let directoryReads = 0;
+function publishedRules() {
+  return JSON.stringify({
+    schemaVersion: 3,
+    files: [{
+      name: 'context-map.json', version: 'test', sha256: api.sha256Hex(directory)
+    }]
+  });
+}
+const release = JSON.stringify({
+  schemaVersion: 3,
+  contractVersion: 'test',
+  files: { 'contract.json': api.sha256Hex('contract') }
+});
+api.clearRuleLibrary();
+api.setRequestText(async (_qu, url) => {
+  if (url.endsWith('ai-rules/rules.json')) return publishedRules();
+  if (url.endsWith('contracts/schema-v3/release.json')) return release;
+  if (url.endsWith('ai-rules/context-map.json')) {
+    directoryReads++;
+    return directory;
+  }
+  throw new Error('unexpected URL: ' + url);
+});
+await api.refreshRuleLibrary({});
+await api.readRule({}, 'ai-rules/context-map.json', '');
+await api.refreshRuleLibrary({});
+await api.readRule({}, 'ai-rules/context-map.json', '');
+assert.equal(directoryReads, 1);
+directory = '{"version":2}';
+await api.refreshRuleLibrary({});
+await api.readRule({}, 'ai-rules/context-map.json', '');
+assert.equal(directoryReads, 2);
+
 function response(message, finishReason = 'tool_calls') {
   return { body: { choices: [{ finish_reason: finishReason, message }] } };
 }
@@ -65,7 +105,7 @@ function call(id, name, args) {
 const responses = [
   response({ content: '先直接回答', tool_calls: [] }, 'stop'),
   response({ content: '', tool_calls: [call('bad', 'read_rules', { path: 'missing.json' })] }),
-  response({ content: '', tool_calls: [call('good', 'read_rules', { path: 'ai-rules/README.md' })] }),
+  response({ content: '', tool_calls: [call('good', 'read_rules', { path: 'ai-rules/context-map.json' })] }),
   response({ content: '规则已读取', reasoning_content: '规则读取完成', tool_calls: [] }, 'stop'),
   response({ content: '直接返回正文', reasoning_content: '准备结果', tool_calls: [] }, 'stop'),
   response({

@@ -52,8 +52,8 @@
   },
   "workflow": {
     "prepare": [
-      "先通过 read_rules 读取 AI 规则入口、资料目录、当前场景指南和工作约束。",
-      "根据用户任务自行选择 generation-profile.json 分区；只有自动摘要不足时才读取 contract.json 对应分区。",
+      "先通过 read_rules 只读取 context-map.json，再由其中的场景与主题路由选择必要资料。",
+      "根据用户任务只读取相关的 generation-profile.json 分区；只有自动摘要不足时才读取 contract.json 对应分区。",
       "核对工具返回的契约版本与 SHA-256，读取当前场景文件和用户提供的真实资产信息；缺少必要信息时保留现有名称并说明缺口。"
     ],
     "generate": [
@@ -236,13 +236,13 @@
   "generationProfile": "ai-rules/generation-profile.json",
   "contextLoading": {
     "mode": "modelSelectedToolCalls",
-    "entry": "ai-rules/README.md",
+    "entry": "ai-rules/context-map.json",
     "catalog": "ai-rules/context-map.json",
     "tool": "read_rules",
-    "cache": "runtimeMemory",
+    "cache": "releaseHashRuntimeMemory",
     "examples": "conditional",
     "schema": "hostOnly",
-    "reuseCondition": "当前请求已通过 read_rules 获得相同 version 与 sha256 的资料时可以复用。"
+    "reuseCondition": "每次任务只检查发布清单；version 与 sha256 未变化时复用本次冷启动缓存，变化时重新读取对应资料。"
   },
   "hostErrorFeedback": {
     "requiredFields": [

@@ -4,9 +4,9 @@
 
 ## 开始
 
-1. 读取 [`context-map.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/context-map.json) 定位当前场景资料。
-2. 读取 [`guidance.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/guidance.json)、当前场景指南，以及 [`generation-profile.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/generation-profile.json) 中与任务直接相关的 JSON Pointer；可在一次工具调用轮次中并行读取。
-3. 自动摘要不足时，再读取 [`contract.json`](https://qu-bl.github.io/one-fuzhu/contracts/schema-v3/contract.json) 的对应分区。只有新建、大幅重写、明确索要示例或语法不确定时才读取 [`examples.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/examples.json)。
+1. 只先读取 [`context-map.json`](https://qu-bl.github.io/one-fuzhu/ai-rules/context-map.json)。
+2. 由目录中的 `scenarios` 和 `routes` 判断当前任务需要的资料，并按其中给出的 `path + pointer` 读取；彼此独立的分区可以并行读取。
+3. 自动摘要不足时才读取共享契约对应分区；只有新建、大幅重写、明确索要示例或语法不确定时才读取示例。
 
 `contract.json` 是字段、类型、枚举、权限、组件和运行语义的唯一权威；`generation-profile.json` 由它自动生成。场景说明和示例不能覆盖契约。
 

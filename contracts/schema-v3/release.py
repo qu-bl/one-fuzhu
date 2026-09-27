@@ -540,10 +540,10 @@ def verify_ai_guidance():
         raise ValueError("AI host errors are not preserved verbatim")
     loading = guidance.get("contextLoading", {})
     if (loading.get("mode") != "modelSelectedToolCalls" or
-            loading.get("entry") != "ai-rules/README.md" or
+            loading.get("entry") != "ai-rules/context-map.json" or
             loading.get("catalog") != "ai-rules/context-map.json" or
             loading.get("tool") != "read_rules" or
-            loading.get("cache") != "runtimeMemory" or
+            loading.get("cache") != "releaseHashRuntimeMemory" or
             loading.get("examples") != "conditional" or
             loading.get("schema") != "hostOnly" or
             "version" not in loading.get("reuseCondition", "") or
@@ -552,17 +552,69 @@ def verify_ai_guidance():
     context_map_text = (ai / "context-map.json").read_text(encoding="utf-8")
     context_map = json.loads(context_map_text)
     catalog = context_map.get("catalog", {})
-    if (context_map.get("schemaVersion") != 2 or
+    if (context_map.get("schemaVersion") != 3 or
             context_map.get("contractVersion") != json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))["contractVersion"] or
-            context_map.get("entry") != "ai-rules/README.md" or
+            context_map.get("entry") != "ai-rules/context-map.json" or
             context_map.get("release") != "ai-rules/rules.json" or
             set(catalog) != {"workflow", "generatedProfile", "examples", "scenarioGuides", "contract",
                              "contractRelease", "resourcePackageSchema"} or
             set(context_map.get("profilePointers", {})) != {"manifest", "ui", "script", "network", "qvmi", "storage"} or
             set(context_map.get("contractPointers", {})) != {"manifest", "ui", "script", "network", "qvmi",
                                                               "resources", "archive"} or
+            set(context_map.get("scenarios", {})) != {"applicationScript", "resourcePackage"} or
+            not context_map.get("routes") or
             not context_map.get("readingPolicy") or "keywords" in context_map_text):
         raise ValueError("AI context map is invalid")
+
+    repository = ROOT.parent.parent
+
+    def verify_catalog_read(read, owner, allow_template=False):
+        if not isinstance(read, dict) or not isinstance(read.get("path"), str):
+            raise ValueError(f"AI context route has no path: {owner}")
+        path = repository / read["path"]
+        if not path.is_file() or path.suffix != ".json":
+            raise ValueError(f"AI context route path is invalid: {owner}")
+        pointer = read.get("pointer")
+        template = read.get("pointerTemplate")
+        if allow_template and isinstance(template, str) and "{scenario}" in template and pointer is None:
+            return
+        if not isinstance(pointer, str) or not pointer.startswith("/") or template is not None:
+            raise ValueError(f"AI context route pointer is invalid: {owner}")
+        current = json.loads(path.read_text(encoding="utf-8"))
+        try:
+            for token in pointer[1:].split("/"):
+                key = token.replace("~1", "/").replace("~0", "~")
+                current = current[int(key)] if isinstance(current, list) else current[key]
+        except (KeyError, IndexError, TypeError, ValueError):
+            raise ValueError(f"AI context route pointer does not exist: {owner}: {pointer}")
+
+    core_reads = context_map.get("coreReads", [])
+    if not core_reads:
+        raise ValueError("AI context map has no core reads")
+    for index, read in enumerate(core_reads):
+        verify_catalog_read(read, f"coreReads[{index}]")
+        if not isinstance(read.get("when"), str) or not read["when"]:
+            raise ValueError(f"AI context core read has no condition: coreReads[{index}]")
+    route_topics = []
+    for index, route in enumerate(context_map["routes"]):
+        if not isinstance(route, dict) or not isinstance(route.get("topic"), str) or \
+                not isinstance(route.get("description"), str) or not route.get("reads"):
+            raise ValueError(f"AI context route is incomplete: routes[{index}]")
+        route_topics.append(route["topic"])
+        for read_index, read in enumerate(route["reads"]):
+            verify_catalog_read(read, f"routes[{index}].reads[{read_index}]", allow_template=True)
+        if "fallback" in route:
+            verify_catalog_read(route["fallback"], f"routes[{index}].fallback")
+    if len(route_topics) != len(set(route_topics)):
+        raise ValueError("AI context route topics must be unique")
+    for name, scenario in context_map["scenarios"].items():
+        if not isinstance(scenario.get("description"), str) or not scenario.get("files") or \
+                not (repository / scenario.get("guide", "")).is_file():
+            raise ValueError(f"AI context scenario is incomplete: {name}")
+        verify_catalog_read({
+            "path": "ai-rules/guidance.json",
+            "pointer": scenario.get("guidancePointer")
+        }, f"scenarios.{name}.guidancePointer")
     scenarios = guidance.get("scenarios", {})
     if set(scenarios) != {"applicationScript", "resourcePackage"}:
         raise ValueError("AI guidance must cover both generation scenarios")
