@@ -122,6 +122,17 @@ a { color: var(--accent); }
 .empty-state strong { color: var(--text); font-size: 20px; font-weight: 500; }
 .empty-state p { margin: 12px 0 0; }
 .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
+
+.contact-section { max-width: 1120px; margin: 0 auto; padding: 24px var(--page-pad) 72px; }
+.contact-card { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); gap: 32px; align-items: center; padding: clamp(28px, 5vw, 52px); border-radius: 28px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+.contact-label { display: block; margin-bottom: 10px; font-size: 14px; font-weight: 650; letter-spacing: .08em; }
+.contact-copy h2 { margin: 0 0 14px; color: inherit; }
+.contact-copy p { max-width: 640px; margin: 0; font-size: 16px; line-height: 1.8; }
+.contact-methods { display: grid; gap: 12px; }
+.contact-method { display: flex; min-width: 0; flex-direction: column; gap: 4px; padding: 18px 20px; border-radius: 20px; background: var(--md-sys-color-surface); color: var(--text); text-decoration: none; }
+.contact-method small { color: var(--muted); font-size: 13px; }
+.contact-method strong { font-size: clamp(18px, 2.5vw, 24px); font-weight: 600; overflow-wrap: anywhere; }
+a.contact-method:hover { background: var(--md-sys-color-surface-container-highest); }
 @media(max-width: 1050px) {
   .activity-slide { padding: 4px 0 24px; gap: 24px; }
   .case-grid { column-count: 2; }
@@ -142,6 +153,8 @@ a { color: var(--accent); }
   .case-card { margin-bottom: 16px; }
   .case-body { padding: 18px; }
   .access-sheet { padding: 24px; }
+  .contact-section { padding-bottom: 48px; }
+  .contact-card { grid-template-columns: 1fr; gap: 24px; }
 }
 @media(max-width: 480px) { .case-grid { column-count: 1; } }
 @media(prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
@@ -293,4 +306,3 @@ a { color: var(--accent); }
   .featured-carousel .case-body { width: 100%; padding: 20px; gap: 16px; }
   .featured-carousel .case-title { font-size: clamp(22px, 5.6vw, 30px); }
 }
-
