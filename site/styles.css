@@ -295,7 +295,7 @@ a { color: var(--accent); }
 }
 
 
-/* GEO：关于与 FAQ */
+/* About */
 .about-section {
   margin: 0 auto;
   max-width: 1120px;
@@ -342,41 +342,6 @@ a { color: var(--accent); }
 .about-facts span {
   font-size: 14px;
   color: var(--text);
-}
-.faq-list {
-  margin-top: 24px;
-  display: grid;
-  gap: 10px;
-}
-.faq-item {
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 14px;
-  background: var(--page);
-  overflow: hidden;
-}
-.faq-item summary {
-  cursor: pointer;
-  padding: 14px 18px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  list-style: none;
-}
-.faq-item summary::-webkit-details-marker { display: none; }
-.faq-item summary::after {
-  content: "+";
-  float: right;
-  color: var(--accent);
-  font-size: 18px;
-  line-height: 1;
-}
-.faq-item[open] summary::after { content: "−"; }
-.faq-item p {
-  margin: 0;
-  padding: 0 18px 16px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--muted);
 }
 @media (max-width: 640px) {
   .about-section { padding: 32px var(--page-pad) 48px; }

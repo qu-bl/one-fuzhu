@@ -1,7 +1,7 @@
 // 千机百变 GEO 构建管线（单一数据源）
 // 运行：node scripts/build.mjs
 // 生成/更新：cases/*.html、cases/*.md、sitemap.xml、index.md、llms.txt，
-// 并向 index.html 注入 ItemList/FAQPage JSON-LD 与可见 FAQ 区块。
+// 并向 index.html 注入供搜索引擎读取的 ItemList/FAQPage JSON-LD。
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -236,20 +236,6 @@ if (jsonldRe.test(html)) {
   console.log("✓ index.html JSON-LD 注入");
 } else {
   console.error("✗ 未找到 GEO:JSONLD 标记");
-}
-
-const faqHtml = FAQ.map(
-  (f) => `          <details class="faq-item">
-            <summary>${esc(f.q)}</summary>
-            <p>${esc(f.a)}</p>
-          </details>`
-).join("\n");
-const faqRe = /<!-- GEO:FAQHTML:START -->[\s\S]*?<!-- GEO:FAQHTML:END -->/;
-if (faqRe.test(html)) {
-  html = html.replace(faqRe, "<!-- GEO:FAQHTML:START -->\n" + faqHtml + "\n          <!-- GEO:FAQHTML:END -->");
-  console.log("✓ index.html 可见 FAQ 注入");
-} else {
-  console.error("✗ 未找到 GEO:FAQHTML 标记");
 }
 
 writeFileSync(indexPath, html);
