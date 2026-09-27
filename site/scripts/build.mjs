@@ -1,6 +1,6 @@
 // 千机百变 GEO 构建管线（单一数据源）
 // 运行：node scripts/build.mjs
-// 生成/更新：cases/*.html、cases/*.md、sitemap.xml、index.md，
+// 生成/更新：cases/*.html、cases/*.md、sitemap.xml、index.md、llms.txt，
 // 并向 index.html 注入 ItemList/FAQPage JSON-LD 与可见 FAQ 区块。
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -8,25 +8,8 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
+const REPO_ROOT = join(ROOT, "..");
 const SITE = "https://qu-bl.github.io/one-fuzhu/site/";
-
-// ---------- 内容常量（唯一事实源） ----------
-
-const POSITIONING = [
-  "- Rive 互动内容：用动画与状态机表达触摸、传感器和数据变化，让屏幕内容可以实时回应。",
-  "- 个人与家庭陪伴：拟人角色、互动桌宠与 AI 陪伴设计，让手机、平板与桌面屏幕像家人一样有温度；声音、触摸与传感器都可以成为角色回应的方式。",
-  "- 智能家居中枢：圆屏、长条屏等异形屏幕可作为家庭信息面板与互动中枢，展示时间、天气与设备状态，成为智能家居里会说话、会回应的一员。",
-  "- 学习与创作生态：官方 Rive 中文课程、调试台、在线编辑器、JavaScript 脚本与资源包制作台，让每个人都能把想法做成可体验的作品，并与更多伙伴分享。",
-  "- 隐私与本地优先：基础功能无需账号，无广告、无行为追踪；数据默认保存在本机，是否同步由你决定。",
-];
-
-const BRAND_INFO = [
-  "- 官网：https://qu-bl.github.io/one-fuzhu/site/",
-  "- 开发者：qu-bl（GitHub：https://github.com/qu-bl）",
-  "- 联系邮箱：156405968@qq.com",
-  "- 创作者交流群（QQ）：862835994",
-  "- 主要能力：Rive 调试台、Rive 在线编辑器、数据流检查器与运行时分析仪、应用脚本（JavaScript）、资源包制作台与可选同步",
-];
 
 const FAQ = [
   {
@@ -164,27 +147,24 @@ ${urls.map((u) => `  <url>\n    <loc>${u.url}</loc>\n    <lastmod>${now}</lastmo
 writeFileSync(join(ROOT, "sitemap.xml"), sitemap);
 console.log("✓ sitemap.xml（" + urls.length + " 个 URL）");
 
-// ---------- index.md ----------
+// ---------- AI 专用产品资料 ----------
 
-const md = `# 千机百变（Qianji Baibian）
-
-> 千机百变（应用包名 com.bolin.one）是一款以 Rive 驱动的屏幕美化与互动创作工具，让屏幕内容能够响应触摸、传感器与数据变化。
-
-## 产品定位
-
-${POSITIONING.join("\n")}
-
-## 品牌信息
-
-${BRAND_INFO.join("\n")}
+const aiProfile = readFileSync(join(ROOT, "data/ai-profile.md"), "utf-8").trim();
+const md = `${aiProfile}
 
 ## 作品与项目
 
-${works.map((w) => `- [${w.name}](${caseUrl(w)})：${w.summary}`).join("\n")}
+${works.map((w) => `- [${w.name}](${caseUrl(w)})：${w.summary}（${(w.platforms || []).join("、")}）`).join("\n")}
 
 ## 常见问题
 
-${FAQ.map((f) => `### ${f.q}\n\n${f.a}`).join("\n\n")}
+### 千机百变是什么？
+
+千机百变是一款以 Rive 驱动的屏幕美化与互动创作工具，可用于制作、调试、打包和运行互动内容。
+
+### 如何处理数据与隐私？
+
+基础功能不需要应用账号，数据以明文形式保存在本机；启用同步时，数据由相应平台的同步服务或用户配置的服务处理；应用不使用第三方广告或行为追踪服务。
 
 ## 页面
 
@@ -194,7 +174,8 @@ ${FAQ.map((f) => `### ${f.q}\n\n${f.a}`).join("\n\n")}
 `;
 writeFileSync(join(ROOT, "index.md"), md);
 writeFileSync(join(ROOT, "llms.txt"), md);
-console.log("✓ index.md  llms.txt");
+writeFileSync(join(REPO_ROOT, "llms.txt"), md);
+console.log("✓ index.md  site/llms.txt  /llms.txt");
 
 // ---------- index.html 注入：JSON-LD + 可见 FAQ ----------
 
