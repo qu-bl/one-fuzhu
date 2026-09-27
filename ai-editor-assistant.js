@@ -372,10 +372,6 @@ function modelIds(body, preferred) {
   return values.slice(0, 64);
 }
 
-function modelOptions(ids) {
-  return ids.slice();
-}
-
 function currentModelSource() {
   return fieldText(fields.endpoint) + '\n' + fieldText(fields.apiKey);
 }
@@ -416,7 +412,7 @@ async function loadModels(qu, force) {
     const ids = modelIds(body, fieldText(fields.model));
     if (ids.length === 0) throw new Error('服务没有返回可识别的模型');
     if (source !== currentModelSource()) return;
-    fields.modelOptions.value = modelOptions(ids);
+    fields.modelOptions.value = ids.slice();
     const selected = fieldText(fields.model);
     if (ids.indexOf(selected) < 0) fields.model.value = ids[0];
     lastModelSource = source;
@@ -453,20 +449,9 @@ function parseJson(text, label) {
   }
 }
 
-function assistantJsonCandidate(raw) {
-  let text = String(raw || '').trim().replace(/^\uFEFF/, '');
-  if (text.startsWith('```')) {
-    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-  }
-  const start = text.indexOf('{');
-  if (start > 0) text = text.slice(start);
-  return text;
-}
-
 function parseAssistantJson(raw) {
-  const candidate = assistantJsonCandidate(raw);
   try {
-    return JSON.parse(candidate);
+    return JSON.parse(String(raw || '').trim());
   } catch (error) {
     throw new Error('AI 服务没有按约定返回完整 JSON：' + String(error));
   }
@@ -741,22 +726,16 @@ function assistantText(body) {
   return content;
 }
 
-function completionInfo(body) {
+function assertCompletionFinished(body, text) {
   const choice = body && Array.isArray(body.choices) ? body.choices[0] : null;
   const reason = choice && choice.finish_reason != null ? String(choice.finish_reason) : '未知';
-  const usage = body && body.usage ? body.usage : {};
-  const outputTokens = usage.completion_tokens;
-  return { reason: reason, outputTokens: outputTokens };
-}
-
-function assertCompletionFinished(body, text) {
-  const info = completionInfo(body);
-  if (/length|max.?tokens|incomplete/i.test(info.reason)) {
-    const tokens = info.outputTokens == null ? '' : '，已输出 ' + info.outputTokens + ' tokens';
-    throw new Error('AI 服务截断了回复（结束原因：' + info.reason + tokens + '）。当前文件或对话上下文过大');
+  const outputTokens = body && body.usage ? body.usage.completion_tokens : null;
+  if (/length|max.?tokens|incomplete/i.test(reason)) {
+    const tokens = outputTokens == null ? '' : '，已输出 ' + outputTokens + ' tokens';
+    throw new Error('AI 服务截断了回复（结束原因：' + reason + tokens + '）。当前文件或对话上下文过大');
   }
-  if (!String(text || '').trim()) throw new Error('AI 服务返回了空回复（结束原因：' + info.reason + '）');
-  return info;
+  if (!String(text || '').trim()) throw new Error('AI 服务返回了空回复（结束原因：' + reason + '）');
+  return { reason: reason, outputTokens: outputTokens };
 }
 
 function completionPayload(model, messages) {
