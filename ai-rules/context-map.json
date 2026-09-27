@@ -1,9 +1,15 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "contractVersion": "10.1.0",
-  "purpose": "供 AI 自主读取的远程规则库目录；调用端不根据关键词选择规则。",
-  "entry": "ai-rules/README.md",
+  "purpose": "供 AI 先读一次的规则路由表；模型根据任务语义自行选择最少资料，调用端不替模型判断主题。",
+  "entry": "ai-rules/context-map.json",
   "release": "ai-rules/rules.json",
+  "authority": {
+    "fieldsAndRuntime": "contracts/schema-v3/contract.json",
+    "generatedSummary": "ai-rules/generation-profile.json",
+    "workflow": "ai-rules/guidance.json",
+    "rule": "摘要不足时才读取契约；指南与示例不能覆盖契约。"
+  },
   "catalog": {
     "workflow": "ai-rules/guidance.json",
     "generatedProfile": "ai-rules/generation-profile.json",
@@ -16,6 +22,168 @@
     "contractRelease": "contracts/schema-v3/release.json",
     "resourcePackageSchema": "contracts/schema-v3/resource-package.schema.json"
   },
+  "coreReads": [
+    {
+      "path": "ai-rules/guidance.json",
+      "pointer": "/priority",
+      "when": "任何生成、修改或判断任务"
+    },
+    {
+      "path": "ai-rules/guidance.json",
+      "pointer": "/deliveryProtocol",
+      "when": "需要向调用端交付说明或文件修改"
+    },
+    {
+      "path": "ai-rules/guidance.json",
+      "pointer": "/hostContractContext",
+      "when": "准备生成或修改代码"
+    }
+  ],
+  "scenarios": {
+    "applicationScript": {
+      "description": "应用脚本编辑器中的单文件 JavaScript",
+      "guide": "ai-rules/application-script.md",
+      "guidancePointer": "/scenarios/applicationScript",
+      "files": [
+        "applicationJavaScript"
+      ]
+    },
+    "resourcePackage": {
+      "description": "资源包制作台中的清单与 JavaScript，二者共同构成一次交付",
+      "guide": "ai-rules/resource-package.md",
+      "guidancePointer": "/scenarios/resourcePackage",
+      "files": [
+        "manifestJson",
+        "mainJavaScript"
+      ]
+    }
+  },
+  "routes": [
+    {
+      "topic": "script",
+      "description": "入口、注解、生命周期、宿主操作、字段定义或编辑器操作",
+      "reads": [
+        {
+          "path": "ai-rules/generation-profile.json",
+          "pointer": "/script"
+        }
+      ],
+      "fallback": {
+        "path": "contracts/schema-v3/contract.json",
+        "pointer": "/script"
+      }
+    },
+    {
+      "topic": "ui",
+      "description": "动态 UI、组件、绑定、布局或交互",
+      "reads": [
+        {
+          "path": "ai-rules/generation-profile.json",
+          "pointer": "/ui"
+        }
+      ],
+      "fallback": {
+        "path": "contracts/schema-v3/contract.json",
+        "pointer": "/ui"
+      }
+    },
+    {
+      "topic": "qvmi",
+      "description": "QVMI、Rive 值绑定、字段所有权、权限、状态或事件",
+      "reads": [
+        {
+          "path": "ai-rules/generation-profile.json",
+          "pointer": "/qvmi"
+        }
+      ],
+      "fallback": {
+        "path": "contracts/schema-v3/contract.json",
+        "pointer": "/qvmi"
+      }
+    },
+    {
+      "topic": "manifest",
+      "description": "资源包清单、能力声明、值声明、绑定或网络域名",
+      "reads": [
+        {
+          "path": "ai-rules/generation-profile.json",
+          "pointer": "/manifest"
+        }
+      ],
+      "fallback": {
+        "path": "contracts/schema-v3/contract.json",
+        "pointer": "/manifest"
+      }
+    },
+    {
+      "topic": "network",
+      "description": "请求、下载、上传、流式响应或 WebSocket",
+      "reads": [
+        {
+          "path": "ai-rules/generation-profile.json",
+          "pointer": "/network"
+        },
+        {
+          "path": "ai-rules/guidance.json",
+          "pointer": "/shared/network"
+        }
+      ],
+      "fallback": {
+        "path": "contracts/schema-v3/contract.json",
+        "pointer": "/network"
+      }
+    },
+    {
+      "topic": "storage",
+      "description": "冷启动恢复、应用更新保留、所有者隔离或多设备同步",
+      "reads": [
+        {
+          "path": "ai-rules/generation-profile.json",
+          "pointer": "/script/storage"
+        }
+      ]
+    },
+    {
+      "topic": "resources",
+      "description": "资源令牌、文本、二进制、Rive 文件、字体或其他包内素材",
+      "reads": [
+        {
+          "path": "contracts/schema-v3/contract.json",
+          "pointer": "/resources"
+        }
+      ]
+    },
+    {
+      "topic": "archive",
+      "description": "qjpkg 文件结构、归档路径或包体限制",
+      "reads": [
+        {
+          "path": "contracts/schema-v3/contract.json",
+          "pointer": "/archive"
+        }
+      ]
+    },
+    {
+      "topic": "repair",
+      "description": "根据宿主原始错误修复已有文件",
+      "reads": [
+        {
+          "path": "ai-rules/guidance.json",
+          "pointer": "/hostErrorFeedback"
+        }
+      ]
+    },
+    {
+      "topic": "examples",
+      "description": "仅在新建、大幅重写、用户明确索要示例或语法仍不确定时读取当前场景示例",
+      "reads": [
+        {
+          "path": "ai-rules/examples.json",
+          "pointerTemplate": "/examples/{scenario}"
+        }
+      ]
+    }
+  ],
   "profilePointers": {
     "manifest": "/manifest",
     "ui": "/ui",
@@ -34,10 +202,10 @@
     "archive": "/archive"
   },
   "readingPolicy": [
-    "先读取 workflow 与当前场景指南。",
-    "根据任务自行选择 generatedProfile 的分区；不要一次读取无关分区。",
-    "自动摘要不足时再读取 contract 的对应分区。",
-    "只有新建、大幅重写、明确索要示例或语法不确定时读取 examples。",
-    "完整 JSON Schema 留给宿主校验。"
+    "先根据当前编辑目标选择一个 scenario，再根据用户任务语义选择必要 routes。",
+    "读取当前场景指南、对应 guidancePointer、适用的 coreReads 和所选 routes；不要读取未涉及的主题。",
+    "优先读取 generatedProfile；只有摘要缺项或需要运行语义细节时才读取 fallback 契约分区。",
+    "生成后读取 guidance.json 的 /workflow/verify，并只执行适用于当前场景和所选主题的检查。",
+    "完整 JSON Schema 留给宿主校验，同一 path 与 pointer 在同一任务中只读取一次。"
   ]
 }
