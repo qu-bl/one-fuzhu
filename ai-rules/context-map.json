@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "9.0.0",
+  "contractVersion": "10.0.0",
   "purpose": "AI 按任务读取资料的轻量路由；文件版本和 SHA-256 以 ai-rules/rules.json 为准。",
   "entry": "ai-rules/README.md",
   "release": "ai-rules/rules.json",

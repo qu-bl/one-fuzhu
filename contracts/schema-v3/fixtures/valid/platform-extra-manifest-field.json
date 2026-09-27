@@ -26,5 +26,7 @@
     "audio": []
   },
   "ui": [],
-  "manifestVersion": 3
+  "platformMetadata": {
+    "vendor": "example"
+  }
 }

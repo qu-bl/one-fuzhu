@@ -31,7 +31,7 @@
 
 `qu.viewModel.define` 的扩展选项仍有平台差异：`label` 三端通用；`description`、`unit`、`nullable`、`writable`、`delivery`、`range`、`values`、`maxLength`、`access`、`valueLabels`、`displayPrecision`、`displayMultiplier`、`displaySuffix` 目前由鸿蒙和 Android 实现，Apple 不接受。此差异已写入云端契约并由调用端按平台执行。
 
-音频触发参数曾有差异：鸿蒙使用 `audio`／`policy`／`volume`，Android 和 Apple 使用 `id`／`options`。三端现都接受两种写法，云端规则推荐前者并将后者标记为兼容写法。
+音频触发参数三端统一使用 `audio`／`policy`／`volume`。`id`／`options` 已从公开契约和三端运行路径删除。
 
 本次补齐的共同规范：归档文件数／大小／路径限制，保留目录 `data`、`.rivelab`、`.qu`，Rive 资源和脚本读取限额，网络请求／响应／传输限额，UI 数量与嵌套限制，以及编辑器写入统一以 UTF-16 单元计数。Apple 原先只拒绝 `.qu`，鸿蒙和 Android 原先只拒绝 `.rivelab`；现三端都拒绝两者。Android 现允许 `assets/` 不同目录的同名文件；完整相对路径可引用，裸文件名仅在唯一时注册。
 
