@@ -895,7 +895,6 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 
 async function initialize() {
   if (appPlatform) {
-    document.querySelector("#about")?.setAttribute("hidden", "");
     document.querySelector(".site-footer")?.setAttribute("hidden", "");
   } else {
     bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
