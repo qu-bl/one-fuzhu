@@ -1,6 +1,6 @@
 /**
  * @id QianjiAiEditorAssistant
- * @description 使用 DeepSeek 按需读取云端规则，在应用脚本与资源包制作台中进行连续 AI 对话
+ * @description 使用支持工具调用的 AI 按需读取云端规则，在应用脚本与资源包制作台中进行连续对话
  * @interval 1000
  * @observe app.aiSupport.endpoint
  * @observe app.aiSupport.apiKey
@@ -20,20 +20,20 @@
  *       "type": "group",
  *       "id": "serviceSettings",
  *       "label": "服务",
- *       "description": "使用 DeepSeek 工具调用按需读取云端规则；服务地址与模型会保存。",
+ *       "description": "支持 OpenAI、DeepSeek 等兼容工具调用的接口；服务地址与模型会保存。",
  *       "layout": "column",
  *       "children": [
  *         {
  *           "type": "input",
  *           "id": "endpoint",
  *           "label": "接口",
- *           "placeholder": "https://api.deepseek.com",
+ *           "placeholder": "https://api.openai.com/v1",
  *           "inputMode": "text",
  *           "bindings": {
  *             "value": {
  *               "path": "app.aiSupport.endpoint",
  *               "type": "string",
- *               "default": "https://api.deepseek.com"
+ *               "default": "https://api.openai.com/v1"
  *             }
  *           }
  *         },
@@ -343,6 +343,10 @@ function serviceEndpoints(endpoint) {
   }
   if (/\/chat\/completions$/i.test(value)) {
     return { chat: value, models: value.replace(/\/chat\/completions$/i, '/models') };
+  }
+  if (/\/responses$/i.test(value)) {
+    const base = value.replace(/\/responses$/i, '');
+    return { chat: base + '/chat/completions', models: base + '/models' };
   }
   if (/\/models$/i.test(value)) {
     const base = value.replace(/\/models$/i, '');
@@ -737,7 +741,7 @@ function systemPrompt(target) {
 
 function assistantText(body) {
   const content = responseMessage(body).content;
-  if (typeof content !== 'string' || !content.trim()) throw new Error('DeepSeek 响应中没有可用文本');
+  if (typeof content !== 'string' || !content.trim()) throw new Error('AI 响应中没有可用文本');
   return content;
 }
 
@@ -760,20 +764,22 @@ function assertCompletionFinished(body, text) {
 }
 
 function completionPayload(model, messages) {
-  return {
+  const payload = {
     model: model,
     messages: messages,
     tools: [RULE_TOOL],
     tool_choice: 'auto',
-    response_format: { type: 'json_object' },
-    max_tokens: MAX_OUTPUT_TOKENS
+    response_format: { type: 'json_object' }
   };
+  if (/^(?:gpt-5|o\d)/i.test(model)) payload.max_completion_tokens = MAX_OUTPUT_TOKENS;
+  else payload.max_tokens = MAX_OUTPUT_TOKENS;
+  return payload;
 }
 
 async function requestCompletion(qu, endpoint, headers, model, messages) {
   const requestBody = JSON.stringify(completionPayload(model, messages));
   if (requestBody.length > MAX_REQUEST_CHARS) {
-    throw new Error('AI 上下文过大（' + requestBody.length + ' 字符）。请清空对话、关闭当前文件附带，或让 DeepSeek 使用 pointer 缩小规则范围');
+    throw new Error('AI 上下文过大（' + requestBody.length + ' 字符）。请清空对话、关闭当前文件附带，或让模型使用 pointer 缩小规则范围');
   }
   const response = await qu.network.request(endpoint, {
     method: 'POST',
@@ -785,13 +791,13 @@ async function requestCompletion(qu, endpoint, headers, model, messages) {
   });
   if (response && response.status >= 200 && response.status < 300) return response;
   const raw = response && response.body != null ? JSON.stringify(response.body) : '无响应正文';
-  throw new Error('DeepSeek 请求失败：HTTP ' + (response ? response.status : '无响应') + ' · ' + raw);
+  throw new Error('AI 请求失败：HTTP ' + (response ? response.status : '无响应') + ' · ' + raw);
 }
 
 function responseMessage(body) {
   const choice = body && Array.isArray(body.choices) ? body.choices[0] : null;
   if (!choice || !choice.message || typeof choice.message !== 'object') {
-    throw new Error('DeepSeek 响应中没有消息');
+    throw new Error('AI 响应中没有消息');
   }
   return choice.message;
 }
@@ -814,7 +820,7 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
     const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
     if (calls.length === 0) {
       if (ruleCalls === 0) {
-        throw new Error('DeepSeek 未读取云端规则，已拒绝应用未核验的生成结果');
+        throw new Error('AI 未读取云端规则，已拒绝应用未核验的生成结果');
       }
       return response;
     }
@@ -832,7 +838,7 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
     for (let index = 0; index < calls.length; index++) {
       const call = calls[index];
       if (++ruleCalls > MAX_RULE_TOOL_CALLS) {
-        throw new Error('DeepSeek 读取规则次数过多，请缩小任务范围后重试');
+        throw new Error('AI 读取规则次数过多，请缩小任务范围后重试');
       }
       let output;
       try {
@@ -853,9 +859,9 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
         content: output
       });
     }
-    setTargetStatus(target, 'DeepSeek 正在读取云端规则…');
+    setTargetStatus(target, 'AI 正在读取云端规则…');
   }
-  throw new Error('DeepSeek 未能完成规则读取');
+  throw new Error('AI 未能完成规则读取');
 }
 
 function parseDeliveryFiles(value, target) {
@@ -1065,7 +1071,7 @@ async function generate(qu, target) {
     const headers = { 'Content-Type': 'application/json' };
     const apiKey = fieldText(fields.apiKey);
     if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
-    setTargetStatus(target, 'DeepSeek 正在判断所需规则…');
+    setTargetStatus(target, 'AI 正在判断所需规则…');
     const response = await requestWithRules(qu, endpoint, headers, model, messages, target);
     if (stopped) return;
     const rawAnswer = assistantText(response.body);
@@ -1121,9 +1127,9 @@ defineQuScript({
     lastModelSource = '';
     fields = {};
     fields.blankLabel = ownedField(qu, 'blankLabel', 'string', '', '空白标签');
-    const storedEndpoint = String(qu.storage.get('endpoint', 'https://api.deepseek.com') || '').trim();
+    const storedEndpoint = String(qu.storage.get('endpoint', 'https://api.openai.com/v1') || '').trim();
     fields.endpoint = ownedField(qu, 'endpoint', 'string',
-      storedEndpoint === 'https://api.openai.com/v1' ? 'https://api.deepseek.com' : storedEndpoint,
+      storedEndpoint,
       '服务地址');
     const storedModel = String(qu.storage.get('model', '') || '').trim();
     fields.model = ownedField(qu, 'model', 'enum', storedModel, '模型');
