@@ -20,7 +20,7 @@
  *       "type": "group",
  *       "id": "serviceSettings",
  *       "label": "服务",
- *       "description": "支持 OpenAI Chat Completions tools 标准接口；连接配置与模型会保存。",
+ *       "description": "支持 OpenAI Chat Completions tools 标准接口；连接配置、模型和对话会随脚本存储同步。",
  *       "layout": "column",
  *       "children": [
  *         {
@@ -41,7 +41,7 @@
  *           "type": "input",
  *           "id": "apiKey",
  *           "label": "密钥",
- *           "description": "仅保留到脚本停止。",
+ *           "description": "保存在脚本独立存储；启用同步时会出现在同一账户设备。",
  *           "placeholder": "API Key",
  *           "inputMode": "password",
  *           "bindings": {
@@ -159,10 +159,12 @@
  * }
  */
 const RULE_BASE = 'https://qu-bl.github.io/one-fuzhu/';
-const MAX_REQUEST_CHARS = 100000;
+const MAX_REQUEST_CHARS = 220000;
 const MAX_OUTPUT_TOKENS = 16384;
-const MAX_HISTORY_MESSAGES = 24;
-const MAX_RULE_TOOL_ROUNDS = 12;
+const MAX_HISTORY_MESSAGES = 12;
+const MAX_HISTORY_BYTES = 24000;
+const MAX_MESSAGE_CHARS = 6000;
+const MAX_RULE_TOOL_ROUNDS = 6;
 const MAX_RULE_RESULT_CHARS = 60000;
 const PREFIX = 'app.aiSupport.';
 
@@ -398,6 +400,7 @@ async function loadModels(qu, force) {
   modelLoadPendingAt = 0;
   setModelStatus('正在读取可用模型…');
   try {
+    persistSettings(qu);
     const url = serviceEndpoints(endpoint).models;
     const headers = { Accept: 'application/json' };
     if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
@@ -417,7 +420,6 @@ async function loadModels(qu, force) {
     if (ids.indexOf(selected) < 0) fields.model.value = ids[0];
     lastModelSource = source;
     setModelStatus('已识别 ' + ids.length + ' 个模型，当前：' + fieldText(fields.model));
-    persistSettings(qu);
   } catch (error) {
     if (!stopped && source === currentModelSource()) {
       const message = error && error.message ? error.message : String(error);
@@ -446,14 +448,6 @@ function parseJson(text, label) {
     return JSON.parse(text);
   } catch (error) {
     throw new Error(label + ' 不是有效 JSON：' + String(error));
-  }
-}
-
-function parseAssistantJson(raw) {
-  try {
-    return JSON.parse(String(raw || '').trim());
-  } catch (error) {
-    throw new Error('AI 服务没有按约定返回完整 JSON：' + String(error));
   }
 }
 
@@ -716,17 +710,11 @@ function systemPrompt(target) {
     '千机百变使用特殊协议，云端规则入口是 ' + RULE_BASE + 'ai-rules/README.md。',
     '你可以使用 read_rules。生成、修改或判断代码前，必须自行读取入口及你认为与当前任务相关的规则；不得依靠模型记忆猜测字段、入口或权限。同一 path 与 pointer 不要重复读取，彼此独立的资料应在同一轮并行调用。',
     '当前目标：' + (target === 'applicationScript' ? '应用脚本' : '资源包') + '。',
-    '最终只返回一个 JSON 对象，包含 reply、edits、apply_files；规则工具只用于读取资料，不要把规则正文复制到 reply。'
+    '规则读取结束后使用 submit_result 提交一次结果；规则正文不要复制到 reply。'
   ].join('\n');
 }
 
-function assistantText(body) {
-  const content = responseMessage(body).content;
-  if (typeof content !== 'string' || !content.trim()) throw new Error('AI 响应中没有可用文本');
-  return content;
-}
-
-function assertCompletionFinished(body, text) {
+function completionInfo(body) {
   const choice = body && Array.isArray(body.choices) ? body.choices[0] : null;
   const reason = choice && choice.finish_reason != null ? String(choice.finish_reason) : '未知';
   const outputTokens = body && body.usage ? body.usage.completion_tokens : null;
@@ -734,27 +722,66 @@ function assertCompletionFinished(body, text) {
     const tokens = outputTokens == null ? '' : '，已输出 ' + outputTokens + ' tokens';
     throw new Error('AI 服务截断了回复（结束原因：' + reason + tokens + '）。当前文件或对话上下文过大');
   }
-  if (!String(text || '').trim()) throw new Error('AI 服务返回了空回复（结束原因：' + reason + '）');
   return { reason: reason, outputTokens: outputTokens };
 }
 
-function completionPayload(model, messages, allowRuleTools) {
-  const payload = {
-    model: model,
-    messages: messages,
-    response_format: { type: 'json_object' }
+function deliveryTool(target) {
+  const files = target === 'applicationScript'
+    ? ['applicationJavaScript']
+    : ['manifestJson', 'mainJavaScript'];
+  const fileProperties = {};
+  files.forEach(function (name) { fileProperties[name] = { type: 'string' }; });
+  return {
+    type: 'function',
+    function: {
+      name: 'submit_result',
+      description: '提交最终回复和可选修改。普通修改优先使用 edits；新建或大幅重写才使用 apply_files。edits 与 apply_files 最多一个非空。',
+      parameters: {
+        type: 'object',
+        properties: {
+          reply: { type: 'string', description: '给用户的简短说明；不要复制规则正文' },
+          edits: {
+            type: 'array', maxItems: 64,
+            items: {
+              type: 'object',
+              properties: {
+                file: { type: 'string', enum: files },
+                oldText: { type: 'string', minLength: 1 },
+                newText: { type: 'string' }
+              },
+              required: ['file', 'oldText', 'newText'],
+              additionalProperties: false
+            }
+          },
+          apply_files: {
+            type: 'object',
+            properties: fileProperties,
+            additionalProperties: false
+          }
+        },
+        required: ['reply', 'edits', 'apply_files'],
+        additionalProperties: false
+      }
+    }
   };
-  if (allowRuleTools !== false) {
+}
+
+function completionPayload(model, messages, mode, target) {
+  const payload = { model: model, messages: messages };
+  if (mode === 'rules') {
     payload.tools = [RULE_TOOL];
     payload.tool_choice = 'auto';
+  } else {
+    payload.tools = [deliveryTool(target)];
+    payload.tool_choice = { type: 'function', function: { name: 'submit_result' } };
   }
   if (/^(?:gpt-5|o\d)/i.test(model)) payload.max_completion_tokens = MAX_OUTPUT_TOKENS;
   else payload.max_tokens = MAX_OUTPUT_TOKENS;
   return payload;
 }
 
-async function requestCompletion(qu, endpoint, headers, model, messages, allowRuleTools) {
-  const requestBody = JSON.stringify(completionPayload(model, messages, allowRuleTools));
+async function requestCompletion(qu, endpoint, headers, model, messages, mode, target) {
+  const requestBody = JSON.stringify(completionPayload(model, messages, mode, target));
   if (requestBody.length > MAX_REQUEST_CHARS) {
     throw new Error('AI 上下文过大（' + requestBody.length + ' 字符）。请清空对话、关闭当前文件附带，或让模型使用 pointer 缩小规则范围');
   }
@@ -766,8 +793,13 @@ async function requestCompletion(qu, endpoint, headers, model, messages, allowRu
     responseType: 'json',
     redirect: 'error'
   });
-  if (response && response.status >= 200 && response.status < 300) return response;
-  const raw = response && response.body != null ? JSON.stringify(response.body) : '无响应正文';
+  if (response && response.status >= 200 && response.status < 300) {
+    return {
+      status: response.status,
+      body: typeof response.body === 'string' ? parseJson(response.body, 'AI 响应') : response.body
+    };
+  }
+  const raw = response && response.body != null ? JSON.stringify(response.body).slice(0, 2000) : '无响应正文';
   throw new Error('AI 请求失败：HTTP ' + (response ? response.status : '无响应') + ' · ' + raw);
 }
 
@@ -779,12 +811,12 @@ function responseMessage(body) {
   return choice.message;
 }
 
-function toolArguments(call) {
+function toolArguments(call, name) {
   const value = call && call.function && call.function.arguments;
-  if (typeof value !== 'string') throw new Error('read_rules 参数不是 JSON 字符串');
-  const parsed = parseJson(value, 'read_rules 参数');
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || typeof parsed.path !== 'string') {
-    throw new Error('read_rules 缺少 path');
+  if (typeof value !== 'string') throw new Error(name + ' 参数不是 JSON 字符串');
+  const parsed = parseJson(value, name + ' 参数');
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(name + ' 参数必须是 JSON 对象');
   }
   return parsed;
 }
@@ -792,19 +824,22 @@ function toolArguments(call) {
 async function requestWithRules(qu, endpoint, headers, model, messages, target) {
   let ruleRounds = 0;
   let verifiedReads = 0;
-  let forceFinal = false;
   const outputs = {};
-  while (true) {
-    const response = await requestCompletion(qu, endpoint, headers, model, messages, !forceFinal);
+  while (ruleRounds < MAX_RULE_TOOL_ROUNDS) {
+    const response = await requestCompletion(qu, endpoint, headers, model, messages, 'rules', target);
+    completionInfo(response.body);
     const message = responseMessage(response.body);
     const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
     if (calls.length === 0) {
-      if (verifiedReads === 0) {
-        throw new Error('AI 未读取云端规则，已拒绝应用未核验的生成结果');
-      }
-      return response;
+      messages.push({ role: 'assistant', content: String(message.content || '') });
+      if (verifiedReads > 0) break;
+      messages.push({
+        role: 'user',
+        content: '请先调用 read_rules 读取云端规则入口和当前任务所需资料，再继续。'
+      });
+      ruleRounds++;
+      continue;
     }
-    if (forceFinal) throw new Error('AI 在规则读取结束后仍返回了工具调用');
 
     const assistant = {
       role: 'assistant',
@@ -817,6 +852,7 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
     messages.push(assistant);
 
     let newReads = 0;
+    let readErrors = 0;
     for (let index = 0; index < calls.length; index++) {
       const call = calls[index];
       let output;
@@ -824,7 +860,8 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
         if (!call || call.type !== 'function' || !call.function || call.function.name !== 'read_rules') {
           throw new Error('不支持的工具调用');
         }
-        const args = toolArguments(call);
+        const args = toolArguments(call, 'read_rules');
+        if (typeof args.path !== 'string') throw new Error('read_rules 缺少 path');
         const request = normalizeRuleRequest(args.path, args.pointer);
         const key = request.path + '#' + request.pointer;
         if (Object.prototype.hasOwnProperty.call(outputs, key)) {
@@ -836,6 +873,7 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
           verifiedReads++;
         }
       } catch (error) {
+        readErrors++;
         output = JSON.stringify({
           error: error && error.message ? error.message : String(error),
           hint: '请修正路径或使用 JSON Pointer 后再次调用 read_rules'
@@ -848,9 +886,23 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
       });
     }
     ruleRounds++;
-    forceFinal = newReads === 0 || ruleRounds >= MAX_RULE_TOOL_ROUNDS;
     setTargetStatus(target, 'AI 正在读取云端规则…');
+    if (verifiedReads > 0 && newReads === 0 && readErrors === 0) break;
   }
+
+  if (verifiedReads === 0) throw new Error('AI 未能读取云端规则，已停止生成');
+  messages.push({
+    role: 'user',
+    content: '规则读取阶段结束。现在使用 submit_result 提交最终结果；不要在正文重复规则。'
+  });
+  const response = await requestCompletion(qu, endpoint, headers, model, messages, 'delivery', target);
+  const info = completionInfo(response.body);
+  const message = responseMessage(response.body);
+  const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
+  if (calls.length !== 1 || !calls[0].function || calls[0].function.name !== 'submit_result') {
+    throw new Error('AI 没有使用 submit_result 提交最终结果（结束原因：' + info.reason + '）');
+  }
+  return { value: toolArguments(calls[0], 'submit_result'), completion: info };
 }
 
 function parseDeliveryFiles(value, target) {
@@ -878,9 +930,9 @@ function parseDeliveryFiles(value, target) {
 }
 
 function parseDeliveryEdits(value, target) {
-  if (value == null) return null;
-  if (!Array.isArray(value) || value.length < 1 || value.length > 64) {
-    throw new Error('AI 交付的 edits 必须包含 1 到 64 项精确替换');
+  if (value == null || (Array.isArray(value) && value.length === 0)) return null;
+  if (!Array.isArray(value) || value.length > 64) {
+    throw new Error('AI 交付的 edits 最多包含 64 项精确替换');
   }
   const allowed = target === 'applicationScript'
     ? ['applicationJavaScript']
@@ -895,8 +947,7 @@ function parseDeliveryEdits(value, target) {
   });
 }
 
-function parseAssistantReply(raw, target, baseFiles) {
-  const value = parseAssistantJson(raw);
+function parseAssistantReply(value, target, baseFiles) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('AI 回复必须是 JSON 对象');
   if (!Object.prototype.hasOwnProperty.call(value, 'edits') ||
       !Object.prototype.hasOwnProperty.call(value, 'apply_files')) {
@@ -980,9 +1031,18 @@ function applyDelivery(qu, target, delivery) {
 
 function safeHistory(value) {
   if (!Array.isArray(value)) return [];
-  return value.filter(function (entry) {
+  const source = value.filter(function (entry) {
     return entry && (entry.role === 'user' || entry.role === 'assistant') && typeof entry.content === 'string';
-  }).slice(-MAX_HISTORY_MESSAGES);
+  }).slice(-MAX_HISTORY_MESSAGES).map(function (entry) {
+    return { role: entry.role, content: entry.content.slice(0, MAX_MESSAGE_CHARS) };
+  });
+  const result = [];
+  for (let index = source.length - 1; index >= 0; index--) {
+    const candidate = [source[index]].concat(result);
+    if (utf8Bytes(JSON.stringify(candidate)).length > MAX_HISTORY_BYTES) break;
+    result.unshift(source[index]);
+  }
+  return result;
 }
 
 function loadHistory(qu, target) {
@@ -1002,9 +1062,9 @@ function publishTranscript(qu, target) {
 function appendMessage(qu, target, role, content) {
   const value = String(content || '').trim();
   if (!value) return;
-  const list = histories[target];
+  const list = histories[target].slice();
   list.push({ role: role, content: value });
-  while (list.length > MAX_HISTORY_MESSAGES) list.shift();
+  histories[target] = safeHistory(list);
   publishTranscript(qu, target);
 }
 
@@ -1062,16 +1122,15 @@ async function generate(qu, target) {
     const apiKey = fieldText(fields.apiKey);
     if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
     setTargetStatus(target, 'AI 正在判断所需规则…');
-    const response = await requestWithRules(qu, endpoint, headers, model, messages, target);
+    ruleLibrary = null;
+    const result = await requestWithRules(qu, endpoint, headers, model, messages, target);
     if (stopped) return;
-    const rawAnswer = assistantText(response.body);
-    const completion = assertCompletionFinished(response.body, rawAnswer);
     let answer;
     try {
-      answer = parseAssistantReply(rawAnswer, target, current);
+      answer = parseAssistantReply(result.value, target, current);
     } catch (error) {
       throw new Error((error && error.message ? error.message : String(error)) +
-        '（服务结束原因：' + completion.reason + '，响应长度：' + rawAnswer.length + ' 字符）');
+        '（服务结束原因：' + result.completion.reason + '）');
     }
     let message = answer.reply;
     if (answer.delivery) {
@@ -1167,8 +1226,6 @@ defineQuScript({
 
   onValue(path, value, qu) {
     const keys = {
-      'app.aiSupport.endpoint': 'endpoint',
-      'app.aiSupport.apiKey': 'apiKey',
       'app.aiSupport.model': 'model',
       'app.aiSupport.autoApply': 'autoApply',
       'app.aiSupport.appIncludeCurrent': 'appIncludeCurrent',
