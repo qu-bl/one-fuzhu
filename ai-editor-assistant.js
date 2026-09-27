@@ -20,7 +20,7 @@
  *       "type": "group",
  *       "id": "serviceSettings",
  *       "label": "服务",
- *       "description": "支持 OpenAI、DeepSeek 等兼容工具调用的接口；服务地址与模型会保存。",
+ *       "description": "支持 OpenAI Chat Completions tools 标准接口；服务地址与模型会保存。",
  *       "layout": "column",
  *       "children": [
  *         {
@@ -338,9 +338,6 @@ function requireHttpsEndpoint(value) {
 
 function serviceEndpoints(endpoint) {
   let value = requireHttpsEndpoint(endpoint).replace(/[?#].*$/, '').replace(/\/+$/, '');
-  if (/^https:\/\/api\.deepseek\.com$/i.test(value)) {
-    return { chat: value + '/chat/completions', models: value + '/models' };
-  }
   if (/\/chat\/completions$/i.test(value)) {
     return { chat: value, models: value.replace(/\/chat\/completions$/i, '/models') };
   }
@@ -354,7 +351,6 @@ function serviceEndpoints(endpoint) {
   }
   const version = value.match(/^(.*\/v\d+)(?:\/.*)?$/i);
   if (version) value = version[1];
-  else if (/^https:\/\/[^/]+$/i.test(value)) value += '/v1';
   return { chat: value + '/chat/completions', models: value + '/models' };
 }
 
