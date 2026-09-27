@@ -20,7 +20,7 @@
 | `osBuildVersion` | `0` | `0` | 鸿蒙提供构建版本；其他两端占位 |
 | `sdkApiVersion`、`sdkMinorApiVersion`、`sdkPatchApiVersion` | 当前 SDK 主版本、`0`、`0` | 均为 `0` | 后两项及 Apple 全部是占位值 |
 | `firstApiVersion` | 当前 SDK 版本 | `0` | 鸿蒙表示设备首发 API；其他两端不具备此语义 |
-| `performanceClass` | Android 媒体性能等级，旧版本为 `0` | `0` | 与鸿蒙设备性能分级标准不同 |
+| `performanceClass` | Android 媒体性能等级，设备未声明等级时为 `0` | `0` | 与鸿蒙设备性能分级标准不同 |
 | `buildTime` | `Build.TIME` 转为字符串 | 空串 | 鸿蒙提供构建时间；Apple 占位 |
 | `distributionOSName`、`distributionOSVersion` | Android 发行信息 | Apple 系统发行信息 | 平台内容不同 |
 | `distributionOSApiVersion`、`distributionOSApiName`、`distributionOSReleaseType` | Android SDK 版本数字、`API`、构建类型 | `0`、空串、空串 | API 版本类型已与鸿蒙统一；Android 近似映射，Apple 占位 |
