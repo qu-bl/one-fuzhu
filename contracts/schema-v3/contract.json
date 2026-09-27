@@ -1,5 +1,5 @@
 {
-  "contractVersion": "9.0.0",
+  "contractVersion": "10.0.0",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -340,7 +340,7 @@
         "depthMax": 6,
         "optionsMax": 64,
         "listItemsMax": 64,
-        "propertyPathSegmentsMax": 8,
+        "bindingPathSegmentsMax": 8,
         "extensionsMax": 16,
         "labelMax": 200,
         "idMax": 64
@@ -952,22 +952,17 @@
       ],
       "runtime.audio.play": [
         "audio",
-        "id",
         "policy",
-        "volume",
-        "options"
+        "volume"
       ],
       "runtime.audio.pause": [
-        "audio",
-        "id"
+        "audio"
       ],
       "runtime.audio.stop": [
-        "audio",
-        "id"
+        "audio"
       ],
       "runtime.audio.setVolume": [
         "audio",
-        "id",
         "volume"
       ]
     },
@@ -1672,30 +1667,6 @@
       ".qu"
     ],
     "reservedDeviceNames": [
-      "CON",
-      "PRN",
-      "AUX",
-      "NUL",
-      "COM1",
-      "COM2",
-      "COM3",
-      "COM4",
-      "COM5",
-      "COM6",
-      "COM7",
-      "COM8",
-      "COM9",
-      "LPT1",
-      "LPT2",
-      "LPT3",
-      "LPT4",
-      "LPT5",
-      "LPT6",
-      "LPT7",
-      "LPT8",
-      "LPT9"
-    ],
-    "windowsDeviceNames": [
       "CON",
       "PRN",
       "AUX",
