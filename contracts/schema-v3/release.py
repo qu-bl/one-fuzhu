@@ -271,6 +271,8 @@ def verify_schema_and_fixtures():
     operations = script["hostOperations"]
     if len(operations) != len(set(operations)) or not operations:
         raise ValueError("script.hostOperations must contain unique operations")
+    if script["validation"].get("annotationsRequired") != ["id"]:
+        raise ValueError("application scripts must require @id")
     if set(script["operationArguments"]) != set(operations):
         raise ValueError("every host operation must declare public arguments")
     if any(len(args) != len(set(args)) for args in script["operationArguments"].values()):
@@ -572,6 +574,9 @@ def verify_ai_guidance():
         if component_errors:
             raise ValueError(f"AI component example is invalid: {name}: {component_errors[0].message}")
     application_source = examples["examples"]["applicationScript"]["applicationJavaScript"]
+    application_id = re.search(r"(?m)^\s*\*\s*@id\s+(\S+)\s*$", application_source)
+    if application_id is None or re.fullmatch(contract["script"]["idPattern"], application_id.group(1)) is None:
+        raise ValueError("AI application script example must contain a valid required @id")
     ui_match = re.search(r"(?ms)^\s*\*\s*@ui\s*$\n(?P<body>.*?)^\s*\*/", application_source)
     if ui_match is None:
         raise ValueError("AI application script example must include a checkable @ui declaration")

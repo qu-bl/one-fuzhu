@@ -82,6 +82,13 @@
         ]
       },
       {
+        "id": "application-required-id",
+        "check": "应用脚本包含唯一且符合 script.idPattern 的 @id；文件名不构成脚本身份，也不能作为缺失 @id 的兜底。",
+        "appliesTo": [
+          "applicationScript"
+        ]
+      },
+      {
         "id": "host-contract-identity",
         "check": "宿主提供的 contractVersion 和 contractSha256 与本次 AI 资料对应的共享契约完全一致；缺失或不一致时停止交付。",
         "appliesTo": [
@@ -217,6 +224,7 @@
       "entry": "defineQuScript",
       "rules": [
         "只处理应用脚本，不交付资源包 manifestJson 或 mainJavaScript。",
+        "每份应用脚本必须声明唯一且符合 script.idPattern 的 @id；宿主不会用文件名补全身份。",
         "onStart 负责一次性初始化；onValue 和 onInterval 可能异步重入；onStop 做同步清理。不要在 onStart 等待随后才安装的订阅回调。",
         "@observe 只列出 onValue 确实消费的路径；UI binding 会由宿主自行观察，不因控件绑定而重复加入 @observe。",
         "已有宿主或其他脚本字段直接使用正确类型句柄；只有确需新增的自有 app.* 字段才 define，不能重新定义公开字段。",
