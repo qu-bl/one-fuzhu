@@ -34,7 +34,7 @@ assert.equal(rulePayload.tool_choice, 'auto');
 
 const deliveryPayload = api.completionPayload('test-model', [], 'delivery', 'resourcePackage');
 assert.equal(deliveryPayload.tools[0].function.name, 'submit_result');
-assert.equal(deliveryPayload.tool_choice.function.name, 'submit_result');
+assert.equal(deliveryPayload.tool_choice, undefined);
 assert.deepEqual(
   Object.keys(deliveryPayload.tools[0].function.parameters.properties.apply_files.properties),
   ['manifestJson', 'mainJavaScript']
@@ -66,9 +66,11 @@ const responses = [
   response({ content: '先直接回答', tool_calls: [] }, 'stop'),
   response({ content: '', tool_calls: [call('bad', 'read_rules', { path: 'missing.json' })] }),
   response({ content: '', tool_calls: [call('good', 'read_rules', { path: 'ai-rules/README.md' })] }),
-  response({ content: '规则已读取', tool_calls: [] }, 'stop'),
+  response({ content: '规则已读取', reasoning_content: '规则读取完成', tool_calls: [] }, 'stop'),
+  response({ content: '直接返回正文', reasoning_content: '准备结果', tool_calls: [] }, 'stop'),
   response({
     content: '',
+    reasoning_content: '改用工具提交',
     tool_calls: [call('result', 'submit_result', { reply: '可以', edits: [], apply_files: {} })]
   })
 ];
@@ -82,6 +84,8 @@ const result = await api.requestWithRules({}, 'https://example.com/v1/chat/compl
   'test-model', messages, 'applicationScript');
 assert.equal(result.value.reply, '可以');
 assert.ok(messages.some(message => message.role === 'user' && message.content.includes('请先调用 read_rules')));
+assert.ok(messages.some(message => message.role === 'assistant' && message.reasoning_content === '规则读取完成'));
+assert.ok(messages.some(message => message.role === 'user' && message.content.includes('请调用 submit_result')));
 assert.equal(responses.length, 0);
 
 assert.throws(() => api.completionInfo({

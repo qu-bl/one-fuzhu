@@ -165,6 +165,7 @@ const MAX_HISTORY_MESSAGES = 12;
 const MAX_HISTORY_BYTES = 24000;
 const MAX_MESSAGE_CHARS = 6000;
 const MAX_RULE_TOOL_ROUNDS = 6;
+const MAX_DELIVERY_ATTEMPTS = 3;
 const MAX_RULE_RESULT_CHARS = 60000;
 const PREFIX = 'app.aiSupport.';
 
@@ -773,7 +774,6 @@ function completionPayload(model, messages, mode, target) {
     payload.tool_choice = 'auto';
   } else {
     payload.tools = [deliveryTool(target)];
-    payload.tool_choice = { type: 'function', function: { name: 'submit_result' } };
   }
   if (/^(?:gpt-5|o\d)/i.test(model)) payload.max_completion_tokens = MAX_OUTPUT_TOKENS;
   else payload.max_tokens = MAX_OUTPUT_TOKENS;
@@ -821,6 +821,18 @@ function toolArguments(call, name) {
   return parsed;
 }
 
+function assistantHistoryMessage(message, calls) {
+  const value = {
+    role: 'assistant',
+    content: message.content == null ? '' : String(message.content)
+  };
+  if (Array.isArray(calls) && calls.length > 0) value.tool_calls = calls;
+  if (typeof message.reasoning_content === 'string') {
+    value.reasoning_content = message.reasoning_content;
+  }
+  return value;
+}
+
 async function requestWithRules(qu, endpoint, headers, model, messages, target) {
   let ruleRounds = 0;
   let verifiedReads = 0;
@@ -831,7 +843,7 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
     const message = responseMessage(response.body);
     const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
     if (calls.length === 0) {
-      messages.push({ role: 'assistant', content: String(message.content || '') });
+      messages.push(assistantHistoryMessage(message));
       if (verifiedReads > 0) break;
       messages.push({
         role: 'user',
@@ -841,15 +853,7 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
       continue;
     }
 
-    const assistant = {
-      role: 'assistant',
-      content: message.content == null ? '' : String(message.content),
-      tool_calls: calls
-    };
-    if (typeof message.reasoning_content === 'string') {
-      assistant.reasoning_content = message.reasoning_content;
-    }
-    messages.push(assistant);
+    messages.push(assistantHistoryMessage(message, calls));
 
     let newReads = 0;
     let readErrors = 0;
@@ -895,14 +899,39 @@ async function requestWithRules(qu, endpoint, headers, model, messages, target) 
     role: 'user',
     content: '规则读取阶段结束。现在使用 submit_result 提交最终结果；不要在正文重复规则。'
   });
-  const response = await requestCompletion(qu, endpoint, headers, model, messages, 'delivery', target);
-  const info = completionInfo(response.body);
-  const message = responseMessage(response.body);
-  const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
-  if (calls.length !== 1 || !calls[0].function || calls[0].function.name !== 'submit_result') {
-    throw new Error('AI 没有使用 submit_result 提交最终结果（结束原因：' + info.reason + '）');
+  let lastError = 'AI 没有使用 submit_result 提交最终结果';
+  for (let attempt = 0; attempt < MAX_DELIVERY_ATTEMPTS; attempt++) {
+    const response = await requestCompletion(qu, endpoint, headers, model, messages, 'delivery', target);
+    const info = completionInfo(response.body);
+    const message = responseMessage(response.body);
+    const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
+    if (calls.length === 1 && calls[0].function && calls[0].function.name === 'submit_result') {
+      try {
+        return { value: toolArguments(calls[0], 'submit_result'), completion: info };
+      } catch (error) {
+        lastError = error && error.message ? error.message : String(error);
+      }
+    } else {
+      lastError = 'AI 没有使用 submit_result 提交最终结果（结束原因：' + info.reason + '）';
+    }
+
+    messages.push(assistantHistoryMessage(message, calls));
+    if (calls.length > 0) {
+      calls.forEach(function (call) {
+        messages.push({
+          role: 'tool',
+          tool_call_id: String(call.id || ''),
+          content: JSON.stringify({ error: lastError, hint: '请只调用一次 submit_result，并提交符合工具参数定义的完整结果' })
+        });
+      });
+    } else {
+      messages.push({
+        role: 'user',
+        content: '请不要使用正文交付结果。请调用 submit_result，并提交符合工具参数定义的完整结果。'
+      });
+    }
   }
-  return { value: toolArguments(calls[0], 'submit_result'), completion: info };
+  throw new Error(lastError + '；自动纠正后仍未成功');
 }
 
 function parseDeliveryFiles(value, target) {
