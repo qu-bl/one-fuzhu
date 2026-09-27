@@ -249,7 +249,7 @@
       "reply": "已生成新应用脚本。",
       "edits": null,
       "apply_files": {
-        "applicationJavaScript": "/** @id application:example */\\ndefineQuScript({ onStart() {} });"
+        "applicationJavaScript": "/** @id application-example */\\ndefineQuScript({ onStart() {} });"
       }
     }
   }
