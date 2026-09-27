@@ -306,6 +306,12 @@ def verify_schema_and_fixtures():
         "applicationOwnerIdentity": "@id",
         "resourcePackageOwnerIdentity": "manifest.id",
         "ownerIdentityMustRemainStableAcrossUpdates": True,
+        "externalChangeCallback": "onStorageChange",
+        "externalChangeArguments": ["qu"],
+        "externalChangesOnly": True,
+        "initialRestoreCallbacks": {"applicationScript": "onStart", "resourcePackage": "activate"},
+        "requiresExplicitReadAfterChange": True,
+        "coalescesEquivalentContent": True,
     }:
         raise ValueError("script storage must be isolated, write-through JSON storage")
     re.compile(storage["keyPattern"])

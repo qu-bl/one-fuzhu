@@ -1146,6 +1146,25 @@ defineQuScript({
     scheduleModelLoad(300);
   },
 
+  onStorageChange(qu) {
+    if (stopped || !fields.endpoint) return;
+    const endpoint = String(qu.storage.get('endpoint', 'https://api.openai.com/v1') || '').trim();
+    const model = String(qu.storage.get('model', '') || '').trim();
+    fields.endpoint.value = endpoint;
+    fields.apiKey.value = String(qu.storage.get('apiKey', '') || '');
+    fields.modelOptions.value = model ? [model] : [];
+    fields.model.value = model;
+    fields.autoApply.value = qu.storage.get('autoApply', false) === true;
+    fields.appIncludeCurrent.value = qu.storage.get('appIncludeCurrent', true) === true;
+    fields.packageIncludeManifest.value = qu.storage.get('packageIncludeManifest', true) === true;
+    fields.packageIncludeScript.value = qu.storage.get('packageIncludeScript', true) === true;
+    histories.applicationScript = loadHistory(qu, 'applicationScript');
+    histories.resourcePackage = loadHistory(qu, 'resourcePackage');
+    refreshConversationUI(qu);
+    lastModelSource = '';
+    scheduleModelLoad(300);
+  },
+
   onValue(path, value, qu) {
     const keys = {
       'app.aiSupport.endpoint': 'endpoint',

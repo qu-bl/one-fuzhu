@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "10.0.1",
+  "contractVersion": "10.1.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -765,7 +765,18 @@
       "isolatedByOwner": true,
       "applicationOwnerIdentity": "@id",
       "resourcePackageOwnerIdentity": "manifest.id",
-      "ownerIdentityMustRemainStableAcrossUpdates": true
+      "ownerIdentityMustRemainStableAcrossUpdates": true,
+      "externalChangeCallback": "onStorageChange",
+      "externalChangeArguments": [
+        "qu"
+      ],
+      "externalChangesOnly": true,
+      "requiresExplicitReadAfterChange": true,
+      "coalescesEquivalentContent": true,
+      "initialRestoreCallbacks": {
+        "applicationScript": "onStart",
+        "resourcePackage": "activate"
+      }
     }
   },
   "network": {
