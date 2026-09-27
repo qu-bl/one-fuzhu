@@ -3,8 +3,8 @@
   "files": [
     {
       "name": "README.md",
-      "version": "2026.09.27.1626",
-      "sha256": "e0d9cbc40632cbdab1951d4ffcbf605c1b51ea6aab1e4b64d46bbee4903a3860"
+      "version": "2026.09.27.1725",
+      "sha256": "f95c5db63ff9ea2b08bf8169c6ced03d63775c38739e99525fc5a4fc6dffd014"
     },
     {
       "name": "application-script.md",
@@ -13,8 +13,8 @@
     },
     {
       "name": "context-map.json",
-      "version": "2026.09.27.1628",
-      "sha256": "39ef64f773523678256f603ab4d92b9b21ef934b54be6431aa4e0e84810fee02"
+      "version": "2026.09.27.1725",
+      "sha256": "e7d02827f19498d1285bbda2c15d276aeb50a0ebb87b85b5b7a47258f54fb267"
     },
     {
       "name": "examples.json",
@@ -28,8 +28,8 @@
     },
     {
       "name": "guidance.json",
-      "version": "2026.09.27.1626",
-      "sha256": "69b118e5a695b83a05d1d2a891744ffe82aeedff6f1c81bbd11c9a59123818df"
+      "version": "2026.09.27.1727",
+      "sha256": "eec52722ccc9ab2ef073d94817675998c68d74472c456cf61b445e096ce3f112"
     },
     {
       "name": "resource-package.md",

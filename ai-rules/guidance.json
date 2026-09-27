@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "audience": "aiScriptsOnly",
   "contract": "contracts/schema-v3/contract.json",
   "priority": [
@@ -9,12 +9,28 @@
     "场景指南中的操作顺序"
   ],
   "deliveryProtocol": {
-    "modes": ["reply", "edits", "apply_files"],
-    "exclusiveFields": ["edits", "apply_files"],
-    "editFields": ["file", "oldText", "newText"],
+    "modes": [
+      "reply",
+      "edits",
+      "apply_files"
+    ],
+    "exclusiveFields": [
+      "edits",
+      "apply_files"
+    ],
+    "editFields": [
+      "file",
+      "oldText",
+      "newText"
+    ],
     "allowedFilesByScenario": {
-      "applicationScript": ["applicationJavaScript"],
-      "resourcePackage": ["manifestJson", "mainJavaScript"]
+      "applicationScript": [
+        "applicationJavaScript"
+      ],
+      "resourcePackage": [
+        "manifestJson",
+        "mainJavaScript"
+      ]
     },
     "limits": {
       "editsMax": 64,
@@ -26,14 +42,17 @@
       "atomic": true,
       "baseFileMustRemainUnchanged": true,
       "defaultForExistingFiles": "edits",
-      "fullFileAllowedFor": ["newFile", "largeRewrite"]
+      "fullFileAllowedFor": [
+        "newFile",
+        "largeRewrite"
+      ]
     }
   },
   "workflow": {
     "prepare": [
-      "核验共享契约、自动生成摘要和本轮资料的版本与 SHA-256；身份不一致时停止交付。",
-      "由 context-map.json 选择本轮主题，只加载对应的 generation-profile.json 分区；只有摘要不足时才读取 contract.json 对应分区。",
-      "读取当前场景文件和用户提供的真实资产信息；缺少必要信息时保留现有名称并说明缺口。"
+      "先通过 read_rules 读取 AI 规则入口、资料目录、当前场景指南和工作约束。",
+      "根据用户任务自行选择 generation-profile.json 分区；只有自动摘要不足时才读取 contract.json 对应分区。",
+      "核对工具返回的契约版本与 SHA-256，读取当前场景文件和用户提供的真实资产信息；缺少必要信息时保留现有名称并说明缺口。"
     ],
     "generate": [
       "所有字段、枚举、入口、权限和限制只取自本轮已核验的自动生成摘要或共享契约，不从本文、示例或模型记忆补充。",
@@ -44,72 +63,109 @@
       {
         "id": "delivery-json",
         "check": "输出符合 deliveryProtocol，edits 与 apply_files 互斥，替换文本在当前演进文件中恰好匹配一次。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       },
       {
         "id": "entry-function",
         "check": "入口与本轮生成摘要中的当前场景入口一致，且只注册一次。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       },
       {
         "id": "application-required-id",
         "check": "应用脚本身份满足本轮生成摘要，文件名不作为身份兜底。",
-        "appliesTo": ["applicationScript"]
+        "appliesTo": [
+          "applicationScript"
+        ]
       },
       {
         "id": "host-contract-identity",
         "check": "宿主契约版本和哈希与本轮资料完全一致。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       },
       {
         "id": "application-observe-closure",
         "check": "应用脚本的观察声明、消费位置和字段来源形成闭环，并符合本轮契约。",
-        "appliesTo": ["applicationScript"]
+        "appliesTo": [
+          "applicationScript"
+        ]
       },
       {
         "id": "application-definition-types",
         "check": "应用脚本创建字段的类型、所有权和同路径绑定符合本轮生成摘要。",
-        "appliesTo": ["applicationScript"]
+        "appliesTo": [
+          "applicationScript"
+        ]
       },
       {
         "id": "ui-required-fields",
         "check": "每个 UI 组件通过本轮 profile.ui 的字段、绑定和条件规则；本文不维护独立字段表。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       },
       {
         "id": "ui-value-semantics",
         "check": "每个值组件通过本轮 profile.ui 的值语义和限制。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       },
       {
         "id": "manifest-schema",
         "check": "资源包清单通过宿主持有的完整 JSON Schema。",
-        "appliesTo": ["resourcePackage"]
+        "appliesTo": [
+          "resourcePackage"
+        ]
       },
       {
         "id": "ui-qvmi-dataflow",
         "check": "UI 绑定、字段所有权和运行时数据流符合本轮契约，没有为同一状态建立转发副本。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       },
       {
         "id": "qvmi-paths",
         "check": "JavaScript 使用的每个字面 QVMI 路径都有契约允许的类型、来源和权限。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       },
       {
         "id": "cross-file-contract",
         "check": "资源包清单、程序和真实资产之间的声明与使用一致。",
-        "appliesTo": ["resourcePackage"]
+        "appliesTo": [
+          "resourcePackage"
+        ]
       },
       {
         "id": "runtime-capabilities",
         "check": "运行时调用及其前置条件属于当前场景，并通过本轮契约。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       },
       {
         "id": "host-error-verbatim",
         "check": "修复时逐字保留宿主返回的文件、路径、错误码和 messageRaw。",
-        "appliesTo": ["applicationScript", "resourcePackage"]
+        "appliesTo": [
+          "applicationScript",
+          "resourcePackage"
+        ]
       }
     ]
   },
@@ -141,8 +197,12 @@
     "applicationScript": {
       "guide": "ai-rules/application-script.md",
       "example": "applicationScript",
-      "files": ["application.js"],
-      "deliveryFields": ["applicationJavaScript"],
+      "files": [
+        "application.js"
+      ],
+      "deliveryFields": [
+        "applicationJavaScript"
+      ],
       "entry": "defineQuScript",
       "rules": [
         "只交付应用脚本文件。",
@@ -154,8 +214,14 @@
     "resourcePackage": {
       "guide": "ai-rules/resource-package.md",
       "example": "resourcePackage",
-      "files": ["resource-package.json", "main.js"],
-      "deliveryFields": ["manifestJson", "mainJavaScript"],
+      "files": [
+        "resource-package.json",
+        "main.js"
+      ],
+      "deliveryFields": [
+        "manifestJson",
+        "mainJavaScript"
+      ],
       "entry": "defineResourcePackage",
       "rules": [
         "资源包清单和程序必须同步交付。",
@@ -167,26 +233,39 @@
   },
   "generationProfile": "ai-rules/generation-profile.json",
   "contextLoading": {
-    "map": "ai-rules/context-map.json",
-    "mode": "topicSelective",
+    "mode": "modelSelectedToolCalls",
+    "entry": "ai-rules/README.md",
+    "catalog": "ai-rules/context-map.json",
+    "tool": "read_rules",
+    "cache": "runtimeMemory",
     "examples": "conditional",
-    "scenarioGuide": "conditional",
     "schema": "hostOnly",
-    "reuseCondition": "当前对话已含同一文件的 version 与 sha256，且没有命中新主题。"
+    "reuseCondition": "当前请求已通过 read_rules 获得相同 version 与 sha256 的资料时可以复用。"
   },
   "hostErrorFeedback": {
-    "requiredFields": ["source", "file", "path", "code", "messageRaw"],
+    "requiredFields": [
+      "source",
+      "file",
+      "path",
+      "code",
+      "messageRaw"
+    ],
     "messagePolicy": "messageRaw 必须逐字采用宿主返回值；解释只能写入 explanation。",
     "repairPolicy": "逐项按原始错误修复，最多两轮；仍失败时只返回说明，不写入文件。"
   },
   "hostContractContext": {
-    "requiredFields": ["contractVersion", "contractSha256"],
+    "requiredFields": [
+      "contractVersion",
+      "contractSha256"
+    ],
     "matchAgainst": [
       "contracts/schema-v3/release.json",
       "ai-rules/context-map.json",
       "ai-rules/generation-profile.json"
     ],
-    "conditionalMatchAgainst": ["ai-rules/examples.json"],
+    "conditionalMatchAgainst": [
+      "ai-rules/examples.json"
+    ],
     "mismatchPolicy": "返回 reply 并逐字报告宿主版本与发布版本；禁止 edits，禁止 apply_files。"
   }
 }
