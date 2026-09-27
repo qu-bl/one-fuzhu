@@ -489,7 +489,7 @@ def verify_ai_guidance():
     if len(guidance_text) > 12000:
         raise ValueError("AI guidance repeats too much contract material")
     guidance = json.loads(guidance_text)
-    if (guidance.get("schemaVersion") != 4 or guidance.get("audience") != "aiScriptsOnly" or
+    if (guidance.get("schemaVersion") != 5 or guidance.get("audience") != "aiScriptsOnly" or
             guidance.get("contract") != "contracts/schema-v3/contract.json" or
             guidance.get("generationProfile") != "ai-rules/generation-profile.json"):
         raise ValueError("AI guidance must reference the published shared contract")
@@ -528,16 +528,29 @@ def verify_ai_guidance():
             "逐字" not in feedback.get("messagePolicy", ""):
         raise ValueError("AI host errors are not preserved verbatim")
     loading = guidance.get("contextLoading", {})
-    if (loading.get("map") != "ai-rules/context-map.json" or
+    if (loading.get("mode") != "modelSelectedToolCalls" or
+            loading.get("entry") != "ai-rules/README.md" or
+            loading.get("catalog") != "ai-rules/context-map.json" or
+            loading.get("tool") != "read_rules" or
+            loading.get("cache") != "runtimeMemory" or
             loading.get("examples") != "conditional" or
             loading.get("schema") != "hostOnly" or
             "version" not in loading.get("reuseCondition", "") or
             "sha256" not in loading.get("reuseCondition", "")):
         raise ValueError("AI context loading policy is incomplete")
-    context_map = json.loads((ai / "context-map.json").read_text(encoding="utf-8"))
-    if (context_map.get("schemaVersion") != 1 or
+    context_map_text = (ai / "context-map.json").read_text(encoding="utf-8")
+    context_map = json.loads(context_map_text)
+    catalog = context_map.get("catalog", {})
+    if (context_map.get("schemaVersion") != 2 or
             context_map.get("contractVersion") != json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))["contractVersion"] or
-            set(context_map.get("topics", {})) != {"ui", "qvmi", "network", "storage", "resources"}):
+            context_map.get("entry") != "ai-rules/README.md" or
+            context_map.get("release") != "ai-rules/rules.json" or
+            set(catalog) != {"workflow", "generatedProfile", "examples", "scenarioGuides", "contract",
+                             "contractRelease", "resourcePackageSchema"} or
+            set(context_map.get("profilePointers", {})) != {"manifest", "ui", "script", "network", "qvmi", "storage"} or
+            set(context_map.get("contractPointers", {})) != {"manifest", "ui", "script", "network", "qvmi",
+                                                              "resources", "archive"} or
+            not context_map.get("readingPolicy") or "keywords" in context_map_text):
         raise ValueError("AI context map is invalid")
     scenarios = guidance.get("scenarios", {})
     if set(scenarios) != {"applicationScript", "resourcePackage"}:
@@ -646,6 +659,8 @@ def verify_ai_guidance():
         markdown = (ai / name).read_text(encoding="utf-8")
         if len(markdown) > 1600 or "BEGIN GENERATED HOST CONTRACT" in markdown:
             raise ValueError(f"AI guide repeats the contract or is too long: {name}")
+    if "read_rules" not in (ai / "README.md").read_text(encoding="utf-8"):
+        raise ValueError("AI entry does not describe the remote rule tool")
     for name in ("application-script.md", "resource-package.md"):
         if "本文不维护字段、枚举、入口或限制清单" not in (ai / name).read_text(encoding="utf-8"):
             raise ValueError(f"AI scenario guide must defer field authority to the generated profile: {name}")
