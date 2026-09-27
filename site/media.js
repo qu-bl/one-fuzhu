@@ -14,7 +14,7 @@
       embed = `https://www.youtube.com/embed/${id}?autoplay=0&playsinline=1`;
       href = `https://www.youtube.com/watch?v=${id}`;
     } else if (video.platform === 'bilibili' && /^BV[A-Za-z0-9]{10}$/.test(id)) {
-      embed = `https://player.bilibili.com/player.html?bvid=${id}&autoplay=0&danmaku=0`;
+      embed = `https://player.bilibili.com/player.html?isOutside=true&bvid=${id}&p=1&autoplay=0&danmaku=0`;
       href = `https://www.bilibili.com/video/${id}/`;
     } else if (video.platform === 'douyin' && /^\d{10,25}$/.test(id)) {
       embed = `https://open.douyin.com/player/video?vid=${id}&autoplay=0`;
