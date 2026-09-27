@@ -3,6 +3,8 @@ const activityDots = document.querySelector("#activity-dots");
 const activityCarousel = document.querySelector("#activity-carousel");
 const activityStatus = document.querySelector("#activity-status");
 const activityTemplate = document.querySelector("#activity-template");
+const activityRiveCanvas = document.querySelector("#activity-rive-canvas");
+const activityRiveFallback = document.querySelector("#activity-rive-fallback");
 const caseTemplate = document.querySelector("#case-template");
 const caseGrid = document.querySelector("#case-grid");
 const categoryTabs = document.querySelector("#category-tabs");
@@ -307,21 +309,12 @@ function renderActivities() {
   state.activities.forEach((activity, index) => {
     const fragment = activityTemplate.content.cloneNode(true);
     const slide = fragment.querySelector(".activity-slide");
-    const cover = fragment.querySelector(".activity-cover");
     const title = fragment.querySelector("h2");
     const summary = fragment.querySelector("p");
     const action = fragment.querySelector(".banner-action");
 
     slide.setAttribute("aria-label", `${index + 1} / ${state.activities.length}：${activity.title}`);
     slide.setAttribute("aria-roledescription", "幻灯片");
-    if (activity.cover) {
-      cover.src = activity.cover;
-      cover.decoding = "async";
-      cover.loading = index === 0 ? "eager" : "lazy";
-      cover.alt = activity.coverAlt || `${activity.title}活动视觉`;
-    } else {
-      cover.hidden = true;
-    }
     title.textContent = activity.title;
     summary.textContent = activity.summary;
     if (activity.action === "showcase") {
@@ -360,6 +353,33 @@ function renderActivities() {
 
   setActivity(0, false);
   scheduleCarousel();
+}
+
+function initHeroRive() {
+  if (!activityRiveCanvas || !window.rive?.Rive) return;
+
+  let instance;
+  const resize = () => instance?.resizeDrawingSurfaceToCanvas();
+  instance = new window.rive.Rive({
+    src: "./assets/hero-cat.riv",
+    canvas: activityRiveCanvas,
+    artboard: "Artboard 2",
+    stateMachine: "State Machine 1",
+    autoplay: !reduceMotion.matches,
+    isTouchScrollEnabled: true,
+    onLoad: () => {
+      resize();
+      activityRiveCanvas.removeAttribute("aria-hidden");
+      activityRiveFallback?.setAttribute("hidden", "");
+    },
+  });
+
+  const observer = "ResizeObserver" in window ? new ResizeObserver(resize) : null;
+  observer?.observe(activityRiveCanvas);
+  window.addEventListener("pagehide", () => {
+    observer?.disconnect();
+    instance.cleanup();
+  }, { once: true });
 }
 
 function setActivity(index, announce = false) {
@@ -894,6 +914,7 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 }
 
 async function initialize() {
+  initHeroRive();
   if (appPlatform) {
     document.querySelector(".site-footer")?.setAttribute("hidden", "");
   } else {
