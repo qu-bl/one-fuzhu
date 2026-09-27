@@ -15,13 +15,17 @@ const accessSummary = document.querySelector("#access-summary");
 const accessMedia = document.querySelector("#access-media");
 const accessItems = document.querySelector("#access-items");
 const copyToast = document.querySelector("#copy-toast");
+const requestedPlatform = new URLSearchParams(window.location.search).get("appPlatform");
+const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform)
+  ? requestedPlatform
+  : null;
 
 const state = {
   activities: [],
   activityIndex: 0,
   cases: [],
   category: "全部",
-  platform: "全部平台",
+  platform: appPlatform || "全部平台",
   query: "",
   timer: null,
   paused: false,
@@ -463,6 +467,11 @@ function renderFilters() {
   setCategoryExpanded(false);
 
   platformButtons.replaceChildren();
+  const platformPicker = document.querySelector("#platform-picker");
+  if (appPlatform) {
+    platformPicker.hidden = true;
+    return;
+  }
   ["全部平台", "Apple", "Android", "HarmonyOS"].forEach((platform) => {
     const button = document.createElement("button");
     const label = platformLabel(platform);
@@ -646,7 +655,7 @@ function createCaseCard(item, index, options = {}) {
   const summaryElement = fragment.querySelector(".case-summary");
   summaryElement.textContent = summary;
   summaryElement.hidden = !summary;
-  const details = item.details || "";
+  const details = appPlatform ? (item.description || item.summary || "") : (item.details || "");
   const detailSection = fragment.querySelector(".case-details");
   detailSection.querySelector(".case-details-text").textContent = details;
   detailSection.hidden = !details;
@@ -669,8 +678,9 @@ function createCaseCard(item, index, options = {}) {
   if (SiteMedia.videoSource(item.video)) renderAccessMedia(item, media);
   else if (!item.cover) media.hidden = true;
   title.textContent = item.name;
-  platforms.setAttribute("aria-label", `支持平台：${item.platforms.map(platformLabel).join("、")}`);
-  item.platforms.forEach((platform) => platforms.append(createPlatformIcon(platform, "platform-icon--case")));
+  const visiblePlatforms = appPlatform ? [appPlatform] : item.platforms;
+  platforms.setAttribute("aria-label", `支持平台：${visiblePlatforms.map(platformLabel).join("、")}`);
+  visiblePlatforms.forEach((platform) => platforms.append(createPlatformIcon(platform, "platform-icon--case")));
   return card;
 }
 
@@ -873,7 +883,12 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 }
 
 async function initialize() {
-  bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
+  if (appPlatform) {
+    document.querySelector("#about")?.setAttribute("hidden", "");
+    document.querySelector(".site-footer")?.setAttribute("hidden", "");
+  } else {
+    bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
+  }
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
   document.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);
   bindCarouselControls();
