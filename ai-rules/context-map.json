@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "contractVersion": "10.0.0",
+  "contractVersion": "10.0.1",
   "purpose": "供 AI 自主读取的远程规则库目录；调用端不根据关键词选择规则。",
   "entry": "ai-rules/README.md",
   "release": "ai-rules/rules.json",
