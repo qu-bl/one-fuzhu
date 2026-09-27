@@ -146,6 +146,8 @@ a.contact-method:hover { background: var(--md-sys-color-surface-container-highes
 }
 @media(max-width: 719px) {
   .activity-layout { grid-template-columns: 1fr; gap: 20px; min-height: 0; }
+  .activity-rive { grid-row: 1; }
+  .activity-copy { grid-row: 2; }
   .activity-slide { padding: 4px 0 16px; min-height: 260px; }
   .activity-content h2 { font-size: clamp(28px,7.7vw,44px); margin-bottom: 16px; }
   .activity-content p { margin-bottom: 20px; }
