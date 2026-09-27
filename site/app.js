@@ -168,6 +168,7 @@ function createPlayerFrame(item, video) {
   frame.allowFullscreen = true;
   frame.loading = "lazy";
   frame.referrerPolicy = "strict-origin-when-cross-origin";
+  frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation");
   return frame;
 }
 
@@ -177,9 +178,19 @@ function renderAccessMedia(item, accessMedia = document.querySelector("#access-m
   accessMedia.hidden = !video && !item.cover;
   accessMedia.style.aspectRatio = String(video?.ratio || 16 / 9);
   accessMedia.classList.toggle("access-media--portrait", Boolean(video && video.ratio < 1));
-  // 视频优先：直接加载播放器（自带封面/播放键），不再需要"播放视频"按钮。
+  // 第三方播放器只在用户明确操作后加载，避免外部页面在 WebView 中接管顶层导航。
   if (video) {
-    accessMedia.append(createPlayerFrame(item, video));
+    const loadButton = document.createElement("button");
+    loadButton.type = "button";
+    loadButton.className = "video-load";
+    loadButton.textContent = "播放视频";
+    loadButton.setAttribute("aria-label", `播放${item.name || item.title}视频`);
+    loadButton.addEventListener("click", event => {
+      event.stopPropagation();
+      if (loadButton.closest(".featured-carousel")) pauseFeatured();
+      accessMedia.replaceChildren(createPlayerFrame(item, video));
+    });
+    accessMedia.append(loadButton);
     return;
   }
   if (item.cover) {
