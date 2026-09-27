@@ -502,6 +502,8 @@
       "observe",
       "ui"
     ],
+    "idPattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+    "minimumIntervalMs": 1000,
     "valueAccessorTypes": [
       "number",
       "boolean",
@@ -595,6 +597,154 @@
       "rive.load",
       "rive.font.set"
     ],
+    "operationArguments": {
+      "values.get": [
+        "path",
+        "type"
+      ],
+      "values.define": [
+        "path",
+        "type",
+        "initialValue",
+        "options"
+      ],
+      "values.remove": [
+        "path"
+      ],
+      "values.list": [],
+      "values.set": [
+        "path",
+        "type",
+        "value"
+      ],
+      "values.observe": [
+        "path",
+        "type",
+        "listener"
+      ],
+      "values.trigger": [
+        "path",
+        "payload"
+      ],
+      "ui.open": [
+        "componentId"
+      ],
+      "ui.declare": [
+        "sets"
+      ],
+      "ui.clear": [],
+      "editor.read": [
+        "target",
+        "project",
+        "file"
+      ],
+      "editor.apply": [
+        "change"
+      ],
+      "network.request": [
+        "url",
+        "options"
+      ],
+      "network.download": [
+        "url",
+        "options"
+      ],
+      "network.upload": [
+        "url",
+        "resource",
+        "options"
+      ],
+      "network.stream": [
+        "url",
+        "options",
+        "onChunk"
+      ],
+      "network.webSocket.open": [
+        "url",
+        "options",
+        "onEvent"
+      ],
+      "network.webSocket.send": [
+        "socket",
+        "data"
+      ],
+      "network.webSocket.close": [
+        "socket",
+        "code",
+        "reason"
+      ],
+      "resources.token": [
+        "resourceId"
+      ],
+      "resources.readText": [
+        "reference"
+      ],
+      "resources.readBinary": [
+        "reference"
+      ],
+      "rive.state": [],
+      "rive.load": [
+        "options"
+      ],
+      "rive.font.set": [
+        "propertyPath",
+        "resourceId"
+      ],
+      "storage.get": [
+        "key",
+        "fallback"
+      ],
+      "storage.set": [
+        "key",
+        "value"
+      ],
+      "storage.remove": [
+        "key"
+      ],
+      "storage.clear": [],
+      "storage.keys": []
+    },
+    "operationOptionFields": {
+      "network.request": [
+        "method",
+        "headers",
+        "body",
+        "bodyBase64",
+        "timeoutMs",
+        "responseType",
+        "redirect"
+      ],
+      "network.download": [
+        "headers",
+        "timeoutMs"
+      ],
+      "network.upload": [
+        "method",
+        "headers",
+        "timeoutMs"
+      ],
+      "network.stream": [
+        "method",
+        "headers",
+        "body",
+        "timeoutMs"
+      ],
+      "network.webSocket.open": [
+        "headers",
+        "protocols"
+      ],
+      "rive.load": [
+        "artboard",
+        "stateMachine",
+        "viewModel",
+        "instanceKind",
+        "instance"
+      ],
+      "editor.read": [
+        "project",
+        "file"
+      ]
+    },
     "storage": {
       "keyPattern": "^[A-Za-z][A-Za-z0-9._-]{0,127}$",
       "keyMaxChars": 128,

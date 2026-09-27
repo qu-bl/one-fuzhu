@@ -1,17 +1,9 @@
-# AI 应用脚本生成步骤
+# AI 应用脚本操作顺序
 
-只用于生成或修复应用脚本。入口、注解、宿主操作、参数、UI 和 QVMI 字段全部从同一版 `contract.json` 读取。
+`contract.json` 是唯一权威，`generation-profile.json` 是它自动生成的摘要；本文不维护字段、枚举、入口或限制清单。
 
-1. 按 `context-map.json` 核验并读取 guidance 的基础段、当前场景以及本轮命中的 generation-profile 或 contract 分区，同时读取当前编辑器完整源码。只有完整新建、大幅重写、明确索要示例或语法不确定时读取 `examples.json`。宿主实际加载的 `contractVersion` 与 `contractSha256` 必须和本次发布一致。
-2. 每份应用脚本都必须包含 `@id`。保留现有合法值；新脚本生成符合 `script.idPattern` 且不与其他脚本重复的值。缺少或无效时直接修复，禁止使用文件名充当身份。
-3. 只为脚本自己拥有且脚本确实读写的新 `app.*` 字段调用 `viewModel.define`；类型必须属于 `generation-profile.script.valueAccessorTypes`。已有公开字段禁止重新定义；UI 绑定类型不在该集合时由宿主管理，不能改写类型或补造 `define`。
-   `json` 初值可为对象或数组；数组必须按 `valueAccessorSemantics.json.arrayRuntimeType` 建成原生 `list` 字段，供动态选项等列表绑定直接观察。
-   QVMI 字段只属于当前脚本会话，脚本停止后全部释放。跨冷启动数据必须写入 `qu.storage`，再由 `onStart` 读取并用于字段初值；禁止给 QVMI 字段添加 `persistent`。
-4. `@observe` 只列出 `onValue` 实际消费的路径；UI binding 由宿主自行观察，不因控件绑定而加入 `@observe`。自有观察路径必须有真实来源，且类型可由脚本访问。`@interval` 和 `@ui` 与处理函数保持一致。所有 UI 组件只使用 `contract.ui` 当前类型和字段。
-   每个组件必须写非空静态 `label`；动态 `bindings.label` 不能代替它。所有动态来源只写入组件的 `bindings`；脚本负责更新相应 QVMI 字段。同一状态在多个组件中复用同一路径，每个自有路径只 `define` 一次；不要为父级禁用、加载、选中或文案建立转发字段。不得生成旧的 `xxxPath`、顶层值绑定或图标字段。
-   每个值控件必须写完整的 `path/type/default`，并逐项满足 `generation-profile.ui.valueSemantics` 中的输入类型、单选/多选、滑杆范围和文件选择规则。布局字段只能用在 `layoutFieldApplicability` 指定的布局中。
-5. 只调用 `script.hostOperations`；操作参数和 options 分别取 `operationArguments` 与 `operationOptionFields`。`qu.storage.set` 每次调用立即写入脚本私有本地存储，适合保存经纬度、用户选择和恢复点；不得把 QVMI 当作本地数据库。
-6. 输出后建立 `@observe → onValue`、`bindings.value → 字段来源`、`viewModel.define → valueAccessorTypes` 三张对应表；再检查入口、注解、写权限、UI 所有权、异步重入和停止清理。
-7. 校验错误逐条修复，最多两轮。仍有错误时返回错误说明，不写入编辑器。
-
-普通修改使用 `edits`，每项只允许 `file: "applicationJavaScript"`、非空且在当前源码中恰好出现一次的 `oldText`、替换后的 `newText`；多项按数组顺序应用。只有新建脚本或大幅重写时才使用 `apply_files.applicationJavaScript` 交付完整脚本。`edits` 与 `apply_files` 必须互斥；只讨论时两者均为 `null`。禁止输出资源包文件、Markdown 代码围栏、省略号或模型记忆中的旧 API。
+1. 核验共享契约及 AI 资料的版本和哈希，由 `context-map.json` 加载本轮主题。
+2. 读取当前应用脚本和用户请求；缺少必要业务信息时只说明缺口。
+3. 按 `guidance.json` 的应用脚本场景建立字段来源、UI 绑定和生命周期对应关系。
+4. 只交付 `applicationJavaScript`；普通修改使用精确替换，新建或大幅重写才返回完整文件。
+5. 交给宿主校验。失败时逐字保留原始错误并最多修复两轮，仍失败则停止写入。
