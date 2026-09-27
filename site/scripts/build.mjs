@@ -176,6 +176,9 @@ for (const w of works) {
 const now = new Date().toISOString().slice(0, 10);
 const urls = [
   { url: SITE, changefreq: "weekly", priority: "1.0" },
+  { url: SITE + "apple/", changefreq: "monthly", priority: "0.8" },
+  { url: SITE + "apple/terms.html", changefreq: "monthly", priority: "0.4" },
+  { url: SITE + "apple/privacy.html", changefreq: "monthly", priority: "0.4" },
   { url: SITE + "terms.html", changefreq: "monthly", priority: "0.4" },
   { url: SITE + "privacy.html", changefreq: "monthly", priority: "0.4" },
   ...works.map((w) => ({ url: caseUrl(w), changefreq: "weekly", priority: "0.7" })),
