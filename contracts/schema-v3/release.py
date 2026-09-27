@@ -485,7 +485,10 @@ def verify_ai_source_map(contract):
 
 def verify_ai_guidance():
     ai = ROOT.parent.parent / "ai-rules"
-    guidance = json.loads((ai / "guidance.json").read_text(encoding="utf-8"))
+    guidance_text = (ai / "guidance.json").read_text(encoding="utf-8")
+    if len(guidance_text) > 12000:
+        raise ValueError("AI guidance repeats too much contract material")
+    guidance = json.loads(guidance_text)
     if (guidance.get("schemaVersion") != 4 or guidance.get("audience") != "aiScriptsOnly" or
             guidance.get("contract") != "contracts/schema-v3/contract.json" or
             guidance.get("generationProfile") != "ai-rules/generation-profile.json"):
@@ -641,8 +644,11 @@ def verify_ai_guidance():
         raise ValueError("AI script examples have no required entry")
     for name in ("README.md", "application-script.md", "resource-package.md"):
         markdown = (ai / name).read_text(encoding="utf-8")
-        if len(markdown) > 2500 or "BEGIN GENERATED HOST CONTRACT" in markdown:
+        if len(markdown) > 1600 or "BEGIN GENERATED HOST CONTRACT" in markdown:
             raise ValueError(f"AI guide repeats the contract or is too long: {name}")
+    for name in ("application-script.md", "resource-package.md"):
+        if "本文不维护字段、枚举、入口或限制清单" not in (ai / name).read_text(encoding="utf-8"):
+            raise ValueError(f"AI scenario guide must defer field authority to the generated profile: {name}")
 
 
 def main():

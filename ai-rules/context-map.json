@@ -15,6 +15,12 @@
     "profile": [
       "script.<currentEntryFunction>",
       "script.annotations",
+      "script.idPattern",
+      "script.minimumIntervalMs",
+      "script.hostOperations",
+      "script.applicationOnlyOperations",
+      "script.operationArguments",
+      "script.operationOptionFields",
       "script.generationChecks"
     ]
   },
