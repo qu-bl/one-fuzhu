@@ -1793,6 +1793,7 @@
   "translation": {
     "riveEditor": {
       "url": "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json",
+      "version": "2026.09.28-115732",
       "sha256": "11f9179a41e74c8d9ffe38a19f66727318ea07206a812396f7c727af6dabf26f",
       "loadPolicy": "firstUseOncePerColdStart",
       "fontPolicy": "sharedRemoteFont",
