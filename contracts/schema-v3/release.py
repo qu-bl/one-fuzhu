@@ -390,11 +390,15 @@ def verify_schema_and_fixtures():
         raise ValueError("package display scale rules are invalid")
     translation = contract.get("translation", {}).get("riveEditor", {})
     dictionary = ROOT.parent.parent / "rive-editor" / "translation.json"
+    if json.loads((dictionary.parent / "release.json").read_text()) != translation:
+        raise ValueError("translation release.json is stale; run tools/update-translation.py")
     font = ROOT.parent.parent / "rive-editor" / "fonts" / "NotoSansSC-Regular.ttf"
     font_license = ROOT.parent.parent / "rive-editor" / "fonts" / "OFL.txt"
     if not re.fullmatch(r"\d{4}\.\d{2}\.\d{2}-\d{6}", translation.get("version", "")) or \
             translation.get("url") != "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json" or \
             translation.get("sha256") != hashlib.sha256(dictionary.read_bytes()).hexdigest() or \
+            translation.get("scriptUrl") != "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.js" or \
+            translation.get("scriptSha256") != hashlib.sha256((dictionary.parent / "translation.js").read_bytes()).hexdigest() or \
             translation.get("loadPolicy") != "firstUseOncePerColdStart" or \
             translation.get("fontPolicy") != "sharedRemoteFont" or \
             translation.get("fontFamily") != "Qu Translation Sans" or \
