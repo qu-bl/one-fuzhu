@@ -202,7 +202,8 @@ function run(input, c) {
     walk(ast);if(!found)add('script',`必须调用 ${entry}`);
     if(kind!=='applicationScript')return null;
     // Read annotations only from comments, never from strings or executable expressions.
-    const annotations=comments.map(x=>x.value).join('\n');
+    const uiTag=/(?:^|\n)[ \t]*\*?[ \t]*@ui[ \t]*(?:\r?\n|$)/;
+    const annotations=comments.map(x=>x.value.split(uiTag,1)[0]).join('\n');
     const capture=(name)=>annotations.match(new RegExp('@'+name+'[ \\t]+'+(name==='description'?'([^\\r\\n*]+)':'([^\\s*]+)')))?.[1]?.trim();
     const metadata={identity:capture('id')||'',description:capture('description')||'未填写说明',intervalMillis:0,observedValues:[],uiSets:[]};
     for(const name of c.script.validation.annotationsRequired)if(!capture(name))add(`@${name}`,'缺少必填注解');
@@ -212,7 +213,7 @@ function run(input, c) {
     const observed=[...annotations.matchAll(/@observe[ \t]+([^\s*]+(?:\*)?)/g)].map(x=>x[1].trim());
     metadata.observedValues=[...new Set(observed)];
     for(const comment of comments) {
-      const tag=comment.value.match(/(?:^|\n)[ \t]*\*?[ \t]*@ui[ \t]*(?:\r?\n|$)/);
+      const tag=comment.value.match(uiTag);
       if(!tag)continue;
       const raw=comment.value.slice(tag.index+tag[0].length).split('\n').map(x=>x.replace(/^\s*\*\s?/, '')).join('\n').trim();
       if(raw.length>c.script.validation.uiDeclarationMaxChars){add('@ui','声明超过长度上限');break;}

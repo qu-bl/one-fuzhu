@@ -1,6 +1,6 @@
 {
   "schemaVersion": 3,
-  "contractVersion": "10.5.2",
+  "contractVersion": "10.5.3",
   "purpose": "供 AI 先读一次的规则路由表；模型根据任务语义自行选择最少资料，调用端不替模型判断主题。",
   "entry": "ai-rules/context-map.json",
   "release": "ai-rules/rules.json",

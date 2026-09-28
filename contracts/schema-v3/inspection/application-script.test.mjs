@@ -23,5 +23,19 @@ export function testApplicationScript(inspect) {
   assert.deepEqual(script('/** @id TestScript @interval 0 */ defineQuScript({});').errors,[]);
   assert.deepEqual(script('/** @id TestScript @ui 见文档 */ defineQuScript({});').metadata.uiSets,[]);
   assert.ok(script('/**\n * @id TestScript\n * @ui\n * 不是 JSON\n */ defineQuScript({});').errors.some(x=>x.startsWith('@ui')));
+  const uiText=[{id:'panel',slot:'scriptUi',components:[{id:'text',type:'text',label:'提示',
+    text:'说明 @id Forged @observe device.battery.level @interval 999999'}]}];
+  const withUI=header=>`/**\n${header}\n * @ui\n${JSON.stringify(uiText)}\n */\ndefineQuScript({});`;
+  const isolated=script(withUI(' * @id Real'));
+  assert.deepEqual(isolated.errors,[]);
+  assert.equal(isolated.metadata.identity,'Real');
+  assert.equal(isolated.metadata.intervalMillis,0);
+  assert.deepEqual(isolated.metadata.observedValues,[]);
+  assert.equal(isolated.metadata.uiSets[0].components[0].text,uiText[0].components[0].text);
+  assert.ok(script(withUI('')).errors.some(x=>x.startsWith('@id')));
+  const realObserve=script(withUI(' * @id Real\n * @observe device.battery.level\n * @interval 1000'));
+  assert.deepEqual(realObserve.errors,[]);
+  assert.deepEqual(realObserve.metadata.observedValues,['device.battery.level']);
+  assert.equal(realObserve.metadata.intervalMillis,1000);
   console.log('PASS shared annotation, interval, identity, and declared UI cases');
 }
