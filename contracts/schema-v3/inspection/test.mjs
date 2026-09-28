@@ -74,3 +74,24 @@ assert.deepEqual(inspect({kind:'manifest',source:c.templates.packageManifest}).e
 assert.deepEqual(inspect({kind:'packageScript',source:c.templates.packageScript}).errors,[]);
 assert.deepEqual(inspect({kind:'package',source:c.templates.packageManifest,script:c.templates.packageScript,hasRive:true,hasPreview:true}).errors,[]);
 console.log('PASS cloud creation templates and empty default subscriptions');
+
+// Package files and application runtime resource tokens belong to different contexts.
+const resourceChoice={id:'file',type:'choice',label:'文件',description:'选择文件',
+  bindings:{value:{path:'ui.file',type:'resource',default:''}},
+  options:[{label:'已选择的文件',resource:'qjres://script-owner/file-id'}]};
+const appResourceSet={id:'files',slot:'scriptUi',components:[resourceChoice]};
+assert.deepEqual(inspect({kind:'ui',sets:appResourceSet,context:'applicationScript'}).errors,[]);
+const pkgResourceSet={id:'files',title:'文件',scope:'persistent',components:[resourceChoice]};
+assert.ok(inspect({kind:'ui',sets:pkgResourceSet,context:'resourcePackage'}).errors.some(x=>x.includes('.resource')));
+const localResourceSet=structuredClone(pkgResourceSet);
+localResourceSet.components[0].options[0].resource='assets/file.txt';
+assert.deepEqual(inspect({kind:'ui',sets:localResourceSet,context:'resourcePackage'}).errors,[]);
+// Entries and annotations remain specific to their own script kinds.
+assert.deepEqual(inspect({kind:'packageScript',source:'defineResourcePackage({});'}).errors,[]);
+assert.ok(inspect({kind:'applicationScript',source:'defineResourcePackage({});'}).errors.length);
+assert.ok(inspect({kind:'packageScript',source:'/** @id Demo */\ndefineQuScript({});'}).errors.length);
+// Application UI can omit package-only title/description, but must have a mounting slot.
+assert.deepEqual(inspect({kind:'ui',sets:{id:'plain',slot:'scriptUi',components:[{id:'t',type:'text',label:'文字'}]}}).errors,[]);
+assert.ok(inspect({kind:'ui',context:'resourcePackage',sets:{id:'plain',scope:'persistent',components:[{id:'t',type:'text',label:'文字'}]}}).errors.length);
+assert.ok(inspect({kind:'ui',sets:pkgResourceSet,context:'applicationScript'}).errors.some(x=>x.includes('.slot')));
+console.log('PASS context boundaries: resource paths, entry points, annotations, UI requirements');

@@ -66,7 +66,7 @@ function run(input, c) {
         const op=`${p}.options[${index}]`;
         unknown(option,c.ui.optionFields,op);
         if(!text(option?.label))add(`${op}.label`,'选项文字不能为空');
-        if(option?.resource!==undefined&&!safeResource(option.resource))add(`${op}.resource`,'需要 assets/ 下的相对资源路径');
+        if(context==='resourcePackage'&&option?.resource!==undefined&&!safeResource(option.resource))add(`${op}.resource`,'需要 assets/ 下的相对资源路径');
       }
       if(context==='resourcePackage'&&item.type==='button'&&item.action==='emit'&&typeof item.text==='string'&&item.text.length>c.manifest.validation.limits.packageActionTextMax)add(`${p}.text`,'按钮文字超过上限');
       const facts={context,type:item.type,scope:set.scope,slot:set.slot,action:item.action,
