@@ -1,5 +1,5 @@
 {
-  "contractVersion": "10.2.1",
+  "contractVersion": "10.2.2",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -1797,10 +1797,10 @@
       "loadPolicy": "firstUseOncePerColdStart",
       "fontPolicy": "sharedRemoteFont",
       "fontFamily": "Qu Translation Sans",
-      "fontSourceFamily": "Noto Sans SC",
-      "fontUrl": "https://qu-bl.github.io/one-fuzhu/rive-editor/fonts/NotoSansSC-Variable.ttf",
-      "fontSha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
-      "fontBytes": 17772300,
+      "fontSourceFamily": "Noto Sans CJK SC",
+      "fontUrl": "https://qu-bl.github.io/one-fuzhu/rive-editor/fonts/NotoSansCJKsc-Regular.otf",
+      "fontSha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+      "fontBytes": 16437364,
       "fontLicense": "OFL-1.1",
       "fontLicenseUrl": "https://qu-bl.github.io/one-fuzhu/rive-editor/fonts/OFL.txt",
       "maximumBytes": 1048576,

@@ -28,7 +28,7 @@
     },
     "translation": {
       "dictionary": "rive-editor/translation.json",
-      "font": "rive-editor/fonts/NotoSansSC-Variable.ttf",
+      "font": "rive-editor/fonts/NotoSansCJKsc-Regular.otf",
       "fontLicense": "rive-editor/fonts/OFL.txt"
     },
     "ai": {
