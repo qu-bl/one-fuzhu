@@ -13,18 +13,18 @@
     },
     {
       "name": "context-map.json",
-      "version": "2026.09.28.1500",
-      "sha256": "d84f33507eeab7d5b4f59df35925765ac9acb4d9c138dd26bb9c517256a23fcf"
+      "version": "2026.09.28.1600",
+      "sha256": "8137407c38cad6e157f3fa8fd530e640e39db9fa78f4ee49e677b317b0e2618d"
     },
     {
       "name": "examples.json",
-      "version": "2026.09.28.1500",
-      "sha256": "e86535e12a8d00053254b24c6f24fc4e789e58d44fc7676bbeccfcb54dda65c9"
+      "version": "2026.09.28.1600",
+      "sha256": "db968f28cfb653f020a7dded6e380d1f36666e4180133ac5504c4e674273151b"
     },
     {
       "name": "generation-profile.json",
-      "version": "2026.09.28.1500",
-      "sha256": "2836196773ec656bcf0d0b1b964310d9f61d7d84c09ff7e11d7bca085bde0349"
+      "version": "2026.09.28.1600",
+      "sha256": "23aa1778b8a5bf43e0b4bc2b909556561ece2d794282ccd326ef157e24eb8a53"
     },
     {
       "name": "guidance.json",
@@ -38,8 +38,8 @@
     },
     {
       "name": "sources.json",
-      "version": "2026.09.28.1500",
-      "sha256": "1158b9e0e32a5c3d24fff9083722a265baa292d2b1d3ee865184cf780969c8d0"
+      "version": "2026.09.28.1600",
+      "sha256": "14798d74df7cd728de67d7d03126a0c92b0d4621bf802cfc3e57c717c73e0895"
     }
   ]
 }
