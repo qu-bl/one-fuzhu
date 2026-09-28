@@ -110,3 +110,36 @@ for(const type of ['string','enum','list','resource']) {
  }
 }
 console.log('PASS choice option values: static and binding fallbacks for every value type');
+
+// Preserve the pre-migration UI boundaries: labels are short, content is not a label.
+const longText='长对话正文'.repeat(2000);
+const panel=item=>({kind:'ui',sets:{id:'regression',slot:'scriptUi',components:[item]}});
+for(const item of [
+ {id:'text',type:'text',label:'正文',text:longText},
+ {id:'text',type:'text',label:'正文',bindings:{text:{path:'app.reply',fallback:longText}}},
+ {id:'input',type:'input',label:'输入',inputMode:'multiline',placeholder:longText,
+  bindings:{value:{path:'app.draft',type:'string',default:longText}}}
+])assert.deepEqual(inspect(panel(item)).errors,[]);
+assert.ok(inspect(panel({id:'text',type:'text',label:longText})).errors.length);
+let nested={id:'leaf',type:'text',label:'内容',text:longText};
+for(let i=0;i<c.ui.validation.limits.depthMax;i++)nested={id:'g'+i,type:'group',label:'组',layout:'column',children:[nested]};
+assert.deepEqual(inspect(panel(nested)).errors,[]);
+nested={id:'tooDeep',type:'group',label:'组',layout:'column',children:[nested]};
+assert.ok(inspect(panel(nested)).errors.some(x=>x.includes('嵌套')));
+const prose='/**\n * @id ProseTest\n * 通过 @observe 驱动 UI 更新\n * @observe 驱动\n * @observe app.actual.value\n */\ndefineQuScript({onStart(){ /* 使用 @observe 驱动 */ }});';
+assert.deepEqual(inspect({kind:'applicationScript',source:prose}).metadata.observedValues,['app.actual.value']);
+
+// Run the repository AI script's real UI factory with saved long conversation history.
+const aiSource=fs.readFileSync(new URL('../../../ai-editor-assistant.js',import.meta.url),'utf8');
+const aiMetadata=inspect({kind:'applicationScript',source:aiSource});
+assert.deepEqual(aiMetadata.errors,[]);
+assert.ok(aiMetadata.metadata.observedValues.every(x=>x.startsWith('app.aiSupport.')));
+const uiRequests=[];
+const aiContext=vm.createContext({defineQuScript(){},capture:sets=>uiRequests.push(JSON.parse(JSON.stringify(sets)))});
+vm.runInContext(aiSource+`\nhistories.applicationScript=[{role:'user',content:${JSON.stringify(longText)}},{role:'assistant',content:${JSON.stringify(longText)}}]; histories.resourcePackage=histories.applicationScript;refreshConversationUI({ui:{declare:capture}});`,aiContext);
+assert.equal(uiRequests.length,1);
+assert.deepEqual(inspect({kind:'ui',sets:uiRequests[0]}).errors,[]);
+console.log('PASS real AI conversation UI, long content/defaults, prose subscriptions and legacy depth boundary');
+const fullUISource=fs.readFileSync(new URL('../../../all-ui-components-test.js',import.meta.url),'utf8');
+assert.deepEqual(inspect({kind:'applicationScript',source:fullUISource}).errors,[]);
+console.log('PASS existing four-slot full UI script');

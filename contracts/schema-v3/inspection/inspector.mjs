@@ -59,9 +59,7 @@ function run(input, c) {
         const kind=uv.bindingKinds[key];
         const fields=kind==='condition'?c.ui.conditionFields:kind==='value'?['path','type','default']:['path','fallback'];
         unknown(binding,fields,`${p}.bindings.${key}`);
-        if(typeof binding?.fallback==='string'&&binding.fallback.length>uv.limits.labelMax)add(`${p}.bindings.${key}.fallback`,'文字超过上限');
       }
-      for(const key of ['text','placeholder'])if(typeof item[key]==='string'&&item[key].length>uv.limits.labelMax)add(`${p}.${key}`,'文字超过上限');
       for(const [optionPath,options] of [[`${p}.options`,item.options],[`${p}.bindings.options.fallback`,b.options?.fallback]])
       for(const [index,option] of list(options).entries()) {
         const op=`${optionPath}[${index}]`;
@@ -137,7 +135,7 @@ function run(input, c) {
         const visit=items=>{for(const item of list(items)){const path=item?.bindings?.value?.path;if(path){if(persistentPaths.has(path))add(p,`重复的 UI 字段 ${path}`);persistentPaths.add(path);}visit(item?.children);}};
         visit(set.components);
       }
-      components(set.components,set,context,`${p}.components`,1,context==='resourcePackage'?packageIDs:new Set(),allValues);
+      components(set.components,set,context,`${p}.components`,0,context==='resourcePackage'?packageIDs:new Set(),allValues);
     }
   }
   function manifest(source) {
@@ -210,7 +208,7 @@ function run(input, c) {
     if(metadata.identity&&!new RegExp(c.script.idPattern).test(metadata.identity))add('@id','身份格式无效');
     const interval=capture('interval');
     if(interval!=null){const number=Number(interval);if(!/^\d+$/.test(interval)||!Number.isSafeInteger(number)||(number!==0&&number<c.script.minimumIntervalMs))add('@interval',`应为 0 或至少 ${c.script.minimumIntervalMs} 的整数`);else metadata.intervalMillis=number;}
-    const observed=[...annotations.matchAll(/@observe[ \t]+([^\s*]+(?:\*)?)/g)].map(x=>x[1].trim());
+    const observed=[...annotations.matchAll(/^[ \t]*\*?[ \t]*@observe[ \t]+([A-Za-z][A-Za-z0-9_.-]*(?:\*)?)(?=[ \t\r\n]|$)/gm)].map(x=>x[1].trim());
     metadata.observedValues=[...new Set(observed)];
     for(const comment of comments) {
       const tag=comment.value.match(uiTag);
