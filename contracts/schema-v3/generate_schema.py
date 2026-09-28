@@ -90,7 +90,9 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
     required_bindings = UV["requiredBindingsByType"][component_type]
     properties["bindings"] = obj(binding_properties, required_bindings, extra=False)
     properties["type"] = {"const": component_type}
-    required = UV["requiredByType"][component_type]
+    required = list(UV["requiredByType"][component_type])
+    if required_bindings and "bindings" not in required:
+        required.append("bindings")
     variant = obj(properties, required)
     alternatives = UV["oneOfRequiredByType"].get(component_type)
     if alternatives:

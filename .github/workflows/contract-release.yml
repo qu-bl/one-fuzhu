@@ -30,4 +30,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm ci --ignore-scripts --prefix contracts/schema-v3/inspection
+      - run: node contracts/schema-v3/inspection/build.mjs --check
+      - run: npm test --prefix contracts/schema-v3/inspection
       - run: node tools/test-translation.mjs
