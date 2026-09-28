@@ -134,3 +134,11 @@
 ### 选择项的值
 
 静态 `options` 和 `bindings.options.fallback` 中，每项必须包含 `label`。当 `bindings.value.type` 为 `resource` 时，使用 `resource` 作为选项值；为 `string`、`enum` 或 `list` 时，使用 `value`。两字段同时存在时，按绑定类型取值。资源包中的资源路径指向包内 `assets/`，应用脚本可使用运行时资源标识。运行时动态字符串数组的形式保持不变。
+
+## 统一的默认值与扩展字段语义
+
+- 静态字段缺失时才采用绑定 fallback；显式空字符串、空数组、false 和 0 都是有效值，不代表缺失。
+- 动态值尚未到达时保留规范化后的默认值；动态空数组表示清空选项，不恢复 fallback。
+- visible 缺值时使用它声明的 fallback；未声明 fallback 才默认可见。静态 visible=false 始终隐藏。
+- 动态选项字符串在普通选择中作为 value，在资源选择中作为 resource；显示文案均为该字符串。
+- 完全未知的扩展键（包括 bindings 中的未知键）按兼容策略警告并忽略；已知绑定用错组件仍是错误。扩展键不参与绑定订阅或必填判定。

@@ -88,7 +88,10 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
     allowed_bindings = UV["bindingsByType"][component_type]
     binding_properties = {key: binding_shapes[UV["bindingKinds"][key]] for key in allowed_bindings}
     required_bindings = UV["requiredBindingsByType"][component_type]
-    properties["bindings"] = obj(binding_properties, required_bindings, extra=False)
+    properties["bindings"] = obj(binding_properties, required_bindings)
+    disallowed_bindings = sorted(set(UV["bindingKinds"]) - set(allowed_bindings))
+    if disallowed_bindings:
+        properties["bindings"]["propertyNames"] = {"not": {"enum": disallowed_bindings}}
     properties["type"] = {"const": component_type}
     required = list(UV["requiredByType"][component_type])
     if required_bindings and "bindings" not in required:

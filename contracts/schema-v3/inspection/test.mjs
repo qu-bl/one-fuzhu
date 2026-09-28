@@ -143,3 +143,15 @@ console.log('PASS real AI conversation UI, long content/defaults, prose subscrip
 const fullUISource=fs.readFileSync(new URL('../../../all-ui-components-test.js',import.meta.url),'utf8');
 assert.deepEqual(inspect({kind:'applicationScript',source:fullUISource}).errors,[]);
 console.log('PASS existing four-slot full UI script');
+
+const tagged=inspect({kind:'applicationScript',source:'/**\n * 使用 @id Wrong 和 @interval 1 作为说明\n * @id Correct\n * @interval 1000\n * @description 说明中提到 @id Other\n */\ndefineQuScript({});'});
+assert.deepEqual(tagged.errors,[]);assert.equal(tagged.metadata.identity,'Correct');assert.equal(tagged.metadata.intervalMillis,1000);
+const extension=inspect(panel({id:'text',type:'text',label:'正文',bindings:{vendorInfo:{anything:true}}}));
+assert.deepEqual(extension.errors,[]);assert.ok(extension.warnings.some(x=>x.includes('vendorInfo')));
+assert.ok(inspect(panel({id:'text',type:'text',label:'正文',bindings:{value:{path:'app.bad',type:'string',default:''}}})).errors.length);
+const malformed=structuredClone(minimal);malformed.rive.viewModel='Main';malformed.rive.instance='Main';malformed.name='';malformed.capabilities.observe=['device.*'];
+malformed.bindings=[{id:'test',qu:123,quType:'number',rive:['value'],riveType:'number',direction:'toRive',mode:'latest',required:true}];
+const multiple=inspect({kind:'manifest',source:JSON.stringify(malformed)});
+assert.ok(multiple.errors.some(x=>x.includes('.qu')));assert.ok(multiple.errors.some(x=>x.includes('name')));
+assert.ok(inspect(panel({id:'bad',type:'constructor',label:'错误类型'})).errors.length);
+console.log('PASS unified annotations, extension warnings, known binding errors, multi-error collection');

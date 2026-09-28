@@ -43,7 +43,7 @@ function run(input, c) {
     for(const [i,item] of list(items).entries()) {
       const p=`${path}[${i}]`;
       if(!object(item)) {add(p,'组件必须是对象');continue;}
-      if(!c.ui.typeFields[item.type]) {add(`${p}.type`,'未开放的组件类型');continue;}
+      if(!own(c.ui.typeFields,item.type)) {add(`${p}.type`,'未开放的组件类型');continue;}
       // Avoid recursively validating children twice.
       const shallow={...item};if(Array.isArray(shallow.children))shallow.children=[];
       schema(schemas['validate_'+item.type],shallow,p);
@@ -55,7 +55,9 @@ function run(input, c) {
       if(context==='resourcePackage'&&!text(item.description))add(`${p}.description`,'资源包组件需要说明');
       const b=object(item.bindings)?item.bindings:{};
       for(const key of c.ui.forbiddenDeclarationFields||[])if(own(item,key))add(`${p}.${key}`,'已移除的声明字段');
+      unknown(b,Object.keys(uv.bindingKinds),`${p}.bindings`);
       for(const [key,binding] of Object.entries(b)) {
+        if(!uv.bindingsByType[item.type].includes(key))continue;
         const kind=uv.bindingKinds[key];
         const fields=kind==='condition'?c.ui.conditionFields:kind==='value'?['path','type','default']:['path','fallback'];
         unknown(binding,fields,`${p}.bindings.${key}`);
@@ -79,7 +81,7 @@ function run(input, c) {
         if(rule.oneOf&&!rule.oneOf.some(name=>at(item,name)!=null))add(p,`至少提供 ${rule.oneOf.join(' 或 ')}`);
         if(rule.allowedScopes&&!rule.allowedScopes.includes(set.scope))add(p,`scope 必须为 ${rule.allowedScopes.join('/')}`);
       }
-      for(const [key,binding] of Object.entries(b))if(object(binding)) {
+      for(const [key,binding] of Object.entries(b))if(uv.bindingsByType[item.type].includes(key)&&object(binding)) {
         if(!text(binding.path)||binding.path.length>uv.limits.labelMax)add(`${p}.bindings.${key}.path`,'绑定路径无效');
       }
       const value=b.value;
@@ -173,7 +175,7 @@ function run(input, c) {
       if(b.transform&&(b.quType!==r.transformSourceType||b.riveType!==r.transformTargetType||b.direction!==r.transformDirection))add(`${p}.transform`,'转换仅允许 number → number 的 toRive');
       if(Array.isArray(b.transform?.clamp)&&b.transform.clamp[0]>b.transform.clamp[1])add(`${p}.transform.clamp`,'区间顺序无效');
       for(const segment of list(b.rive))if(!text(segment)||segment.length>mv.limits.rivePropertySegmentMax||/[\/\0]/.test(segment))add(`${p}.rive`,'属性路径分段无效');
-      const local=values.get(b.qu), declared=observe.some(x=>x===b.qu||(typeof x==='string'&&x.endsWith('.*')&&b.qu?.startsWith(x.slice(0,-1))));
+      const local=values.get(b.qu), declared=observe.some(x=>x===b.qu||(typeof x==='string'&&x.endsWith('.*')&&typeof b.qu==='string'&&b.qu.startsWith(x.slice(0,-1))));
       if(!local&&!declared)add(`${p}.qu`,'未在 values 或 capabilities.observe 中声明');
       if(b.direction!=='toRive'&&!local?.writable)add(`${p}.qu`,'反向写入需要可写的资源包字段');
     }
@@ -202,13 +204,28 @@ function run(input, c) {
     // Read annotations only from comments, never from strings or executable expressions.
     const uiTag=/(?:^|\n)[ \t]*\*?[ \t]*@ui[ \t]*(?:\r?\n|$)/;
     const annotations=comments.map(x=>x.value.split(uiTag,1)[0]).join('\n');
-    const capture=(name)=>annotations.match(new RegExp('@'+name+'[ \\t]+'+(name==='description'?'([^\\r\\n*]+)':'([^\\s*]+)')))?.[1]?.trim();
+    const tags=new Map();
+    for(const line of annotations.split(/\r?\n/)) {
+      let rest=line.replace(/^[ \t]*\*?[ \t]*/, '');
+      while(rest.startsWith('@')) {
+        const tag=rest.match(/^@(id|description|interval|observe)[ \t]+/);
+        if(!tag)break;
+        rest=rest.slice(tag[0].length);
+        const value=tag[1]==='description'?rest.trim():rest.match(/^[^\s*]+(?:\*)?/)?.[0];
+        if(!value)break;
+        if(!tags.has(tag[1]))tags.set(tag[1],[]);
+        tags.get(tag[1]).push(value);
+        if(tag[1]==='description')break;
+        rest=rest.slice(value.length).trimStart();
+      }
+    }
+    const capture=name=>tags.get(name)?.[0];
     const metadata={identity:capture('id')||'',description:capture('description')||'未填写说明',intervalMillis:0,observedValues:[],uiSets:[]};
     for(const name of c.script.validation.annotationsRequired)if(!capture(name))add(`@${name}`,'缺少必填注解');
     if(metadata.identity&&!new RegExp(c.script.idPattern).test(metadata.identity))add('@id','身份格式无效');
     const interval=capture('interval');
     if(interval!=null){const number=Number(interval);if(!/^\d+$/.test(interval)||!Number.isSafeInteger(number)||(number!==0&&number<c.script.minimumIntervalMs))add('@interval',`应为 0 或至少 ${c.script.minimumIntervalMs} 的整数`);else metadata.intervalMillis=number;}
-    const observed=[...annotations.matchAll(/^[ \t]*\*?[ \t]*@observe[ \t]+([A-Za-z][A-Za-z0-9_.-]*(?:\*)?)(?=[ \t\r\n]|$)/gm)].map(x=>x[1].trim());
+    const observed=(tags.get('observe')||[]).filter(value=>/^[A-Za-z][A-Za-z0-9_.-]*(?:\*)?$/.test(value));
     metadata.observedValues=[...new Set(observed)];
     for(const comment of comments) {
       const tag=comment.value.match(uiTag);
