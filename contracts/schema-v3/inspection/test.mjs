@@ -64,3 +64,13 @@ for(const platform of ['android','harmony','ios','macos']) {
  assert.deepEqual(result.errors,[]);assert.ok(result.warnings.length);
 }
 console.log('PASS runtime UI normalization, required bindings, limits, paths and platform warnings');
+
+const templateScript=c.templates.applicationScript.replace('{{identity}}','TemplateSmoke');
+const templateResult=inspect({kind:'applicationScript',source:templateScript});
+assert.deepEqual(templateResult.errors,[]);
+assert.equal(templateResult.metadata.identity,'TemplateSmoke');
+assert.deepEqual(templateResult.metadata.observedValues,[]);
+assert.deepEqual(inspect({kind:'manifest',source:c.templates.packageManifest}).errors,[]);
+assert.deepEqual(inspect({kind:'packageScript',source:c.templates.packageScript}).errors,[]);
+assert.deepEqual(inspect({kind:'package',source:c.templates.packageManifest,script:c.templates.packageScript,hasRive:true,hasPreview:true}).errors,[]);
+console.log('PASS cloud creation templates and empty default subscriptions');
