@@ -1,0 +1,1 @@
+{"name":"qu-cloud-inspector","private":true,"type":"module","scripts":{"build":"node build.mjs","test":"node test.mjs"},"dependencies":{"acorn":"8.15.0","ajv":"8.17.1","esbuild":"0.25.9"}}

@@ -158,6 +158,14 @@ def build_release():
 
 def verify_schema_and_fixtures():
     contract = json.loads((ROOT / "contract.json").read_text(encoding="utf-8"))
+    inspection = contract.get("inspection", {})
+    if inspection.get("protocol") != 1 or not inspection.get("program"):
+        raise ValueError("shared inspector is missing")
+    digest = hashlib.sha256()
+    for name in inspection["sourceFiles"]:
+        digest.update((ROOT / name).read_bytes())
+    if digest.hexdigest() != inspection.get("sourceSha256"):
+        raise ValueError("shared inspector is stale; run npm run build in inspection")
     script = contract["script"]
     if contract.get("compatibility") != {
         "unknownObjectFields": "warn",

@@ -2214,7 +2214,8 @@
             "id",
             "type",
             "label",
-            "inputMode"
+            "inputMode",
+            "bindings"
           ],
           "additionalProperties": true,
           "allOf": [
@@ -2776,7 +2777,8 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "bindings"
           ],
           "additionalProperties": true,
           "allOf": [
@@ -3298,7 +3300,8 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "bindings"
           ],
           "additionalProperties": true,
           "allOf": [
@@ -3829,7 +3832,8 @@
           "required": [
             "id",
             "type",
-            "label"
+            "label",
+            "bindings"
           ],
           "additionalProperties": true,
           "anyOf": [
