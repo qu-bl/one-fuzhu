@@ -74,6 +74,8 @@ def verify_ui_generation_rules(contract):
         "choiceModeByValueType": {
             "string": "single", "enum": "single", "resource": "single", "list": "multiple"
         },
+        "choiceOptionFieldByValueType": {"string": "value", "enum": "value",
+                                       "list": "value", "resource": "resource"},
         "buttonValueActions": ["pickFile"],
         "buttonValueTypes": ["resource"],
         "maxBytesMinimum": 1,

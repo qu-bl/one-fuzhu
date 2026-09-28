@@ -119,6 +119,19 @@ for component_type, fields in CONTRACT["ui"]["typeFields"].items():
                 "enum": list(semantics["choiceModeByValueType"])
             }}}
         }}}})
+    if component_type == "choice":
+        for value_type, option_field in semantics["choiceOptionFieldByValueType"].items():
+            variant.setdefault("allOf", []).append({
+                "if": {"properties": {"bindings": {"properties": {"value": {
+                    "properties": {"type": {"const": value_type}}, "required": ["type"]
+                }}, "required": ["value"]}}, "required": ["bindings"]},
+                "then": {"properties": {
+                    "options": {"items": {"required": [option_field]}},
+                    "bindings": {"properties": {"options": {"properties": {
+                        "fallback": {"items": {"required": [option_field]}}
+                    }}}}
+                }}
+            })
     if component_type == "group":
         for field, layouts in UV["layoutFieldApplicability"].items():
             variant.setdefault("allOf", []).append({
