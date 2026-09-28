@@ -854,7 +854,21 @@
                 }
               },
               "required": [],
-              "additionalProperties": false
+              "additionalProperties": true,
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "max",
+                    "min",
+                    "options",
+                    "placeholder",
+                    "readOnly",
+                    "step",
+                    "text",
+                    "value"
+                  ]
+                }
+              }
             }
           },
           "required": [
@@ -1053,7 +1067,24 @@
                 }
               },
               "required": [],
-              "additionalProperties": false
+              "additionalProperties": true,
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "description",
+                    "enabled",
+                    "error",
+                    "label",
+                    "max",
+                    "min",
+                    "options",
+                    "placeholder",
+                    "readOnly",
+                    "step",
+                    "value"
+                  ]
+                }
+              }
             }
           },
           "required": [
@@ -1173,7 +1204,25 @@
                 }
               },
               "required": [],
-              "additionalProperties": false
+              "additionalProperties": true,
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "description",
+                    "enabled",
+                    "error",
+                    "label",
+                    "max",
+                    "min",
+                    "options",
+                    "placeholder",
+                    "readOnly",
+                    "step",
+                    "text",
+                    "value"
+                  ]
+                }
+              }
             }
           },
           "required": [
@@ -1623,7 +1672,21 @@
                 }
               },
               "required": [],
-              "additionalProperties": false
+              "additionalProperties": true,
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "description",
+                    "label",
+                    "max",
+                    "min",
+                    "options",
+                    "placeholder",
+                    "readOnly",
+                    "step"
+                  ]
+                }
+              }
             }
           },
           "required": [
@@ -2207,7 +2270,18 @@
               "required": [
                 "value"
               ],
-              "additionalProperties": false
+              "additionalProperties": true,
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "max",
+                    "min",
+                    "options",
+                    "step",
+                    "text"
+                  ]
+                }
+              }
             }
           },
           "required": [
@@ -2771,7 +2845,20 @@
               "required": [
                 "value"
               ],
-              "additionalProperties": false
+              "additionalProperties": true,
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "max",
+                    "min",
+                    "options",
+                    "placeholder",
+                    "readOnly",
+                    "step",
+                    "text"
+                  ]
+                }
+              }
             }
           },
           "required": [
@@ -3294,7 +3381,17 @@
               "required": [
                 "value"
               ],
-              "additionalProperties": false
+              "additionalProperties": true,
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "options",
+                    "placeholder",
+                    "readOnly",
+                    "text"
+                  ]
+                }
+              }
             }
           },
           "required": [
@@ -3826,7 +3923,19 @@
               "required": [
                 "value"
               ],
-              "additionalProperties": false
+              "additionalProperties": true,
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "max",
+                    "min",
+                    "placeholder",
+                    "readOnly",
+                    "step",
+                    "text"
+                  ]
+                }
+              }
             }
           },
           "required": [
