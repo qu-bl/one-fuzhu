@@ -1793,8 +1793,8 @@
   "translation": {
     "riveEditor": {
       "url": "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json",
-      "version": "2026.09.28-115732",
-      "sha256": "11f9179a41e74c8d9ffe38a19f66727318ea07206a812396f7c727af6dabf26f",
+      "version": "2026.09.28-120756",
+      "sha256": "b57fb665469a5ed3629d830a645fbb5244e66d732a2e452d435417c3b3f64c91",
       "loadPolicy": "firstUseOncePerColdStart",
       "fontPolicy": "sharedRemoteFont",
       "fontFamily": "Qu Translation Sans",
