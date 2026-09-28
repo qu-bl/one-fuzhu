@@ -196,6 +196,8 @@ schema = obj({
     "name": {"type": "string", "minLength": 1, "maxLength": MV["limits"]["nameMax"]},
     "author": {"type": "string", "minLength": 1, "maxLength": MV["limits"]["authorMax"]},
     "description": {"type": "string", "maxLength": MV["limits"]["descriptionMax"]},
+    "license": obj({name: {"type": "string", "pattern": MV["patterns"]["licenseText"]}
+                    for name in CONTRACT["manifest"]["nested"]["license"]}, MV["license"]["required"]),
     "preview": {"const": MV["fixedFiles"]["preview"]},
     "rive": rive,
     "javascript": obj({"entry": {"const": MV["fixedFiles"]["javascript"]},
