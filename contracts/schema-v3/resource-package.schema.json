@@ -29,6 +29,24 @@
       "type": "string",
       "maxLength": 1024
     },
+    "license": {
+      "type": "object",
+      "properties": {
+        "copyright": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "text": {
+          "type": "string",
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "copyright",
+        "text"
+      ],
+      "additionalProperties": true
+    },
     "preview": {
       "const": "preview.webp"
     },

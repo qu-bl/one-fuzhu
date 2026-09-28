@@ -22,6 +22,7 @@ def build_profile():
         "manifest": {
             "required": manifest["required"],
             "optional": manifest["optional"],
+            "license": {"fields": manifest["nested"]["license"], **manifest["validation"]["license"], "textPattern": manifest["validation"]["patterns"]["licenseText"]},
             "fixedFiles": manifest["validation"]["fixedFiles"],
             "valueTypes": manifest["valueTypes"],
             "packageScriptEntryFunction": manifest["validation"]["packageScriptEntryFunction"],
