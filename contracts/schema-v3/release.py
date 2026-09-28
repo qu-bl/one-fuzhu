@@ -390,10 +390,20 @@ def verify_schema_and_fixtures():
         raise ValueError("package display scale rules are invalid")
     translation = contract.get("translation", {}).get("riveEditor", {})
     dictionary = ROOT.parent.parent / "rive-editor" / "translation.json"
+    font = ROOT.parent.parent / "rive-editor" / "fonts" / "NotoSansSC-Variable.ttf"
+    font_license = ROOT.parent.parent / "rive-editor" / "fonts" / "OFL.txt"
     if translation.get("url") != "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json" or \
             translation.get("sha256") != hashlib.sha256(dictionary.read_bytes()).hexdigest() or \
             translation.get("loadPolicy") != "firstUseOncePerColdStart" or \
-            translation.get("fontPolicy") != "platformDefault":
+            translation.get("fontPolicy") != "sharedRemoteFont" or \
+            translation.get("fontFamily") != "Qu Translation Sans" or \
+            translation.get("fontSourceFamily") != "Noto Sans SC" or \
+            translation.get("fontUrl") != "https://qu-bl.github.io/one-fuzhu/rive-editor/fonts/NotoSansSC-Variable.ttf" or \
+            translation.get("fontSha256") != hashlib.sha256(font.read_bytes()).hexdigest() or \
+            translation.get("fontBytes") != font.stat().st_size or \
+            translation.get("fontLicense") != "OFL-1.1" or \
+            translation.get("fontLicenseUrl") != "https://qu-bl.github.io/one-fuzhu/rive-editor/fonts/OFL.txt" or \
+            "SIL OPEN FONT LICENSE Version 1.1" not in font_license.read_text(encoding="utf-8"):
         raise ValueError("Rive editor translation delivery rules are invalid")
     if not (0 < translation.get("minimumEntries", 0) <= translation.get("maximumEntries", 0)) or \
             translation.get("maximumBytes", 0) <= 0 or translation.get("unmatchedTermsMax", 0) <= 0:
