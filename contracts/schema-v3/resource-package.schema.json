@@ -3875,6 +3875,214 @@
                   }
                 }
               }
+            },
+            {
+              "if": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "const": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  }
+                },
+                "required": [
+                  "bindings"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "items": {
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  },
+                  "bindings": {
+                    "properties": {
+                      "options": {
+                        "properties": {
+                          "fallback": {
+                            "items": {
+                              "required": [
+                                "value"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "const": "enum"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  }
+                },
+                "required": [
+                  "bindings"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "items": {
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  },
+                  "bindings": {
+                    "properties": {
+                      "options": {
+                        "properties": {
+                          "fallback": {
+                            "items": {
+                              "required": [
+                                "value"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "const": "list"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  }
+                },
+                "required": [
+                  "bindings"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "items": {
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  },
+                  "bindings": {
+                    "properties": {
+                      "options": {
+                        "properties": {
+                          "fallback": {
+                            "items": {
+                              "required": [
+                                "value"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "bindings": {
+                    "properties": {
+                      "value": {
+                        "properties": {
+                          "type": {
+                            "const": "resource"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ]
+                  }
+                },
+                "required": [
+                  "bindings"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "items": {
+                      "required": [
+                        "resource"
+                      ]
+                    }
+                  },
+                  "bindings": {
+                    "properties": {
+                      "options": {
+                        "properties": {
+                          "fallback": {
+                            "items": {
+                              "required": [
+                                "resource"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           ],
           "propertyNames": {

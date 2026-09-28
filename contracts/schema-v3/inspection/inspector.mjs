@@ -62,8 +62,9 @@ function run(input, c) {
         if(typeof binding?.fallback==='string'&&binding.fallback.length>uv.limits.labelMax)add(`${p}.bindings.${key}.fallback`,'文字超过上限');
       }
       for(const key of ['text','placeholder'])if(typeof item[key]==='string'&&item[key].length>uv.limits.labelMax)add(`${p}.${key}`,'文字超过上限');
-      for(const [index,option] of list(item.options??b.options?.fallback).entries()) {
-        const op=`${p}.options[${index}]`;
+      for(const [optionPath,options] of [[`${p}.options`,item.options],[`${p}.bindings.options.fallback`,b.options?.fallback]])
+      for(const [index,option] of list(options).entries()) {
+        const op=`${optionPath}[${index}]`;
         unknown(option,c.ui.optionFields,op);
         if(!text(option?.label))add(`${op}.label`,'选项文字不能为空');
         if(context==='resourcePackage'&&option?.resource!==undefined&&!safeResource(option.resource))add(`${op}.resource`,'需要 assets/ 下的相对资源路径');

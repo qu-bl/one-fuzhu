@@ -130,3 +130,7 @@
 
 此前已删除的样式、绝对布局和旧绑定字段继续列在 `ui.forbiddenDeclarationFields` 中。
 未知的第三方扩展字段只产生兼容性警告；已知字段用错组件、缺少必填项、类型不匹配或枚举错误会阻止该 UI 运行。
+
+### 选择项的值
+
+静态 `options` 和 `bindings.options.fallback` 中，每项必须包含 `label`。当 `bindings.value.type` 为 `resource` 时，使用 `resource` 作为选项值；为 `string`、`enum` 或 `list` 时，使用 `value`。两字段同时存在时，按绑定类型取值。资源包中的资源路径指向包内 `assets/`，应用脚本可使用运行时资源标识。运行时动态字符串数组的形式保持不变。

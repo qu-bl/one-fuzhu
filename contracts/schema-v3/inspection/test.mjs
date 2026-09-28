@@ -95,3 +95,18 @@ assert.deepEqual(inspect({kind:'ui',sets:{id:'plain',slot:'scriptUi',components:
 assert.ok(inspect({kind:'ui',context:'resourcePackage',sets:{id:'plain',scope:'persistent',components:[{id:'t',type:'text',label:'文字'}]}}).errors.length);
 assert.ok(inspect({kind:'ui',sets:pkgResourceSet,context:'applicationScript'}).errors.some(x=>x.includes('.slot')));
 console.log('PASS context boundaries: resource paths, entry points, annotations, UI requirements');
+
+for(const type of ['string','enum','list','resource']) {
+ const choice={id:'select',type:'choice',label:'选择',bindings:{value:{path:'app.select',type,default:type==='list'?[]:''}}};
+ const check=item=>inspect({kind:'ui',sets:{id:'panel',slot:'scriptUi',components:[item]}});
+ const field=c.ui.validation.valueSemantics.choiceOptionFieldByValueType[type];
+ for(const dynamic of [false,true]) {
+  const item=structuredClone(choice);
+  const options=[{label:'缺少值'}];
+  if(dynamic)item.bindings.options={path:'app.options',fallback:options};else item.options=options;
+  assert.ok(check(item).errors.some(x=>x.includes(`.${field}`)),`${type} ${dynamic}`);
+  options[0][field]=type==='resource'?'qjres://owner/file':'item';
+  assert.deepEqual(check(item).errors,[],`${type} ${dynamic}`);
+ }
+}
+console.log('PASS choice option values: static and binding fallbacks for every value type');
