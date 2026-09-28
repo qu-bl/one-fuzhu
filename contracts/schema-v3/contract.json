@@ -1,5 +1,5 @@
 {
-  "contractVersion": "10.2.0",
+  "contractVersion": "10.2.1",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -1793,7 +1793,7 @@
   "translation": {
     "riveEditor": {
       "url": "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json",
-      "sha256": "61eadb6db0051ebed53d41e0e42da24f5b52f4a5bbf503b0a6614df81cfa57b7",
+      "sha256": "df537c8467be74dd39d6492717049625d496812674e2f4e0f4b3022fb878b550",
       "loadPolicy": "firstUseOncePerColdStart",
       "fontPolicy": "sharedRemoteFont",
       "fontFamily": "Qu Translation Sans",
