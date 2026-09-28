@@ -1,0 +1,25 @@
+{
+  "url": "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json",
+  "version": "2026.09.28-183444",
+  "sha256": "b57fb665469a5ed3629d830a645fbb5244e66d732a2e452d435417c3b3f64c91",
+  "loadPolicy": "firstUseOncePerColdStart",
+  "fontPolicy": "sharedRemoteFont",
+  "fontFamily": "Qu Translation Sans",
+  "fontSourceFamily": "Noto Sans SC",
+  "fontUrl": "https://qu-bl.github.io/one-fuzhu/rive-editor/fonts/NotoSansSC-Regular.ttf",
+  "fontSha256": "4c404494a3e2c8d3ed60f69ac9857aced2fb3aa7958745c9aba120b40eeec553",
+  "fontBytes": 10596088,
+  "fontLicense": "OFL-1.1",
+  "fontLicenseUrl": "https://qu-bl.github.io/one-fuzhu/rive-editor/fonts/OFL.txt",
+  "maximumBytes": 1048576,
+  "minimumEntries": 100,
+  "maximumEntries": 20000,
+  "unmatchedTermsMax": 5000,
+  "forbiddenKeys": [
+    "__proto__",
+    "constructor",
+    "prototype"
+  ],
+  "scriptUrl": "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.js",
+  "scriptSha256": "ba15ca286025fe605c26774b0fdd029c57496349aca1c3c3d4e28a2bc3d3024e"
+}

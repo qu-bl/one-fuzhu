@@ -1793,7 +1793,7 @@
   "translation": {
     "riveEditor": {
       "url": "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json",
-      "version": "2026.09.28-120756",
+      "version": "2026.09.28-183444",
       "sha256": "b57fb665469a5ed3629d830a645fbb5244e66d732a2e452d435417c3b3f64c91",
       "loadPolicy": "firstUseOncePerColdStart",
       "fontPolicy": "sharedRemoteFont",
@@ -1812,7 +1812,9 @@
         "__proto__",
         "constructor",
         "prototype"
-      ]
+      ],
+      "scriptUrl": "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.js",
+      "scriptSha256": "ba15ca286025fe605c26774b0fdd029c57496349aca1c3c3d4e28a2bc3d3024e"
     }
   }
 }
