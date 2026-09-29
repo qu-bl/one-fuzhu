@@ -122,7 +122,7 @@ def verify_example_component(component, contract, owner):
     facts = {
         "context": "resourcePackage",
         "hosting": "selfDrawn",
-        "scope": "runtime" if component_type == "button" and action == "emit" else "persistent",
+        "presentation": "dialog" if component_type == "button" and action == "emit" else "inline",
         "slot": None,
         "type": component_type,
         "action": action,
@@ -140,7 +140,7 @@ def verify_example_component(component, contract, owner):
             (item.startswith("bindings.") and item.removeprefix("bindings.") in bindings) or
             (not item.startswith("bindings.") and item in component) for item in alternatives)
         if missing or forbidden or missing_bound or forbidden_bound or not has_alternative or \
-                (rule.get("allowedScopes") and facts["scope"] not in rule["allowedScopes"]):
+                (rule.get("allowedPresentations") and facts["presentation"] not in rule["allowedPresentations"]):
             raise ValueError(f"AI component example violates {rule['id']}: {owner}")
     for index, child in enumerate(component.get("children", [])):
         verify_example_component(child, contract, f"{owner}.children[{index}]")
@@ -234,8 +234,12 @@ def verify_schema_and_fixtures():
         "layoutPolicy": "adaptiveRelativeOnly",
         "absoluteLayoutValuesAllowed": False,
         "uiRemovedOnOwnerStop": True,
-        "scopeControlsMountOnly": True,
-        "scopeDoesNotPersistData": True,
+        "presentationControlsMountOnly": True,
+        "uiPersistsData": False,
+        "declarationStorage": "singleCurrentPerOwner",
+        "initialDeclarationTiming": "beforeOnStart",
+        "declareMode": "replaceAllSlots",
+        "clearRestoresInitialDeclaration": False,
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
     forbidden_appearance = {"style", "size", "density", "presentation", "format"}
@@ -248,17 +252,17 @@ def verify_schema_and_fixtures():
     if set(contract["ui"].get("forbiddenDeclarationFields", [])) != \
             forbidden_appearance | forbidden_absolute_layout | forbidden_legacy_binding | forbidden_removed_semantics:
         raise ValueError("UI contract must publish every removed declaration field")
-    all_ui_fields = set(contract["ui"]["commonFields"] + contract["ui"]["setFields"])
+    all_ui_fields = set(contract["ui"]["commonFields"])
     for fields in contract["ui"]["typeFields"].values():
         all_ui_fields.update(fields)
     if forbidden_appearance & all_ui_fields or forbidden_absolute_layout & all_ui_fields or \
             forbidden_legacy_binding & all_ui_fields or forbidden_removed_semantics & all_ui_fields or \
-            forbidden_appearance & set(ui_validation["enums"]) or \
+            (forbidden_appearance - {"presentation"}) & set(ui_validation["enums"]) or \
             "color" in ui_validation["enums"]["inputMode"] or \
             any(field in contract["ui"]["typeFields"]["group"] for field in ("surface", "radius", "wrap")):
         raise ValueError("UI declarations must contain only values, states, and adaptive or relative layout")
-    if set(ui_validation["enums"]["scope"]) != {"persistent", "runtime"}:
-        raise ValueError("UI scopes must retain the two runtime lifetimes")
+    if set(ui_validation["enums"]["presentation"]) != {"inline", "dialog"}:
+        raise ValueError("UI presentation must describe only inline or dialog mounting")
     archive = contract["archive"]
     for name in ("maxFiles", "maxTotalBytes", "maxSingleFileBytes", "maxPathUtf8Bytes"):
         if not isinstance(archive[name], int) or archive[name] <= 0:

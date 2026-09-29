@@ -7,6 +7,7 @@ const context = vm.createContext({ defineQuScript() {} });
 vm.runInContext(source + `
 globalThis.aiTest = {
   serviceEndpoints,
+  refreshConversationUI,
   completionPayload,
   deliveryTool,
   parseAssistantReply,
@@ -24,6 +25,9 @@ globalThis.aiTest = {
 };`, context);
 
 const api = context.aiTest;
+let currentUI;
+api.refreshConversationUI({ ui: { declare: sets => { currentUI = JSON.parse(JSON.stringify(sets)); } } });
+assert.deepEqual(currentUI.map(set => set.slot).sort(), ['applicationScript', 'packageBuilder', 'scriptUi']);
 assert.deepEqual(
   JSON.parse(JSON.stringify(api.serviceEndpoints('https://api.openai.com/v1'))),
   {

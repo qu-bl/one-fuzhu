@@ -70,7 +70,7 @@ function run(input, c) {
         if(context==='resourcePackage'&&option?.resource!==undefined&&!safeResource(option.resource))add(`${op}.resource`,'需要 assets/ 下的相对资源路径');
       }
       if(context==='resourcePackage'&&item.type==='button'&&item.action==='emit'&&typeof item.text==='string'&&item.text.length>c.manifest.validation.limits.packageActionTextMax)add(`${p}.text`,'按钮文字超过上限');
-      const facts={context,type:item.type,scope:set.scope,slot:set.slot,action:item.action,
+      const facts={context,type:item.type,presentation:set.presentation,slot:set.slot,action:item.action,
         valueControl:uv.inputTypes.includes(item.type)||(item.type==='button'&&sem.buttonValueActions.includes(item.action))};
       for(const rule of uv.requiredWhen) {
         if(!Object.entries(rule.when).every(([k,v])=>equal(facts[k],v)))continue;
@@ -79,7 +79,7 @@ function run(input, c) {
         for(const name of rule.requiredBindings||[])if(b[name]==null)add(`${p}.bindings.${name}`,'缺少绑定');
         for(const name of rule.forbiddenBindings||[])if(b[name]!=null)add(`${p}.bindings.${name}`,'不允许此绑定');
         if(rule.oneOf&&!rule.oneOf.some(name=>at(item,name)!=null))add(p,`至少提供 ${rule.oneOf.join(' 或 ')}`);
-        if(rule.allowedScopes&&!rule.allowedScopes.includes(set.scope))add(p,`scope 必须为 ${rule.allowedScopes.join('/')}`);
+        if(rule.allowedPresentations&&!rule.allowedPresentations.includes(set.presentation))add(p,`presentation 必须为 ${rule.allowedPresentations.join('/')}`);
       }
       for(const [key,binding] of Object.entries(b))if(uv.bindingsByType[item.type].includes(key)&&object(binding)) {
         if(!text(binding.path)||binding.path.length>uv.limits.labelMax)add(`${p}.bindings.${key}.path`,'绑定路径无效');
@@ -122,18 +122,17 @@ function run(input, c) {
     const packageIDs=new Set(),persistentPaths=new Set();
     for(const [i,set] of sets.entries()) {
       const p=`${path}[${i}]`;if(!object(set)){add(p,'必须是对象');continue;}
-      if(context==='applicationScript'&&set.scope==null)set.scope=set.slot==='dialog'?uv.dialogScope:uv.mountedScope;
       const shallow={...set,components:[]};schema(schemas.validateSet,shallow,p);
       unknown(set,context==='resourcePackage'?c.manifest.nested['ui[]']:c.ui.setFields,p);
       if(context==='resourcePackage'&&own(set,'slot')&&!uv.selfDrawnHasSlot)add(`${p}.slot`,'资源包不声明挂载位置');
       if(context==='applicationScript') {
         if(!uv.enums.slot.includes(set.slot))add(`${p}.slot`,'缺少或不支持的挂载位置');
-        const expected=set.slot==='dialog'?uv.dialogScope:uv.mountedScope;
-        if(set.scope!==expected)add(`${p}.scope`,`此位置要求 ${expected}`);
+        const expected=set.slot==='dialog'?uv.dialogPresentation:uv.mountedPresentation;
+        if(set.presentation!==expected)add(`${p}.presentation`,`此位置要求 ${expected}`);
       }
       if(!Array.isArray(set.components)||set.components.length>uv.limits.componentsPerSetMax)add(`${p}.components`,'组件数组无效或超过上限');
       if(context==='resourcePackage'&&(!text(set.title)||!list(set.components).length))add(p,'资源包 UI 需要标题及组件');
-      if(context==='resourcePackage'&&set.scope==='persistent') {
+      if(context==='resourcePackage'&&set.presentation==='inline') {
         const visit=items=>{for(const item of list(items)){const path=item?.bindings?.value?.path;if(path){if(persistentPaths.has(path))add(p,`重复的 UI 字段 ${path}`);persistentPaths.add(path);}visit(item?.children);}};
         visit(set.components);
       }

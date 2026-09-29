@@ -29,7 +29,6 @@
     {
       "id": "settings",
       "title": "设置",
-      "scope": "persistent",
       "components": [
         {
           "id": "enabled",
@@ -43,7 +42,8 @@
             }
           }
         }
-      ]
+      ],
+      "presentation": "inline"
     }
   ]
 }

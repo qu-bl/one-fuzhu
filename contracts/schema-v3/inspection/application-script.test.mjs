@@ -5,7 +5,7 @@ export function testApplicationScript(inspect) {
   const sources=[
   "/**\n * @id DailyColor\n * @description 每日颜色\n * @interval 1000\n * @observe app.theme.brand\n * @observe app.theme.brand\n * @observe device.battery.level\n */\ndefineQuScript({});",
   "/**\n * @id ai-copilot\n * @description 带身份的脚本\n */\ndefineQuScript({});",
-  "/**\n * @id panel\n * @ui\n * [\n *   {\n *     \"slot\": \"applicationScript\",\n *     \"id\": \"main\",\n *     \"title\": \"面板\",\n *     \"components\": [\n *       { \"id\": \"title\", \"type\": \"text\", \"label\": \"标题\", \"description\": \"\", \"text\": \"你好\" },\n *       { \"id\": \"value\", \"type\": \"input\", \"inputMode\": \"number\", \"label\": \"数值\", \"description\": \"\",\n *         \"bindings\": { \"value\": { \"path\": \"app.panel.value\", \"type\": \"number\", \"default\": 0 } } }\n *     ]\n *   }\n * ]\n */\ndefineQuScript({});"
+  "/**\n * @id panel\n * @ui\n * [\n *   {\n *     \"slot\": \"applicationScript\", \"presentation\": \"inline\",\n *     \"id\": \"main\",\n *     \"title\": \"面板\",\n *     \"components\": [\n *       { \"id\": \"title\", \"type\": \"text\", \"label\": \"标题\", \"description\": \"\", \"text\": \"你好\" },\n *       { \"id\": \"value\", \"type\": \"input\", \"inputMode\": \"number\", \"label\": \"数值\", \"description\": \"\",\n *         \"bindings\": { \"value\": { \"path\": \"app.panel.value\", \"type\": \"number\", \"default\": 0 } } }\n *     ]\n *   }\n * ]\n */\ndefineQuScript({});"
 ];
   for(const source of sources)assert.deepEqual(script(source).errors,[]);
   const metadata=script(sources[0]).metadata;
@@ -23,7 +23,7 @@ export function testApplicationScript(inspect) {
   assert.deepEqual(script('/** @id TestScript @interval 0 */ defineQuScript({});').errors,[]);
   assert.deepEqual(script('/** @id TestScript @ui 见文档 */ defineQuScript({});').metadata.uiSets,[]);
   assert.ok(script('/**\n * @id TestScript\n * @ui\n * 不是 JSON\n */ defineQuScript({});').errors.some(x=>x.startsWith('@ui')));
-  const uiText=[{id:'panel',slot:'scriptUi',components:[{id:'text',type:'text',label:'提示',
+  const uiText=[{id:'panel',slot:'scriptUi',presentation:'inline',components:[{id:'text',type:'text',label:'提示',
     text:'说明 @id Forged @observe device.battery.level @interval 999999'}]}];
   const withUI=header=>`/**\n${header}\n * @ui\n${JSON.stringify(uiText)}\n */\ndefineQuScript({});`;
   const isolated=script(withUI(' * @id Real'));

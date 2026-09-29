@@ -9,155 +9,156 @@
  * @observe app.aiSupport.appIncludeCurrent
  * @observe app.aiSupport.packageIncludeManifest
  * @observe app.aiSupport.packageIncludeScript
- * @ui
- * {
- *   "slot": "scriptUi",
- *   "id": "ai-assistant-settings",
- *   "title": "配置",
- *   "scope": "persistent",
- *   "components": [
- *     {
- *       "type": "group",
- *       "id": "serviceSettings",
- *       "label": "服务",
- *       "description": "支持 OpenAI Chat Completions tools 标准接口；连接配置、模型和对话会随脚本存储同步。",
- *       "layout": "column",
- *       "children": [
- *         {
- *           "type": "input",
- *           "id": "endpoint",
- *           "label": "接口",
- *           "placeholder": "https://api.openai.com/v1",
- *           "inputMode": "text",
- *           "bindings": {
- *             "value": {
- *               "path": "app.aiSupport.endpoint",
- *               "type": "string",
- *               "default": "https://api.openai.com/v1"
- *             }
- *           }
- *         },
- *         {
- *           "type": "input",
- *           "id": "apiKey",
- *           "label": "密钥",
- *           "description": "保存在脚本独立存储；启用同步时会出现在同一账户设备。",
- *           "placeholder": "API Key",
- *           "inputMode": "password",
- *           "bindings": {
- *             "value": {
- *               "path": "app.aiSupport.apiKey",
- *               "type": "string",
- *               "default": ""
- *             }
- *           }
- *         },
- *         {
- *           "type": "choice",
- *           "id": "model",
- *           "label": "模型",
- *           "bindings": {
- *             "value": {
- *               "path": "app.aiSupport.model",
- *               "type": "enum",
- *               "default": ""
- *             },
- *             "options": {
- *               "path": "app.aiSupport.modelOptions",
- *               "fallback": []
- *             },
- *             "enabled": {
- *               "path": "app.aiSupport.modelLoading",
- *               "equals": false,
- *               "fallback": true
- *             }
- *           }
- *         },
- *         {
- *           "type": "text",
- *           "id": "modelStatus",
- *           "label": "状态",
- *           "copyable": true,
- *           "bindings": {
- *             "text": {
- *               "path": "app.aiSupport.modelStatus",
- *               "fallback": "等待连接"
- *             }
- *           }
- *         },
- *         {
- *           "type": "button",
- *           "id": "reloadModels",
- *           "label": "刷新模型",
- *           "text": "刷新模型",
- *           "action": "emit",
- *           "hug": true
- *         }
- *       ]
- *     },
- *     {
- *       "type": "group",
- *       "id": "assistantOptions",
- *       "label": "上下文",
- *       "layout": "column",
- *       "children": [
- *         {
- *           "type": "toggle",
- *           "id": "autoApply",
- *           "label": "自动应用结果",
- *           "hug": true,
- *           "bindings": {
- *             "value": {
- *               "path": "app.aiSupport.autoApply",
- *               "type": "boolean",
- *               "default": false
- *             }
- *           }
- *         },
- *         {
- *           "type": "toggle",
- *           "id": "appIncludeCurrent",
- *           "label": "附带当前应用脚本",
- *           "hug": true,
- *           "bindings": {
- *             "value": {
- *               "path": "app.aiSupport.appIncludeCurrent",
- *               "type": "boolean",
- *               "default": true
- *             }
- *           }
- *         },
- *         {
- *           "type": "toggle",
- *           "id": "packageIncludeManifest",
- *           "label": "附带资源包清单",
- *           "hug": true,
- *           "bindings": {
- *             "value": {
- *               "path": "app.aiSupport.packageIncludeManifest",
- *               "type": "boolean",
- *               "default": true
- *             }
- *           }
- *         },
- *         {
- *           "type": "toggle",
- *           "id": "packageIncludeScript",
- *           "label": "附带资源包脚本",
- *           "hug": true,
- *           "bindings": {
- *             "value": {
- *               "path": "app.aiSupport.packageIncludeScript",
- *               "type": "boolean",
- *               "default": true
- *             }
- *           }
- *         }
- *       ]
- *     }
- *   ]
- * }
  */
+
+const SETTINGS_UI = {
+  "slot": "scriptUi",
+  "id": "ai-assistant-settings",
+  "title": "配置",
+  "presentation": "inline",
+  "components": [
+    {
+      "type": "group",
+      "id": "serviceSettings",
+      "label": "服务",
+      "description": "支持 OpenAI Chat Completions tools 标准接口；连接配置、模型和对话会随脚本存储同步。",
+      "layout": "column",
+      "children": [
+        {
+          "type": "input",
+          "id": "endpoint",
+          "label": "接口",
+          "placeholder": "https://api.openai.com/v1",
+          "inputMode": "text",
+          "bindings": {
+            "value": {
+              "path": "app.aiSupport.endpoint",
+              "type": "string",
+              "default": "https://api.openai.com/v1"
+            }
+          }
+        },
+        {
+          "type": "input",
+          "id": "apiKey",
+          "label": "密钥",
+          "description": "保存在脚本独立存储；启用同步时会出现在同一账户设备。",
+          "placeholder": "API Key",
+          "inputMode": "password",
+          "bindings": {
+            "value": {
+              "path": "app.aiSupport.apiKey",
+              "type": "string",
+              "default": ""
+            }
+          }
+        },
+        {
+          "type": "choice",
+          "id": "model",
+          "label": "模型",
+          "bindings": {
+            "value": {
+              "path": "app.aiSupport.model",
+              "type": "enum",
+              "default": ""
+            },
+            "options": {
+              "path": "app.aiSupport.modelOptions",
+              "fallback": []
+            },
+            "enabled": {
+              "path": "app.aiSupport.modelLoading",
+              "equals": false,
+              "fallback": true
+            }
+          }
+        },
+        {
+          "type": "text",
+          "id": "modelStatus",
+          "label": "状态",
+          "copyable": true,
+          "bindings": {
+            "text": {
+              "path": "app.aiSupport.modelStatus",
+              "fallback": "等待连接"
+            }
+          }
+        },
+        {
+          "type": "button",
+          "id": "reloadModels",
+          "label": "刷新模型",
+          "text": "刷新模型",
+          "action": "emit",
+          "hug": true
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "assistantOptions",
+      "label": "上下文",
+      "layout": "column",
+      "children": [
+        {
+          "type": "toggle",
+          "id": "autoApply",
+          "label": "自动应用结果",
+          "hug": true,
+          "bindings": {
+            "value": {
+              "path": "app.aiSupport.autoApply",
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        {
+          "type": "toggle",
+          "id": "appIncludeCurrent",
+          "label": "附带当前应用脚本",
+          "hug": true,
+          "bindings": {
+            "value": {
+              "path": "app.aiSupport.appIncludeCurrent",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        {
+          "type": "toggle",
+          "id": "packageIncludeManifest",
+          "label": "附带资源包清单",
+          "hug": true,
+          "bindings": {
+            "value": {
+              "path": "app.aiSupport.packageIncludeManifest",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        {
+          "type": "toggle",
+          "id": "packageIncludeScript",
+          "label": "附带资源包脚本",
+          "hug": true,
+          "bindings": {
+            "value": {
+              "path": "app.aiSupport.packageIncludeScript",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+};
+
 const RULE_BASE = 'https://qu-bl.github.io/one-fuzhu/';
 const MAX_REQUEST_CHARS = 220000;
 const MAX_OUTPUT_TOKENS = 16384;
@@ -216,7 +217,7 @@ function conversationSet(target) {
     slot: isApplication ? 'applicationScript' : 'packageBuilder',
     id: prefix + '-conversation',
     title: '',
-    scope: 'persistent',
+    presentation: 'inline',
     components: [
       {
         type: 'group',
@@ -292,6 +293,7 @@ function conversationSet(target) {
 
 function refreshConversationUI(qu) {
   qu.ui.declare([
+    SETTINGS_UI,
     conversationSet('applicationScript'),
     conversationSet('resourcePackage')
   ]);
