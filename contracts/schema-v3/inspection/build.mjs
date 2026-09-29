@@ -20,7 +20,7 @@ for (const variant of variants) {
   ajv.addSchema(shape, variant.properties.type.const);
 }
 const set = structuredClone(packageShape.properties.ui.items);
-set.required=['id','components'];
+set.required=['id','presentation','components'];
 set.properties = {...set.properties, slot:{enum:contract.ui.validation.enums.slot}};
 ajv.addSchema(set,'set');
 const validators = {validatePackage:'package', validateSet:'set'};

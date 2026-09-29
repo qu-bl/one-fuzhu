@@ -227,10 +227,10 @@ schema = obj({
     "bindings": arr(binding),
     "assets": obj({"audio": arr(audio)}, ["audio"]),
     "ui": arr(obj({"id": {"type": "string", "pattern": UV["idPattern"]}, "title": string,
-                   "scope": {"enum": UV["enums"]["scope"]},
+                   "presentation": {"enum": UV["enums"]["presentation"]},
                    "components": arr({"$ref": "#/$defs/uiComponent"},
                                      maxItems=UV["limits"]["componentsPerSetMax"])},
-                  ["id", "title", "scope", "components"]), maxItems=UV["limits"]["setsMax"]),
+                  ["id", "title", "presentation", "components"]), maxItems=UV["limits"]["setsMax"]),
 }, CONTRACT["manifest"]["required"])
 schema["properties"]["ui"]["items"]["propertyNames"] = {"not": {"enum": ["density"]}}
 schema.update({"$schema": "https://json-schema.org/draft/2020-12/schema",

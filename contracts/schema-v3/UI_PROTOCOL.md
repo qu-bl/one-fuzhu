@@ -1,4 +1,4 @@
-# 三端动态原生 UI 规范 10.0.0
+# 三端动态原生 UI 规范 11.0.0
 
 本规范是 Apple、Android、鸿蒙动态 UI 的共同最小集合。权威机器规则位于
 [`contract.json`](contract.json) 的 `ui` 段；本文用于说明它能表达什么。
@@ -11,6 +11,16 @@
 - **数据与 UI 分离**：声明描述组件和绑定；动态值通过当前脚本或资源包作用域的 QVMI 传递。
 - **运行与持久化分离**：QVMI 和 UI 随所有者停止而释放；跨冷启动数据由脚本显式使用 `qu.storage` 保存。
 - **云端为准**：制作台、检查器和运行时读取同一份已校验云端契约。
+
+## 一份声明，两种承载方式
+
+- `presentation=inline`：常驻区域。应用脚本使用 `scriptUi`、`applicationScript` 或 `packageBuilder` 位置；并非存储持久化。
+- `presentation=dialog`：按需弹窗，应用脚本对应 `slot=dialog`；并非另一种动态 UI 引擎。
+- 常驻区域和弹窗都可以通过 QVMI 更新内容、值与状态。
+- 每个运行中的所有者只有一份当前 UI 声明。`@ui` 在 `onStart` 前作为初始声明加载。
+- `qu.ui.declare()` 替换该所有者全部位置的当前声明。需要保留的配置、分栏、弹窗应一起提交；不叠加或回退到 `@ui`。
+- `qu.ui.clear()` 清空当前声明；脚本停止也移除界面。再次启动才重新加载初始声明。
+- 组件固定值与 `bindings` 的值回退仍然有效，它们不构成第二套 UI 声明。
 
 ## 八种组件
 
@@ -110,11 +120,11 @@
 
 ## UI 集合
 
-集合字段为 `id`、`title`、`scope`、`slot`、`components`。
+集合字段为 `id`、`title`、`presentation`、`slot`、`components`。
 
-- `scope=persistent`：UI 在所有者本次运行期间持续挂载。
-- `scope=runtime`：UI 用于本次临时交互。
-- `scope` 只控制挂载周期，不保存数据。
+- `presentation=inline`：UI 在所有者本次运行期间持续挂载。
+- `presentation=dialog`：UI 用于本次临时交互。
+- `presentation` 只控制挂载周期，不保存数据。
 - 应用脚本使用 `slot` 指定宿主位置；资源包自绘面板不声明 `slot`。
 
 ## 已删除的差异字段

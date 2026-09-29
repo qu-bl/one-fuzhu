@@ -599,10 +599,10 @@
           "title": {
             "type": "string"
           },
-          "scope": {
+          "presentation": {
             "enum": [
-              "persistent",
-              "runtime"
+              "inline",
+              "dialog"
             ]
           },
           "components": {
@@ -616,7 +616,7 @@
         "required": [
           "id",
           "title",
-          "scope",
+          "presentation",
           "components"
         ],
         "additionalProperties": true,

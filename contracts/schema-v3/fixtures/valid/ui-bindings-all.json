@@ -29,7 +29,6 @@
     {
       "id": "bindings",
       "title": "动态绑定覆盖",
-      "scope": "persistent",
       "components": [
         {
           "id": "root",
@@ -303,7 +302,8 @@
           },
           "description": "设置"
         }
-      ]
+      ],
+      "presentation": "inline"
     }
   ]
 }

@@ -9,7 +9,7 @@
  *     "slot": "dialog",
  *     "id": "ui-lab-dialogs",
  *     "title": "00 · 全部弹窗交互控件",
- *     "scope": "runtime",
+ *     "presentation": "dialog",
  *     "components": [
  *       {
  *         "id": "dialogTextInput",
@@ -191,7 +191,7 @@
  *     "slot": "applicationScript",
  *     "id": "ui-lab-layout",
  *     "title": "01 · 布局与联动状态",
- *     "scope": "persistent",
+ *     "presentation": "inline",
  *     "components": [
  *       {
  *         "id": "layoutIntro",
@@ -424,7 +424,7 @@
  *     "slot": "scriptUi",
  *     "id": "ui-lab-text-buttons",
  *     "title": "02 · 文本与按钮",
- *     "scope": "persistent",
+ *     "presentation": "inline",
  *     "components": [
  *       {
  *         "id": "dialogLaunchers",
@@ -680,7 +680,7 @@
  *     "slot": "scriptUi",
  *     "id": "ui-lab-inputs",
  *     "title": "03 · 全部输入模式",
- *     "scope": "persistent",
+ *     "presentation": "inline",
  *     "components": [
  *       {
  *         "id": "textInput",
@@ -824,7 +824,7 @@
  *     "slot": "packageBuilder",
  *     "id": "ui-lab-values",
  *     "title": "04 · 开关与滑杆",
- *     "scope": "persistent",
+ *     "presentation": "inline",
  *     "components": [
  *       {
  *         "id": "toggleOn",
@@ -1020,7 +1020,7 @@
  *     "slot": "packageBuilder",
  *     "id": "ui-lab-choices",
  *     "title": "05 · 选择器与占位",
- *     "scope": "persistent",
+ *     "presentation": "inline",
  *     "components": [
  *       {
  *         "id": "singleString",

@@ -38,21 +38,21 @@ testApplicationScript(inspect);
 
 // Import/export and runtime UI now use this same checker, including normalized output.
 const node={id:'value',type:'input',label:'数值',inputMode:'number',bindings:{value:{path:'app.demo.value',type:'number',default:0}}};
-const mounted={id:'panel',slot:'scriptUi',components:[node]};
+const mounted={id:'panel',slot:'scriptUi',presentation:'inline',components:[node]};
 let result=inspect({kind:'ui',sets:mounted});
 assert.deepEqual(result.errors,[]);
-assert.equal(result.uiSets[0].scope,c.ui.validation.mountedScope);
+assert.equal(result.uiSets[0].presentation,c.ui.validation.mountedPresentation);
 assert.equal(result.uiSets[0].title,'');
 assert.equal(result.uiSets[0].components[0].description,'');
 const missing=structuredClone(mounted);delete missing.components[0].bindings;
 assert.ok(inspect({kind:'ui',sets:missing}).errors.some(x=>x.includes('.bindings')));
 assert.ok(inspect({kind:'ui',sets:[]}).errors.length);
-const defaults={id:'status',slot:'dialog',components:[{id:'text',type:'text',label:'状态',bindings:{text:{path:'app.status',fallback:'就绪'}}}]};
+const defaults={id:'status',slot:'dialog',presentation:'dialog',components:[{id:'text',type:'text',label:'状态',bindings:{text:{path:'app.status',fallback:'就绪'}}}]};
 result=inspect({kind:'ui',sets:defaults});
 assert.deepEqual(result.errors,[]);
-assert.equal(result.uiSets[0].scope,c.ui.validation.dialogScope);
+assert.equal(result.uiSets[0].presentation,c.ui.validation.dialogPresentation);
 assert.equal(result.uiSets[0].components[0].text,'就绪');
-const tooMany={id:'many',slot:'scriptUi',components:[{id:'group',type:'group',label:'组',layout:'column',children:Array.from({length:c.ui.validation.limits.childrenMax+1},(_,i)=>({id:'item'+i,type:'spacer',label:'占位'}))}]};
+const tooMany={id:'many',slot:'scriptUi',presentation:'inline',components:[{id:'group',type:'group',label:'组',layout:'column',children:Array.from({length:c.ui.validation.limits.childrenMax+1},(_,i)=>({id:'item'+i,type:'spacer',label:'占位'}))}]};
 assert.ok(inspect({kind:'ui',sets:tooMany}).errors.some(x=>x.includes('.children')));
 const extra=structuredClone(mounted);extra.components[0].vendorField=true;
 result=inspect({kind:'ui',sets:extra});assert.deepEqual(result.errors,[]);assert.ok(result.warnings.length);
@@ -79,9 +79,9 @@ console.log('PASS cloud creation templates and empty default subscriptions');
 const resourceChoice={id:'file',type:'choice',label:'文件',description:'选择文件',
   bindings:{value:{path:'ui.file',type:'resource',default:''}},
   options:[{label:'已选择的文件',resource:'qjres://script-owner/file-id'}]};
-const appResourceSet={id:'files',slot:'scriptUi',components:[resourceChoice]};
+const appResourceSet={id:'files',slot:'scriptUi',presentation:'inline',components:[resourceChoice]};
 assert.deepEqual(inspect({kind:'ui',sets:appResourceSet,context:'applicationScript'}).errors,[]);
-const pkgResourceSet={id:'files',title:'文件',scope:'persistent',components:[resourceChoice]};
+const pkgResourceSet={id:'files',title:'文件',presentation: 'inline',components:[resourceChoice]};
 assert.ok(inspect({kind:'ui',sets:pkgResourceSet,context:'resourcePackage'}).errors.some(x=>x.includes('.resource')));
 const localResourceSet=structuredClone(pkgResourceSet);
 localResourceSet.components[0].options[0].resource='assets/file.txt';
@@ -91,14 +91,14 @@ assert.deepEqual(inspect({kind:'packageScript',source:'defineResourcePackage({})
 assert.ok(inspect({kind:'applicationScript',source:'defineResourcePackage({});'}).errors.length);
 assert.ok(inspect({kind:'packageScript',source:'/** @id Demo */\ndefineQuScript({});'}).errors.length);
 // Application UI can omit package-only title/description, but must have a mounting slot.
-assert.deepEqual(inspect({kind:'ui',sets:{id:'plain',slot:'scriptUi',components:[{id:'t',type:'text',label:'文字'}]}}).errors,[]);
-assert.ok(inspect({kind:'ui',context:'resourcePackage',sets:{id:'plain',scope:'persistent',components:[{id:'t',type:'text',label:'文字'}]}}).errors.length);
+assert.deepEqual(inspect({kind:'ui',sets:{id:'plain',slot:'scriptUi',presentation:'inline',components:[{id:'t',type:'text',label:'文字'}]}}).errors,[]);
+assert.ok(inspect({kind:'ui',context:'resourcePackage',sets:{id:'plain',presentation: 'inline',components:[{id:'t',type:'text',label:'文字'}]}}).errors.length);
 assert.ok(inspect({kind:'ui',sets:pkgResourceSet,context:'applicationScript'}).errors.some(x=>x.includes('.slot')));
 console.log('PASS context boundaries: resource paths, entry points, annotations, UI requirements');
 
 for(const type of ['string','enum','list','resource']) {
  const choice={id:'select',type:'choice',label:'选择',bindings:{value:{path:'app.select',type,default:type==='list'?[]:''}}};
- const check=item=>inspect({kind:'ui',sets:{id:'panel',slot:'scriptUi',components:[item]}});
+ const check=item=>inspect({kind:'ui',sets:{id:'panel',slot:'scriptUi',presentation:'inline',components:[item]}});
  const field=c.ui.validation.valueSemantics.choiceOptionFieldByValueType[type];
  for(const dynamic of [false,true]) {
   const item=structuredClone(choice);
@@ -113,7 +113,7 @@ console.log('PASS choice option values: static and binding fallbacks for every v
 
 // Preserve the pre-migration UI boundaries: labels are short, content is not a label.
 const longText='长对话正文'.repeat(2000);
-const panel=item=>({kind:'ui',sets:{id:'regression',slot:'scriptUi',components:[item]}});
+const panel=item=>({kind:'ui',sets:{id:'regression',slot:'scriptUi',presentation:'inline',components:[item]}});
 for(const item of [
  {id:'text',type:'text',label:'正文',text:longText},
  {id:'text',type:'text',label:'正文',bindings:{text:{path:'app.reply',fallback:longText}}},
@@ -155,3 +155,13 @@ const multiple=inspect({kind:'manifest',source:JSON.stringify(malformed)});
 assert.ok(multiple.errors.some(x=>x.includes('.qu')));assert.ok(multiple.errors.some(x=>x.includes('name')));
 assert.ok(inspect(panel({id:'bad',type:'constructor',label:'错误类型'})).errors.length);
 console.log('PASS unified annotations, extension warnings, known binding errors, multi-error collection');
+
+// Presentation is explicit and has no legacy scope/lifetime compatibility.
+const currentSet={id:'newUi',slot:'scriptUi',presentation:'inline',components:[]};
+assert.deepEqual(inspect({kind:'ui',sets:currentSet}).errors,[]);
+const legacySet={id:'oldUi',slot:'scriptUi',scope:'persistent',components:[]};
+assert.ok(inspect({kind:'ui',sets:legacySet}).errors.some(x=>x.includes('presentation')));
+for (const presentation of ['persistent','runtime']) {
+ assert.ok(inspect({kind:'ui',sets:{...currentSet,presentation}}).errors.length);
+}
+console.log('PASS explicit inline/dialog presentation; old UI scope rejected');

@@ -29,7 +29,6 @@
     {
       "id": "settings",
       "title": "设置",
-      "scope": "persistent",
       "components": [
         {
           "id": "file",
@@ -47,7 +46,8 @@
             }
           }
         }
-      ]
+      ],
+      "presentation": "inline"
     }
   ]
 }
