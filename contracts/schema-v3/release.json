@@ -2,7 +2,7 @@
   "contractVersion": "11.0.0",
   "schemaVersion": 3,
   "files": {
-    "contract.json": "3eb6e762babe459980710b3a670188765ee8bb5562b8021a4b9a493afc393d13",
+    "contract.json": "12e1cb6f319bdca61e376593274d7da90c2a370743dd908dd35131dda5c704df",
     "resource-package.schema.json": "6db79db6ede33d4354d2bbefce93d619510b8ac8583c0e77e5a6a0d7b907b420"
   }
 }
