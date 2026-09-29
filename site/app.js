@@ -915,9 +915,7 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 
 async function initialize() {
   initHeroRive();
-  if (appPlatform) {
-    document.querySelector(".site-footer")?.setAttribute("hidden", "");
-  } else {
+  if (!appPlatform) {
     bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
   }
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
