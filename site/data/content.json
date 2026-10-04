@@ -131,38 +131,6 @@
   ],
   "cards": [
     {
-      "id": "audio-orbit",
-      "name": "声音轨道交互实验",
-      "summary": "欢迎共创",
-      "details": "探索声音与轨道动画的互动方式，欢迎共创。",
-      "partnerName": "官方",
-      "category": "全新发布",
-      "platforms": [
-        "HarmonyOS"
-      ],
-      "tags": [
-        "音频",
-        "Rive",
-        "交互实验"
-      ],
-      "access": {
-        "items": [
-          {
-            "platform": "douyin",
-            "label": "抖音",
-            "value": "抖音：声音轨道实验（展示样例，待替换）",
-            "copyable": false
-          }
-        ]
-      },
-      "featured": true,
-      "visible": true,
-      "video": {
-        "platform": "bilibili",
-        "id": "BV1cjYk6MEj1"
-      }
-    },
-    {
       "id": "image-binding-cards",
       "name": "RIVE中文系列课程",
       "summary": "rive101系列官方课，中文译制版",
@@ -192,99 +160,6 @@
           }
         ]
       }
-    },
-    {
-      "id": "sensor-compass",
-      "name": "感应罗盘",
-      "summary": "将方向与传感器信息转换成具有生命感的指针反馈。",
-      "details": "将方向与传感器信息转换成具有生命感的指针反馈，用 Rive 状态机让传感器数据动起来。",
-      "partnerName": "示例伙伴 F",
-      "category": "趣味工具",
-      "platforms": [
-        "Android",
-        "Apple"
-      ],
-      "tags": [
-        "传感器",
-        "方向",
-        "状态机"
-      ],
-      "access": {
-        "items": [
-          {
-            "platform": "qq",
-            "label": "QQ",
-            "value": "862835994"
-          }
-        ]
-      },
-      "featured": true,
-      "visible": true
-    },
-    {
-      "id": "focus-controller",
-      "name": "专注节奏控制器",
-      "summary": "把倒计时、阶段状态和轻量反馈组合成一件桌面工具。",
-      "details": "把倒计时、阶段状态和轻量反馈组合成一件桌面工具，由 JavaScript 与 Rive 状态机共同驱动。",
-      "partnerName": "示例伙伴 G",
-      "category": "趣味工具",
-      "platforms": [
-        "HarmonyOS",
-        "Apple"
-      ],
-      "tags": [
-        "时间",
-        "JavaScript",
-        "状态机"
-      ],
-      "access": {
-        "items": [
-          {
-            "platform": "kdocs",
-            "label": "金山文档",
-            "value": "金山文档内容待发布",
-            "copyable": false
-          }
-        ]
-      },
-      "featured": false,
-      "visible": true
-    },
-    {
-      "id": "liquid-switch",
-      "name": "液态开关组件",
-      "summary": "围绕按压、拖动和状态变化设计的高反馈交互组件。",
-      "details": "围绕按压、拖动和状态变化设计的高反馈交互组件，演示 Rive 状态机与触摸交互的结合。",
-      "partnerName": "示例伙伴 H",
-      "category": "互动组件",
-      "platforms": [
-        "Apple",
-        "Android",
-        "HarmonyOS"
-      ],
-      "tags": [
-        "Rive",
-        "组件",
-        "状态机"
-      ],
-      "access": {
-        "items": [
-          {
-            "platform": "github",
-            "label": "GitHub",
-            "value": "GitHub：液态开关组件（展示样例，待替换）",
-            "copyable": false
-          },
-          {
-            "platform": "xiaohongshu",
-            "label": "小红书",
-            "value": "小红书：液态开关组件（展示样例，待替换）",
-            "copyable": false
-          }
-        ]
-      },
-      "featured": false,
-      "visible": true
     }
   ]
 }
