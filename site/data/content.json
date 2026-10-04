@@ -9,8 +9,8 @@
       "autoplay": true
     },
     "fallback": {
-      "src": "./assets/hero-cat.webp",
-      "alt": "猫咪触摸跟随动画预览"
+      "src": "",
+      "alt": ""
     }
   },
   "notice": {
