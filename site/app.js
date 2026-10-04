@@ -1044,8 +1044,10 @@ function initNotice() {
   if (!noticeDialog.open && typeof noticeDialog.showModal === "function") {
     document.body.classList.add("dialog-open");
     noticeDialog.showModal();
-    // 弹窗里唯一可聚焦的元素是底部按钮，showModal 会把它滚进视野，
-    // 内容一高就把标题顶出屏幕。打开后强制回到顶部。
+    // showModal 会把焦点给第一个可聚焦子元素。弹窗里唯一那个是底部按钮，
+    // 它会因此被画出焦点环（看起来像双层边框），还会被滚进视野把标题顶出屏幕。
+    // 改为聚焦弹窗容器本身：默认无环，键盘 Tab 到按钮时环照常出现。
+    noticeDialog.focus();
     noticeDialog.scrollTop = 0;
   }
 }

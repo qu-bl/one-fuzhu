@@ -119,7 +119,11 @@ a { color: var(--accent); }
 .notice-header h2 { margin: 0; font-size: 24px; line-height: 1.4; }
 /* 容器贴着图片本身：宽图铺满，竖图按比例收窄并居中，不会留出色块。
    图片限高是因为一张竖图能把弹窗撑得比屏幕还高，标题会被顶出可视区。 */
-.notice-media { max-width: 100%; overflow: hidden; border-radius: 20px; background: var(--surface-soft); }
+/* 不设底色：带透明通道的图（例如圆形 logo）会透出底色形成方块。 */
+.notice-media { max-width: 100%; overflow: hidden; border-radius: 20px; }
+/* 打开时把焦点停在弹窗容器上，只是为了让焦点环不画到按钮上；
+   容器不是可操作控件，自己不该显示描边。Tab 到按钮时环照常出现。 */
+.notice-dialog:focus, .notice-dialog:focus-visible { outline: none; }
 .notice-media img { display: block; width: auto; height: auto; max-width: 100%; max-height: 38vh; }
 .notice-body { margin: 0; color: var(--muted); font-size: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .notice-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
