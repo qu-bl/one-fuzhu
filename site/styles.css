@@ -22,6 +22,9 @@
   --muted: var(--md-sys-color-on-surface-variant);
   --accent: var(--md-sys-color-primary);
   --page-pad: clamp(16px, 4vw, 56px);
+  /* 各区块共用的宽度上限。原来联系区单独用了 1120px，
+     视口一宽它的左边界就比轮播/橱柜/页脚更靠右（1440px 视口下差 153px）。 */
+  --page-max: 1440px;
   --app-safe-area-top: 0px;
   --ease-out: cubic-bezier(.2, 0, 0, 1);
 }
@@ -40,7 +43,7 @@ a { color: var(--accent); }
 .skip-link { position: fixed; z-index: 300; top: 12px; left: 12px; padding: 10px 20px; border-radius: 100px; background: var(--accent); color: var(--md-sys-color-on-primary); transform: translateY(-160%); }
 .skip-link:focus { transform: none; }
 .app-page { padding-top: calc(64px + max(env(safe-area-inset-top, 0px), var(--app-safe-area-top))); padding-bottom: max(24px, env(safe-area-inset-bottom)); }
-.activity-section, .showcase-section { max-width: 1440px; margin: auto; padding-inline: var(--page-pad); }
+.activity-section, .showcase-section { max-width: var(--page-max); margin: auto; padding-inline: var(--page-pad); }
 .activity-carousel { overflow: hidden; color: var(--text); touch-action: pan-y; }
 .activity-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; gap: clamp(24px, 4vw, 64px); min-height: 380px; }
 .activity-copy { display: flex; min-width: 0; flex-direction: column; justify-content: center; }
@@ -150,7 +153,7 @@ a { color: var(--accent); }
 .empty-state p { margin: 12px 0 0; }
 .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
 
-.contact-section { max-width: 1120px; margin: 0 auto; padding: 24px var(--page-pad) 72px; }
+.contact-section { max-width: var(--page-max); margin: 0 auto; padding: 24px var(--page-pad) 72px; }
 .contact-card { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); gap: 32px; align-items: center; padding: clamp(28px, 5vw, 52px); border-radius: 28px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
 .contact-label { display: block; margin-bottom: 10px; font-size: 14px; font-weight: 650; letter-spacing: .08em; }
 .contact-copy h2 { margin: 0 0 14px; color: inherit; }
@@ -325,7 +328,7 @@ a.contact-method:hover { background: var(--md-sys-color-surface-container-highes
 .featured-carousel .case-card-trigger.is-expanded .case-summary { -webkit-line-clamp: unset; }
 
 /* Site footer (user agreement entry). */
-.site-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px; max-width: 1440px; margin: 0 auto; padding: 20px var(--page-pad) max(36px, env(safe-area-inset-bottom)); color: var(--muted); font-size: 14px; }
+.site-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px; max-width: var(--page-max); margin: 0 auto; padding: 20px var(--page-pad) max(36px, env(safe-area-inset-bottom)); color: var(--muted); font-size: 14px; }
 .site-footer-sep { opacity: .6; }
 .site-footer a { color: var(--accent); text-decoration: none; }
 .site-footer a:hover { text-decoration: underline; }
