@@ -29,9 +29,10 @@
     // 那种写法在管理台里完全看不出来，改了字却不知道按钮为什么是灰的。
     if (item.copyable === false || typeof value !== 'string' || !value.trim()) return {type:'unavailable'};
     const href = webUrl(value);
-    if (item.action === 'copy' || item.platform === 'qq') return {type:'copy', value};
+    // 平台是 QQ 一定是复制（群号）。其余按值的形态推断，不再需要单独的 action 字段。
+    if (item.platform === 'qq') return {type:'copy', value};
     if (href) return {type:'link', href};
-    if (item.action === 'link' || /^[a-z][a-z\d+.-]*:/i.test(value)) return {type:'unavailable'};
+    if (/^[a-z][a-z\d+.-]*:/i.test(value)) return {type:'unavailable'};
     return {type:'copy', value};
   }
   root.SiteMedia = {webUrl, videoSource, accessAction};

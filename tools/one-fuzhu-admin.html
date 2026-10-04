@@ -93,7 +93,8 @@
   /* 紧接标题的第一段不画分隔线，否则卡片顶部会出现多余的一条。 */
   .editor-header + .form-section { padding-top:0; border-top:0; }
   .form-section-title { margin:0; font-size:12px; font-weight:700; color:var(--c-primary); }
-  .form-section-hint { margin:3px 0 0; font-size:11px; line-height:1.45; color:var(--c-on-surface-variant); }
+  /* 说明不再占一行，改挂到标题的悬停提示；ⓘ 只是提示这里可以悬停。 */
+  .form-section-info { margin-left:5px; font-weight:400; opacity:.55; cursor:help; }
   .form-section > .grid { margin-top:8px; }
   .form-section > .row { margin-top:8px; }
 
@@ -543,15 +544,20 @@ async function loadContent() {
 // 返回 { box, grid }：字段放进 grid（两列布局），整行的东西放进 box。
 function section(parent, title, hint) {
   const box = el('div', 'form-section');
-  box.append(el('h3', 'form-section-title', title));
-  if (hint) box.append(el('p', 'form-section-hint', hint));
+  const head = el('h3', 'form-section-title', title);
+  if (hint) {
+    // 说明改挂到标题的悬停提示上，避免每个分区都多占一行。
+    head.title = hint;
+    head.append(el('span', 'form-section-info', 'ⓘ'));
+  }
+  box.append(head);
   const grid = el('div', 'grid');
   box.append(grid);
   parent.append(box);
   return { box: box, grid: grid };
 }
 
-// 原生控件工厂。故意保持与之前相同的调用签名，所以 40 处编辑器调用点无需改动。
+
 function field(parent, labelText, input) {
   if (input.type === 'checkbox') {
     const label = el('label', 'check-field');
@@ -616,55 +622,35 @@ function renderVideoEditor(grid, video, onChange) {
   const state = video && typeof video === 'object' ? { ...video } : {};
   const platform = select(VIDEO_PLATFORMS, state.platform || '');
   const vid = textInput(state.id || '', '粘贴 BV号 / 视频链接 / iframe 代码均可');
-  const ratio = textInput(state.aspectRatio ? String(state.aspectRatio) : '', '比例，默认 1.7777');
   const apply = () => {
     const guess = guessVideo(vid.value);
     let p = platform.value;
     if (!p && guess) { p = guess.platform; platform.value = p; }
     const id = guess && guess.platform === p ? guess.id : vid.value.trim();
     if (!p || !id) { onChange(null); markDirty(); return; }
-    const r = parseFloat(ratio.value);
     state.platform = p;
     state.id = id;
-    state.aspectRatio = Number.isFinite(r) ? r : 1.7777;
     onChange({ ...state });
     markDirty();
   };
   platform.addEventListener('change', apply);
   vid.addEventListener('input', apply);
   vid.addEventListener('blur', () => { const g = guessVideo(vid.value); if (g) { vid.value = g.id; if (!platform.value) platform.value = g.platform; } apply(); });
-  ratio.addEventListener('input', apply);
   field(grid, '视频平台', platform);
   field(grid, '视频 ID', vid);
-  field(grid, '视频比例', ratio);
 }
 
-function renderAccessEditor(container, access, onAccess) {
-  const state = access && Array.isArray(access.items) ? JSON.parse(JSON.stringify(access)) : { items: [] };
-  state.items = state.items || [];
-  const commit = () => onAccess(state.items.length || state.title || state.summary ? JSON.parse(JSON.stringify(state)) : null);
 
-  // 面板本体：只在点开卡片/横幅时出现，所以放在条目列表前面单独说明。
-  const metadata = el('div', 'grid');
-  const accessTitle = textInput(state.title || '');
-  const accessSummary = textArea(state.summary || '');
-  field(metadata, '面板标题', accessTitle);
-  field(metadata, '面板说明', accessSummary);
-  const updateMetadata = () => {
-    if (accessTitle.value.trim()) state.title = accessTitle.value.trim(); else delete state.title;
-    if (accessSummary.value.trim()) state.summary = accessSummary.value.trim(); else delete state.summary;
-    commit();
-    markDirty();
-  };
-  accessTitle.addEventListener('input', updateMetadata);
-  accessSummary.addEventListener('input', updateMetadata);
+function renderAccessEditor(container, access, onAccess) {
+  const state = access && Array.isArray(access.items) ? { items: access.items.map((it) => ({ ...it })) } : { items: [] };
+  state.items = state.items || [];
+  const commit = () => onAccess(state.items.length ? { items: JSON.parse(JSON.stringify(state.items)) } : null);
 
   const list = el('div');
   const redraw = () => {
     list.replaceChildren();
     state.items.forEach((item, index) => {
       const box = el('div', 'access-item');
-      // 块头：写清这是第几条，删除键收在这里，不和字段混在一起。
       const head = el('div', 'access-item-head');
       head.append(el('span', 'access-item-title', `入口 ${index + 1}`));
       const del = actionButton('删除', 'danger');
@@ -674,12 +660,10 @@ function renderAccessEditor(container, access, onAccess) {
       const g = el('div', 'grid');
       field(g, '平台', select(PLATFORM_OPTIONS, item.platform));
       field(g, '按钮文字', textInput(item.label, '如：哔哩哔哩'));
-      field(g, '链接或内容', textInput(item.url || item.value || '', 'https://… 或 QQ 群号'));
-      field(g, '点击行为', select(['', 'copy', 'link'], item.action || ''));
+      const valueIn = textInput(item.url || item.value || '', 'https://… 或 QQ 群号');
+      field(g, '链接或内容', valueIn);
       box.append(g);
 
-      // 「暂不开放」以前只能靠在文本里写「待发布/待替换」触发，看不见也猜不到。
-      // 现在改成显式勾选，写进数据的是 copyable:false，与文本内容无关。
       const holdCheck = checkbox(item.copyable === false);
       const holdLabel = el('label', 'check-field');
       holdLabel.append(holdCheck, document.createTextNode('暂不开放（前台显示为「待发布」，点了没反应）'));
@@ -687,20 +671,18 @@ function renderAccessEditor(container, access, onAccess) {
       holdRow.append(holdLabel);
       box.append(holdRow);
 
-      const [platformSel, labelIn, valueIn, actionSel] = [g.querySelectorAll('select')[0], g.querySelectorAll('input')[0], g.querySelectorAll('input')[1], g.querySelectorAll('select')[1]];
+      const [platformSel, labelIn] = [g.querySelectorAll('select')[0], g.querySelectorAll('input')[0]];
       const sync = () => {
         const next = { ...state.items[index] };
         if (platformSel.value) next.platform = platformSel.value;
         else delete next.platform;
         if (labelIn.value.trim()) next.label = labelIn.value.trim();
         else delete next.label;
+        // 不再有「点击行为」字段：值像网址就存 url（前台跳转），否则存 value（前台复制）。
         const v = valueIn.value.trim();
-        const storedAsValue = actionSel.value === 'copy' || (!actionSel.value && Object.prototype.hasOwnProperty.call(state.items[index], 'value'));
         delete next.url;
         delete next.value;
-        if (v) { if (storedAsValue) next.value = v; else next.url = v; }
-        if (actionSel.value) next.action = actionSel.value;
-        else delete next.action;
+        if (v) { if (/^[a-z][a-z\d+.-]*:\/\//i.test(v)) next.url = v; else next.value = v; }
         state.items[index] = next;
         commit();
         markDirty();
@@ -715,7 +697,6 @@ function renderAccessEditor(container, access, onAccess) {
       platformSel.addEventListener('change', sync);
       labelIn.addEventListener('input', sync);
       valueIn.addEventListener('input', sync);
-      actionSel.addEventListener('change', sync);
       holdCheck.addEventListener('change', toggleHold);
       del.addEventListener('click', async () => {
         if (!await confirmAction(`删除入口 ${index + 1}？`)) return;
@@ -731,8 +712,9 @@ function renderAccessEditor(container, access, onAccess) {
 
   const add = actionButton('添加入口');
   add.addEventListener('click', () => { state.items.push({ platform: 'bilibili', label: '', url: '' }); commit(); markDirty(); redraw(); });
-  container.append(metadata, list, add);
+  container.append(list, add);
 }
+
 
 function editorShell(index, label, onDelete) {
   const details = el('section', 'surface editor');
@@ -755,7 +737,6 @@ function cardEditor(card, index) {
 
   const basic = section(details, '基本信息');
   field(basic.grid, '名称', bind(textInput(card.name), (v) => { card.name = v; shell.title.textContent = `${index + 1}. ${v || card.id || '未命名'}`; }));
-  field(basic.grid, 'ID', bind(textInput(card.id), (v) => (card.id = v)));
   field(basic.grid, '简介', bind(textArea(card.summary), (v) => (card.summary = v)));
   field(basic.grid, '详情', bind(textArea(card.details), (v) => (card.details = v)));
 
@@ -768,7 +749,6 @@ function cardEditor(card, index) {
   const cover = section(details, '封面图（可选）', '有封面就显示封面，并把它当作视频海报；留空则只显示视频。以后去掉视频链接，卡片画面就直接用封面。');
   const coverInput = textInput(card.cover, './assets/xxx.webp');
   field(cover.grid, '封面图路径', bind(coverInput, (v) => { card.cover = v; }));
-  field(cover.grid, '封面图说明', bind(textInput(card.coverAlt), (v) => (card.coverAlt = v)));
   const coverRow = el('div', 'row');
   const coverUpload = actionButton('上传封面图', 'outlined');
   coverUpload.addEventListener('click', () => uploadCardCover(card, index));

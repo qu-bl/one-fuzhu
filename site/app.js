@@ -244,8 +244,9 @@ function mountAccessDialog(item, trigger) {
   const sourceBounds = trigger?.getBoundingClientRect();
   renderAccessMedia(item);
 
-  accessTitle.textContent = access.title || item.name || item.title;
-  accessSummary.textContent = item.description || access.description || access.summary || item.summary || "";
+  // 弹窗不再有单独的面板标题/说明字段，直接用条目自身的名称与简介。
+  accessTitle.textContent = item.name || item.title;
+  accessSummary.textContent = item.description || item.summary || "";
   accessSummary.hidden = !accessSummary.textContent;
   accessItems.replaceChildren();
 

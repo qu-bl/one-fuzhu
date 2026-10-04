@@ -160,8 +160,7 @@
       "visible": true,
       "video": {
         "platform": "bilibili",
-        "id": "BV1cjYk6MEj1",
-        "aspectRatio": 1.7777
+        "id": "BV1cjYk6MEj1"
       }
     },
     {
@@ -184,8 +183,7 @@
       "visible": true,
       "video": {
         "platform": "bilibili",
-        "id": "BV1MYeY6bEtU",
-        "aspectRatio": 1.7777
+        "id": "BV1MYeY6bEtU"
       },
       "access": {
         "items": [
@@ -292,18 +290,6 @@
       },
       "featured": false,
       "visible": true
-    },
-    {
-      "id": "card-1789178404623",
-      "name": "新卡片",
-      "summary": "",
-      "category": "互动组件",
-      "partnerName": "",
-      "platforms": [
-        "HarmonyOS"
-      ],
-      "tags": [],
-      "visible": false
     }
   ]
 }
