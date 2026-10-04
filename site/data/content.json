@@ -151,7 +151,8 @@
           {
             "platform": "douyin",
             "label": "抖音",
-            "value": "抖音：声音轨道实验（展示样例，待替换）"
+            "value": "抖音：声音轨道实验（展示样例，待替换）",
+            "copyable": false
           }
         ]
       },
@@ -278,12 +279,14 @@
           {
             "platform": "github",
             "label": "GitHub",
-            "value": "GitHub：液态开关组件（展示样例，待替换）"
+            "value": "GitHub：液态开关组件（展示样例，待替换）",
+            "copyable": false
           },
           {
             "platform": "xiaohongshu",
             "label": "小红书",
-            "value": "小红书：液态开关组件（展示样例，待替换）"
+            "value": "小红书：液态开关组件（展示样例，待替换）",
+            "copyable": false
           }
         ]
       },

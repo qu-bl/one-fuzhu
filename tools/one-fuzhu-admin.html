@@ -82,9 +82,20 @@
   .surface { background:var(--c-surface); border-radius:var(--r-m); padding:20px; }
   .surface > h2:first-child { margin-top:0; }
   .editor-list { display:flex; flex-direction:column; gap:16px; margin-top:16px; }
-  .editor { display:flex; flex-direction:column; gap:16px; }
-  .editor-header { display:flex; gap:12px; align-items:center; }
+  /* 编辑器内部由 .form-section 自己控制间距，所以这里不加 gap。 */
+  .editor { display:flex; flex-direction:column; }
+  .editor-header { display:flex; gap:12px; align-items:center; margin-bottom:20px; }
   .editor-header .title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* ---------- 分区：给表单建立层级，避免十几个字段平铺成一片 ---------- */
+  .form-section { padding-top:20px; border-top:1px solid var(--c-outline-variant); }
+  /* 紧接标题的第一段不画分隔线，否则卡片顶部会出现多余的一条。 */
+  .editor-header + .form-section { padding-top:0; border-top:0; }
+  .form-section-title { margin:0; font-size:13px; font-weight:700; color:var(--c-primary); }
+  .form-section-hint { margin:6px 0 0; font-size:12px; line-height:1.55; color:var(--c-on-surface-variant); }
+  .form-section > .grid { margin-top:12px; }
+  .form-section > .row { margin-top:12px; }
+
   .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:4px; }
   .field-wide { grid-column:1 / -1; }
   /* 复选框没有标签行，底对齐才能和同一行的输入框齐平。 */
@@ -92,6 +103,9 @@
   /* end 对齐：字段是「标签 + 控件」，按钮没有标签，只有底对齐才能和输入框齐平。 */
   .row { display:flex; gap:12px; align-items:end; margin-top:12px; flex-wrap:wrap; }
   .access-item { background:var(--c-surface-container); border-radius:var(--r-s); padding:16px; margin-top:12px; }
+  /* 每条平台入口独立成块：块头写清是第几条，删除键收进块头，不和字段混在一起。 */
+  .access-item-head { display:flex; align-items:center; gap:12px; margin-bottom:4px; }
+  .access-item-title { flex:1; font-size:13px; font-weight:700; color:var(--c-on-surface-variant); }
   /* 工具栏同样底对齐：搜索框带标签，而按钮和复选框没有标签。 */
   .translation-toolbar { display:grid; grid-template-columns:minmax(180px,1fr) auto auto; gap:8px; align-items:end; }
   /* 词典按表格呈现：列名只在表头出现一次，数据行不带标签，一行就是一条文本的高度。
@@ -522,6 +536,18 @@ async function loadContent() {
   }
 }
 
+// 分区：把一个编辑器拆成若干有标题的段落，段落之间画分隔线。
+// 返回 { box, grid }：字段放进 grid（两列布局），整行的东西放进 box。
+function section(parent, title, hint) {
+  const box = el('div', 'form-section');
+  box.append(el('h3', 'form-section-title', title));
+  if (hint) box.append(el('p', 'form-section-hint', hint));
+  const grid = el('div', 'grid');
+  box.append(grid);
+  parent.append(box);
+  return { box: box, grid: grid };
+}
+
 // 原生控件工厂。故意保持与之前相同的调用签名，所以 40 处编辑器调用点无需改动。
 function field(parent, labelText, input) {
   if (input.type === 'checkbox') {
@@ -613,13 +639,14 @@ function renderVideoEditor(grid, video, onChange) {
 function renderAccessEditor(container, access, onAccess) {
   const state = access && Array.isArray(access.items) ? JSON.parse(JSON.stringify(access)) : { items: [] };
   state.items = state.items || [];
+  const commit = () => onAccess(state.items.length || state.title || state.summary ? JSON.parse(JSON.stringify(state)) : null);
+
+  // 面板本体：只在点开卡片/横幅时出现，所以放在条目列表前面单独说明。
   const metadata = el('div', 'grid');
   const accessTitle = textInput(state.title || '');
   const accessSummary = textArea(state.summary || '');
-  field(metadata, '访问面板标题', accessTitle);
-  field(metadata, '访问面板说明', accessSummary);
-  const list = el('div');
-  const commit = () => onAccess(state.items.length ? JSON.parse(JSON.stringify(state)) : null);
+  field(metadata, '面板标题', accessTitle);
+  field(metadata, '面板说明', accessSummary);
   const updateMetadata = () => {
     if (accessTitle.value.trim()) state.title = accessTitle.value.trim(); else delete state.title;
     if (accessSummary.value.trim()) state.summary = accessSummary.value.trim(); else delete state.summary;
@@ -629,20 +656,34 @@ function renderAccessEditor(container, access, onAccess) {
   accessTitle.addEventListener('input', updateMetadata);
   accessSummary.addEventListener('input', updateMetadata);
 
+  const list = el('div');
   const redraw = () => {
     list.replaceChildren();
     state.items.forEach((item, index) => {
       const box = el('div', 'access-item');
+      // 块头：写清这是第几条，删除键收在这里，不和字段混在一起。
+      const head = el('div', 'access-item-head');
+      head.append(el('span', 'access-item-title', `入口 ${index + 1}`));
+      const del = actionButton('删除', 'danger');
+      head.append(del);
+      box.append(head);
+
       const g = el('div', 'grid');
       field(g, '平台', select(PLATFORM_OPTIONS, item.platform));
-      field(g, '显示名', textInput(item.label, '如：哔哩哔哩'));
-      field(g, '链接/值', textInput(item.url || item.value || '', 'https://… 或 QQ 群号'));
-      field(g, '动作', select(['', 'copy', 'link'], item.action || ''));
+      field(g, '按钮文字', textInput(item.label, '如：哔哩哔哩'));
+      field(g, '链接或内容', textInput(item.url || item.value || '', 'https://… 或 QQ 群号'));
+      field(g, '点击行为', select(['', 'copy', 'link'], item.action || ''));
       box.append(g);
-      const row = el('div', 'row');
-      const del = actionButton('删除这一条', 'danger');
-      row.append(del);
-      box.append(row);
+
+      // 「暂不开放」以前只能靠在文本里写「待发布/待替换」触发，看不见也猜不到。
+      // 现在改成显式勾选，写进数据的是 copyable:false，与文本内容无关。
+      const holdCheck = checkbox(item.copyable === false);
+      const holdLabel = el('label', 'check-field');
+      holdLabel.append(holdCheck, document.createTextNode('暂不开放（前台显示为「待发布」，点了没反应）'));
+      const holdRow = el('div', 'row');
+      holdRow.append(holdLabel);
+      box.append(holdRow);
+
       const [platformSel, labelIn, valueIn, actionSel] = [g.querySelectorAll('select')[0], g.querySelectorAll('input')[0], g.querySelectorAll('input')[1], g.querySelectorAll('select')[1]];
       const sync = () => {
         const next = { ...state.items[index] };
@@ -661,12 +702,20 @@ function renderAccessEditor(container, access, onAccess) {
         commit();
         markDirty();
       };
+      const toggleHold = () => {
+        const next = { ...state.items[index] };
+        if (holdCheck.checked) next.copyable = false; else delete next.copyable;
+        state.items[index] = next;
+        commit();
+        markDirty();
+      };
       platformSel.addEventListener('change', sync);
       labelIn.addEventListener('input', sync);
       valueIn.addEventListener('input', sync);
       actionSel.addEventListener('change', sync);
+      holdCheck.addEventListener('change', toggleHold);
       del.addEventListener('click', async () => {
-        if (!await confirmAction('删除这一条访问入口？')) return;
+        if (!await confirmAction(`删除入口 ${index + 1}？`)) return;
         state.items.splice(index, 1);
         commit();
         markDirty();
@@ -676,7 +725,8 @@ function renderAccessEditor(container, access, onAccess) {
     });
   };
   redraw();
-  const add = actionButton('添加访问入口');
+
+  const add = actionButton('添加入口');
   add.addEventListener('click', () => { state.items.push({ platform: 'bilibili', label: '', url: '' }); commit(); markDirty(); redraw(); });
   container.append(metadata, list, add);
 }
@@ -699,41 +749,30 @@ function editorShell(index, label, onDelete) {
 function cardEditor(card, index) {
   const shell = editorShell(index, card.name || card.id || '未命名', () => { content.cards.splice(index, 1); renderCards(); });
   const details = shell.details;
-  const grid = el('div', 'grid');
 
-  field(grid, '名称', bind(textInput(card.name), (v) => { card.name = v; shell.title.textContent = `${index + 1}. ${v || card.id || '未命名'}`; }));
-  field(grid, 'ID', bind(textInput(card.id), (v) => (card.id = v)));
-  field(grid, '简介', bind(textArea(card.summary), (v) => (card.summary = v)));
-  field(grid, '详情', bind(textArea(card.details), (v) => (card.details = v)));
-  field(grid, '伙伴', bind(textInput(card.partnerName), (v) => (card.partnerName = v)));
-  field(grid, '分类', bind(textInput(card.category), (v) => (card.category = v)));
-  field(grid, '平台', bind(textInput((card.platforms || []).join(', '), 'HarmonyOS, Android, Apple'), (v) => (card.platforms = splitList(v))));
-  field(grid, '标签', bind(textInput((card.tags || []).join(', '), 'Rive, 状态机'), (v) => (card.tags = splitList(v))));
+  const basic = section(details, '基本信息');
+  field(basic.grid, '名称', bind(textInput(card.name), (v) => { card.name = v; shell.title.textContent = `${index + 1}. ${v || card.id || '未命名'}`; }));
+  field(basic.grid, 'ID', bind(textInput(card.id), (v) => (card.id = v)));
+  field(basic.grid, '简介', bind(textArea(card.summary), (v) => (card.summary = v)));
+  field(basic.grid, '详情', bind(textArea(card.details), (v) => (card.details = v)));
 
-  renderVideoEditor(grid, card.video, (v) => { if (v) card.video = v; else delete card.video; });
+  const meta = section(details, '分类与标签', '决定卡片在橱柜里被哪个分类和平台筛出来。多个值用英文逗号分隔。');
+  field(meta.grid, '伙伴', bind(textInput(card.partnerName), (v) => (card.partnerName = v)));
+  field(meta.grid, '分类', bind(textInput(card.category), (v) => (card.category = v)));
+  field(meta.grid, '平台', bind(textInput((card.platforms || []).join(', '), 'HarmonyOS, Android, Apple'), (v) => (card.platforms = splitList(v))));
+  field(meta.grid, '标签', bind(textInput((card.tags || []).join(', '), 'Rive, 状态机'), (v) => (card.tags = splitList(v))));
 
-  // 封面图（可选）。官网逻辑：有封面就显示封面、并把它当作视频海报；没有封面才用视频。
-  // 因此以后去掉视频链接时，这里填的封面会直接接管卡片和弹窗的画面。
+  const cover = section(details, '封面图（可选）', '有封面就显示封面，并把它当作视频海报；留空则只显示视频。以后去掉视频链接，卡片画面就直接用封面。');
   const coverInput = textInput(card.cover, './assets/xxx.webp');
-  field(grid, '封面图路径（可选）', bind(coverInput, (v) => { card.cover = v; }));
-  field(grid, '封面图说明', bind(textInput(card.coverAlt), (v) => (card.coverAlt = v)));
-
-  const featured = bind(checkbox(card.featured), (v) => (card.featured = v));
-  field(grid, '精选', featured);
-  const visible = bind(checkbox(card.visible), (v) => (card.visible = v));
-  field(grid, '显示', visible);
-
-  details.append(grid);
-
+  field(cover.grid, '封面图路径', bind(coverInput, (v) => { card.cover = v; }));
+  field(cover.grid, '封面图说明', bind(textInput(card.coverAlt), (v) => (card.coverAlt = v)));
   const coverRow = el('div', 'row');
   const coverUpload = actionButton('上传封面图', 'outlined');
   coverUpload.addEventListener('click', () => uploadCardCover(card, index));
   coverRow.append(coverUpload);
-  details.append(coverRow);
-
   const coverPreview = el('img');
   coverPreview.alt = '';
-  coverPreview.style.cssText = 'max-width:220px;width:100%;border-radius:8px;display:block;margin-top:8px;background:var(--c-surface-container)';
+  coverPreview.style.cssText = 'max-width:220px;width:100%;border-radius:8px;display:block;margin-top:12px;background:var(--c-surface-container)';
   const syncCover = () => {
     const url = siteAssetUrl(coverInput.value.trim());
     coverPreview.hidden = !url;
@@ -741,12 +780,19 @@ function cardEditor(card, index) {
   };
   syncCover();
   coverInput.addEventListener('input', syncCover);
-  details.append(coverPreview);
+  cover.box.append(coverRow, coverPreview);
 
-  const accessWrap = el('div');
-  accessWrap.append(el('div', 'hint ts-title-small', '访问入口（视频/平台链接）'));
-  renderAccessEditor(accessWrap, card.access, (a) => { if (a) card.access = a; else delete card.access; });
-  details.append(accessWrap);
+  const media = section(details, '视频', '填了就在卡片和弹窗里显示「播放视频」按钮；不填则只显示封面。');
+  renderVideoEditor(media.grid, card.video, (v) => { if (v) card.video = v; else delete card.video; });
+
+  const links = section(details, '平台链接与联系方式',
+    '点开卡片后，底部出现的那排平台按钮。值是网址就跳转；是纯文本（例如 QQ 群号）就点了复制到剪贴板。');
+  renderAccessEditor(links.box, card.access, (a) => { if (a) card.access = a; else delete card.access; });
+
+  const show = section(details, '显示');
+  field(show.grid, '精选', bind(checkbox(card.featured), (v) => (card.featured = v)));
+  field(show.grid, '显示', bind(checkbox(card.visible), (v) => (card.visible = v)));
+
   return details;
 }
 
@@ -754,19 +800,23 @@ function cardEditor(card, index) {
 function bannerEditor(banner, index) {
   const shell = editorShell(index, banner.title || '未命名', () => { content.banners.splice(index, 1); renderBanners(); });
   const details = shell.details;
-  const grid = el('div', 'grid');
-  field(grid, '标题', bind(textArea(banner.title), (v) => { banner.title = v; shell.title.textContent = `${index + 1}. ${v || '未命名'}`; }));
-  field(grid, '圆点文字', bind(textInput(banner.label), (v) => (banner.label = v)));
-  field(grid, '简介', bind(textArea(banner.summary), (v) => (banner.summary = v)));
-  field(grid, '按钮文字', bind(textInput(banner.linkLabel), (v) => (banner.linkLabel = v)));
-  field(grid, '跳转分类', bind(textInput(banner.category, '留空＝全部'), (v) => (banner.category = v)));
-  field(grid, '显示', bind(checkbox(banner.visible), (v) => (banner.visible = v)));
-  details.append(grid);
 
-  const accessWrap = el('div');
-  accessWrap.append(el('div', 'hint ts-title-small', '访问入口：填了内容按钮就改为「打开信息面板」，留空则跳转到橱柜'));
-  renderAccessEditor(accessWrap, banner.access, (a) => { if (a) banner.access = a; else delete banner.access; });
-  details.append(accessWrap);
+  const text = section(details, '轮播文案');
+  field(text.grid, '标题', bind(textArea(banner.title), (v) => { banner.title = v; shell.title.textContent = `${index + 1}. ${v || '未命名'}`; }));
+  field(text.grid, '圆点文字', bind(textInput(banner.label), (v) => (banner.label = v)));
+  field(text.grid, '简介', bind(textArea(banner.summary), (v) => (banner.summary = v)));
+
+  const action = section(details, '按钮', '留空按钮文字就不显示按钮。');
+  field(action.grid, '按钮文字', bind(textInput(banner.linkLabel), (v) => (banner.linkLabel = v)));
+  field(action.grid, '跳转分类', bind(textInput(banner.category, '留空＝全部'), (v) => (banner.category = v)));
+
+  const links = section(details, '平台链接与联系方式',
+    '留空则按钮跳转到橱柜；填了内容，按钮就改为打开信息面板，并在面板里列出这些平台入口。');
+  renderAccessEditor(links.box, banner.access, (a) => { if (a) banner.access = a; else delete banner.access; });
+
+  const show = section(details, '显示');
+  field(show.grid, '显示', bind(checkbox(banner.visible), (v) => (banner.visible = v)));
+
   return details;
 }
 
@@ -892,29 +942,29 @@ function heroEditor() {
   header.append(el('div', 'title ts-title-medium', '顶部 Rive'));
   details.append(header);
 
-  const grid = el('div', 'grid');
-  const fallbackSrc = textInput(hero.fallback.src, './assets/xxx.webp');
-  field(grid, '区块名称（读屏）', bind(textInput(hero.ariaLabel), (v) => (hero.ariaLabel = v)));
-  field(grid, 'Rive 文件路径', bind(textInput(hero.rive.src, './assets/xxx.riv'), (v) => (hero.rive.src = v)));
-  field(grid, '画板名（留空用文件默认）', bind(textInput(hero.rive.artboard, 'Artboard 2'), (v) => (hero.rive.artboard = v)));
-  field(grid, '状态机名（留空用文件默认）', bind(textInput(hero.rive.stateMachine, 'State Machine 1'), (v) => (hero.rive.stateMachine = v)));
-  field(grid, '自动播放', bind(checkbox(hero.rive.autoplay !== false), (v) => (hero.rive.autoplay = v)));
-  field(grid, '兜底图片路径', bind(fallbackSrc, (v) => (hero.fallback.src = v)));
-  field(grid, '兜底图片说明', bind(textInput(hero.fallback.alt), (v) => (hero.fallback.alt = v)));
-  details.append(grid);
+  const basic = section(details, '基本信息');
+  field(basic.grid, '区块名称（读屏）', bind(textInput(hero.ariaLabel), (v) => (hero.ariaLabel = v)));
 
-  const previewLabel = el('div', 'hint ts-title-small', '兜底图预览（Rive 载入前或不可用时显示）');
+  const rive = section(details, 'Rive 文件', '画板和状态机留空就用文件里的默认值。');
+  field(rive.grid, 'Rive 文件路径', bind(textInput(hero.rive.src, './assets/xxx.riv'), (v) => (hero.rive.src = v)));
+  field(rive.grid, '画板名', bind(textInput(hero.rive.artboard, 'Artboard 2'), (v) => (hero.rive.artboard = v)));
+  field(rive.grid, '状态机名', bind(textInput(hero.rive.stateMachine, 'State Machine 1'), (v) => (hero.rive.stateMachine = v)));
+  field(rive.grid, '自动播放', bind(checkbox(hero.rive.autoplay !== false), (v) => (hero.rive.autoplay = v)));
+
+  const fallback = section(details, '兜底图片', 'Rive 载入前或不可用时显示这张图。');
+  const fallbackSrc = textInput(hero.fallback.src, './assets/xxx.webp');
+  field(fallback.grid, '兜底图片路径', bind(fallbackSrc, (v) => (hero.fallback.src = v)));
+  field(fallback.grid, '兜底图片说明', bind(textInput(hero.fallback.alt), (v) => (hero.fallback.alt = v)));
   const preview = el('img');
   preview.alt = '';
-  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--c-surface-container)';
+  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:12px;background:var(--c-surface-container)';
   const syncPreview = (url) => { preview.src = siteAssetUrl(url); preview.hidden = !url; };
   syncPreview(hero.fallback.src);
   fallbackSrc.addEventListener('input', () => syncPreview(fallbackSrc.value.trim()));
-  details.append(previewLabel, preview);
+  fallback.box.append(preview);
+
   return details;
 }
-
-// ---------- 联系方式 ----------
 
 function contactMethodEditor(methods, index, redraw) {
   const box = el('div', 'access-item');
@@ -958,12 +1008,11 @@ function contactEditor() {
   header.append(el('div', 'title ts-title-medium', '联系方式'));
   details.append(header);
 
-  const grid = el('div', 'grid');
-  field(grid, '整段显示', bind(checkbox(contact.visible !== false), (v) => (contact.visible = v)));
-  field(grid, '小标题', bind(textInput(contact.label), (v) => (contact.label = v)));
-  field(grid, '标题', bind(textArea(contact.title), (v) => (contact.title = v)));
-  field(grid, '说明', bind(textArea(contact.summary), (v) => (contact.summary = v)));
-  details.append(grid);
+  const basic = section(details, '整段文案');
+  field(basic.grid, '整段显示', bind(checkbox(contact.visible !== false), (v) => (contact.visible = v)));
+  field(basic.grid, '小标题', bind(textInput(contact.label), (v) => (contact.label = v)));
+  field(basic.grid, '标题', bind(textArea(contact.title), (v) => (contact.title = v)));
+  field(basic.grid, '说明', bind(textArea(contact.summary), (v) => (contact.summary = v)));
 
   const list = el('div', 'editor-list');
   const redraw = () => {
@@ -972,11 +1021,11 @@ function contactEditor() {
     details.dataset.methodCount = String(contact.methods.length);
   };
   redraw();
-  details.append(el('div', 'hint ts-title-small', '联系方式条目（没有条目时整段不显示）'), list);
+  const methods = section(details, '联系方式条目', '没有条目时整段不显示。');
+  methods.box.append(list);
+
   return details;
 }
-
-// ---------- 公告弹窗 ----------
 
 function noticeEditor() {
   if (!content.notice) content.notice = { ...NOTICE_TEMPLATE };
@@ -986,19 +1035,17 @@ function noticeEditor() {
   header.append(el('div', 'title ts-title-medium', '公告弹窗'));
   details.append(header);
 
-  const grid = el('div', 'grid');
-  const imageSrc = textInput(notice.image, './assets/xxx.webp');
-  field(grid, '打开时弹出', bind(checkbox(notice.enabled === true), (v) => (notice.enabled = v)));
-  field(grid, '标题', bind(textInput(notice.title), (v) => (notice.title = v)));
-  field(grid, '正文（支持换行）', bind(textArea(notice.body), (v) => (notice.body = v)));
-  field(grid, '图片路径（可留空）', bind(imageSrc, (v) => (notice.image = v)));
-  field(grid, '按钮文字（可留空）', bind(textInput(notice.linkLabel), (v) => (notice.linkLabel = v)));
-  field(grid, '按钮链接（可留空）', bind(textInput(notice.linkHref, 'https://…'), (v) => (notice.linkHref = v)));
-  details.append(grid);
+  const basic = section(details, '弹窗内容', '「打开时弹出」是总开关：关闭后网页打开时不再出现弹窗。弹窗右上角始终可以关闭。');
+  field(basic.grid, '打开时弹出', bind(checkbox(notice.enabled === true), (v) => (notice.enabled = v)));
+  field(basic.grid, '标题', bind(textInput(notice.title), (v) => (notice.title = v)));
+  field(basic.grid, '正文（支持换行）', bind(textArea(notice.body), (v) => (notice.body = v)));
 
+  const image = section(details, '弹窗图片（可选）');
+  const imageSrc = textInput(notice.image, './assets/xxx.webp');
+  field(image.grid, '图片路径', bind(imageSrc, (v) => (notice.image = v)));
   const preview = el('img');
   preview.alt = '';
-  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--c-surface-container)';
+  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:12px;background:var(--c-surface-container)';
   const syncPreview = () => {
     const url = siteAssetUrl(imageSrc.value.trim());
     preview.hidden = !url;
@@ -1006,8 +1053,12 @@ function noticeEditor() {
   };
   syncPreview();
   imageSrc.addEventListener('input', syncPreview);
-  details.append(el('div', 'hint ts-title-small', '图片预览'), preview);
-  details.append(el('p', 'hint', '「打开时弹出」是总开关：关闭后网页打开时不再出现弹窗。弹窗右上角始终可以关闭。'));
+  image.box.append(preview);
+
+  const button = section(details, '弹窗按钮（可选）', '按钮文字和链接都填了才会显示按钮。');
+  field(button.grid, '按钮文字', bind(textInput(notice.linkLabel), (v) => (notice.linkLabel = v)));
+  field(button.grid, '按钮链接', bind(textInput(notice.linkHref, 'https://…'), (v) => (notice.linkHref = v)));
+
   return details;
 }
 
@@ -1332,6 +1383,9 @@ function validateContent(value) {
         // url 会被站点渲染成可点击链接，必须是 http(s) 地址；纯文本（群号、iframe 代码等）应当填在 value。
         if (String(item.url || '').trim() && !httpUrlOk(item.url)) {
           throw new Error(`${entry.id} 的访问入口 ${itemIndex + 1} 的 url 不是 http(s) 链接，纯文本请填在 value 字段`);
+        }
+        if (item.copyable != null && typeof item.copyable !== 'boolean') {
+          throw new Error(`${entry.id} 的访问入口 ${itemIndex + 1} 的 copyable 必须是布尔值`);
         }
       });
     }

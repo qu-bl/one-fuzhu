@@ -25,7 +25,9 @@
   }
   function accessAction(item) {
     const value = item.url || item.value;
-    if (item.copyable === false || typeof value !== 'string' || !value.trim() || /待发布|待替换|展示样例/.test(value)) return {type:'unavailable'};
+    // 是否开放只看显式的 copyable:false，不再靠「值里含待发布/待替换」这类魔法词——
+    // 那种写法在管理台里完全看不出来，改了字却不知道按钮为什么是灰的。
+    if (item.copyable === false || typeof value !== 'string' || !value.trim()) return {type:'unavailable'};
     const href = webUrl(value);
     if (item.action === 'copy' || item.platform === 'qq') return {type:'copy', value};
     if (href) return {type:'link', href};
