@@ -4,142 +4,144 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>千机百变 · 内容与翻译管理</title>
-<!--
-  Material 3 组件与字体全部本地自托管，不依赖 esm.run / fonts.googleapis.com 等境外 CDN。
-
-  只打包本页真正用到的 14 个组件（不用 all.js）：全量 477 KB / gzip 81 KB，
-  精简后 243 KB / gzip 50 KB。新增组件时记得在 entry.js 里补上对应 import。
-
-  重新生成 tools/vendor/material-web.js：
-
-    mkdir -p /tmp/mwbuild && cd /tmp/mwbuild
-    printf '{"name":"mwbuild","private":true,"type":"module"}' > package.json
-    cat > entry.js <<'ENTRY'
-    import '@material/web/textfield/outlined-text-field.js';
-    import '@material/web/select/outlined-select.js';
-    import '@material/web/select/select-option.js';
-    import '@material/web/checkbox/checkbox.js';
-    import '@material/web/button/outlined-button.js';
-    import '@material/web/button/filled-button.js';
-    import '@material/web/button/text-button.js';
-    import '@material/web/iconbutton/icon-button.js';
-    import '@material/web/list/list.js';
-    import '@material/web/list/list-item.js';
-    import '@material/web/divider/divider.js';
-    import '@material/web/elevation/elevation.js';
-    import '@material/web/progress/linear-progress.js';
-    import '@material/web/dialog/dialog.js';
-    export { styles as typescaleStyles } from '@material/web/typography/md-typescale-styles.js';
-    ENTRY
-    npm i @material/web@2.5.0 esbuild@0.25.9
-    ./node_modules/.bin/esbuild entry.js --bundle --format=esm --minify --target=es2022 \
-      --legal-comments=eof --outfile=material-web.js
-    cp material-web.js <repo>/tools/vendor/material-web.js
-    cp node_modules/@material/web/LICENSE <repo>/tools/vendor/material-web.LICENSE
--->
-<script type="module">
-  window.__MATERIAL_ERROR__ = '';
-  try {
-    const mod = await import('./vendor/material-web.js');
-    const typescale = mod.typescaleStyles;
-    if (typescale?.styleSheet) document.adoptedStyleSheets.push(typescale.styleSheet);
-  } catch (error) {
-    window.__MATERIAL_ERROR__ = error?.message || String(error);
-  }
-  window.dispatchEvent(new Event('material-ready'));
-</script>
+<!-- 本页不依赖任何第三方前端库或境外 CDN：没有外部 JS，样式全部写在下方 <style> 里。
+     颜色沿用 Material 3 的 token 命名与取值（前缀 --c-），只是为了方便对照设计规范，
+     并不引入 @material/web —— 后台工具用不到组件库，省掉约 240 KB 依赖。 -->
 <style>
   :root {
     color-scheme: light;
-    /* 不加载 Google Fonts：Roboto 没有中文字形，中文本来就走系统字体回落。 */
-    --md-ref-typeface-brand: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
-    --md-ref-typeface-plain: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
-    --md-sys-color-primary: #445e91;
-    --md-sys-color-on-primary: #ffffff;
-    --md-sys-color-primary-container: #d9e2ff;
-    --md-sys-color-on-primary-container: #001a41;
-    --md-sys-color-secondary-container: #dce2f2;
-    --md-sys-color-on-secondary-container: #171b25;
-    --md-sys-color-surface: #fbf8ff;
-    --md-sys-color-surface-container: #eeedf4;
-    --md-sys-color-surface-container-low: #f5f3fa;
-    --md-sys-color-surface-container-high: #e8e7ed;
-    --md-sys-color-on-surface: #1b1b20;
-    --md-sys-color-on-surface-variant: #45464f;
-    --md-sys-color-outline: #767780;
-    --md-sys-color-outline-variant: #c6c6d0;
-    --md-sys-color-error: #ba1a1a;
-    --md-sys-color-on-error: #ffffff;
-    --md-sys-color-error-container: #ffdad6;
-    --md-sys-color-on-error-container: #410002;
-    /* M3 elevation 阴影规范值。@material/web 的 md-elevation 只提供色调叠加，
-       不含阴影，因此需要阴影的地方用这些值（与 md-elevation 并用即为完整 elevation）。 */
-    --md-sys-elevation-level1: 0 1px 2px 0 rgb(0 0 0 / .30), 0 1px 3px 1px rgb(0 0 0 / .15);
-    --md-sys-elevation-level2: 0 1px 2px 0 rgb(0 0 0 / .30), 0 2px 6px 2px rgb(0 0 0 / .15);
+    /* 字体：系统字体栈。不加载 Google Fonts —— Roboto 没有中文字形，中文本来就走系统回落。 */
+    --font: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+    --font-mono: ui-monospace, Menlo, Consolas, monospace;
+    /* 颜色沿用 Material 3 的 token 取值，仅把命名改成 --c-*，便于与设计规范对照。 */
+    --c-primary: #445e91;
+    --c-on-primary: #ffffff;
+    --c-primary-container: #d9e2ff;
+    --c-on-primary-container: #001a41;
+    --c-secondary-container: #dce2f2;
+    --c-on-secondary-container: #171b25;
+    --c-surface: #fbf8ff;
+    --c-surface-container: #eeedf4;
+    --c-surface-container-low: #f5f3fa;
+    --c-surface-container-high: #e8e7ed;
+    --c-on-surface: #1b1b20;
+    --c-on-surface-variant: #45464f;
+    --c-outline: #767780;
+    --c-outline-variant: #c6c6d0;
+    --c-error: #ba1a1a;
+    --c-on-error: #ffffff;
+    --c-error-container: #ffdad6;
+    --c-on-error-container: #410002;
+    /* M3 elevation 阴影规范值。 */
+    --elev-1: 0 1px 2px 0 rgb(0 0 0 / .30), 0 1px 3px 1px rgb(0 0 0 / .15);
+    --elev-2: 0 1px 2px 0 rgb(0 0 0 / .30), 0 2px 6px 2px rgb(0 0 0 / .15);
+    /* 形状与尺寸（M3 形状标度：medium 12 / small 8 / full 999）。 */
+    --r-m: 12px;
+    --r-s: 8px;
+    --r-full: 999px;
+    --control-h: 44px;
   }
   * { box-sizing: border-box; }
-  body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--md-sys-color-surface-container-low); color:var(--md-sys-color-on-surface); font-family:var(--md-ref-typeface-plain); }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--c-surface-container-low); color:var(--c-on-surface); font-family:var(--font); }
 
-  /* 顶栏 elevation：md-elevation 提供色调叠加，M3 level 2 阴影由 token 提供。 */
-  header.app-bar { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 20px; background:var(--md-sys-color-surface); box-shadow:var(--md-sys-elevation-level2); }
+  header.app-bar { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 20px; background:var(--c-surface); box-shadow:var(--elev-2); }
   header.app-bar h1 { margin:0; }
-  header.app-bar .repo { color:var(--md-sys-color-on-surface-variant); }
-  header.app-bar md-linear-progress { position:absolute; inset:auto 0 0; width:100%; }
+  header.app-bar .repo { color:var(--c-on-surface-variant); }
 
   /* 侧边栏铺满整个左侧（从页头到底部），与页面同色：无卡片、无圆角、无边框。 */
   .shell { flex:1; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:stretch; }
-  .sidebar { position:sticky; top:var(--header-h, 61px); align-self:start; width:240px; max-height:calc(100vh - var(--header-h, 61px)); overflow:auto; padding:8px 12px 20px; background:var(--md-sys-color-surface-container-low); transition:width 180ms ease; }
+  .sidebar { position:sticky; top:var(--header-h, 61px); align-self:start; width:240px; max-height:calc(100vh - var(--header-h, 61px)); overflow:auto; padding:8px 12px 20px; background:var(--c-surface-container-low); transition:width 180ms ease; }
   .sidebar[data-collapsed="true"] { width:72px; }
   .sidebar[data-collapsed="true"] .nav-groups { display:none; }
   .sidebar-head { display:flex; justify-content:flex-end; }
   .sidebar[data-collapsed="true"] .sidebar-head { justify-content:center; }
   /* 折叠后箭头翻转，指向展开方向。 */
-  #navToggle svg { width:24px; height:24px; fill:currentColor; transition:transform 180ms ease; }
+  #navToggle svg { display:block; width:24px; height:24px; fill:currentColor; transition:transform 180ms ease; }
   .sidebar[data-collapsed="true"] #navToggle svg { transform:scaleX(-1); }
 
-  /* md-list 自带容器色，置透明以露出侧边栏底色；选中态由 md-list-item 的 selected 提供。 */
+  /* 导航：M3 导航抽屉的选中态 = secondary-container 药丸 + 标签加重。 */
   .nav-groups { display:flex; flex-direction:column; gap:4px; }
-  .nav-groups md-list { padding:0; --md-list-container-color:transparent; }
-  .nav-groups md-divider { margin:8px 0; }
-  /* md-list-item 本身没有 selected 状态（Material Web 不含导航抽屉组件），
-     这里按 M3 导航抽屉规范自己实现选中态：secondary-container 药丸指示器 + 标签加重。
-     内部容器是 background:none，所以宿主的背景能透出来；标签色用官方 token 覆盖。 */
-  .nav-groups md-list-item[data-active] {
-    background: var(--md-sys-color-secondary-container);
-    border-radius: 999px;
-    --md-list-item-label-text-color: var(--md-sys-color-on-secondary-container);
-    --md-list-item-label-text-weight: 700;
-  }
+  .nav-item { appearance:none; margin:0; border:0; background:transparent; color:var(--c-on-surface-variant); font:inherit; text-align:left; padding:0 16px; min-height:48px; border-radius:var(--r-full); cursor:pointer; white-space:nowrap; }
+  .nav-item:hover { background:var(--c-surface-container); }
+  .nav-item[data-active] { background:var(--c-secondary-container); color:var(--c-on-secondary-container); font-weight:700; }
+  .nav-item:focus-visible { outline:2px solid var(--c-primary); outline-offset:2px; }
+  .divider { border:0; border-top:1px solid var(--c-outline-variant); margin:8px 0; }
 
   main { display:flex; flex-direction:column; gap:16px; min-width:0; padding:20px; }
-  md-outlined-text-field, md-outlined-select { width:100%; }
   .bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-  .bar > md-outlined-text-field { flex:1 1 280px; }
-  .status { min-height:24px; color:var(--md-sys-color-on-surface-variant); }
+  .status { min-height:24px; color:var(--c-on-surface-variant); }
   .status.ok { color:#146c2e; }
-  .status.err { color:var(--md-sys-color-error); }
-  /* M3 形状规范：面板 medium(12px)，嵌套容器 small(8px)。 */
-  .surface { background:var(--md-sys-color-surface); border-radius:12px; padding:20px; }
+  .status.err { color:var(--c-error); }
+  .surface { background:var(--c-surface); border-radius:var(--r-m); padding:20px; }
   .editor-list { display:flex; flex-direction:column; gap:16px; margin-top:16px; }
   .editor { display:flex; flex-direction:column; gap:16px; }
   .editor-header { display:flex; gap:12px; align-items:center; }
   .editor-header .title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:4px; }
   .field-wide { grid-column:1 / -1; }
-  .check-field { display:flex; gap:10px; align-items:center; min-height:48px; color:var(--md-sys-color-on-surface-variant); }
   .row { display:flex; gap:12px; align-items:center; margin-top:12px; flex-wrap:wrap; }
-  .row > md-outlined-text-field { flex:1 1 220px; }
-  .access-item { background:var(--md-sys-color-surface-container); border-radius:8px; padding:16px; margin-top:12px; }
+  .access-item { background:var(--c-surface-container); border-radius:var(--r-s); padding:16px; margin-top:12px; }
   .translation-toolbar { display:grid; grid-template-columns:minmax(180px,1fr) auto auto; gap:8px; align-items:center; }
   .translation-list { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
   .translation-row { display:grid; grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) auto; gap:8px; align-items:start; }
-  .translation-row .source { min-height:56px; padding:16px; border-radius:8px; background:var(--md-sys-color-surface-container); overflow-wrap:anywhere; }
-  .translation-row.missing .source { background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); }
-  .stats { display:flex; gap:12px; flex-wrap:wrap; color:var(--md-sys-color-on-surface-variant); }
+  .translation-row .source { min-height:56px; padding:16px; border-radius:var(--r-s); background:var(--c-surface-container); overflow-wrap:anywhere; }
+  .translation-row.missing .source { background:var(--c-error-container); color:var(--c-on-error-container); }
+  .stats { display:flex; gap:12px; flex-wrap:wrap; color:var(--c-on-surface-variant); }
   .pager { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; }
-  .hint { color:var(--md-sys-color-on-surface-variant); margin-top:8px; }
-  #raw { min-height:60vh; --md-outlined-text-field-input-text-font:ui-monospace,Menlo,Consolas,monospace; }
-  .danger { --md-text-button-label-text-color:var(--md-sys-color-error); }
+  .hint { color:var(--c-on-surface-variant); margin-top:8px; }
+  #raw { min-height:60vh; font-family:var(--font-mono); }
+
+  /* ---------- 表单控件（原生元素 + M3 取值） ---------- */
+  .field { display:flex; flex-direction:column; gap:6px; width:100%; min-width:0; }
+  .field-label { font-size:12px; line-height:1.3; color:var(--c-on-surface-variant); }
+  .field-support { font-size:12px; line-height:1.3; color:var(--c-on-surface-variant); }
+  .field-input { width:100%; min-height:var(--control-h); padding:10px 14px; border:1px solid var(--c-outline); border-radius:var(--r-s); background:var(--c-surface); color:var(--c-on-surface); font:inherit; }
+  .field-input::placeholder { color:var(--c-on-surface-variant); opacity:.7; }
+  .field-input:focus-visible { outline:none; border-color:var(--c-primary); box-shadow:inset 0 0 0 1px var(--c-primary); }
+  .field-input:disabled { opacity:.5; cursor:not-allowed; }
+  textarea.field-input { min-height:88px; resize:vertical; }
+  select.field-input { cursor:pointer; }
+  .bar > .field { flex:1 1 280px; }
+  .row > .field { flex:1 1 220px; }
+
+  .check-field { display:flex; gap:10px; align-items:center; min-height:var(--control-h); color:var(--c-on-surface-variant); cursor:pointer; }
+  .check-field input[type="checkbox"] { width:18px; height:18px; margin:0; accent-color:var(--c-primary); }
+
+  /* ---------- 按钮（M3 三种形态） ---------- */
+  .btn { appearance:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 20px; border:1px solid transparent; border-radius:var(--r-full); background:transparent; color:var(--c-primary); font:inherit; font-weight:500; cursor:pointer; white-space:nowrap; }
+  .btn:hover { background:color-mix(in srgb, currentColor 8%, transparent); }
+  .btn:focus-visible { outline:2px solid var(--c-primary); outline-offset:2px; }
+  .btn:disabled { opacity:.38; cursor:not-allowed; background:transparent; }
+  .btn--filled { background:var(--c-primary); color:var(--c-on-primary); }
+  .btn--filled:hover { background:color-mix(in srgb, var(--c-primary) 88%, var(--c-on-primary)); }
+  .btn--filled:disabled { background:var(--c-on-surface); color:var(--c-surface); }
+  .btn--outlined { border-color:var(--c-outline); }
+  .btn--text { padding:0 12px; }
+  .btn--text.danger { color:var(--c-error); }
+  .btn-icon { appearance:none; display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; padding:0; border:0; border-radius:var(--r-full); background:transparent; color:var(--c-on-surface-variant); cursor:pointer; flex-shrink:0; }
+  .btn-icon:hover { background:var(--c-surface-container); }
+  .btn-icon:focus-visible { outline:2px solid var(--c-primary); outline-offset:2px; }
+
+  /* ---------- 顶栏进度条 ---------- */
+  .progress { position:absolute; inset:auto 0 0; height:4px; overflow:hidden; background:var(--c-primary-container); }
+  .progress::after { content:""; position:absolute; inset:0 auto 0 0; width:40%; background:var(--c-primary); animation:progress-slide 1.4s ease-in-out infinite; }
+  @keyframes progress-slide { 0% { transform:translateX(-100%); } 100% { transform:translateX(350%); } }
+
+  /* ---------- 对话框 ---------- */
+  dialog { width:min(560px, calc(100vw - 32px)); padding:0; border:0; border-radius:28px; background:var(--c-surface-container-high); color:var(--c-on-surface); box-shadow:var(--elev-2); }
+  dialog::backdrop { background:rgb(0 0 0 / .55); }
+  .dialog-head { padding:24px 24px 0; font-size:20px; font-weight:500; }
+  .dialog-body { padding:16px 24px; color:var(--c-on-surface-variant); }
+  .dialog-actions { display:flex; justify-content:flex-end; gap:8px; padding:0 16px 16px; }
+  .dialog-wide { width:min(760px, calc(100vw - 32px)); }
+
+  /* ---------- 排版（M3 typescale 取值，按需取用） ---------- */
+  .ts-title-large { font-size:22px; line-height:1.27; font-weight:400; }
+  .ts-title-medium { font-size:16px; line-height:1.5; font-weight:500; }
+  .ts-title-small { font-size:14px; line-height:1.4; font-weight:500; }
+  .ts-body-medium { font-size:14px; line-height:1.4; font-weight:400; }
+  .ts-body-small { font-size:12px; line-height:1.33; font-weight:400; }
+  .ts-label-large { font-size:14px; line-height:1.43; font-weight:500; }
   [hidden], .hidden { display:none !important; }
   @media (max-width:900px) {
     /* 窄屏改为顶部横向导航，折叠按钮在此布局下没有意义，隐藏。 */
@@ -150,10 +152,9 @@
     .sidebar-head { display:none; }
     .nav-groups { flex-direction:row; align-items:center; gap:0; overflow-x:auto; scrollbar-width:none; }
     .nav-groups::-webkit-scrollbar { display:none; }
-    .nav-groups md-list { display:flex; flex-direction:row; }
-    .nav-groups md-divider { display:none; }
     /* 横排时不要让标签折行：宽度够就铺开，不够就横向滚动。 */
-    .nav-groups md-list-item { flex:0 0 auto; white-space:nowrap; }
+    .nav-item { flex:0 0 auto; }
+    .divider { display:none; }
     main { padding:12px; }
   }
   @media (max-width:680px) {
@@ -165,87 +166,70 @@
 </head>
 <body>
 <header class="app-bar">
-  <h1 class="md-typescale-title-large">内容与翻译管理</h1>
-  <span class="repo md-typescale-body-medium" id="repoLabel"></span>
+  <h1 class="ts-title-large">内容与翻译管理</h1>
+  <span class="repo ts-body-medium" id="repoLabel"></span>
   <span style="flex:1"></span>
-  <md-text-button id="loadBtn">重新加载</md-text-button>
-  <md-filled-button id="saveBtn" disabled>保存并发布</md-filled-button>
-  <md-linear-progress id="progress" indeterminate hidden></md-linear-progress>
-  <md-elevation level="2"></md-elevation>
+  <button class="btn btn--text" id="loadBtn" type="button">重新加载</button>
+  <button class="btn btn--filled" id="saveBtn" type="button" disabled>保存并发布</button>
+  <div class="progress" id="progress" hidden></div>
 </header>
 
 <div class="shell">
   <aside class="sidebar" id="sidebar" data-collapsed="false">
     <div class="sidebar-head">
-      <md-icon-button id="navToggle" aria-label="折叠导航" title="折叠导航" aria-expanded="true">
+      <button class="btn-icon" id="navToggle" type="button" aria-label="折叠导航" title="折叠导航" aria-expanded="true">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-      </md-icon-button>
+      </button>
     </div>
     <nav class="nav-groups" id="nav" aria-label="管理内容">
-      <md-list>
-        <md-list-item class="nav-item" type="button" data-view="banners" data-active aria-current="page">
-          <div slot="headline">顶部轮播</div>
-        </md-list-item>
-        <md-list-item class="nav-item" type="button" data-view="hero">
-          <div slot="headline">顶部 Rive</div>
-        </md-list-item>
-        <md-list-item class="nav-item" type="button" data-view="cards">
-          <div slot="headline">创意橱柜</div>
-        </md-list-item>
-        <md-list-item class="nav-item" type="button" data-view="contact">
-          <div slot="headline">联系方式</div>
-        </md-list-item>
-        <md-list-item class="nav-item" type="button" data-view="notice">
-          <div slot="headline">弹窗</div>
-        </md-list-item>
-      </md-list>
-      <md-divider></md-divider>
-      <md-list>
-        <md-list-item class="nav-item" type="button" data-view="translations">
-          <div slot="headline">Rive 翻译</div>
-        </md-list-item>
-        <md-list-item class="nav-item" type="button" data-view="raw">
-          <div slot="headline">官网 JSON</div>
-        </md-list-item>
-      </md-list>
+      <button class="nav-item" type="button" data-view="banners" data-active aria-current="page">顶部轮播</button>
+      <button class="nav-item" type="button" data-view="hero">顶部 Rive</button>
+      <button class="nav-item" type="button" data-view="cards">创意橱柜</button>
+      <button class="nav-item" type="button" data-view="contact">联系方式</button>
+      <button class="nav-item" type="button" data-view="notice">弹窗</button>
+      <hr class="divider">
+      <button class="nav-item" type="button" data-view="translations">Rive 翻译</button>
+      <button class="nav-item" type="button" data-view="raw">官网 JSON</button>
     </nav>
   </aside>
 
   <main id="workspace">
     <div class="surface">
-      <div class="bar">
-        <md-outlined-text-field id="tokenInput" type="password" label="GitHub Token" supporting-text="仅保留到当前浏览器会话"></md-outlined-text-field>
-      </div>
-      <div class="status md-typescale-body-medium" id="status" role="status" aria-live="polite"></div>
+      <label class="field">
+        <span class="field-label">GitHub Token</span>
+        <input class="field-input" id="tokenInput" type="password" autocomplete="off">
+        <span class="field-support">仅保留到当前浏览器会话</span>
+      </label>
+      <div class="status ts-body-medium" id="status" role="status" aria-live="polite"></div>
     </div>
 
   <section id="viewBanners" role="region" aria-label="顶部轮播">
-    <div class="bar"><md-outlined-button id="addBanner">添加横幅</md-outlined-button><span class="hint">按列表顺序轮播；关闭「显示」即从轮播中移除。</span></div>
+    <div class="bar"><button class="btn btn--outlined" id="addBanner" type="button">添加横幅</button><span class="hint">按列表顺序轮播；关闭「显示」即从轮播中移除。</span></div>
     <div id="banners" class="editor-list"></div>
   </section>
 
   <section id="viewHero" role="region" aria-label="顶部 Rive" hidden>
     <div class="bar">
-      <md-outlined-button id="uploadHeroRive">上传 .riv 文件</md-outlined-button>
-      <md-outlined-button id="uploadHeroFallback">上传兜底图片</md-outlined-button>
+      <button class="btn btn--outlined" id="uploadHeroRive" type="button">上传 .riv 文件</button>
+      <button class="btn btn--outlined" id="uploadHeroFallback" type="button">上传兜底图片</button>
       <span class="hint">上传的文件随「保存并发布」一起写入仓库，并自动加版本号绕过缓存。</span>
     </div>
     <div id="hero" class="editor-list"></div>
   </section>
 
   <section id="viewCards" role="region" aria-label="创意橱柜" hidden>
-    <div class="bar"><md-outlined-button id="addCard">添加卡片</md-outlined-button><span class="hint">按列表顺序显示；勾选「精选」的卡片会进入橱柜顶部轮播。</span></div>
+    <div class="bar"><button class="btn btn--outlined" id="addCard" type="button">添加卡片</button><span class="hint">按列表顺序显示；勾选「精选」的卡片会进入橱柜顶部轮播。</span></div>
     <div id="cards" class="editor-list"></div>
   </section>
 
   <section id="viewContact" role="region" aria-label="联系方式" hidden>
-    <div class="bar"><md-outlined-button id="addContactMethod">添加联系方式</md-outlined-button><span class="hint">关闭「显示」即整段隐藏。</span></div>
+    <div class="bar"><button class="btn btn--outlined" id="addContactMethod" type="button">添加联系方式</button><span class="hint">关闭「显示」即整段隐藏。</span></div>
     <div id="contact" class="editor-list"></div>
   </section>
 
   <section id="viewNotice" role="region" aria-label="弹窗" hidden>
     <div class="bar">
-      <md-outlined-button id="uploadNoticeImage">上传弹窗图片</md-outlined-button>
+      <button class="btn btn--outlined" id="uploadNoticeImage" type="button">上传弹窗图片</button>
       <span class="hint">「打开时弹出」关闭后，网页打开时不再出现弹窗。</span>
     </div>
     <div id="notice" class="editor-list"></div>
@@ -253,57 +237,60 @@
 
   <section id="viewTranslations" role="region" aria-label="Rive 翻译" hidden>
     <div class="surface">
-      <h2 class="md-typescale-title-medium">AI 筛选与翻译</h2>
+      <h2 class="ts-title-medium">AI 筛选与翻译</h2>
       <div class="row">
-        <md-outlined-text-field id="aiBase" label="API 基础地址" placeholder="https://服务地址/v1"></md-outlined-text-field>
-        <md-outlined-text-field id="aiModel" label="模型名称"></md-outlined-text-field>
-        <md-outlined-text-field id="aiKey" type="password" label="AI API 密钥" supporting-text="仅当前页面保留，不上传到仓库"></md-outlined-text-field>
+        <label class="field"><span class="field-label">API 基础地址</span><input class="field-input" id="aiBase" type="text" placeholder="https://服务地址/v1"></label>
+        <label class="field"><span class="field-label">模型名称</span><input class="field-input" id="aiModel" type="text"></label>
+        <label class="field"><span class="field-label">AI API 密钥</span><input class="field-input" id="aiKey" type="password" autocomplete="off"><span class="field-support">仅当前页面保留，不上传到仓库</span></label>
       </div>
-      <md-filled-button id="aiReportBtn">导入报告，AI 筛选翻译并发布</md-filled-button>
+      <div class="row"><button class="btn btn--filled" id="aiReportBtn" type="button">导入报告，AI 筛选翻译并发布</button></div>
       <input id="aiReportFile" class="hidden" type="file" accept="application/json,.json">
       <p class="hint">使用兼容 Chat Completions 的接口，服务需允许浏览器跨域访问。去除明显无关项后，将候选原文发送给所配置的 AI；模型筛选不能保证识别所有私人名称，请先移除敏感内容。全部批次成功后自动发布翻译及日期版本、哈希，不发布官网编辑。</p>
       <details><summary>本次筛选结果</summary><pre id="aiResults" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>
     </div>
     <div class="surface">
       <div class="translation-toolbar">
-        <md-outlined-text-field id="translationSearch" type="search" label="搜索词典"></md-outlined-text-field>
-        <md-outlined-button id="importReportBtn">导入未翻译报告</md-outlined-button>
+        <label class="field"><span class="field-label">搜索词典</span><input class="field-input" id="translationSearch" type="search"></label>
+        <button class="btn btn--outlined" id="importReportBtn" type="button">导入未翻译报告</button>
         <input id="reportFile" class="hidden" type="file" accept="application/json,.json">
-        <label class="check-field"><md-checkbox id="missingOnly" touch-target="wrapper"></md-checkbox>只看待翻译</label>
+        <label class="check-field"><input type="checkbox" id="missingOnly">只看待翻译</label>
       </div>
       <div class="row">
-        <md-outlined-text-field id="newSource" label="英文原文"></md-outlined-text-field>
-        <md-outlined-text-field id="newTranslation" label="中文译文"></md-outlined-text-field>
-        <md-outlined-button id="addTranslation">添加词条</md-outlined-button>
+        <label class="field"><span class="field-label">英文原文</span><input class="field-input" id="newSource" type="text"></label>
+        <label class="field"><span class="field-label">中文译文</span><input class="field-input" id="newTranslation" type="text"></label>
+        <button class="btn btn--outlined" id="addTranslation" type="button">添加词条</button>
       </div>
-      <div class="stats md-typescale-body-medium" id="translationStats"></div>
-      <div class="hint md-typescale-body-small">可直接导入三端导出的 rive-editor-unmatched-report.json。空译文不会写入云端，发布时会同步更新契约与发布清单的哈希。</div>
+      <div class="stats ts-body-medium" id="translationStats"></div>
+      <div class="hint ts-body-small">可直接导入三端导出的 rive-editor-unmatched-report.json。空译文不会写入云端，发布时会同步更新契约与发布清单的哈希。</div>
       <div id="translations" class="translation-list"></div>
       <div class="pager">
-        <md-text-button id="translationPrev">上一页</md-text-button>
-        <span id="translationPage" class="hint md-typescale-label-large"></span>
-        <md-text-button id="translationNext">下一页</md-text-button>
+        <button class="btn btn--text" id="translationPrev" type="button">上一页</button>
+        <span id="translationPage" class="hint ts-label-large"></span>
+        <button class="btn btn--text" id="translationNext" type="button">下一页</button>
       </div>
     </div>
   </section>
 
   <section id="viewRaw" role="region" aria-label="官网 JSON" hidden>
     <div class="surface">
-      <md-outlined-text-field id="raw" type="textarea" rows="24" label="官网 JSON" spellcheck="false"></md-outlined-text-field>
-      <div class="hint md-typescale-body-small">这里是最终发布的官网内容，可整体粘贴或编辑。切换到其他页面前必须保持 JSON 合法。</div>
+      <label class="field">
+        <span class="field-label">官网 JSON</span>
+        <textarea class="field-input" id="raw" rows="24" spellcheck="false"></textarea>
+      </label>
+      <div class="hint ts-body-small">这里是最终发布的官网内容，可整体粘贴或编辑。切换到其他页面前必须保持 JSON 合法。</div>
     </div>
   </section>
   </main>
 </div>
 
-<md-dialog id="confirmDialog">
-  <div slot="headline">确认操作</div>
-  <div slot="content" id="confirmMessage"></div>
-  <div slot="actions">
-    <md-text-button id="confirmCancel">取消</md-text-button>
-    <md-filled-button id="confirmAccept">确认</md-filled-button>
+<dialog id="confirmDialog">
+  <div class="dialog-head">确认操作</div>
+  <div class="dialog-body" id="confirmMessage"></div>
+  <div class="dialog-actions">
+    <button class="btn btn--text" id="confirmCancel" type="button">取消</button>
+    <button class="btn btn--filled" id="confirmAccept" type="button">确认</button>
   </div>
-</md-dialog>
+</dialog>
 
 <script>
 // ===== 写死的配置（只改这里） =====
@@ -377,8 +364,9 @@ const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 const setStatus = (msg, kind = '') => { const s = $('status'); s.textContent = msg; s.className = 'status ' + kind; };
 const actionButton = (text, kind = 'outlined') => {
-  const tag = kind === 'filled' ? 'md-filled-button' : kind === 'text' || kind === 'danger' ? 'md-text-button' : 'md-outlined-button';
-  const button = el(tag, kind === 'danger' ? 'danger' : '', text);
+  const variant = kind === 'filled' ? 'btn--filled' : (kind === 'text' || kind === 'danger') ? 'btn--text' : 'btn--outlined';
+  const button = el('button', `btn ${variant}${kind === 'danger' ? ' danger' : ''}`, text);
+  button.type = 'button';
   return button;
 };
 function setBusy(value) {
@@ -403,11 +391,12 @@ async function confirmAction(message) {
   $('confirmMessage').textContent = message;
   dialog.returnValue = '';
   return new Promise(async (resolve) => {
+    // 原生 <dialog>：close 事件 + showModal()（原来等的是 Material 的 closed/show）。
     const finish = () => resolve(dialog.returnValue === 'accept');
-    dialog.addEventListener('closed', finish, { once: true });
+    dialog.addEventListener('close', finish, { once: true });
     $('confirmCancel').onclick = () => dialog.close('cancel');
     $('confirmAccept').onclick = () => dialog.close('accept');
-    await dialog.show();
+    dialog.showModal();
   });
 }
 
@@ -492,35 +481,55 @@ async function loadContent() {
   }
 }
 
+// 原生控件工厂。故意保持与之前相同的调用签名，所以 40 处编辑器调用点无需改动。
 function field(parent, labelText, input) {
-  if (input.tagName === 'MD-CHECKBOX') {
+  if (input.type === 'checkbox') {
     const label = el('label', 'check-field');
     label.append(input, document.createTextNode(labelText));
     parent.append(label);
     return;
   }
-  input.label = labelText;
-  if (input.type === 'textarea') input.classList.add('field-wide');
-  parent.append(input);
+  // 其余控件包一层 .field：标签单独一行，多行文本框占满整行。
+  const wrap = el('label', 'field');
+  if (input.tagName === 'TEXTAREA') wrap.classList.add('field-wide');
+  wrap.append(el('span', 'field-label', labelText), input);
+  parent.append(wrap);
 }
-function textInput(value, placeholder) { const i = el('md-outlined-text-field'); i.value = value ?? ''; if (placeholder) i.placeholder = placeholder; return i; }
-function textArea(value, placeholder) { const t = el('md-outlined-text-field'); t.type = 'textarea'; t.rows = 3; t.value = value ?? ''; if (placeholder) t.placeholder = placeholder; return t; }
+function textInput(value, placeholder) {
+  const i = el('input');
+  i.className = 'field-input';
+  i.type = 'text';
+  i.value = value ?? '';
+  if (placeholder) i.placeholder = placeholder;
+  return i;
+}
+function textArea(value, placeholder) {
+  const t = el('textarea');
+  t.className = 'field-input';
+  t.rows = 3;
+  t.value = value ?? '';
+  if (placeholder) t.placeholder = placeholder;
+  return t;
+}
 function select(options, value) {
-  const s = el('md-outlined-select');
+  const s = el('select');
+  s.className = 'field-input';
   const selectedValue = options.includes(value) ? value : (options[0] || '');
   options.forEach((o) => {
-    const opt = el('md-select-option');
+    const opt = el('option', null, o || '（无）');
     opt.value = o;
     opt.selected = o === selectedValue;
-    const headline = el('div', null, o || '（无）');
-    headline.slot = 'headline';
-    opt.append(headline);
     s.append(opt);
   });
   s.value = selectedValue;
   return s;
 }
-function checkbox(value) { const c = el('md-checkbox'); c.setAttribute('touch-target', 'wrapper'); c.checked = value !== false; return c; }
+function checkbox(value) {
+  const c = el('input');
+  c.type = 'checkbox';
+  c.checked = value !== false;
+  return c;
+}
 
 function guessVideo(text) {
   const t = String(text || '');
@@ -593,7 +602,7 @@ function renderAccessEditor(container, access, onAccess) {
       const del = actionButton('删除这一条', 'danger');
       row.append(del);
       box.append(row);
-      const [platformSel, labelIn, valueIn, actionSel] = [g.querySelectorAll('md-outlined-select')[0], g.querySelectorAll('md-outlined-text-field')[0], g.querySelectorAll('md-outlined-text-field')[1], g.querySelectorAll('md-outlined-select')[1]];
+      const [platformSel, labelIn, valueIn, actionSel] = [g.querySelectorAll('select')[0], g.querySelectorAll('input')[0], g.querySelectorAll('input')[1], g.querySelectorAll('select')[1]];
       const sync = () => {
         const next = { ...state.items[index] };
         if (platformSel.value) next.platform = platformSel.value;
@@ -634,7 +643,7 @@ function renderAccessEditor(container, access, onAccess) {
 function editorShell(index, label, onDelete) {
   const details = el('section', 'surface editor');
   const summary = el('div', 'editor-header');
-  const title = el('div', 'title md-typescale-title-medium', `${index + 1}. ${label}`);
+  const title = el('div', 'title ts-title-medium', `${index + 1}. ${label}`);
   const del = actionButton('删除', 'danger');
   del.addEventListener('click', async () => {
     if (!await confirmAction(`确定删除「${title.textContent}」？`)) return;
@@ -670,7 +679,7 @@ function cardEditor(card, index) {
   details.append(grid);
 
   const accessWrap = el('div');
-  accessWrap.append(el('div', 'hint md-typescale-title-small', '访问入口（视频/平台链接）'));
+  accessWrap.append(el('div', 'hint ts-title-small', '访问入口（视频/平台链接）'));
   renderAccessEditor(accessWrap, card.access, (a) => { if (a) card.access = a; else delete card.access; });
   details.append(accessWrap);
   return details;
@@ -692,7 +701,7 @@ function bannerEditor(banner, index) {
   details.append(grid);
 
   const accessWrap = el('div');
-  accessWrap.append(el('div', 'hint md-typescale-title-small', '访问入口'));
+  accessWrap.append(el('div', 'hint ts-title-small', '访问入口'));
   renderAccessEditor(accessWrap, banner.access, (a) => { if (a) banner.access = a; else delete banner.access; });
   details.append(accessWrap);
   return details;
@@ -801,7 +810,7 @@ function heroEditor() {
 
   const details = el('section', 'surface editor');
   const header = el('div', 'editor-header');
-  header.append(el('div', 'title md-typescale-title-medium', '顶部 Rive'));
+  header.append(el('div', 'title ts-title-medium', '顶部 Rive'));
   details.append(header);
 
   const grid = el('div', 'grid');
@@ -815,10 +824,10 @@ function heroEditor() {
   field(grid, '兜底图片说明', bind(textInput(hero.fallback.alt), (v) => (hero.fallback.alt = v)));
   details.append(grid);
 
-  const previewLabel = el('div', 'hint md-typescale-title-small', '兜底图预览（Rive 载入前或不可用时显示）');
+  const previewLabel = el('div', 'hint ts-title-small', '兜底图预览（Rive 载入前或不可用时显示）');
   const preview = el('img');
   preview.alt = '';
-  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--md-sys-color-surface-container)';
+  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--c-surface-container)';
   const syncPreview = (url) => { preview.src = siteAssetUrl(url); preview.hidden = !url; };
   syncPreview(hero.fallback.src);
   fallbackSrc.addEventListener('input', () => syncPreview(fallbackSrc.value.trim()));
@@ -867,7 +876,7 @@ function contactEditor() {
   if (!Array.isArray(contact.methods)) contact.methods = [];
   const details = el('section', 'surface editor');
   const header = el('div', 'editor-header');
-  header.append(el('div', 'title md-typescale-title-medium', '联系方式'));
+  header.append(el('div', 'title ts-title-medium', '联系方式'));
   details.append(header);
 
   const grid = el('div', 'grid');
@@ -884,7 +893,7 @@ function contactEditor() {
     details.dataset.methodCount = String(contact.methods.length);
   };
   redraw();
-  details.append(el('div', 'hint md-typescale-title-small', '联系方式条目（没有条目时整段不显示）'), list);
+  details.append(el('div', 'hint ts-title-small', '联系方式条目（没有条目时整段不显示）'), list);
   return details;
 }
 
@@ -895,7 +904,7 @@ function noticeEditor() {
   const notice = content.notice;
   const details = el('section', 'surface editor');
   const header = el('div', 'editor-header');
-  header.append(el('div', 'title md-typescale-title-medium', '公告弹窗'));
+  header.append(el('div', 'title ts-title-medium', '公告弹窗'));
   details.append(header);
 
   const grid = el('div', 'grid');
@@ -910,7 +919,7 @@ function noticeEditor() {
 
   const preview = el('img');
   preview.alt = '';
-  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--md-sys-color-surface-container)';
+  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--c-surface-container)';
   const syncPreview = () => {
     const url = siteAssetUrl(imageSrc.value.trim());
     preview.hidden = !url;
@@ -918,7 +927,7 @@ function noticeEditor() {
   };
   syncPreview();
   imageSrc.addEventListener('input', syncPreview);
-  details.append(el('div', 'hint md-typescale-title-small', '图片预览'), preview);
+  details.append(el('div', 'hint ts-title-small', '图片预览'), preview);
   details.append(el('p', 'hint', '「打开时弹出」是总开关：关闭后网页打开时不再出现弹窗。弹窗右上角始终可以关闭。'));
   return details;
 }
@@ -929,7 +938,7 @@ function renderNotice() { const box = $('notice'); box.replaceChildren(); box.ap
 
 function bind(input, apply) {
   const commit = () => {
-    apply(input.tagName === 'MD-CHECKBOX' ? input.checked : input.value);
+    apply(input.type === 'checkbox' ? input.checked : input.value);
     markDirty();
   };
   input.addEventListener('input', commit);
@@ -978,8 +987,10 @@ function renderTranslations() {
     const target = typeof translation[source] === 'string' ? translation[source] : '';
     const row = el('div', `translation-row${target.trim() ? '' : ' missing'}`);
     const sourceView = el('div', 'source', source);
+    // 译文输入框用 .field 包裹，标签与输入框成组（原来是 Material 的浮动 label）。
     const targetInput = textArea(target, '输入中文译文');
-    targetInput.label = '中文译文';
+    const targetField = el('label', 'field');
+    targetField.append(el('span', 'field-label', '中文译文'), targetInput);
     const remove = actionButton('删除', 'danger');
     targetInput.addEventListener('input', () => {
       if (targetInput.value.trim()) {
@@ -1002,7 +1013,7 @@ function renderTranslations() {
       if (hadPublishedValue) markDirty();
       renderTranslations();
     });
-    row.append(sourceView, targetInput, remove);
+    row.append(sourceView, targetField, remove);
     box.append(row);
   });
   if (!visible.length) box.append(el('div', 'hint', '没有符合条件的词条。'));
@@ -1138,14 +1149,14 @@ function refreshRaw() {
   rawBaseline = $('raw').value;
 }
 
-// 侧边导航：视图顺序由 DOM 里 md-list-item 的顺序决定，不再单独维护一张表。
-function navItems() { return Array.from(document.querySelectorAll('#nav md-list-item[data-view]')); }
+// 侧边导航：视图顺序由 DOM 里 .nav-item 的顺序决定，不再单独维护一张表。
+function navItems() { return Array.from(document.querySelectorAll('#nav .nav-item[data-view]')); }
 
 function setNavActive(which) {
   navItems().forEach((item) => {
     const active = item.dataset.view === which;
     // data-active 由 CSS 渲染成 M3 导航抽屉的选中指示器；
-    // aria-current 提供给读屏，md-list-item 自身没有选中状态。
+    // aria-current 提供给读屏：选中态完全由 CSS 的 [data-active] 规则渲染。
     if (active) {
       item.setAttribute('data-active', '');
       item.setAttribute('aria-current', 'page');
@@ -1435,9 +1446,6 @@ async function initialize() {
   };
   syncHeaderHeight();
   window.addEventListener('resize', syncHeaderHeight);
-  if (window.__MATERIAL_ERROR__) {
-    setStatus('Material 3 组件未能加载，界面会显示为未样式化：' + window.__MATERIAL_ERROR__, 'err');
-  }
   $('tokenInput').addEventListener('input', () => {
     token = $('tokenInput').value.trim();
     if (token) sessionStorage.setItem('oneFuzhuToken', token);
@@ -1449,7 +1457,7 @@ async function initialize() {
     catch (e) { setStatus('加载失败：' + e.message, 'err'); }
   });
   $('saveBtn').addEventListener('click', save);
-  // 侧边导航：md-list-item 自带按钮语义、涟漪与选中指示器，这里只负责切换视图。
+  // 侧边导航：点击切换视图；选中态由 CSS 的 [data-active] 规则渲染。
   const items = navItems();
   items.forEach((item) => {
     item.addEventListener('click', () => { selectTab(item.dataset.view); });
@@ -1547,9 +1555,7 @@ window.addEventListener('beforeunload', (event) => {
   event.preventDefault();
   event.returnValue = '';
 });
-// 不再等 Material 就绪：以前这里挂在 material-ready 上，组件一旦加载失败
-// 初始化就永远不执行，导航点不动、内容也不加载。自定义元素即使晚于脚本升级，
-// 之前绑在宿主元素上的监听依然有效，所以先初始化是安全的。
+// 页面不依赖任何外部库，脚本一到位就可以初始化。
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', initialize, { once: true });
 } else {
