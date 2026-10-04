@@ -57,9 +57,15 @@
   header h1 { margin:0; }
   header .repo { color:var(--md-sys-color-on-surface-variant); }
   header md-linear-progress { position:absolute; inset:auto 0 0; width:100%; }
-  main { max-width:1120px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+  .shell { display:grid; grid-template-columns:224px minmax(0,1fr); gap:20px; align-items:start; max-width:1320px; margin:0 auto; padding:20px; }
+  .sidebar { position:sticky; top:78px; background:var(--md-sys-color-surface); border-radius:20px; padding:8px; }
+  .sidebar nav { display:flex; flex-direction:column; gap:2px; }
+  .nav-item { appearance:none; margin:0; border:0; background:transparent; color:var(--md-sys-color-on-surface-variant); font:inherit; text-align:left; padding:0 16px; min-height:48px; border-radius:14px; cursor:pointer; white-space:nowrap; }
+  .nav-item:hover { background:var(--md-sys-color-surface-container); }
+  .nav-item[aria-selected="true"] { background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container); font-weight:600; }
+  .nav-item:focus-visible { outline:2px solid var(--md-sys-color-primary); outline-offset:2px; }
+  main { display:flex; flex-direction:column; gap:16px; min-width:0; }
   md-outlined-text-field, md-outlined-select { width:100%; }
-  md-tabs { background:var(--md-sys-color-surface); border-radius:20px; overflow:hidden; }
   .bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
   .bar > md-outlined-text-field { flex:1 1 280px; }
   .status { min-height:24px; color:var(--md-sys-color-on-surface-variant); }
@@ -87,8 +93,14 @@
   #raw { min-height:60vh; --md-outlined-text-field-input-text-font:ui-monospace,Menlo,Consolas,monospace; }
   .danger { --md-text-button-label-text-color:var(--md-sys-color-error); }
   [hidden], .hidden { display:none !important; }
+  @media (max-width:900px) {
+    .shell { grid-template-columns:1fr; padding:12px; }
+    .sidebar { position:static; padding:6px; }
+    .sidebar nav { flex-direction:row; overflow-x:auto; scrollbar-width:none; }
+    .sidebar nav::-webkit-scrollbar { display:none; }
+    .nav-item { padding:0 14px; }
+  }
   @media (max-width:680px) {
-    main { padding:12px; }
     .grid { grid-template-columns:1fr; }
     .field-wide { grid-column:auto; }
     .translation-toolbar, .translation-row { grid-template-columns:1fr; }
@@ -105,23 +117,26 @@
   <md-linear-progress id="progress" indeterminate hidden></md-linear-progress>
 </header>
 
-<main id="workspace">
-  <div class="surface">
-    <div class="bar">
-      <md-outlined-text-field id="tokenInput" type="password" label="GitHub Token" supporting-text="仅保留到当前浏览器会话"></md-outlined-text-field>
-    </div>
-    <div class="status md-typescale-body-medium" id="status" role="status" aria-live="polite"></div>
-  </div>
+<div class="shell">
+  <aside class="sidebar">
+    <nav id="nav" role="tablist" aria-orientation="vertical" aria-label="管理内容">
+      <button class="nav-item" type="button" role="tab" id="tabBanners" aria-controls="viewBanners" aria-selected="true" tabindex="0" data-view="banners">顶部轮播</button>
+      <button class="nav-item" type="button" role="tab" id="tabHero" aria-controls="viewHero" aria-selected="false" tabindex="-1" data-view="hero">顶部 Rive</button>
+      <button class="nav-item" type="button" role="tab" id="tabCards" aria-controls="viewCards" aria-selected="false" tabindex="-1" data-view="cards">创意橱柜</button>
+      <button class="nav-item" type="button" role="tab" id="tabContact" aria-controls="viewContact" aria-selected="false" tabindex="-1" data-view="contact">联系方式</button>
+      <button class="nav-item" type="button" role="tab" id="tabNotice" aria-controls="viewNotice" aria-selected="false" tabindex="-1" data-view="notice">弹窗</button>
+      <button class="nav-item" type="button" role="tab" id="tabTranslations" aria-controls="viewTranslations" aria-selected="false" tabindex="-1" data-view="translations">Rive 翻译</button>
+      <button class="nav-item" type="button" role="tab" id="tabRaw" aria-controls="viewRaw" aria-selected="false" tabindex="-1" data-view="raw">官网 JSON</button>
+    </nav>
+  </aside>
 
-  <md-tabs id="tabs" aria-label="管理内容">
-    <md-primary-tab id="tabBanners" active aria-controls="viewBanners">顶部轮播</md-primary-tab>
-    <md-primary-tab id="tabHero" aria-controls="viewHero">顶部 Rive</md-primary-tab>
-    <md-primary-tab id="tabCards" aria-controls="viewCards">创意橱柜</md-primary-tab>
-    <md-primary-tab id="tabContact" aria-controls="viewContact">联系方式</md-primary-tab>
-    <md-primary-tab id="tabNotice" aria-controls="viewNotice">弹窗</md-primary-tab>
-    <md-primary-tab id="tabTranslations" aria-controls="viewTranslations">Rive 翻译</md-primary-tab>
-    <md-primary-tab id="tabRaw" aria-controls="viewRaw">官网 JSON</md-primary-tab>
-  </md-tabs>
+  <main id="workspace">
+    <div class="surface">
+      <div class="bar">
+        <md-outlined-text-field id="tokenInput" type="password" label="GitHub Token" supporting-text="仅保留到当前浏览器会话"></md-outlined-text-field>
+      </div>
+      <div class="status md-typescale-body-medium" id="status" role="status" aria-live="polite"></div>
+    </div>
 
   <section id="viewBanners" role="tabpanel" aria-labelledby="tabBanners">
     <div class="bar"><md-outlined-button id="addBanner">添加横幅</md-outlined-button><span class="hint">按列表顺序轮播；关闭「显示」即从轮播中移除。</span></div>
@@ -197,7 +212,8 @@
       <div class="hint md-typescale-body-small">这里是最终发布的官网内容，可整体粘贴或编辑。切换到其他页面前必须保持 JSON 合法。</div>
     </div>
   </section>
-</main>
+  </main>
+</div>
 
 <md-dialog id="confirmDialog">
   <div slot="headline">确认操作</div>
@@ -364,7 +380,11 @@ async function loadContent() {
     const keys = Object.keys(CONFIG.paths);
     const texts = await Promise.all(keys.map((key) => loadTextFile(CONFIG.paths[key], nextHeadSha)));
     const nextTexts = Object.fromEntries(keys.map((key, index) => [key, texts[index]]));
-    const nextContent = validateContent(JSON.parse(nextTexts.content));
+    const nextContent = JSON.parse(nextTexts.content);
+    // 线上内容不满足当前规则时（例如规则收紧后仓库里仍是旧数据），仍然把它载入编辑器，
+    // 稍后跳到「官网 JSON」让使用者修正，而不是留下一个空白且无法操作的界面。
+    let validationError = null;
+    try { validateContent(nextContent); } catch (error) { validationError = error; }
     const nextTranslation = JSON.parse(nextTexts.translation);
     const nextContract = JSON.parse(nextTexts.contract);
     const nextRelease = JSON.parse(nextTexts.release);
@@ -380,7 +400,12 @@ async function loadContent() {
     translationPage = 0;
     renderAll();
     markClean();
-    setStatus(`已加载 · ${Object.keys(translation).length} 条翻译`, 'ok');
+    if (validationError) {
+      selectTab('raw');
+      setStatus('线上内容不符合当前校验规则，已切到「官网 JSON」。修正后再切回其他页签：' + validationError.message, 'err');
+    } else {
+      setStatus(`已加载 · ${Object.keys(translation).length} 条翻译`, 'ok');
+    }
   } finally {
     setBusy(false);
   }
@@ -810,8 +835,9 @@ function bind(input, apply) {
 }
 function splitList(value) { return String(value).split(/[,，]/).map((s) => s.trim()).filter(Boolean); }
 
-function renderCards() { const box = $('cards'); box.replaceChildren(); content.cards.forEach((c, i) => box.append(cardEditor(c, i))); }
-function renderBanners() { const box = $('banners'); box.replaceChildren(); content.banners.forEach((b, i) => box.append(bannerEditor(b, i))); }
+// content 可能来自未通过校验的线上数据，这里对结构做兜底，避免渲染直接抛错。
+function renderCards() { const box = $('cards'); box.replaceChildren(); (Array.isArray(content.cards) ? content.cards : []).forEach((c, i) => box.append(cardEditor(c, i))); }
+function renderBanners() { const box = $('banners'); box.replaceChildren(); (Array.isArray(content.banners) ? content.banners : []).forEach((b, i) => box.append(bannerEditor(b, i))); }
 
 function filteredTranslationTerms() {
   const query = $('translationSearch').value.trim().toLocaleLowerCase();
@@ -1001,29 +1027,48 @@ function addTranslationEntry() {
 
 function renderAll() { renderCards(); renderBanners(); renderHero(); renderContactEditor(); renderNotice(); renderTranslations(); refreshRaw(); }
 
-function refreshRaw() { $('raw').value = JSON.stringify(content, null, 2); }
+// 记下「官网 JSON」文本框最后一次由程序写入的内容，用来判断使用者是否真的改过它。
+let rawBaseline = '';
 
-// tab 顺序必须与 HTML 中 <md-primary-tab> 的顺序一致。
-const TAB_VIEWS = ['banners', 'hero', 'cards', 'contact', 'notice', 'translations', 'raw'];
-const RAW_TAB_INDEX = TAB_VIEWS.indexOf('raw');
+function refreshRaw() {
+  $('raw').value = JSON.stringify(content, null, 2);
+  rawBaseline = $('raw').value;
+}
+
+// 侧边导航：视图顺序由 DOM 里 nav-item 的顺序决定，不再单独维护一张表。
+function navItems() { return Array.from(document.querySelectorAll('#nav .nav-item')); }
+
+function setNavActive(which) {
+  navItems().forEach((item) => {
+    const active = item.dataset.view === which;
+    item.setAttribute('aria-selected', active ? 'true' : 'false');
+    // 漫游 tabindex：只有当前项可 Tab 聚焦，其余用方向键访问。
+    item.tabIndex = active ? 0 : -1;
+  });
+}
 
 function selectTab(which) {
   if (which === 'raw' && activeView !== 'raw') refreshRaw();
   if (which !== 'raw' && activeView === 'raw') {
-    try {
-      const candidate = JSON.parse($('raw').value);
-      validateContent(candidate);
-      content = candidate;
-      renderCards();
-      renderBanners();
-      renderHero();
-      renderContactEditor();
-      renderNotice();
-    } catch (e) {
-      setStatus('官网 JSON 无效：' + e.message, 'err');
-      $('tabs').activeTabIndex = RAW_TAB_INDEX;
-      return false;
+    // 只有使用者确实改过 JSON 时才要求它合法。若文本框仍是载入时的原样
+    // （例如线上数据本身未通过校验而被自动切到这里），允许直接离开，
+    // 否则使用者会被永久卡在「官网 JSON」，无法使用可视化编辑器。
+    if ($('raw').value !== rawBaseline) {
+      try {
+        const candidate = JSON.parse($('raw').value);
+        validateContent(candidate);
+        content = candidate;
+      } catch (e) {
+        setStatus('官网 JSON 无效，修正后才能切到其他页签：' + e.message, 'err');
+        setNavActive(activeView);
+        return false;
+      }
     }
+    renderCards();
+    renderBanners();
+    renderHero();
+    renderContactEditor();
+    renderNotice();
   }
   $('viewBanners').hidden = which !== 'banners';
   $('viewHero').hidden = which !== 'hero';
@@ -1033,6 +1078,7 @@ function selectTab(which) {
   $('viewTranslations').hidden = which !== 'translations';
   $('viewRaw').hidden = which !== 'raw';
   activeView = which;
+  setNavActive(which);
   if (which === 'translations') renderTranslations();
   return true;
 }
@@ -1284,8 +1330,22 @@ async function initialize() {
     catch (e) { setStatus('加载失败：' + e.message, 'err'); }
   });
   $('saveBtn').addEventListener('click', save);
-  $('tabs').addEventListener('change', () => {
-    selectTab(TAB_VIEWS[$('tabs').activeTabIndex] || 'banners');
+  // 侧边导航：点击切换，方向键在导航内移动并切换（roving tabindex）。
+  const items = navItems();
+  items.forEach((item, index) => {
+    item.addEventListener('click', () => { selectTab(item.dataset.view); });
+  });
+  $('nav').addEventListener('keydown', (event) => {
+    const step = { ArrowDown: 1, ArrowUp: -1, ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    if (step === undefined && event.key !== 'Home' && event.key !== 'End') return;
+    event.preventDefault();
+    const current = items.findIndex((item) => item.getAttribute('aria-selected') === 'true');
+    let next;
+    if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = items.length - 1;
+    else next = ((current < 0 ? 0 : current) + step + items.length) % items.length;
+    items[next].focus();
+    selectTab(items[next].dataset.view);
   });
   $('uploadHeroRive').addEventListener('click', uploadHeroRive);
   $('uploadHeroFallback').addEventListener('click', uploadHeroFallback);
