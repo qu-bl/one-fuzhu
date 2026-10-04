@@ -39,9 +39,10 @@
     --r-m: 12px;
     --r-s: 8px;
     --r-full: 999px;
-    --control-h: 44px;
-    /* 多行文本框（卡片详情等）的默认高度。 */
-    --textarea-h: 88px;
+    /* 后台是密集表单，控件压到 32px；词典行单独用 --row-h。 */
+    --control-h: 32px;
+    /* 多行文本框（简介、详情、面板说明）的默认高度。 */
+    --textarea-h: 56px;
     /* 词典表格数据行的高度：一行文本，超出部分横向滚动。 */
     --row-h: 36px;
     /* 词典表格操作列宽度（放「删除」按钮）。 */
@@ -51,7 +52,7 @@
   body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--c-surface-container-low); color:var(--c-on-surface); font-family:var(--font); }
 
   /* 顶栏：静态、不悬浮、无阴影，只用一条分隔线。 */
-  header.app-bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:14px 20px; background:var(--c-surface); border-bottom:1px solid var(--c-outline-variant); }
+  header.app-bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:10px 16px; background:var(--c-surface); border-bottom:1px solid var(--c-outline-variant); }
   header.app-bar h1 { margin:0; }
 
   /* 侧边栏铺满整个左侧（从页头到底部），与页面同色：无卡片、无圆角、无边框。 */
@@ -67,7 +68,7 @@
 
   /* 导航：M3 导航抽屉的选中态 = secondary-container 药丸 + 标签加重。 */
   .nav-groups { display:flex; flex-direction:column; gap:4px; }
-  .nav-item { appearance:none; margin:0; border:0; background:transparent; color:var(--c-on-surface-variant); font:inherit; text-align:left; padding:0 16px; min-height:48px; border-radius:var(--r-full); cursor:pointer; white-space:nowrap; }
+  .nav-item { appearance:none; margin:0; border:0; background:transparent; color:var(--c-on-surface-variant); font:inherit; text-align:left; padding:0 14px; min-height:40px; border-radius:var(--r-full); cursor:pointer; white-space:nowrap; }
   .nav-item:hover { background:var(--c-surface-container); }
   .nav-item[data-active] { background:var(--c-secondary-container); color:var(--c-on-secondary-container); font-weight:700; }
   .nav-item:focus-visible { outline:2px solid var(--c-primary); outline-offset:2px; }
@@ -79,33 +80,35 @@
   .status { min-height:20px; font-size:13px; color:var(--c-on-surface-variant); }
   .status.ok { color:#146c2e; }
   .status.err { color:var(--c-error); }
-  .surface { background:var(--c-surface); border-radius:var(--r-m); padding:20px; }
+  .surface { background:var(--c-surface); border-radius:var(--r-m); padding:14px 16px; }
   .surface > h2:first-child { margin-top:0; }
-  .editor-list { display:flex; flex-direction:column; gap:16px; margin-top:16px; }
+  .editor-list { display:flex; flex-direction:column; gap:12px; margin-top:12px; }
   /* 编辑器内部由 .form-section 自己控制间距，所以这里不加 gap。 */
   .editor { display:flex; flex-direction:column; }
-  .editor-header { display:flex; gap:12px; align-items:center; margin-bottom:20px; }
+  .editor-header { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
   .editor-header .title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   /* ---------- 分区：给表单建立层级，避免十几个字段平铺成一片 ---------- */
-  .form-section { padding-top:20px; border-top:1px solid var(--c-outline-variant); }
+  .form-section { padding-top:12px; border-top:1px solid var(--c-outline-variant); }
   /* 紧接标题的第一段不画分隔线，否则卡片顶部会出现多余的一条。 */
   .editor-header + .form-section { padding-top:0; border-top:0; }
-  .form-section-title { margin:0; font-size:13px; font-weight:700; color:var(--c-primary); }
-  .form-section-hint { margin:6px 0 0; font-size:12px; line-height:1.55; color:var(--c-on-surface-variant); }
-  .form-section > .grid { margin-top:12px; }
-  .form-section > .row { margin-top:12px; }
+  .form-section-title { margin:0; font-size:12px; font-weight:700; color:var(--c-primary); }
+  .form-section-hint { margin:3px 0 0; font-size:11px; line-height:1.45; color:var(--c-on-surface-variant); }
+  .form-section > .grid { margin-top:8px; }
+  .form-section > .row { margin-top:8px; }
 
-  .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:4px; }
+  /* 宽屏一行放三列以上：字段大多是短值，固定两列会白占一半横向空间。 */
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px 12px; margin-top:4px; }
   .field-wide { grid-column:1 / -1; }
   /* 复选框没有标签行，底对齐才能和同一行的输入框齐平。 */
   .grid > .check-field { align-self:end; }
   /* end 对齐：字段是「标签 + 控件」，按钮没有标签，只有底对齐才能和输入框齐平。 */
-  .row { display:flex; gap:12px; align-items:end; margin-top:12px; flex-wrap:wrap; }
-  .access-item { background:var(--c-surface-container); border-radius:var(--r-s); padding:16px; margin-top:12px; }
+  .row { display:flex; gap:12px; align-items:end; margin-top:8px; flex-wrap:wrap; }
+  .access-item { background:var(--c-surface-container); border-radius:var(--r-s); padding:10px 12px; margin-top:8px; }
   /* 每条平台入口独立成块：块头写清是第几条，删除键收进块头，不和字段混在一起。 */
-  .access-item-head { display:flex; align-items:center; gap:12px; margin-bottom:4px; }
-  .access-item-title { flex:1; font-size:13px; font-weight:700; color:var(--c-on-surface-variant); }
+  .access-item-head { display:flex; align-items:center; gap:12px; }
+  .access-item-title { flex:1; font-size:11px; font-weight:700; color:var(--c-on-surface-variant); }
+  .access-item .row { margin-top:4px; }
   /* 工具栏同样底对齐：搜索框带标签，而按钮和复选框没有标签。 */
   .translation-toolbar { display:grid; grid-template-columns:minmax(180px,1fr) auto auto; gap:8px; align-items:end; }
   /* 词典按表格呈现：列名只在表头出现一次，数据行不带标签，一行就是一条文本的高度。
@@ -122,30 +125,30 @@
   .translation-row .btn { min-height:var(--row-h); padding:0 12px; }
   .translation-row.missing .source { background:var(--c-error-container); color:var(--c-on-error-container); }
   .stats { display:flex; gap:12px; flex-wrap:wrap; color:var(--c-on-surface-variant); }
-  .pager { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:16px; }
+  .pager { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; }
   .hint { color:var(--c-on-surface-variant); margin-top:8px; }
   #raw { min-height:60vh; font-family:var(--font-mono); }
 
   /* ---------- 表单控件（原生元素 + M3 取值） ---------- */
-  .field { display:flex; flex-direction:column; gap:6px; width:100%; min-width:0; }
+  .field { display:flex; flex-direction:column; gap:3px; width:100%; min-width:0; }
   /* 固定标签行高，保证同一行内多个字段的输入框顶端对齐。 */
-  .field-label { min-height:16px; font-size:12px; line-height:16px; color:var(--c-on-surface-variant); }
-  .field-input { width:100%; min-height:var(--control-h); padding:10px 14px; border:1px solid var(--c-outline); border-radius:var(--r-s); background:var(--c-surface); color:var(--c-on-surface); font:inherit; }
+  .field-label { min-height:14px; font-size:11px; line-height:14px; color:var(--c-on-surface-variant); }
+  .field-input { width:100%; min-height:var(--control-h); padding:4px 10px; border:1px solid var(--c-outline); border-radius:var(--r-s); background:var(--c-surface); color:var(--c-on-surface); font:inherit; }
   .field-input::placeholder { color:var(--c-on-surface-variant); opacity:.7; }
   .field-input:focus-visible { outline:none; border-color:var(--c-primary); box-shadow:inset 0 0 0 1px var(--c-primary); }
   .field-input:disabled { opacity:.5; cursor:not-allowed; }
   textarea.field-input { min-height:var(--textarea-h); resize:vertical; }
   select.field-input { cursor:pointer; }
   .bar > .field { flex:1 1 280px; }
-  .row > .field { flex:1 1 220px; }
+  .row > .field { flex:1 1 200px; }
   /* 混排时输入框和原文字块高度一致，避免一行里高低不齐。 */
   .row > .btn, .bar > .btn { flex:0 0 auto; }
 
   .check-field { display:flex; gap:8px; align-items:center; height:var(--control-h); color:var(--c-on-surface-variant); cursor:pointer; }
-  .check-field input[type="checkbox"] { width:18px; height:18px; margin:0; accent-color:var(--c-primary); }
+  .check-field input[type="checkbox"] { width:16px; height:16px; margin:0; accent-color:var(--c-primary); }
 
   /* ---------- 按钮（M3 三种形态） ---------- */
-  .btn { appearance:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 20px; border:1px solid transparent; border-radius:var(--r-full); background:transparent; color:var(--c-primary); font:inherit; font-weight:500; cursor:pointer; white-space:nowrap; }
+  .btn { appearance:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:var(--control-h); padding:0 14px; border:1px solid transparent; border-radius:var(--r-full); background:transparent; color:var(--c-primary); font:inherit; font-weight:500; cursor:pointer; white-space:nowrap; }
   .btn:hover { background:color-mix(in srgb, currentColor 8%, transparent); }
   .btn:focus-visible { outline:2px solid var(--c-primary); outline-offset:2px; }
   .btn:disabled { opacity:.38; cursor:not-allowed; background:transparent; }
@@ -155,7 +158,7 @@
   .btn--outlined { border-color:var(--c-outline); }
   .btn--text { padding:0 12px; }
   .btn--text.danger { color:var(--c-error); }
-  .btn-icon { appearance:none; display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; padding:0; border:0; border-radius:var(--r-full); background:transparent; color:var(--c-on-surface-variant); cursor:pointer; flex-shrink:0; }
+  .btn-icon { appearance:none; display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; padding:0; border:0; border-radius:var(--r-full); background:transparent; color:var(--c-on-surface-variant); cursor:pointer; flex-shrink:0; }
   .btn-icon:hover { background:var(--c-surface-container); }
   .btn-icon:focus-visible { outline:2px solid var(--c-primary); outline-offset:2px; }
 
@@ -772,7 +775,7 @@ function cardEditor(card, index) {
   coverRow.append(coverUpload);
   const coverPreview = el('img');
   coverPreview.alt = '';
-  coverPreview.style.cssText = 'max-width:220px;width:100%;border-radius:8px;display:block;margin-top:12px;background:var(--c-surface-container)';
+  coverPreview.style.cssText = 'max-width:150px;width:100%;max-height:88px;object-fit:cover;border-radius:6px;display:block;margin-top:8px;background:var(--c-surface-container)';
   const syncCover = () => {
     const url = siteAssetUrl(coverInput.value.trim());
     coverPreview.hidden = !url;
