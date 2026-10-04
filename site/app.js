@@ -1036,11 +1036,20 @@ function initNotice() {
 
 function renderLoadError(error) {
   console.error(error);
-  if (emptyState) {
-    emptyState.hidden = false;
-    emptyState.querySelector("strong").textContent = "内容载入失败";
-    emptyState.querySelector("p").textContent = "请稍后重试或联系官方。";
+  if (!emptyState) return;
+  // 直接双击 index.html 时协议是 file:，浏览器会拒绝 fetch 本地文件，
+  // 此时给出可操作的指引，而不是笼统的「请稍后重试」。
+  const isLocalFile = window.location.protocol === "file:";
+  const title = emptyState.querySelector("strong");
+  const detail = emptyState.querySelector("p");
+  emptyState.hidden = false;
+  if (isLocalFile) {
+    if (title) title.textContent = "本地预览需要启动服务器";
+    if (detail) detail.textContent = "不要直接双击打开 index.html。请在仓库根目录运行 python3 -m http.server 8000，然后访问 http://127.0.0.1:8000/site/";
+    return;
   }
+  if (title) title.textContent = "内容载入失败";
+  if (detail) detail.textContent = "无法读取内容文件，请检查网络后重试；持续失败可联系官方。";
 }
 
 function bindCollapsibleFilter(picker, options, setExpanded) {
