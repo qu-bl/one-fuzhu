@@ -14,7 +14,7 @@
     }
   },
   "notice": {
-    "enabled": false,
+    "enabled": true,
     "title": "公告标题",
     "body": "这里填写公告正文，支持换行。",
     "image": "",
