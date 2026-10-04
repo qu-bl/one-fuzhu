@@ -1043,6 +1043,9 @@ function initNotice() {
   if (!noticeDialog.open && typeof noticeDialog.showModal === "function") {
     document.body.classList.add("dialog-open");
     noticeDialog.showModal();
+    // 弹窗里唯一可聚焦的元素是底部按钮，showModal 会把它滚进视野，
+    // 内容一高就把标题顶出屏幕。打开后强制回到顶部。
+    noticeDialog.scrollTop = 0;
   }
 }
 

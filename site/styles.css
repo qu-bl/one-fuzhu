@@ -113,13 +113,16 @@ a { color: var(--accent); }
 /* 公告弹窗：结构与卡片详情弹窗同源，内容全部来自 content.json 的 notice 分节。 */
 .notice-dialog { width: min(560px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 0; border: 0; border-radius: 28px; overflow: auto; color: var(--text); background: var(--md-sys-color-surface-container-high); }
 .notice-dialog::backdrop { background: #0009; }
-.notice-sheet { position: relative; display: flex; flex-direction: column; gap: 18px; padding: 32px; }
-.notice-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+/* 公告弹窗整块居中：标题、图片、正文、按钮都居中排列。 */
+.notice-sheet { position: relative; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 32px; text-align: center; }
+.notice-header { display: flex; align-items: flex-start; justify-content: center; gap: 16px; }
 .notice-header h2 { margin: 0; font-size: 24px; line-height: 1.4; }
-.notice-media { overflow: hidden; border-radius: 20px; background: var(--surface-soft); }
-.notice-media img { display: block; width: 100%; height: auto; }
+/* 容器贴着图片本身：宽图铺满，竖图按比例收窄并居中，不会留出色块。
+   图片限高是因为一张竖图能把弹窗撑得比屏幕还高，标题会被顶出可视区。 */
+.notice-media { max-width: 100%; overflow: hidden; border-radius: 20px; background: var(--surface-soft); }
+.notice-media img { display: block; width: auto; height: auto; max-width: 100%; max-height: 38vh; }
 .notice-body { margin: 0; color: var(--muted); font-size: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
-.notice-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.notice-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 .notice-actions:empty { display: none; }
 .notice-dialog, .notice-sheet { scrollbar-width: none; -ms-overflow-style: none; }
 .notice-dialog::-webkit-scrollbar, .notice-sheet::-webkit-scrollbar { display: none; width: 0; height: 0; }
