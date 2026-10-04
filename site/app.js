@@ -1029,7 +1029,7 @@ function initNotice() {
   const unlock = () => {
     if (!accessDialog?.open) document.body.classList.remove("dialog-open");
   };
-  noticeDialog.querySelector(".notice-close")?.addEventListener("click", close);
+  // 公告弹窗不设关闭按钮：Esc 键（cancel）和点击弹窗外（backdrop）都能关掉。
   noticeDialog.addEventListener("cancel", (event) => {
     event.preventDefault();
     close();
@@ -1100,7 +1100,7 @@ async function initialize() {
     bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
   }
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
-  // 只绑定卡片详情弹窗的关闭键；公告弹窗有自己的 .notice-close。
+  // 卡片详情弹窗有 × 关闭键；公告弹窗没有，靠 Esc 与点击外部关闭。
   accessDialog?.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);
   bindCarouselControls();
   bindFeaturedControls();
