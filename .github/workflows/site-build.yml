@@ -1,0 +1,53 @@
+name: Rebuild site artifacts
+
+# 管理台是纯浏览器端的，它通过 GitHub API 直接提交 site/data/content.json，
+# 没法在自己那边跑 Node。所以派生文件交给这里重新生成并另行提交：
+# 案例页、sitemap.xml、index.md、llms.txt，以及 index.html 里的 JSON-LD。
+#
+# 触发条件只盯源文件。本工作流自己提交的是派生文件，不在这些路径里，
+# 因此不会自我触发形成循环。
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/data/content.json'
+      - 'site/data/ai-profile.md'
+      - 'site/scripts/build.mjs'
+      - '.github/workflows/site-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # build.mjs 只用 node:fs 与 node:path，没有第三方依赖，直接跑即可。
+      - name: 生成派生文件
+        run: node site/scripts/build.mjs
+
+      - name: 有变化才提交
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "派生文件无变化，跳过提交"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 只提交派生文件，绝不碰 content.json 等源文件。
+          git add site/cases site/sitemap.xml site/index.md site/llms.txt site/index.html llms.txt
+          git commit -m "Rebuild site artifacts from content.json"
+          git push

@@ -1371,11 +1371,24 @@ async function buildPublishDocuments() {
   return { content: contentText, translation: translationText, translationRelease, contract: contractText, release: releaseText };
 }
 
+// build.mjs 的产物。CI 会在每次 content.json 提交后重新生成它们并另行提交一版，
+// 所以分支前进时不能一律拦截：只有「我真正在编辑的源文件」被改动才需要重新加载。
+const DERIVED_PATHS = ['site/cases/', 'site/sitemap.xml', 'site/index.md', 'site/llms.txt', 'site/index.html', 'llms.txt'];
+const isDerivedPath = (path) => DERIVED_PATHS.some((p) => (p.endsWith('/') ? path.startsWith(p) : path === p));
+async function assertOnlyDerivedChanged(currentHead) {
+  const cmp = await gh('GET', `${REPO_API}/compare/${loadedHeadSha}...${currentHead}?t=${Date.now()}`);
+  const foreign = (cmp.files || []).map((f) => f.filename).filter((path) => !isDerivedPath(path));
+  if (foreign.length) {
+    const shown = foreign.slice(0, 3).join('、') + (foreign.length > 3 ? ' 等' : '');
+    throw new Error(`线上内容已变化（${shown}），请重新加载后再编辑`);
+  }
+}
+
 async function publishFiles(files) {
   const refUrl = `${REPO_API}/git/ref/heads/${CONFIG.branch}`;
   const ref = await gh('GET', `${refUrl}?t=${Date.now()}`);
   const parentSha = ref.object.sha;
-  if (loadedHeadSha && parentSha !== loadedHeadSha) throw new Error('线上内容已变化，请重新加载后再编辑');
+  if (loadedHeadSha && parentSha !== loadedHeadSha) await assertOnlyDerivedChanged(parentSha);
   const parent = await gh('GET', `${REPO_API}/git/commits/${parentSha}`);
   const treeEntries = await Promise.all(files.map(async (file) => {
     // sha: null 在 Git 树里表示删除该路径。
