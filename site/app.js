@@ -246,7 +246,7 @@ function mountAccessDialog(item, trigger) {
 
   // 弹窗不再有单独的面板标题/说明字段，直接用条目自身的名称与简介。
   accessTitle.textContent = item.name || item.title;
-  accessSummary.textContent = item.description || item.summary || "";
+  accessSummary.textContent = item.summary || "";
   accessSummary.hidden = !accessSummary.textContent;
   accessItems.replaceChildren();
 
@@ -588,7 +588,7 @@ function getFilteredCases() {
   return state.cases.filter((item) => {
     const categoryMatches = state.category === "全部" || item.category === state.category;
     const platformMatches = state.platform === "全部平台" || item.platforms.includes(state.platform);
-    const searchable = [item.name, item.summary, item.details, item.description, item.partnerName, item.category, ...item.platforms, ...item.tags]
+    const searchable = [item.name, item.summary, item.details, item.partnerName, item.category, ...item.platforms, ...item.tags]
       .join(" ")
       .toLocaleLowerCase("zh-CN");
     return categoryMatches && platformMatches && (!query || searchable.includes(query));
@@ -740,7 +740,8 @@ function createCaseCard(item, index, options = {}) {
   const summaryElement = fragment.querySelector(".case-summary");
   summaryElement.textContent = summary;
   summaryElement.hidden = !summary;
-  const details = appPlatform ? (item.description || item.summary || "") : (item.details || "");
+  // description 与 details 已合并为一个字段，App 内嵌和浏览器用同一段正文。
+  const details = item.details || item.summary || "";
   const detailSection = fragment.querySelector(".case-details");
   detailSection.querySelector(".case-details-text").textContent = details;
   detailSection.hidden = !details;
