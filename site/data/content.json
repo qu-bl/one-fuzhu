@@ -15,10 +15,10 @@
   },
   "notice": {
     "enabled": true,
-    "title": "加入创作者交流 QQ 群",
-    "body": "群号：862835994\n交流 Rive 动画、异形屏幕与互动作品，欢迎来聊。",
-    "image": "",
-    "linkLabel": "加入群聊",
+    "title": "装修中",
+    "body": "暂时以QQ群为重要发布渠道，辛苦跳转。本页面仍会实时更新",
+    "image": "./assets/notice.png?v=1791131173643",
+    "linkLabel": "去看看",
     "linkHref": "https://qm.qq.com/q/cARWUthgDC"
   },
   "contact": {
