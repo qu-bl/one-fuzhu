@@ -2,7 +2,7 @@
 // 运行：node scripts/build.mjs
 // 生成/更新：cases/*.html、cases/*.md、sitemap.xml、index.md、llms.txt，
 // 并向 index.html 注入供搜索引擎读取的 ItemList/FAQPage JSON-LD。
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -128,6 +128,15 @@ for (const w of works) {
   writeFileSync(join(ROOT, "cases", w.id + ".html"), caseHTML(w));
   writeFileSync(join(ROOT, "cases", w.id + ".md"), caseMD(w));
   console.log("✓ cases/" + w.id + ".html  cases/" + w.id + ".md");
+}
+
+// 移除已不在卡片列表里的旧案例页。生成步骤只写不删，卡片一旦从 content.json
+// 移除，它的案例页就成了没有入口的孤儿页，而 sitemap 还会继续把它提交给搜索引擎。
+const wanted = new Set(works.flatMap((w) => [w.id + ".html", w.id + ".md"]));
+for (const name of readdirSync(join(ROOT, "cases"))) {
+  if (wanted.has(name)) continue;
+  rmSync(join(ROOT, "cases", name));
+  console.log("✓ 移除失效案例页 cases/" + name);
 }
 
 // ---------- sitemap.xml ----------

@@ -163,11 +163,7 @@ Rive 擅长实时矢量动画、状态机和数据驱动视觉，JavaScript 擅�
 
 ## 作品与项目
 
-- [声音轨道交互实验](https://qu-bl.github.io/one-fuzhu/site/cases/audio-orbit.html)：欢迎共创（HarmonyOS）
 - [RIVE中文系列课程](https://qu-bl.github.io/one-fuzhu/site/cases/image-binding-cards.html)：rive101系列官方课，中文译制版（Apple、Android、HarmonyOS）
-- [感应罗盘](https://qu-bl.github.io/one-fuzhu/site/cases/sensor-compass.html)：将方向与传感器信息转换成具有生命感的指针反馈。（Android、Apple）
-- [专注节奏控制器](https://qu-bl.github.io/one-fuzhu/site/cases/focus-controller.html)：把倒计时、阶段状态和轻量反馈组合成一件桌面工具。（HarmonyOS、Apple）
-- [液态开关组件](https://qu-bl.github.io/one-fuzhu/site/cases/liquid-switch.html)：围绕按压、拖动和状态变化设计的高反馈交互组件。（Apple、Android、HarmonyOS）
 
 ## 页面
 
