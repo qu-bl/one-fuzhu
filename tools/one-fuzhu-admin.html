@@ -631,6 +631,15 @@ function bytesToBase64(bytes) {
 // 仓库路径 site/assets/x.riv -> 站点相对地址 ./assets/x.riv
 function repoPathToUrl(path) { return './' + path.replace(/^site\//, ''); }
 
+// content.json 里的资源路径以站点根目录为基准（./assets/…），而管理台位于 /tools/ 下，
+// 直接引用会解析成 /tools/assets/… 而 404。这里换算成站点下的可访问地址。
+function siteAssetUrl(url) {
+  const clean = String(url || '').split('?')[0].trim();
+  if (!clean) return '';
+  if (/^(https?:)?\/\//i.test(clean) || clean.startsWith('data:')) return clean;
+  return '../site/' + clean.replace(/^\.\//, '');
+}
+
 // 加版本号，避免 GitHub Pages 缓存导致替换文件后站点仍拿到旧内容。
 function versioned(url) { return url ? url.split('?')[0] + '?v=' + Date.now() : url; }
 
@@ -729,7 +738,7 @@ function heroEditor() {
   const preview = el('img');
   preview.alt = '';
   preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--md-sys-color-surface-container)';
-  const syncPreview = (url) => { preview.src = url || ''; preview.hidden = !url; };
+  const syncPreview = (url) => { preview.src = siteAssetUrl(url); preview.hidden = !url; };
   syncPreview(hero.fallback.src);
   fallbackSrc.addEventListener('input', () => syncPreview(fallbackSrc.value.trim()));
   details.append(previewLabel, preview);
@@ -809,13 +818,26 @@ function noticeEditor() {
   details.append(header);
 
   const grid = el('div', 'grid');
+  const imageSrc = textInput(notice.image, './assets/xxx.webp');
   field(grid, '打开时弹出', bind(checkbox(notice.enabled === true), (v) => (notice.enabled = v)));
   field(grid, '标题', bind(textInput(notice.title), (v) => (notice.title = v)));
   field(grid, '正文（支持换行）', bind(textArea(notice.body), (v) => (notice.body = v)));
-  field(grid, '图片路径（可留空）', bind(textInput(notice.image, './assets/xxx.webp'), (v) => (notice.image = v)));
+  field(grid, '图片路径（可留空）', bind(imageSrc, (v) => (notice.image = v)));
   field(grid, '按钮文字（可留空）', bind(textInput(notice.linkLabel), (v) => (notice.linkLabel = v)));
   field(grid, '按钮链接（可留空）', bind(textInput(notice.linkHref, 'https://…'), (v) => (notice.linkHref = v)));
   details.append(grid);
+
+  const preview = el('img');
+  preview.alt = '';
+  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--md-sys-color-surface-container)';
+  const syncPreview = () => {
+    const url = siteAssetUrl(imageSrc.value.trim());
+    preview.hidden = !url;
+    preview.src = url;
+  };
+  syncPreview();
+  imageSrc.addEventListener('input', syncPreview);
+  details.append(el('div', 'hint md-typescale-title-small', '图片预览'), preview);
   details.append(el('p', 'hint', '「打开时弹出」是总开关：关闭后网页打开时不再出现弹窗。弹窗右上角始终可以关闭。'));
   return details;
 }
@@ -1049,26 +1071,19 @@ function setNavActive(which) {
 
 function selectTab(which) {
   if (which === 'raw' && activeView !== 'raw') refreshRaw();
-  if (which !== 'raw' && activeView === 'raw') {
+  if (which !== 'raw' && activeView === 'raw' && $('raw').value !== rawBaseline) {
     // 只有使用者确实改过 JSON 时才要求它合法。若文本框仍是载入时的原样
     // （例如线上数据本身未通过校验而被自动切到这里），允许直接离开，
     // 否则使用者会被永久卡在「官网 JSON」，无法使用可视化编辑器。
-    if ($('raw').value !== rawBaseline) {
-      try {
-        const candidate = JSON.parse($('raw').value);
-        validateContent(candidate);
-        content = candidate;
-      } catch (e) {
-        setStatus('官网 JSON 无效，修正后才能切到其他页签：' + e.message, 'err');
-        setNavActive(activeView);
-        return false;
-      }
+    try {
+      const candidate = JSON.parse($('raw').value);
+      validateContent(candidate);
+      content = candidate;
+    } catch (e) {
+      setStatus('官网 JSON 无效，修正后才能切到其他页签：' + e.message, 'err');
+      setNavActive(activeView);
+      return false;
     }
-    renderCards();
-    renderBanners();
-    renderHero();
-    renderContactEditor();
-    renderNotice();
   }
   $('viewBanners').hidden = which !== 'banners';
   $('viewHero').hidden = which !== 'hero';
@@ -1079,7 +1094,14 @@ function selectTab(which) {
   $('viewRaw').hidden = which !== 'raw';
   activeView = which;
   setNavActive(which);
-  if (which === 'translations') renderTranslations();
+  // 每次切换都重绘目标页。不要依赖「载入时统一渲染一次」这个前提：
+  // 载入失败、或从「官网 JSON」改完返回时，都必须按当前 content 重建。
+  if (which === 'banners') renderBanners();
+  else if (which === 'hero') renderHero();
+  else if (which === 'cards') renderCards();
+  else if (which === 'contact') renderContactEditor();
+  else if (which === 'notice') renderNotice();
+  else if (which === 'translations') renderTranslations();
   return true;
 }
 
