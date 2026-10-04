@@ -724,23 +724,21 @@ function cardEditor(card, index) {
   return details;
 }
 
+// 轮播只需编辑官网真正读取的字段。ID 由程序生成、视频轮播不渲染，都不再暴露。
 function bannerEditor(banner, index) {
-  const shell = editorShell(index, banner.title || banner.id || '未命名', () => { content.banners.splice(index, 1); renderBanners(); });
+  const shell = editorShell(index, banner.title || '未命名', () => { content.banners.splice(index, 1); renderBanners(); });
   const details = shell.details;
   const grid = el('div', 'grid');
-  field(grid, '标题', bind(textArea(banner.title), (v) => { banner.title = v; shell.title.textContent = `${index + 1}. ${v || banner.id || '未命名'}`; }));
-  field(grid, 'ID', bind(textInput(banner.id), (v) => (banner.id = v)));
+  field(grid, '标题', bind(textArea(banner.title), (v) => { banner.title = v; shell.title.textContent = `${index + 1}. ${v || '未命名'}`; }));
   field(grid, '圆点文字', bind(textInput(banner.label), (v) => (banner.label = v)));
   field(grid, '简介', bind(textArea(banner.summary), (v) => (banner.summary = v)));
   field(grid, '按钮文字', bind(textInput(banner.linkLabel), (v) => (banner.linkLabel = v)));
-  field(grid, '动作', bind(select(['showcase', 'access'], banner.action || 'showcase'), (v) => (banner.action = v)));
-  field(grid, '分类', bind(textInput(banner.category, 'showcase 时用于筛选'), (v) => (banner.category = v)));
-  renderVideoEditor(grid, banner.video, (v) => { if (v) banner.video = v; else delete banner.video; });
+  field(grid, '跳转分类', bind(textInput(banner.category, '留空＝全部'), (v) => (banner.category = v)));
   field(grid, '显示', bind(checkbox(banner.visible), (v) => (banner.visible = v)));
   details.append(grid);
 
   const accessWrap = el('div');
-  accessWrap.append(el('div', 'hint ts-title-small', '访问入口'));
+  accessWrap.append(el('div', 'hint ts-title-small', '访问入口：填了内容按钮就改为「打开信息面板」，留空则跳转到橱柜'));
   renderAccessEditor(accessWrap, banner.access, (a) => { if (a) banner.access = a; else delete banner.access; });
   details.append(accessWrap);
   return details;

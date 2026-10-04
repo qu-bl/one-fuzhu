@@ -54,7 +54,6 @@
       "title": "让创意动起来，\n让屏幕有个性。",
       "summary": "发现设计师的互动作品与趣味工具，让每一块屏幕，都有属于自己的精彩。",
       "linkLabel": "探索创意作品",
-      "action": "showcase",
       "visible": true
     },
     {
@@ -126,7 +125,6 @@
       "title": "给屏幕，\n添一点好玩。",
       "summary": "从互动角色到专注计时，挑选喜欢的趣味工具，了解购买与加载方式，把创意带进日常。",
       "linkLabel": "发现趣味工具",
-      "action": "showcase",
       "category": "趣味工具",
       "visible": true
     }

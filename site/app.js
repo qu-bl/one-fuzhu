@@ -343,7 +343,13 @@ function renderActivities() {
     slide.setAttribute("aria-roledescription", "幻灯片");
     title.textContent = activity.title;
     summary.textContent = activity.summary;
-    if (activity.action === "showcase") {
+    // 按钮行为由数据自身推导，不再需要单独的 action 字段：
+    // 有访问入口 → 打开信息面板；否则有按钮文字 → 跳转橱柜（按 category 筛选）；
+    // 两者都没有 → 不显示按钮。
+    if (getAccess(activity).items.length) {
+      action.querySelector("span").textContent = activity.linkLabel || "获取信息";
+      action.addEventListener("click", () => openAccessDialog(activity, action));
+    } else if (activity.linkLabel) {
       action.querySelector("span").textContent = activity.linkLabel;
       action.addEventListener("click", () => {
         state.category = activity.category || "全部";
@@ -356,9 +362,6 @@ function renderActivities() {
         showcase.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" });
         document.querySelector("#case-search").focus({ preventScroll: true });
       });
-    } else if (getAccess(activity).items.length) {
-      action.querySelector("span").textContent = activity.linkLabel || "获取信息";
-      action.addEventListener("click", () => openAccessDialog(activity, action));
     } else {
       action.hidden = true;
     }
