@@ -4,34 +4,36 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>千机百变 · 内容与翻译管理</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<script type="importmap">
-{
-  "imports": {
-    "@material/web/": "https://esm.run/@material/web@2.5.0/"
-  }
-}
-</script>
+<!--
+  Material 3 组件与字体全部本地自托管，不依赖 esm.run / fonts.googleapis.com 等境外 CDN。
+  重新生成 tools/vendor/material-web.js：
+
+    mkdir -p /tmp/mwbuild && cd /tmp/mwbuild
+    printf '{"name":"mwbuild","private":true,"type":"module"}' > package.json
+    printf "import '@material/web/all.js';\nexport { styles as typescaleStyles } from '@material/web/typography/md-typescale-styles.js';\n" > entry.js
+    npm i @material/web@2.5.0 esbuild@0.25.9
+    ./node_modules/.bin/esbuild entry.js --bundle --format=esm --minify --target=es2022 \
+      --legal-comments=eof --outfile=material-web.js
+    cp material-web.js <repo>/tools/vendor/material-web.js
+    cp node_modules/@material/web/LICENSE <repo>/tools/vendor/material-web.LICENSE
+-->
 <script type="module">
+  window.__MATERIAL_ERROR__ = '';
   try {
-    await import('@material/web/all.js');
-    const { styles: typescaleStyles } = await import('@material/web/typography/md-typescale-styles.js');
-    document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
-    window.dispatchEvent(new Event('material-ready'));
+    const mod = await import('./vendor/material-web.js');
+    const typescale = mod.typescaleStyles;
+    if (typescale?.styleSheet) document.adoptedStyleSheets.push(typescale.styleSheet);
   } catch (error) {
-    window.addEventListener('DOMContentLoaded', () => {
-      const status = document.getElementById('status');
-      if (status) status.textContent = `Material 3 组件加载失败：${error.message}`;
-    });
+    window.__MATERIAL_ERROR__ = error?.message || String(error);
   }
+  window.dispatchEvent(new Event('material-ready'));
 </script>
 <style>
   :root {
     color-scheme: light;
-    --md-ref-typeface-brand: Roboto, system-ui, sans-serif;
-    --md-ref-typeface-plain: Roboto, system-ui, sans-serif;
+    /* 不加载 Google Fonts：Roboto 没有中文字形，中文本来就走系统字体回落。 */
+    --md-ref-typeface-brand: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+    --md-ref-typeface-plain: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
     --md-sys-color-primary: #445e91;
     --md-sys-color-on-primary: #ffffff;
     --md-sys-color-primary-container: #d9e2ff;
@@ -52,19 +54,26 @@
     --md-sys-color-on-error-container: #410002;
   }
   * { box-sizing: border-box; }
-  body { margin:0; min-height:100vh; background:var(--md-sys-color-surface-container-low); color:var(--md-sys-color-on-surface); font-family:var(--md-ref-typeface-plain); }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--md-sys-color-surface-container-low); color:var(--md-sys-color-on-surface); font-family:var(--md-ref-typeface-plain); }
   header { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 20px; background:var(--md-sys-color-surface); box-shadow:0 1px 3px color-mix(in srgb, var(--md-sys-color-on-surface) 18%, transparent); }
   header h1 { margin:0; }
   header .repo { color:var(--md-sys-color-on-surface-variant); }
   header md-linear-progress { position:absolute; inset:auto 0 0; width:100%; }
-  .shell { display:grid; grid-template-columns:224px minmax(0,1fr); gap:20px; align-items:start; max-width:1320px; margin:0 auto; padding:20px; }
-  .sidebar { position:sticky; top:78px; background:var(--md-sys-color-surface); border-radius:20px; padding:8px; }
+  /* 侧边栏铺满整个左侧（从页头到底部），无卡片、无圆角、无边框，
+     与页面背景同色，视觉上就是页面的左边一条。 */
+  .shell { flex:1; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:stretch; }
+  .sidebar { position:sticky; top:var(--header-h, 61px); align-self:start; display:flex; flex-direction:column; gap:4px; width:224px; max-height:calc(100vh - var(--header-h, 61px)); overflow:auto; padding:12px 8px 20px; background:var(--md-sys-color-surface-container-low); transition:width 180ms ease; }
+  .sidebar[data-collapsed="true"] { width:56px; }
+  .sidebar[data-collapsed="true"] .nav-item { display:none; }
+  .nav-toggle { appearance:none; margin:0 0 4px; border:0; background:transparent; color:var(--md-sys-color-on-surface-variant); font:inherit; font-size:18px; line-height:1; height:40px; border-radius:20px; cursor:pointer; flex-shrink:0; }
+  .nav-toggle:hover { background:var(--md-sys-color-surface-container); }
+  .nav-toggle:focus-visible { outline:2px solid var(--md-sys-color-primary); outline-offset:2px; }
   .sidebar nav { display:flex; flex-direction:column; gap:2px; }
-  .nav-item { appearance:none; margin:0; border:0; background:transparent; color:var(--md-sys-color-on-surface-variant); font:inherit; text-align:left; padding:0 16px; min-height:48px; border-radius:14px; cursor:pointer; white-space:nowrap; }
+  .nav-item { appearance:none; margin:0; border:0; background:transparent; color:var(--md-sys-color-on-surface-variant); font:inherit; text-align:left; padding:0 16px; min-height:48px; border-radius:24px; cursor:pointer; white-space:nowrap; }
   .nav-item:hover { background:var(--md-sys-color-surface-container); }
   .nav-item[aria-selected="true"] { background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container); font-weight:600; }
   .nav-item:focus-visible { outline:2px solid var(--md-sys-color-primary); outline-offset:2px; }
-  main { display:flex; flex-direction:column; gap:16px; min-width:0; }
+  main { display:flex; flex-direction:column; gap:16px; min-width:0; padding:20px; }
   md-outlined-text-field, md-outlined-select { width:100%; }
   .bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
   .bar > md-outlined-text-field { flex:1 1 280px; }
@@ -94,11 +103,16 @@
   .danger { --md-text-button-label-text-color:var(--md-sys-color-error); }
   [hidden], .hidden { display:none !important; }
   @media (max-width:900px) {
-    .shell { grid-template-columns:1fr; padding:12px; }
-    .sidebar { position:static; padding:6px; }
+    /* 窄屏改为顶部横向导航，折叠按钮在此布局下没有意义，隐藏。 */
+    .shell { grid-template-columns:1fr; }
+    .sidebar { position:static; width:auto; max-height:none; flex-direction:row; align-items:center; gap:6px; padding:8px 12px; }
+    .sidebar[data-collapsed="true"] { width:auto; }
+    .sidebar[data-collapsed="true"] .nav-item { display:block; }
+    .nav-toggle { display:none; }
     .sidebar nav { flex-direction:row; overflow-x:auto; scrollbar-width:none; }
     .sidebar nav::-webkit-scrollbar { display:none; }
-    .nav-item { padding:0 14px; }
+    .nav-item { padding:0 14px; flex:0 0 auto; }
+    main { padding:12px; }
   }
   @media (max-width:680px) {
     .grid { grid-template-columns:1fr; }
@@ -118,7 +132,8 @@
 </header>
 
 <div class="shell">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar" data-collapsed="false">
+    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="true" aria-controls="nav" aria-label="折叠导航" title="折叠导航">«</button>
     <nav id="nav" role="tablist" aria-orientation="vertical" aria-label="管理内容">
       <button class="nav-item" type="button" role="tab" id="tabBanners" aria-controls="viewBanners" aria-selected="true" tabindex="0" data-view="banners">顶部轮播</button>
       <button class="nav-item" type="button" role="tab" id="tabHero" aria-controls="viewHero" aria-selected="false" tabindex="-1" data-view="hero">顶部 Rive</button>
@@ -1341,6 +1356,16 @@ async function initialize() {
   initialized = true;
   $('tokenInput').value = token;
   $('repoLabel').textContent = `${CONFIG.owner}/${CONFIG.repo} · 官网 + Rive 翻译 @${CONFIG.branch}`;
+  // 页头会随宽度换行而改变高度，实测后写进 CSS 变量，供侧边栏的 sticky 定位使用。
+  const syncHeaderHeight = () => {
+    const height = document.querySelector('header')?.offsetHeight;
+    if (height) document.documentElement.style.setProperty('--header-h', `${height}px`);
+  };
+  syncHeaderHeight();
+  window.addEventListener('resize', syncHeaderHeight);
+  if (window.__MATERIAL_ERROR__) {
+    setStatus('Material 3 组件未能加载，界面会显示为未样式化：' + window.__MATERIAL_ERROR__, 'err');
+  }
   $('tokenInput').addEventListener('input', () => {
     token = $('tokenInput').value.trim();
     if (token) sessionStorage.setItem('oneFuzhuToken', token);
@@ -1356,6 +1381,21 @@ async function initialize() {
   const items = navItems();
   items.forEach((item, index) => {
     item.addEventListener('click', () => { selectTab(item.dataset.view); });
+  });
+  // 折叠侧边栏，状态记在 localStorage 里，下次打开保持。
+  const applyCollapsed = (collapsed) => {
+    const sidebar = $('sidebar');
+    sidebar.dataset.collapsed = collapsed ? 'true' : 'false';
+    const toggle = $('navToggle');
+    toggle.textContent = collapsed ? '»' : '«';
+    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    toggle.setAttribute('aria-label', collapsed ? '展开导航' : '折叠导航');
+    toggle.title = collapsed ? '展开导航' : '折叠导航';
+    try { localStorage.setItem('oneFuzhuNavCollapsed', collapsed ? '1' : '0'); } catch {}
+  };
+  applyCollapsed(localStorage.getItem('oneFuzhuNavCollapsed') === '1');
+  $('navToggle').addEventListener('click', () => {
+    applyCollapsed($('sidebar').dataset.collapsed !== 'true');
   });
   $('nav').addEventListener('keydown', (event) => {
     const step = { ArrowDown: 1, ArrowUp: -1, ArrowRight: 1, ArrowLeft: -1 }[event.key];
@@ -1436,8 +1476,14 @@ window.addEventListener('beforeunload', (event) => {
   event.preventDefault();
   event.returnValue = '';
 });
-if (customElements.get('md-filled-button')) initialize();
-else window.addEventListener('material-ready', initialize, { once: true });
+// 不再等 Material 就绪：以前这里挂在 material-ready 上，组件一旦加载失败
+// 初始化就永远不执行，导航点不动、内容也不加载。自定义元素即使晚于脚本升级，
+// 之前绑在宿主元素上的监听依然有效，所以先初始化是安全的。
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', initialize, { once: true });
+} else {
+  initialize();
+}
 </script>
 </body>
 </html>
