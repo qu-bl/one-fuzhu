@@ -6,11 +6,31 @@
 <title>千机百变 · 内容与翻译管理</title>
 <!--
   Material 3 组件与字体全部本地自托管，不依赖 esm.run / fonts.googleapis.com 等境外 CDN。
+
+  只打包本页真正用到的 14 个组件（不用 all.js）：全量 477 KB / gzip 81 KB，
+  精简后 243 KB / gzip 50 KB。新增组件时记得在 entry.js 里补上对应 import。
+
   重新生成 tools/vendor/material-web.js：
 
     mkdir -p /tmp/mwbuild && cd /tmp/mwbuild
     printf '{"name":"mwbuild","private":true,"type":"module"}' > package.json
-    printf "import '@material/web/all.js';\nexport { styles as typescaleStyles } from '@material/web/typography/md-typescale-styles.js';\n" > entry.js
+    cat > entry.js <<'ENTRY'
+    import '@material/web/textfield/outlined-text-field.js';
+    import '@material/web/select/outlined-select.js';
+    import '@material/web/select/select-option.js';
+    import '@material/web/checkbox/checkbox.js';
+    import '@material/web/button/outlined-button.js';
+    import '@material/web/button/filled-button.js';
+    import '@material/web/button/text-button.js';
+    import '@material/web/iconbutton/icon-button.js';
+    import '@material/web/list/list.js';
+    import '@material/web/list/list-item.js';
+    import '@material/web/divider/divider.js';
+    import '@material/web/elevation/elevation.js';
+    import '@material/web/progress/linear-progress.js';
+    import '@material/web/dialog/dialog.js';
+    export { styles as typescaleStyles } from '@material/web/typography/md-typescale-styles.js';
+    ENTRY
     npm i @material/web@2.5.0 esbuild@0.25.9
     ./node_modules/.bin/esbuild entry.js --bundle --format=esm --minify --target=es2022 \
       --legal-comments=eof --outfile=material-web.js
