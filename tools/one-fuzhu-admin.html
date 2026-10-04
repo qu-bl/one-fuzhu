@@ -40,8 +40,12 @@
     --r-s: 8px;
     --r-full: 999px;
     --control-h: 44px;
-    /* 词典行的控件高度：原文框与译文输入框共用，保证两列上下都齐平。 */
-    --row-h: 88px;
+    /* 多行文本框（卡片详情等）的默认高度。 */
+    --textarea-h: 88px;
+    /* 词典表格数据行的高度：一行文本，超出部分横向滚动。 */
+    --row-h: 36px;
+    /* 词典表格操作列宽度（放「删除」按钮）。 */
+    --action-w: 88px;
   }
   * { box-sizing: border-box; }
   body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--c-surface-container-low); color:var(--c-on-surface); font-family:var(--font); }
@@ -90,12 +94,18 @@
   .access-item { background:var(--c-surface-container); border-radius:var(--r-s); padding:16px; margin-top:12px; }
   /* 工具栏同样底对齐：搜索框带标签，而按钮和复选框没有标签。 */
   .translation-toolbar { display:grid; grid-template-columns:minmax(180px,1fr) auto auto; gap:8px; align-items:end; }
-  .translation-list { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
-  /* 原文与译文两列结构一致（都有标签），行首对齐；删除按钮贴底与输入框齐平。 */
-  .translation-row { display:grid; grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) auto; gap:12px; align-items:start; }
-  .translation-row .btn { align-self:end; }
-  /* 原文框高度与译文输入框一致（同为 --row-h），两列上下都齐平。 */
-  .translation-row .source { min-height:var(--row-h); padding:10px 14px; border-radius:var(--r-s); border:1px solid transparent; background:var(--c-surface-container); overflow-wrap:anywhere; }
+  /* 词典按表格呈现：列名只在表头出现一次，数据行不带标签，一行就是一条文本的高度。
+     操作列用固定宽度：若写成 auto，表头的空单元格与数据行的按钮宽度不同，
+     前两列会被挤得偏移，表头和数据行就对不齐了。 */
+  .translation-list { display:flex; flex-direction:column; gap:4px; margin-top:16px; }
+  .translation-head, .translation-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) var(--action-w); gap:8px; align-items:center; }
+  /* 表头文字内缩 12px，与原文框/输入框内的文字起点对齐。 */
+  .translation-head { padding-bottom:4px; font-size:12px; color:var(--c-on-surface-variant); }
+  .translation-head > span { padding-inline:12px; }
+  .translation-row .btn { width:100%; }
+  .translation-row .source { height:var(--row-h); display:flex; align-items:center; padding:0 12px; border:1px solid transparent; border-radius:var(--r-s); background:var(--c-surface-container); white-space:nowrap; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; }
+  .translation-row .field-input { height:var(--row-h); min-height:var(--row-h); padding:0 12px; }
+  .translation-row .btn { min-height:var(--row-h); padding:0 12px; }
   .translation-row.missing .source { background:var(--c-error-container); color:var(--c-on-error-container); }
   .stats { display:flex; gap:12px; flex-wrap:wrap; color:var(--c-on-surface-variant); }
   .pager { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:16px; }
@@ -110,7 +120,7 @@
   .field-input::placeholder { color:var(--c-on-surface-variant); opacity:.7; }
   .field-input:focus-visible { outline:none; border-color:var(--c-primary); box-shadow:inset 0 0 0 1px var(--c-primary); }
   .field-input:disabled { opacity:.5; cursor:not-allowed; }
-  textarea.field-input { min-height:var(--row-h); resize:vertical; }
+  textarea.field-input { min-height:var(--textarea-h); resize:vertical; }
   select.field-input { cursor:pointer; }
   .bar > .field { flex:1 1 280px; }
   .row > .field { flex:1 1 220px; }
@@ -173,7 +183,11 @@
   @media (max-width:680px) {
     .grid { grid-template-columns:1fr; }
     .field-wide { grid-column:auto; }
-    .translation-toolbar, .translation-row { grid-template-columns:1fr; }
+    .translation-toolbar { grid-template-columns:1fr; }
+    /* 窄屏改成上下排列，此时表头的列名会错位，直接隐藏。 */
+    .translation-head { display:none; }
+    .translation-row { grid-template-columns:1fr; }
+    .translation-list { gap:12px; }
   }
 </style>
 </head>
@@ -1008,15 +1022,18 @@ function renderTranslations() {
   const visible = terms.slice(start, start + TRANSLATION_PAGE_SIZE);
   const box = $('translations');
   box.replaceChildren();
+  // 表头只出现一次，列名与数据行共用同一套 grid 列宽，因此逐列对齐。
+  if (visible.length) {
+    const head = el('div', 'translation-head');
+    head.append(el('span', null, '英文原文'), el('span', null, '中文译文'), el('span', null, ''));
+    box.append(head);
+  }
   visible.forEach((source) => {
     const target = typeof translation[source] === 'string' ? translation[source] : '';
     const row = el('div', `translation-row${target.trim() ? '' : ' missing'}`);
-    // 原文与译文都用 .field 包裹并带标签，两列结构一致才会行首对齐。
-    const sourceTextField = el('label', 'field');
-    sourceTextField.append(el('span', 'field-label', '英文原文'), el('div', 'source', source));
-    const targetInput = textArea(target, '输入中文译文');
-    const targetField = el('label', 'field');
-    targetField.append(el('span', 'field-label', '中文译文'), targetInput);
+    // 数据行不带标签：原文一行文本、超宽横向滚动；译文用单行输入框。
+    const sourceBox = el('div', 'source', source);
+    const targetInput = textInput(target, '输入中文译文');
     const remove = actionButton('删除', 'danger');
     targetInput.addEventListener('input', () => {
       if (targetInput.value.trim()) {
@@ -1039,7 +1056,7 @@ function renderTranslations() {
       if (hadPublishedValue) markDirty();
       renderTranslations();
     });
-    row.append(sourceTextField, targetField, remove);
+    row.append(sourceBox, targetInput, remove);
     box.append(row);
   });
   if (!visible.length) box.append(el('div', 'hint', '没有符合条件的词条。'));
