@@ -54,7 +54,8 @@ a { color: var(--accent); }
 .activity-rive canvas, .activity-rive-fallback { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 .activity-rive canvas { touch-action: pan-y; }
 .activity-rive-fallback { object-fit: contain; }
-.banner-action { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 20px; border: 0; border-radius: 24px; background: var(--accent); color: var(--md-sys-color-on-primary); font-size: 15px; font-weight: 550; }
+/* 这个类同时用在轮播的 <button> 和弹窗的 <a> 上；<a> 会继承浏览器默认下划线，需显式去掉。 */
+.banner-action { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 20px; border: 0; border-radius: 24px; background: var(--accent); color: var(--md-sys-color-on-primary); font-size: 15px; font-weight: 550; text-decoration: none; }
 .banner-action:hover { opacity: .9; }
 .banner-navigation { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 8px 0 0; }
 .activity-dots { display: flex; flex-wrap: wrap; gap: 8px; }
