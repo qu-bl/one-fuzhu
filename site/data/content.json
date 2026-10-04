@@ -1,5 +1,52 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "hero": {
+    "ariaLabel": "猫咪触摸跟随互动动画",
+    "rive": {
+      "src": "./assets/hero-cat.riv",
+      "artboard": "Artboard 2",
+      "stateMachine": "State Machine 1",
+      "autoplay": true
+    },
+    "fallback": {
+      "src": "./assets/hero-cat.webp",
+      "alt": "猫咪触摸跟随动画预览"
+    }
+  },
+  "notice": {
+    "enabled": false,
+    "title": "公告标题",
+    "body": "这里填写公告正文，支持换行。",
+    "image": "",
+    "linkLabel": "",
+    "linkHref": ""
+  },
+  "contact": {
+    "visible": true,
+    "label": "联系与合作",
+    "title": "有想法，欢迎联系。",
+    "summary": "互动作品定制、Rive 与资源包创作、App 或设备适配、课程与品牌合作，以及使用中的问题和建议，都可以联系。",
+    "methods": [
+      {
+        "id": "mail",
+        "label": "发送邮件 · 正式沟通与合作",
+        "value": "156405968@qq.com",
+        "href": "mailto:156405968@qq.com?subject=%E5%8D%83%E6%9C%BA%E7%99%BE%E5%8F%98%E8%81%94%E7%B3%BB%E4%B8%8E%E5%90%88%E4%BD%9C"
+      },
+      {
+        "id": "qq",
+        "label": "添加 QQ 联系人",
+        "value": "156405968",
+        "href": "mqqwpa://im/chat?chat_type=wpa&uin=156405968&version=1&src_type=web"
+      },
+      {
+        "id": "group",
+        "label": "加入创作者交流 QQ 群",
+        "value": "862835994",
+        "href": "https://qm.qq.com/q/cARWUthgDC"
+      }
+    ]
+  },
   "banners": [
     {
       "id": "discover",
@@ -145,7 +192,8 @@
         "items": [
           {
             "platform": "bilibili",
-            "url": "<iframe src=\"//player.bilibili.com/player.html?isOutside=true&aid=117300673910614&bvid=BV1MYeY6bEtU&cid=42041410389&p=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"></iframe>"
+            "label": "哔哩哔哩课程",
+            "url": "https://www.bilibili.com/video/BV1MYeY6bEtU"
           }
         ]
       }

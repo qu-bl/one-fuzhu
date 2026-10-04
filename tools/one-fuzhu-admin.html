@@ -114,20 +114,45 @@
   </div>
 
   <md-tabs id="tabs" aria-label="管理内容">
-    <md-primary-tab id="tabCards" active aria-controls="viewCards">卡片</md-primary-tab>
-    <md-primary-tab id="tabBanners" aria-controls="viewBanners">横幅</md-primary-tab>
+    <md-primary-tab id="tabBanners" active aria-controls="viewBanners">顶部轮播</md-primary-tab>
+    <md-primary-tab id="tabHero" aria-controls="viewHero">顶部 Rive</md-primary-tab>
+    <md-primary-tab id="tabCards" aria-controls="viewCards">创意橱柜</md-primary-tab>
+    <md-primary-tab id="tabContact" aria-controls="viewContact">联系方式</md-primary-tab>
+    <md-primary-tab id="tabNotice" aria-controls="viewNotice">弹窗</md-primary-tab>
     <md-primary-tab id="tabTranslations" aria-controls="viewTranslations">Rive 翻译</md-primary-tab>
     <md-primary-tab id="tabRaw" aria-controls="viewRaw">官网 JSON</md-primary-tab>
   </md-tabs>
 
-  <section id="viewCards" role="tabpanel" aria-labelledby="tabCards">
-    <div class="bar"><md-outlined-button id="addCard">添加卡片</md-outlined-button><span class="hint">按列表顺序显示。</span></div>
+  <section id="viewBanners" role="tabpanel" aria-labelledby="tabBanners">
+    <div class="bar"><md-outlined-button id="addBanner">添加横幅</md-outlined-button><span class="hint">按列表顺序轮播；关闭「显示」即从轮播中移除。</span></div>
+    <div id="banners" class="editor-list"></div>
+  </section>
+
+  <section id="viewHero" role="tabpanel" aria-labelledby="tabHero" hidden>
+    <div class="bar">
+      <md-outlined-button id="uploadHeroRive">上传 .riv 文件</md-outlined-button>
+      <md-outlined-button id="uploadHeroFallback">上传兜底图片</md-outlined-button>
+      <span class="hint">上传的文件随「保存并发布」一起写入仓库，并自动加版本号绕过缓存。</span>
+    </div>
+    <div id="hero" class="editor-list"></div>
+  </section>
+
+  <section id="viewCards" role="tabpanel" aria-labelledby="tabCards" hidden>
+    <div class="bar"><md-outlined-button id="addCard">添加卡片</md-outlined-button><span class="hint">按列表顺序显示；勾选「精选」的卡片会进入橱柜顶部轮播。</span></div>
     <div id="cards" class="editor-list"></div>
   </section>
 
-  <section id="viewBanners" role="tabpanel" aria-labelledby="tabBanners" hidden>
-    <div class="bar"><md-outlined-button id="addBanner">添加横幅</md-outlined-button></div>
-    <div id="banners" class="editor-list"></div>
+  <section id="viewContact" role="tabpanel" aria-labelledby="tabContact" hidden>
+    <div class="bar"><md-outlined-button id="addContactMethod">添加联系方式</md-outlined-button><span class="hint">关闭「显示」即整段隐藏。</span></div>
+    <div id="contact" class="editor-list"></div>
+  </section>
+
+  <section id="viewNotice" role="tabpanel" aria-labelledby="tabNotice" hidden>
+    <div class="bar">
+      <md-outlined-button id="uploadNoticeImage">上传弹窗图片</md-outlined-button>
+      <span class="hint">「打开时弹出」关闭后，网页打开时不再出现弹窗。</span>
+    </div>
+    <div id="notice" class="editor-list"></div>
   </section>
 
   <section id="viewTranslations" role="tabpanel" aria-labelledby="tabTranslations" hidden>
@@ -196,6 +221,12 @@ const CONFIG = {
     contract: 'contracts/schema-v3/contract.json',
     release: 'contracts/schema-v3/release.json'
   },
+  // 上传槽位：固定前缀 + 上传文件的扩展名，避免把 PNG 字节写进 .webp 路径。
+  uploads: {
+    heroRive: { base: 'site/assets/hero-cat', exts: ['.riv'], maxBytes: 24 * 1024 * 1024 },
+    heroFallback: { base: 'site/assets/hero-cat', exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 },
+    noticeImage: { base: 'site/assets/notice', exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 }
+  },
   token: ''
 };
 const REPO_API = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}`;
@@ -205,7 +236,31 @@ const PLATFORM_OPTIONS = ['', 'youtube', 'bilibili', 'xiaohongshu', 'douyin', 'k
 const VIDEO_PLATFORMS = ['', 'bilibili', 'youtube', 'douyin'];
 const CARD_PLATFORMS = ['HarmonyOS', 'Android', 'Apple'];
 
-let content = { schemaVersion: 1, banners: [], cards: [] };
+// 站点 app.js 的 HERO_DEFAULTS 与此保持一致，用于 content.json 还没有 hero 分节时的新建默认值。
+const HERO_TEMPLATE = {
+  ariaLabel: '猫咪触摸跟随互动动画',
+  rive: { src: './assets/hero-cat.riv', artboard: 'Artboard 2', stateMachine: 'State Machine 1', autoplay: true },
+  fallback: { src: './assets/hero-cat.webp', alt: '猫咪触摸跟随动画预览' }
+};
+const CONTACT_TEMPLATE = {
+  visible: true,
+  label: '联系与合作',
+  title: '有想法，欢迎联系。',
+  summary: '',
+  methods: []
+};
+const NOTICE_TEMPLATE = {
+  enabled: false,
+  title: '',
+  body: '',
+  image: '',
+  linkLabel: '',
+  linkHref: ''
+};
+// 站点允许直出的链接协议白名单（与 app.js 的 CONTACT_SCHEMES 一致）。
+const LINK_SCHEMES = ['http:', 'https:', 'mailto:', 'tel:', 'sms:', 'mqqwpa:', 'mqq:', 'weixin:', 'alipays:'];
+
+let content = { schemaVersion: 2, banners: [], cards: [] };
 let translation = {};
 let contract = null;
 let release = null;
@@ -214,10 +269,12 @@ let loadedHeadSha = null;
 let pendingTerms = new Set();
 let translationPage = 0;
 const TRANSLATION_PAGE_SIZE = 80;
+// 待发布的二进制文件：仓库路径 -> base64；随「保存并发布」一起提交。
+const pendingUploads = new Map();
 let token = CONFIG.token || sessionStorage.getItem('oneFuzhuToken') || '';
 let dirty = false;
 let busy = false;
-let activeView = 'cards';
+let activeView = 'banners';
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
@@ -233,7 +290,8 @@ function setBusy(value) {
   $('workspace').inert = value;
   $('loadBtn').disabled = value;
   $('saveBtn').disabled = value || !dirty;
-  ['addCard', 'addBanner', 'addTranslation', 'importReportBtn'].forEach((id) => { $(id).disabled = value; });
+  ['addCard', 'addBanner', 'addTranslation', 'importReportBtn', 'addContactMethod',
+    'uploadHeroRive', 'uploadHeroFallback', 'uploadNoticeImage'].forEach((id) => { const node = $(id); if (node) node.disabled = value; });
 }
 function markDirty() {
   dirty = true;
@@ -318,6 +376,7 @@ async function loadContent() {
     contract = nextContract;
     release = nextRelease;
     pendingTerms = new Set();
+    pendingUploads.clear();
     translationPage = 0;
     renderAll();
     markClean();
@@ -533,6 +592,213 @@ function bannerEditor(banner, index) {
   return details;
 }
 
+// ---------- 二进制上传：先暂存，随「保存并发布」一起提交 ----------
+
+function bytesToBase64(bytes) {
+  let bin = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(bin);
+}
+
+// 仓库路径 site/assets/x.riv -> 站点相对地址 ./assets/x.riv
+function repoPathToUrl(path) { return './' + path.replace(/^site\//, ''); }
+
+// 加版本号，避免 GitHub Pages 缓存导致替换文件后站点仍拿到旧内容。
+function versioned(url) { return url ? url.split('?')[0] + '?v=' + Date.now() : url; }
+
+function stageUpload(slot, onStaged) {
+  const input = el('input');
+  input.type = 'file';
+  input.accept = slot.exts.join(',');
+  input.addEventListener('change', async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const match = String(file.name).match(/\.[A-Za-z0-9]+$/);
+    const ext = match ? match[0].toLowerCase() : '';
+    if (!slot.exts.includes(ext)) {
+      setStatus(`只支持 ${slot.exts.join(' / ')} 格式`, 'err');
+      return;
+    }
+    if (file.size > slot.maxBytes) {
+      setStatus(`文件 ${(file.size / 1048576).toFixed(2)} MB 超过上限 ${(slot.maxBytes / 1048576).toFixed(1)} MB`, 'err');
+      return;
+    }
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const path = slot.base + ext;
+      // 同一槽位若已暂存别的扩展名，先移除，避免一次提交两个同名不同后缀的文件。
+      for (const key of Array.from(pendingUploads.keys())) {
+        if (key.startsWith(slot.base + '.')) pendingUploads.delete(key);
+      }
+      pendingUploads.set(path, bytesToBase64(bytes));
+      onStaged(path, file.size);
+      markDirty();
+      setStatus(`已暂存 ${path}（${(file.size / 1024).toFixed(0)} KB），点「保存并发布」写入仓库`, 'ok');
+    } catch (error) {
+      setStatus('读取文件失败：' + error.message, 'err');
+    }
+  }, { once: true });
+  input.click();
+}
+
+function uploadHeroRive() {
+  stageUpload(CONFIG.uploads.heroRive, (path) => {
+    if (!content.hero) content.hero = JSON.parse(JSON.stringify(HERO_TEMPLATE));
+    content.hero.rive = content.hero.rive || { ...HERO_TEMPLATE.rive };
+    content.hero.rive.src = versioned(repoPathToUrl(path));
+    renderHero();
+  });
+}
+
+function uploadHeroFallback() {
+  stageUpload(CONFIG.uploads.heroFallback, (path) => {
+    if (!content.hero) content.hero = JSON.parse(JSON.stringify(HERO_TEMPLATE));
+    content.hero.fallback = content.hero.fallback || { ...HERO_TEMPLATE.fallback };
+    content.hero.fallback.src = versioned(repoPathToUrl(path));
+    renderHero();
+  });
+}
+
+function uploadNoticeImage() {
+  stageUpload(CONFIG.uploads.noticeImage, (path) => {
+    if (!content.notice) content.notice = { ...NOTICE_TEMPLATE };
+    content.notice.image = versioned(repoPathToUrl(path));
+    renderNotice();
+  });
+}
+
+// 页面切走后重新渲染会丢掉未提交的暂存提示，这里在标签处标出已暂存的文件数。
+function pendingUploadHint() {
+  if (!pendingUploads.size) return '';
+  return ` · 待发布文件 ${pendingUploads.size} 个`;
+}
+
+// ---------- 顶部 Rive ----------
+
+function heroEditor() {
+  if (!content.hero) content.hero = JSON.parse(JSON.stringify(HERO_TEMPLATE));
+  const hero = content.hero;
+  hero.rive = hero.rive || { ...HERO_TEMPLATE.rive };
+  hero.fallback = hero.fallback || { ...HERO_TEMPLATE.fallback };
+
+  const details = el('section', 'surface editor');
+  const header = el('div', 'editor-header');
+  header.append(el('div', 'title md-typescale-title-medium', '顶部 Rive'));
+  details.append(header);
+
+  const grid = el('div', 'grid');
+  const fallbackSrc = textInput(hero.fallback.src, './assets/xxx.webp');
+  field(grid, '区块名称（读屏）', bind(textInput(hero.ariaLabel), (v) => (hero.ariaLabel = v)));
+  field(grid, 'Rive 文件路径', bind(textInput(hero.rive.src, './assets/xxx.riv'), (v) => (hero.rive.src = v)));
+  field(grid, '画板名（留空用文件默认）', bind(textInput(hero.rive.artboard, 'Artboard 2'), (v) => (hero.rive.artboard = v)));
+  field(grid, '状态机名（留空用文件默认）', bind(textInput(hero.rive.stateMachine, 'State Machine 1'), (v) => (hero.rive.stateMachine = v)));
+  field(grid, '自动播放', bind(checkbox(hero.rive.autoplay !== false), (v) => (hero.rive.autoplay = v)));
+  field(grid, '兜底图片路径', bind(fallbackSrc, (v) => (hero.fallback.src = v)));
+  field(grid, '兜底图片说明', bind(textInput(hero.fallback.alt), (v) => (hero.fallback.alt = v)));
+  details.append(grid);
+
+  const previewLabel = el('div', 'hint md-typescale-title-small', '兜底图预览（Rive 载入前或不可用时显示）');
+  const preview = el('img');
+  preview.alt = '';
+  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:8px;background:var(--md-sys-color-surface-container)';
+  const syncPreview = (url) => { preview.src = url || ''; preview.hidden = !url; };
+  syncPreview(hero.fallback.src);
+  fallbackSrc.addEventListener('input', () => syncPreview(fallbackSrc.value.trim()));
+  details.append(previewLabel, preview);
+  return details;
+}
+
+// ---------- 联系方式 ----------
+
+function contactMethodEditor(methods, index, redraw) {
+  const box = el('div', 'access-item');
+  const grid = el('div', 'grid');
+  const label = textInput(methods[index].label, '如：发送邮件 · 正式沟通与合作');
+  const value = textInput(methods[index].value, '如：156405968@qq.com');
+  const href = textInput(methods[index].href, 'mailto:… 或 https://… 或 mqqwpa:…');
+  field(grid, '说明', label);
+  field(grid, '显示值', value);
+  field(grid, '链接', href);
+  const sync = () => {
+    const next = { ...methods[index] };
+    const l = label.value.trim(), v = value.value.trim(), h = href.value.trim();
+    if (l) next.label = l; else delete next.label;
+    if (v) next.value = v; else delete next.value;
+    if (h) next.href = h; else delete next.href;
+    methods[index] = next;
+    markDirty();
+  };
+  [label, value, href].forEach((node) => node.addEventListener('input', sync));
+  box.append(grid);
+  const row = el('div', 'row');
+  const del = actionButton('删除这一条', 'danger');
+  del.addEventListener('click', async () => {
+    if (!await confirmAction('删除这条联系方式？')) return;
+    methods.splice(index, 1);
+    markDirty();
+    redraw();
+  });
+  row.append(del);
+  box.append(row);
+  return box;
+}
+
+function contactEditor() {
+  if (!content.contact) content.contact = JSON.parse(JSON.stringify(CONTACT_TEMPLATE));
+  const contact = content.contact;
+  if (!Array.isArray(contact.methods)) contact.methods = [];
+  const details = el('section', 'surface editor');
+  const header = el('div', 'editor-header');
+  header.append(el('div', 'title md-typescale-title-medium', '联系方式'));
+  details.append(header);
+
+  const grid = el('div', 'grid');
+  field(grid, '整段显示', bind(checkbox(contact.visible !== false), (v) => (contact.visible = v)));
+  field(grid, '小标题', bind(textInput(contact.label), (v) => (contact.label = v)));
+  field(grid, '标题', bind(textArea(contact.title), (v) => (contact.title = v)));
+  field(grid, '说明', bind(textArea(contact.summary), (v) => (contact.summary = v)));
+  details.append(grid);
+
+  const list = el('div', 'editor-list');
+  const redraw = () => {
+    list.replaceChildren();
+    contact.methods.forEach((_, index) => list.append(contactMethodEditor(contact.methods, index, redraw)));
+    details.dataset.methodCount = String(contact.methods.length);
+  };
+  redraw();
+  details.append(el('div', 'hint md-typescale-title-small', '联系方式条目（没有条目时整段不显示）'), list);
+  return details;
+}
+
+// ---------- 公告弹窗 ----------
+
+function noticeEditor() {
+  if (!content.notice) content.notice = { ...NOTICE_TEMPLATE };
+  const notice = content.notice;
+  const details = el('section', 'surface editor');
+  const header = el('div', 'editor-header');
+  header.append(el('div', 'title md-typescale-title-medium', '公告弹窗'));
+  details.append(header);
+
+  const grid = el('div', 'grid');
+  field(grid, '打开时弹出', bind(checkbox(notice.enabled === true), (v) => (notice.enabled = v)));
+  field(grid, '标题', bind(textInput(notice.title), (v) => (notice.title = v)));
+  field(grid, '正文（支持换行）', bind(textArea(notice.body), (v) => (notice.body = v)));
+  field(grid, '图片路径（可留空）', bind(textInput(notice.image, './assets/xxx.webp'), (v) => (notice.image = v)));
+  field(grid, '按钮文字（可留空）', bind(textInput(notice.linkLabel), (v) => (notice.linkLabel = v)));
+  field(grid, '按钮链接（可留空）', bind(textInput(notice.linkHref, 'https://…'), (v) => (notice.linkHref = v)));
+  details.append(grid);
+  details.append(el('p', 'hint', '「打开时弹出」是总开关：关闭后网页打开时不再出现弹窗。弹窗右上角始终可以关闭。'));
+  return details;
+}
+
+function renderHero() { const box = $('hero'); box.replaceChildren(); box.append(heroEditor()); }
+function renderContactEditor() { const box = $('contact'); box.replaceChildren(); box.append(contactEditor()); }
+function renderNotice() { const box = $('notice'); box.replaceChildren(); box.append(noticeEditor()); }
+
 function bind(input, apply) {
   const commit = () => {
     apply(input.tagName === 'MD-CHECKBOX' ? input.checked : input.value);
@@ -733,38 +999,56 @@ function addTranslationEntry() {
   renderTranslations();
 }
 
-function renderAll() { renderCards(); renderBanners(); renderTranslations(); refreshRaw(); }
+function renderAll() { renderCards(); renderBanners(); renderHero(); renderContactEditor(); renderNotice(); renderTranslations(); refreshRaw(); }
 
 function refreshRaw() { $('raw').value = JSON.stringify(content, null, 2); }
 
+// tab 顺序必须与 HTML 中 <md-primary-tab> 的顺序一致。
+const TAB_VIEWS = ['banners', 'hero', 'cards', 'contact', 'notice', 'translations', 'raw'];
+const RAW_TAB_INDEX = TAB_VIEWS.indexOf('raw');
+
 function selectTab(which) {
-  const cards = which === 'cards', banners = which === 'banners', translations = which === 'translations', raw = which === 'raw';
-  if (raw && activeView !== 'raw') refreshRaw();
-  if (!raw && activeView === 'raw') {
+  if (which === 'raw' && activeView !== 'raw') refreshRaw();
+  if (which !== 'raw' && activeView === 'raw') {
     try {
       const candidate = JSON.parse($('raw').value);
       validateContent(candidate);
       content = candidate;
       renderCards();
       renderBanners();
+      renderHero();
+      renderContactEditor();
+      renderNotice();
     } catch (e) {
       setStatus('官网 JSON 无效：' + e.message, 'err');
-      $('tabs').activeTabIndex = 3;
+      $('tabs').activeTabIndex = RAW_TAB_INDEX;
       return false;
     }
   }
-  $('viewCards').hidden = !cards;
-  $('viewBanners').hidden = !banners;
-  $('viewTranslations').hidden = !translations;
-  $('viewRaw').hidden = !raw;
+  $('viewBanners').hidden = which !== 'banners';
+  $('viewHero').hidden = which !== 'hero';
+  $('viewCards').hidden = which !== 'cards';
+  $('viewContact').hidden = which !== 'contact';
+  $('viewNotice').hidden = which !== 'notice';
+  $('viewTranslations').hidden = which !== 'translations';
+  $('viewRaw').hidden = which !== 'raw';
   activeView = which;
-  if (translations) renderTranslations();
+  if (which === 'translations') renderTranslations();
   return true;
+}
+
+function linkSchemeOk(value) {
+  try { return LINK_SCHEMES.includes(new URL(String(value).trim()).protocol); } catch { return false; }
+}
+function httpUrlOk(value) {
+  const raw = String(value).trim();
+  if (!/^https?:\/\/\S+$/i.test(raw)) return false;
+  try { return ['http:', 'https:'].includes(new URL(raw).protocol); } catch { return false; }
 }
 
 function validateContent(value) {
   if (!value || Array.isArray(value) || typeof value !== 'object') throw new Error('官网内容必须是对象');
-  if (value.schemaVersion !== 1) throw new Error('官网内容 schemaVersion 必须为 1');
+  if (value.schemaVersion !== 1 && value.schemaVersion !== 2) throw new Error('官网内容 schemaVersion 必须为 1 或 2');
   if (!Array.isArray(value.cards) || !Array.isArray(value.banners)) throw new Error('cards 和 banners 必须是数组');
   const ids = new Set();
   const validateEntry = (entry, kind, index) => {
@@ -789,11 +1073,55 @@ function validateContent(value) {
         if (!item || typeof item !== 'object' || (!String(item.url || '').trim() && !String(item.value || '').trim())) {
           throw new Error(`${entry.id} 的访问入口 ${itemIndex + 1} 缺少链接或值`);
         }
+        // url 会被站点渲染成可点击链接，必须是 http(s) 地址；纯文本（群号、iframe 代码等）应当填在 value。
+        if (String(item.url || '').trim() && !httpUrlOk(item.url)) {
+          throw new Error(`${entry.id} 的访问入口 ${itemIndex + 1} 的 url 不是 http(s) 链接，纯文本请填在 value 字段`);
+        }
       });
     }
   };
   value.cards.forEach((entry, index) => validateEntry(entry, '卡片', index));
   value.banners.forEach((entry, index) => validateEntry(entry, '横幅', index));
+
+  // schemaVersion 2 新增的站点分区。缺省表示沿用站点内置的默认值，因此都是可选的。
+  if (value.hero != null) {
+    if (!value.hero || typeof value.hero !== 'object' || Array.isArray(value.hero)) throw new Error('hero 必须是对象');
+    const rive = value.hero.rive;
+    if (rive != null) {
+      if (typeof rive !== 'object' || Array.isArray(rive)) throw new Error('hero.rive 必须是对象');
+      if (typeof rive.src !== 'string' || !rive.src.trim()) throw new Error('hero.rive.src 不能为空');
+      if (rive.autoplay != null && typeof rive.autoplay !== 'boolean') throw new Error('hero.rive.autoplay 必须是布尔值');
+    }
+    if (value.hero.fallback != null && (typeof value.hero.fallback !== 'object' || Array.isArray(value.hero.fallback))) {
+      throw new Error('hero.fallback 必须是对象');
+    }
+  }
+
+  if (value.contact != null) {
+    if (!value.contact || typeof value.contact !== 'object' || Array.isArray(value.contact)) throw new Error('contact 必须是对象');
+    if (value.contact.visible != null && typeof value.contact.visible !== 'boolean') throw new Error('contact.visible 必须是布尔值');
+    if (value.contact.methods != null) {
+      if (!Array.isArray(value.contact.methods)) throw new Error('contact.methods 必须是数组');
+      value.contact.methods.forEach((method, index) => {
+        if (!method || typeof method !== 'object' || Array.isArray(method)) throw new Error(`contact.methods 第 ${index + 1} 项不是对象`);
+        if (!String(method.label || '').trim() && !String(method.value || '').trim()) {
+          throw new Error(`contact.methods 第 ${index + 1} 项至少要有说明或值`);
+        }
+        if (String(method.href || '').trim() && !linkSchemeOk(method.href)) {
+          throw new Error(`contact.methods 第 ${index + 1} 项的链接协议不受支持：${method.href}`);
+        }
+      });
+    }
+  }
+
+  if (value.notice != null) {
+    if (!value.notice || typeof value.notice !== 'object' || Array.isArray(value.notice)) throw new Error('notice 必须是对象');
+    if (value.notice.enabled != null && typeof value.notice.enabled !== 'boolean') throw new Error('notice.enabled 必须是布尔值');
+    if (String(value.notice.linkHref || '').trim() && !linkSchemeOk(value.notice.linkHref)) {
+      throw new Error(`notice.linkHref 的链接协议不受支持：${value.notice.linkHref}`);
+    }
+  }
+
   return value;
 }
 
@@ -846,19 +1174,64 @@ async function publishFiles(files) {
   const parentSha = ref.object.sha;
   if (loadedHeadSha && parentSha !== loadedHeadSha) throw new Error('线上内容已变化，请重新加载后再编辑');
   const parent = await gh('GET', `${REPO_API}/git/commits/${parentSha}`);
-  const treeEntries = await Promise.all(files.map(async ({ path, text }) => {
-    const blob = await gh('POST', `${REPO_API}/git/blobs`, { content: b64encode(text), encoding: 'base64' });
-    return { path, mode: '100644', type: 'blob', sha: blob.sha };
+  const treeEntries = await Promise.all(files.map(async (file) => {
+    // sha: null 在 Git 树里表示删除该路径。
+    if (file.remove) return { path: file.path, mode: '100644', type: 'blob', sha: null };
+    // base64 用于 .riv 与图片等二进制；text 用于 JSON 与脚本文本。
+    const payload = file.base64 != null ? file.base64 : b64encode(file.text);
+    const blob = await gh('POST', `${REPO_API}/git/blobs`, { content: payload, encoding: 'base64' });
+    return { path: file.path, mode: '100644', type: 'blob', sha: blob.sha };
   }));
+  const touchesTranslation = files.some((file) => file.path === CONFIG.paths.translation);
   const tree = await gh('POST', `${REPO_API}/git/trees`, { base_tree: parent.tree.sha, tree: treeEntries });
   const commit = await gh('POST', `${REPO_API}/git/commits`, {
-    message: files.some((file) => file.path === CONFIG.paths.translation) ? '更新官网内容与 Rive 翻译' : '更新官网内容',
+    message: touchesTranslation ? '更新官网内容与 Rive 翻译' : '更新官网内容',
     tree: tree.sha,
     parents: [parentSha]
   });
   await gh('PATCH', `${REPO_API}/git/refs/heads/${CONFIG.branch}`, { sha: commit.sha, force: false });
   loadedHeadSha = commit.sha;
   return commit.sha;
+}
+
+// 每个上传基名当前被 content.json 引用的路径（去掉 ?v= 与 ./ 前缀）。
+function currentUploadRefs() {
+  const refs = new Map();
+  const add = (base, url) => {
+    if (!url) return;
+    const clean = String(url).split('?')[0].replace(/^\.\//, 'site/');
+    if (!clean.startsWith('site/assets/')) return;
+    if (!refs.has(base)) refs.set(base, new Set());
+    refs.get(base).add(clean);
+  };
+  add(CONFIG.uploads.heroRive.base, content.hero?.rive?.src);
+  add(CONFIG.uploads.heroFallback.base, content.hero?.fallback?.src);
+  add(CONFIG.uploads.noticeImage.base, content.notice?.image);
+  return refs;
+}
+
+// 上传换过扩展名时（例如 hero-cat.webp -> hero-cat.png），把同基名下已无人引用的旧文件删掉。
+// 只处理本次确实上传过的基名，未编辑的槽位不受影响。
+async function staleUploadPaths() {
+  const bases = new Set(Array.from(pendingUploads.keys()).map((path) => path.replace(/\.[A-Za-z0-9]+$/, '')));
+  const refs = currentUploadRefs();
+  const stale = [];
+  if (!bases.size) return stale;
+  try {
+    const listing = await gh('GET', `${contentsApi('site/assets')}?ref=${encodeURIComponent(CONFIG.branch)}&t=${Date.now()}`);
+    if (!Array.isArray(listing)) return stale;
+    listing.forEach((entry) => {
+      if (!entry || entry.type !== 'file' || typeof entry.path !== 'string') return;
+      const base = entry.path.replace(/\.[A-Za-z0-9]+$/, '');
+      if (!bases.has(base)) return;
+      const keep = refs.get(base);
+      if (!keep || !keep.has(entry.path)) stale.push(entry.path);
+    });
+  } catch (error) {
+    // 列目录失败不应阻断发布，残留文件可以之后手动清理。
+    console.warn('列举 site/assets 失败：', error);
+  }
+  return stale;
 }
 
 async function save() {
@@ -870,14 +1243,22 @@ async function save() {
     const files = Object.keys(documents)
       .filter((key) => documents[key] !== loadedTexts[key])
       .map((key) => ({ path: CONFIG.paths[key], text: documents[key] }));
+    for (const [path, base64] of pendingUploads) files.push({ path, base64 });
+    if (pendingUploads.size) {
+      const stale = await staleUploadPaths();
+      stale.forEach((path) => { if (!pendingUploads.has(path)) files.push({ path, remove: true }); });
+    }
     if (!files.length) { markClean(); setStatus('没有需要发布的更改', 'ok'); return; }
-    setStatus('发布中…');
+    const uploadCount = pendingUploads.size;
+    setStatus(`发布中…${uploadCount ? `（含 ${uploadCount} 个上传文件）` : ''}`);
     const commitSha = await publishFiles(files);
     Object.entries(documents).forEach(([key, text]) => { loadedTexts[key] = text; });
+    pendingUploads.clear();
     contract = JSON.parse(documents.contract);
     release = JSON.parse(documents.release);
     if (activeView === 'translations') renderTranslations();
     markClean();
+    renderAll();
     setStatus(`已发布 ${files.length} 个文件 · ${commitSha.slice(0, 7)} · 约 10 分钟后生效`, 'ok');
   } catch (e) {
     setStatus('发布失败：' + e.message, 'err');
@@ -904,8 +1285,17 @@ async function initialize() {
   });
   $('saveBtn').addEventListener('click', save);
   $('tabs').addEventListener('change', () => {
-    const views = ['cards', 'banners', 'translations', 'raw'];
-    selectTab(views[$('tabs').activeTabIndex] || 'cards');
+    selectTab(TAB_VIEWS[$('tabs').activeTabIndex] || 'banners');
+  });
+  $('uploadHeroRive').addEventListener('click', uploadHeroRive);
+  $('uploadHeroFallback').addEventListener('click', uploadHeroFallback);
+  $('uploadNoticeImage').addEventListener('click', uploadNoticeImage);
+  $('addContactMethod').addEventListener('click', () => {
+    if (!content.contact) content.contact = JSON.parse(JSON.stringify(CONTACT_TEMPLATE));
+    if (!Array.isArray(content.contact.methods)) content.contact.methods = [];
+    content.contact.methods.push({ id: 'method-' + Date.now(), label: '新联系方式', value: '', href: '' });
+    markDirty();
+    renderContactEditor();
   });
   $('translationSearch').addEventListener('input', () => { translationPage = 0; renderTranslations(); });
   $('missingOnly').addEventListener('change', () => { translationPage = 0; renderTranslations(); });

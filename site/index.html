@@ -187,27 +187,14 @@
       </div>
     </section>
 
-    <section class="contact-section" id="contact" aria-labelledby="contact-title">
+    <section class="contact-section" id="contact" aria-labelledby="contact-title" hidden>
       <div class="contact-card">
         <div class="contact-copy">
-          <span class="contact-label">联系与合作</span>
-          <h2 id="contact-title">有想法，欢迎联系。</h2>
-          <p>互动作品定制、Rive 与资源包创作、App 或设备适配、课程与品牌合作，以及使用中的问题和建议，都可以联系。</p>
+          <span class="contact-label" id="contact-label"></span>
+          <h2 id="contact-title"></h2>
+          <p id="contact-summary"></p>
         </div>
-        <div class="contact-methods">
-          <a class="contact-method" href="mailto:156405968@qq.com?subject=%E5%8D%83%E6%9C%BA%E7%99%BE%E5%8F%98%E8%81%94%E7%B3%BB%E4%B8%8E%E5%90%88%E4%BD%9C">
-            <small>发送邮件 · 正式沟通与合作</small>
-            <strong>156405968@qq.com</strong>
-          </a>
-          <a class="contact-method" href="mqqwpa://im/chat?chat_type=wpa&amp;uin=156405968&amp;version=1&amp;src_type=web">
-            <small>添加 QQ 联系人</small>
-            <strong>156405968</strong>
-          </a>
-          <a class="contact-method" href="https://qm.qq.com/q/cARWUthgDC">
-            <small>加入创作者交流 QQ 群</small>
-            <strong>862835994</strong>
-          </a>
-        </div>
+        <div class="contact-methods" id="contact-methods"></div>
       </div>
     </section>
 
@@ -267,6 +254,19 @@
       <div class="access-items" id="access-items" aria-label="平台链接与联系方式"></div>
     </div>
   </dialog>
+
+  <dialog class="notice-dialog" id="notice-dialog" aria-labelledby="notice-title">
+    <div class="notice-sheet">
+      <header class="notice-header">
+        <h2 id="notice-title"></h2>
+        <button class="dialog-close notice-close" type="button" aria-label="关闭公告">×</button>
+      </header>
+      <div class="notice-media" id="notice-media" hidden></div>
+      <p class="notice-body" id="notice-body"></p>
+      <div class="notice-actions" id="notice-actions"></div>
+    </div>
+  </dialog>
+
   <p class="copy-toast" id="copy-toast" role="status" aria-live="polite"></p>
 </body>
 </html>

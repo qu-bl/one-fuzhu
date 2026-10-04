@@ -17,15 +17,41 @@ const accessSummary = document.querySelector("#access-summary");
 const accessMedia = document.querySelector("#access-media");
 const accessItems = document.querySelector("#access-items");
 const copyToast = document.querySelector("#copy-toast");
+const contactSection = document.querySelector("#contact");
+const contactLabel = document.querySelector("#contact-label");
+const contactTitle = document.querySelector("#contact-title");
+const contactSummary = document.querySelector("#contact-summary");
+const contactMethods = document.querySelector("#contact-methods");
+const noticeDialog = document.querySelector("#notice-dialog");
+const noticeTitle = document.querySelector("#notice-title");
+const noticeMedia = document.querySelector("#notice-media");
+const noticeBody = document.querySelector("#notice-body");
+const noticeActions = document.querySelector("#notice-actions");
 const requestedPlatform = new URLSearchParams(window.location.search).get("appPlatform");
 const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform)
   ? requestedPlatform
   : null;
 
+// 站点在 content.json 缺少某些分区时（旧版 schemaVersion 1）回退到这些默认值，
+// 保证只更新站点文件、不更新内容文件时页面仍然可用。
+const HERO_DEFAULTS = {
+  rive: {
+    src: "./assets/hero-cat.riv",
+    artboard: "Artboard 2",
+    stateMachine: "State Machine 1",
+    autoplay: true,
+  },
+  fallback: { src: "./assets/hero-cat.webp", alt: "猫咪触摸跟随动画预览" },
+  ariaLabel: "猫咪触摸跟随互动动画",
+};
+
 const state = {
   activities: [],
   activityIndex: 0,
   cases: [],
+  hero: null,
+  contact: null,
+  notice: null,
   category: "全部",
   platform: appPlatform || "全部平台",
   query: "",
@@ -356,23 +382,39 @@ function renderActivities() {
 }
 
 function initHeroRive() {
-  if (!activityRiveCanvas || !window.rive?.Rive) return;
+  const hero = state.hero || HERO_DEFAULTS;
+  const rive = hero.rive || HERO_DEFAULTS.rive;
+  const fallback = hero.fallback || HERO_DEFAULTS.fallback;
+
+  // 兜底图先按数据设置，这样即使 Rive 运行时不可用（例如外部 CDN 被拦截），
+  // 首屏依然是内容里指定的那张图。
+  if (activityRiveFallback) {
+    if (fallback.src) activityRiveFallback.src = fallback.src;
+    if (fallback.alt) activityRiveFallback.alt = fallback.alt;
+  }
+  if (hero.ariaLabel) {
+    activityRiveCanvas?.closest(".activity-rive")?.setAttribute("aria-label", hero.ariaLabel);
+  }
+
+  if (!activityRiveCanvas || !window.rive?.Rive || !rive.src) return;
 
   let instance;
   const resize = () => instance?.resizeDrawingSurfaceToCanvas();
-  instance = new window.rive.Rive({
-    src: "./assets/hero-cat.riv",
+  const options = {
+    src: rive.src,
     canvas: activityRiveCanvas,
-    artboard: "Artboard 2",
-    stateMachine: "State Machine 1",
-    autoplay: !reduceMotion.matches,
+    autoplay: rive.autoplay !== false && !reduceMotion.matches,
     isTouchScrollEnabled: true,
     onLoad: () => {
       resize();
       activityRiveCanvas.removeAttribute("aria-hidden");
       activityRiveFallback?.setAttribute("hidden", "");
     },
-  });
+  };
+  // 留空表示使用 .riv 文件里的默认画板与状态机，交给 Rive 自行选择。
+  if (rive.artboard) options.artboard = rive.artboard;
+  if (rive.stateMachine) options.stateMachine = rive.stateMachine;
+  instance = new window.rive.Rive(options);
 
   const observer = "ResizeObserver" in window ? new ResizeObserver(resize) : null;
   observer?.observe(activityRiveCanvas);
@@ -873,6 +915,125 @@ function bindAccessDialog() {
   });
 }
 
+// 联系方式允许的协议白名单（http/https 之外还包含邮件与 QQ 等系统 scheme）。
+// 用白名单而非黑名单，避免资料里出现 javascript: 之类可执行协议。
+const CONTACT_SCHEMES = ["http:", "https:", "mailto:", "tel:", "sms:", "mqqwpa:", "mqq:", "weixin:", "alipays:"];
+
+function contactHref(value) {
+  if (typeof value !== "string") return "";
+  const raw = value.trim();
+  if (!raw) return "";
+  try {
+    const url = new URL(raw);
+    return CONTACT_SCHEMES.includes(url.protocol) ? raw : "";
+  } catch {
+    return "";
+  }
+}
+
+function renderContact() {
+  const contact = state.contact;
+  if (!contactSection) return;
+  const methods = Array.isArray(contact?.methods)
+    ? contact.methods.filter((method) => method && (method.href || method.value))
+    : [];
+  if (!contact || contact.visible === false || !methods.length) {
+    contactSection.hidden = true;
+    return;
+  }
+
+  contactLabel.textContent = contact.label || "";
+  contactTitle.textContent = contact.title || "";
+  contactSummary.textContent = contact.summary || "";
+  contactMethods.replaceChildren();
+
+  methods.forEach((method) => {
+    const href = contactHref(method.href);
+    // 有合法协议就渲染成可点的原生链接；只有号码之类的纯值则退化成可复制按钮。
+    const node = document.createElement(href ? "a" : "button");
+    if (href) {
+      node.href = href;
+      if (!href.startsWith("mailto:") && !href.startsWith("tel:") && !href.startsWith("sms:")) {
+        node.target = "_blank";
+        node.rel = "noopener noreferrer";
+      }
+    } else {
+      node.type = "button";
+      const value = String(method.value ?? "");
+      node.addEventListener("click", () => copyAccessValue(value, method.label || "联系方式", node));
+    }
+    node.className = "contact-method";
+    const small = document.createElement("small");
+    small.textContent = method.label || "";
+    const strong = document.createElement("strong");
+    strong.textContent = method.value || "";
+    node.append(small, strong);
+    contactMethods.append(node);
+  });
+
+  contactSection.hidden = false;
+}
+
+function initNotice() {
+  const notice = state.notice;
+  if (!noticeDialog || !notice || notice.enabled !== true) return;
+
+  if (notice.title) {
+    noticeTitle.textContent = notice.title;
+    noticeTitle.hidden = false;
+  } else {
+    noticeTitle.hidden = true;
+  }
+
+  if (notice.image) {
+    const image = document.createElement("img");
+    image.src = notice.image;
+    image.alt = "";
+    image.loading = "lazy";
+    image.decoding = "async";
+    noticeMedia.replaceChildren(image);
+    noticeMedia.hidden = false;
+  } else {
+    noticeMedia.replaceChildren();
+    noticeMedia.hidden = true;
+  }
+
+  noticeBody.textContent = notice.body || "";
+  noticeActions.replaceChildren();
+  const href = contactHref(notice.linkHref);
+  if (href) {
+    const link = document.createElement("a");
+    link.className = "banner-action";
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = notice.linkLabel || "了解详情";
+    noticeActions.append(link);
+  }
+
+  const close = () => {
+    if (noticeDialog.open) noticeDialog.close();
+  };
+  const unlock = () => {
+    if (!accessDialog?.open) document.body.classList.remove("dialog-open");
+  };
+  noticeDialog.querySelector(".notice-close")?.addEventListener("click", close);
+  noticeDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    close();
+  });
+  noticeDialog.addEventListener("click", (event) => {
+    if (event.target === noticeDialog) close();
+  });
+  noticeDialog.addEventListener("close", unlock);
+
+  // 与卡片弹窗一致：先确认浏览器支持 <dialog> 的模态方法，老 WebView 下静默跳过。
+  if (!noticeDialog.open && typeof noticeDialog.showModal === "function") {
+    document.body.classList.add("dialog-open");
+    noticeDialog.showModal();
+  }
+}
+
 function renderLoadError(error) {
   console.error(error);
   if (emptyState) {
@@ -914,27 +1075,35 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 }
 
 async function initialize() {
-  initHeroRive();
   if (!appPlatform) {
     bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
   }
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
-  document.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);
+  // 只绑定卡片详情弹窗的关闭键；公告弹窗有自己的 .notice-close。
+  accessDialog?.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);
   bindCarouselControls();
   bindFeaturedControls();
   bindCaseControls();
 
   bindAccessDialog();
   try {
-    // Single source of truth: banners + cards all come from one JSON file,
-    // so publishing content only means editing data/content.json.
+    // 单一数据源：顶部 Rive、公告、联系方式、横幅、卡片都来自同一个 JSON，
+    // 因此发布内容只需要编辑 data/content.json，不必改动页面代码。
     const content = await loadJson("./data/content.json");
+    state.hero = content.hero || null;
+    state.notice = content.notice || null;
+    state.contact = content.contact || null;
     state.activities = (content.banners || []).filter((item) => item.visible !== false);
     state.cases = (content.cards || []).filter((item) => item.visible !== false);
+    initHeroRive();
+    renderContact();
     renderActivities();
     renderFilters();
     renderCases();
+    initNotice();
   } catch (error) {
+    // 内容读取失败时仍然初始化顶部：hero 会回退到 HERO_DEFAULTS。
+    initHeroRive();
     renderLoadError(error);
   }
 }

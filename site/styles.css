@@ -110,6 +110,19 @@ a { color: var(--accent); }
 .dialog-close { width: 44px; height: 44px; flex-shrink: 0; border: 0; border-radius: 50%; background: var(--surface-soft); color: var(--text); font-size: 26px; }
 .access-summary { margin: 20px 0 24px; color: var(--muted); font-size: 16px; white-space: pre-wrap; overflow-wrap: anywhere; order: 2; }
 .access-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr)); gap: 12px; order: 3; }
+/* 公告弹窗：结构与卡片详情弹窗同源，内容全部来自 content.json 的 notice 分节。 */
+.notice-dialog { width: min(560px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 0; border: 0; border-radius: 28px; overflow: auto; color: var(--text); background: var(--md-sys-color-surface-container-high); }
+.notice-dialog::backdrop { background: #0009; }
+.notice-sheet { position: relative; display: flex; flex-direction: column; gap: 18px; padding: 32px; }
+.notice-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.notice-header h2 { margin: 0; font-size: 24px; line-height: 1.4; }
+.notice-media { overflow: hidden; border-radius: 20px; background: var(--surface-soft); }
+.notice-media img { display: block; width: 100%; height: auto; }
+.notice-body { margin: 0; color: var(--muted); font-size: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.notice-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.notice-actions:empty { display: none; }
+.notice-dialog, .notice-sheet { scrollbar-width: none; -ms-overflow-style: none; }
+.notice-dialog::-webkit-scrollbar, .notice-sheet::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .access-option { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-width: 0; min-height: 120px; padding: 16px 12px; border: 0; border-radius: 24px; text-align: center; background: var(--surface-soft); color: var(--text); text-decoration: none; }
 .access-option:not(:disabled):hover { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
 .access-option:disabled { opacity: .6; cursor: default; }
@@ -163,6 +176,7 @@ a.contact-method:hover { background: var(--md-sys-color-surface-container-highes
   .case-card { margin-bottom: 16px; }
   .case-body { padding: 18px; }
   .access-sheet { padding: 24px; }
+  .notice-sheet { padding: 24px; }
   .contact-section { padding-bottom: 48px; }
   .contact-card { grid-template-columns: 1fr; gap: 24px; }
 }
@@ -199,8 +213,10 @@ a.contact-method:hover { background: var(--md-sys-color-surface-container-highes
   .banner-action, .category-button, .activity-dot, .platform-button, .access-option, .dialog-close, .video-load { transition: transform 180ms var(--ease-out), background-color 220ms ease, color 220ms ease; }
   .banner-action:active, .category-button:active, .activity-dot:active, .platform-button:active, .access-option:active, .dialog-close:active { transform: scale(.95); }
   .access-dialog[open] { transform-origin: center; }
+  .notice-dialog[open] { transform-origin: center; }
 
   .access-dialog[open]::backdrop { animation: backdrop-enter 360ms ease both; }
+  .notice-dialog[open]::backdrop { animation: backdrop-enter 360ms ease both; }
   .access-option[data-copied="true"] .access-option-icon { animation: copy-confirm 400ms ease; }
   @media (hover: hover) and (pointer: fine) {
     .case-card-trigger:hover { transform: translateY(-4px); }
