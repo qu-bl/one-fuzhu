@@ -348,7 +348,9 @@ const CONFIG = {
   uploads: {
     heroRive: { base: 'site/assets/hero-cat', exts: ['.riv'], maxBytes: 24 * 1024 * 1024 },
     heroFallback: { base: 'site/assets/hero-cat', exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 },
-    noticeImage: { base: 'site/assets/notice', exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 }
+    noticeImage: { base: 'site/assets/notice', exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 },
+    // 卡片封面：基名按卡片 id 动态生成，见 coverSlot()。
+    cardCover: { exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 }
   },
   token: ''
 };
@@ -710,12 +712,36 @@ function cardEditor(card, index) {
 
   renderVideoEditor(grid, card.video, (v) => { if (v) card.video = v; else delete card.video; });
 
+  // 封面图（可选）。官网逻辑：有封面就显示封面、并把它当作视频海报；没有封面才用视频。
+  // 因此以后去掉视频链接时，这里填的封面会直接接管卡片和弹窗的画面。
+  const coverInput = textInput(card.cover, './assets/xxx.webp');
+  field(grid, '封面图路径（可选）', bind(coverInput, (v) => { card.cover = v; }));
+  field(grid, '封面图说明', bind(textInput(card.coverAlt), (v) => (card.coverAlt = v)));
+
   const featured = bind(checkbox(card.featured), (v) => (card.featured = v));
   field(grid, '精选', featured);
   const visible = bind(checkbox(card.visible), (v) => (card.visible = v));
   field(grid, '显示', visible);
 
   details.append(grid);
+
+  const coverRow = el('div', 'row');
+  const coverUpload = actionButton('上传封面图', 'outlined');
+  coverUpload.addEventListener('click', () => uploadCardCover(card, index));
+  coverRow.append(coverUpload);
+  details.append(coverRow);
+
+  const coverPreview = el('img');
+  coverPreview.alt = '';
+  coverPreview.style.cssText = 'max-width:220px;width:100%;border-radius:8px;display:block;margin-top:8px;background:var(--c-surface-container)';
+  const syncCover = () => {
+    const url = siteAssetUrl(coverInput.value.trim());
+    coverPreview.hidden = !url;
+    coverPreview.src = url;
+  };
+  syncCover();
+  coverInput.addEventListener('input', syncCover);
+  details.append(coverPreview);
 
   const accessWrap = el('div');
   accessWrap.append(el('div', 'hint ts-title-small', '访问入口（视频/平台链接）'));
@@ -828,6 +854,22 @@ function uploadNoticeImage() {
     if (!content.notice) content.notice = { ...NOTICE_TEMPLATE };
     content.notice.image = versioned(repoPathToUrl(path));
     renderNotice();
+  });
+}
+
+// 每张卡片的封面各占一个基名（site/assets/cover-<id>），
+// 这样同一张卡换封面时只覆盖自己那一个文件，也能按基名清理旧扩展名。
+function safeId(value, index) {
+  const cleaned = String(value || '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+  return cleaned || `card-${index}`;
+}
+function coverSlot(card, index) {
+  return { ...CONFIG.uploads.cardCover, base: `site/assets/cover-${safeId(card.id, index)}` };
+}
+function uploadCardCover(card, index) {
+  stageUpload(coverSlot(card, index), (path) => {
+    card.cover = versioned(repoPathToUrl(path));
+    renderCards();
   });
 }
 
@@ -1275,6 +1317,12 @@ function validateContent(value) {
     if (entry.video != null && (typeof entry.video !== 'object' || !entry.video.platform || !entry.video.id)) {
       throw new Error(`${entry.id} 的 video 缺少 platform 或 id`);
     }
+    // 封面图只有卡片支持。
+    if (kind === '卡片') {
+      for (const key of ['cover', 'coverAlt']) {
+        if (entry[key] != null && typeof entry[key] !== 'string') throw new Error(`${entry.id} 的 ${key} 必须是字符串`);
+      }
+    }
     if (entry.access != null) {
       if (typeof entry.access !== 'object' || !Array.isArray(entry.access.items)) throw new Error(`${entry.id} 的 access.items 必须是数组`);
       entry.access.items.forEach((item, itemIndex) => {
@@ -1415,6 +1463,10 @@ function currentUploadRefs() {
   add(CONFIG.uploads.heroRive.base, content.hero?.rive?.src);
   add(CONFIG.uploads.heroFallback.base, content.hero?.fallback?.src);
   add(CONFIG.uploads.noticeImage.base, content.notice?.image);
+  // 每张卡片的封面基名不同，逐个登记，否则换扩展名时会被当成无人引用的旧文件删掉。
+  (Array.isArray(content.cards) ? content.cards : []).forEach((card, index) => {
+    if (card && card.cover) add(coverSlot(card, index).base, card.cover);
+  });
   return refs;
 }
 

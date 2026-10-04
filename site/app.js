@@ -208,6 +208,14 @@ function renderAccessMedia(item, accessMedia = document.querySelector("#access-m
   accessMedia.classList.toggle("access-media--portrait", Boolean(video && video.ratio < 1));
   // 第三方播放器只在用户明确操作后加载，避免外部页面在 WebView 中接管顶层导航。
   if (video) {
+    // 有封面时先把封面当作视频海报铺上，播放按钮再叠加在其上（两者都是绝对/相对定位）。
+    // 否则封面会在这一步被 replaceChildren 清掉，表现为「填了封面却不显示」。
+    if (item.cover) {
+      const poster = document.createElement("img");
+      poster.src = item.cover;
+      poster.alt = item.coverAlt || `${item.name || item.title}封面`;
+      accessMedia.append(poster);
+    }
     const loadButton = document.createElement("button");
     loadButton.type = "button";
     loadButton.className = "video-load";
