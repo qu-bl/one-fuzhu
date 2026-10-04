@@ -52,27 +52,45 @@
     --md-sys-color-on-error: #ffffff;
     --md-sys-color-error-container: #ffdad6;
     --md-sys-color-on-error-container: #410002;
+    /* M3 elevation 阴影规范值。@material/web 的 md-elevation 只提供色调叠加，
+       不含阴影，因此需要阴影的地方用这些值（与 md-elevation 并用即为完整 elevation）。 */
+    --md-sys-elevation-level1: 0 1px 2px 0 rgb(0 0 0 / .30), 0 1px 3px 1px rgb(0 0 0 / .15);
+    --md-sys-elevation-level2: 0 1px 2px 0 rgb(0 0 0 / .30), 0 2px 6px 2px rgb(0 0 0 / .15);
   }
   * { box-sizing: border-box; }
   body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--md-sys-color-surface-container-low); color:var(--md-sys-color-on-surface); font-family:var(--md-ref-typeface-plain); }
-  header { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 20px; background:var(--md-sys-color-surface); box-shadow:0 1px 3px color-mix(in srgb, var(--md-sys-color-on-surface) 18%, transparent); }
-  header h1 { margin:0; }
-  header .repo { color:var(--md-sys-color-on-surface-variant); }
-  header md-linear-progress { position:absolute; inset:auto 0 0; width:100%; }
-  /* 侧边栏铺满整个左侧（从页头到底部），无卡片、无圆角、无边框，
-     与页面背景同色，视觉上就是页面的左边一条。 */
+
+  /* 顶栏 elevation：md-elevation 提供色调叠加，M3 level 2 阴影由 token 提供。 */
+  header.app-bar { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 20px; background:var(--md-sys-color-surface); box-shadow:var(--md-sys-elevation-level2); }
+  header.app-bar h1 { margin:0; }
+  header.app-bar .repo { color:var(--md-sys-color-on-surface-variant); }
+  header.app-bar md-linear-progress { position:absolute; inset:auto 0 0; width:100%; }
+
+  /* 侧边栏铺满整个左侧（从页头到底部），与页面同色：无卡片、无圆角、无边框。 */
   .shell { flex:1; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:stretch; }
-  .sidebar { position:sticky; top:var(--header-h, 61px); align-self:start; display:flex; flex-direction:column; gap:4px; width:224px; max-height:calc(100vh - var(--header-h, 61px)); overflow:auto; padding:12px 8px 20px; background:var(--md-sys-color-surface-container-low); transition:width 180ms ease; }
-  .sidebar[data-collapsed="true"] { width:56px; }
-  .sidebar[data-collapsed="true"] .nav-item { display:none; }
-  .nav-toggle { appearance:none; margin:0 0 4px; border:0; background:transparent; color:var(--md-sys-color-on-surface-variant); font:inherit; font-size:18px; line-height:1; height:40px; border-radius:20px; cursor:pointer; flex-shrink:0; }
-  .nav-toggle:hover { background:var(--md-sys-color-surface-container); }
-  .nav-toggle:focus-visible { outline:2px solid var(--md-sys-color-primary); outline-offset:2px; }
-  .sidebar nav { display:flex; flex-direction:column; gap:2px; }
-  .nav-item { appearance:none; margin:0; border:0; background:transparent; color:var(--md-sys-color-on-surface-variant); font:inherit; text-align:left; padding:0 16px; min-height:48px; border-radius:24px; cursor:pointer; white-space:nowrap; }
-  .nav-item:hover { background:var(--md-sys-color-surface-container); }
-  .nav-item[aria-selected="true"] { background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container); font-weight:600; }
-  .nav-item:focus-visible { outline:2px solid var(--md-sys-color-primary); outline-offset:2px; }
+  .sidebar { position:sticky; top:var(--header-h, 61px); align-self:start; width:240px; max-height:calc(100vh - var(--header-h, 61px)); overflow:auto; padding:8px 12px 20px; background:var(--md-sys-color-surface-container-low); transition:width 180ms ease; }
+  .sidebar[data-collapsed="true"] { width:72px; }
+  .sidebar[data-collapsed="true"] .nav-groups { display:none; }
+  .sidebar-head { display:flex; justify-content:flex-end; }
+  .sidebar[data-collapsed="true"] .sidebar-head { justify-content:center; }
+  /* 折叠后箭头翻转，指向展开方向。 */
+  #navToggle svg { width:24px; height:24px; fill:currentColor; transition:transform 180ms ease; }
+  .sidebar[data-collapsed="true"] #navToggle svg { transform:scaleX(-1); }
+
+  /* md-list 自带容器色，置透明以露出侧边栏底色；选中态由 md-list-item 的 selected 提供。 */
+  .nav-groups { display:flex; flex-direction:column; gap:4px; }
+  .nav-groups md-list { padding:0; --md-list-container-color:transparent; }
+  .nav-groups md-divider { margin:8px 0; }
+  /* md-list-item 本身没有 selected 状态（Material Web 不含导航抽屉组件），
+     这里按 M3 导航抽屉规范自己实现选中态：secondary-container 药丸指示器 + 标签加重。
+     内部容器是 background:none，所以宿主的背景能透出来；标签色用官方 token 覆盖。 */
+  .nav-groups md-list-item[data-active] {
+    background: var(--md-sys-color-secondary-container);
+    border-radius: 999px;
+    --md-list-item-label-text-color: var(--md-sys-color-on-secondary-container);
+    --md-list-item-label-text-weight: 700;
+  }
+
   main { display:flex; flex-direction:column; gap:16px; min-width:0; padding:20px; }
   md-outlined-text-field, md-outlined-select { width:100%; }
   .bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
@@ -80,7 +98,8 @@
   .status { min-height:24px; color:var(--md-sys-color-on-surface-variant); }
   .status.ok { color:#146c2e; }
   .status.err { color:var(--md-sys-color-error); }
-  .surface { background:var(--md-sys-color-surface); border-radius:20px; padding:20px; }
+  /* M3 形状规范：面板 medium(12px)，嵌套容器 small(8px)。 */
+  .surface { background:var(--md-sys-color-surface); border-radius:12px; padding:20px; }
   .editor-list { display:flex; flex-direction:column; gap:16px; margin-top:16px; }
   .editor { display:flex; flex-direction:column; gap:16px; }
   .editor-header { display:flex; gap:12px; align-items:center; }
@@ -90,12 +109,12 @@
   .check-field { display:flex; gap:10px; align-items:center; min-height:48px; color:var(--md-sys-color-on-surface-variant); }
   .row { display:flex; gap:12px; align-items:center; margin-top:12px; flex-wrap:wrap; }
   .row > md-outlined-text-field { flex:1 1 220px; }
-  .access-item { background:var(--md-sys-color-surface-container-low); border-radius:16px; padding:16px; margin-top:12px; }
+  .access-item { background:var(--md-sys-color-surface-container); border-radius:8px; padding:16px; margin-top:12px; }
   .translation-toolbar { display:grid; grid-template-columns:minmax(180px,1fr) auto auto; gap:8px; align-items:center; }
   .translation-list { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
   .translation-row { display:grid; grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) auto; gap:8px; align-items:start; }
-  .translation-row .source { min-height:56px; padding:16px; border-radius:12px; background:var(--md-sys-color-surface-container); overflow-wrap:anywhere; }
-  .translation-row.missing .source { background:#fff3c4; color:#261a00; }
+  .translation-row .source { min-height:56px; padding:16px; border-radius:8px; background:var(--md-sys-color-surface-container); overflow-wrap:anywhere; }
+  .translation-row.missing .source { background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); }
   .stats { display:flex; gap:12px; flex-wrap:wrap; color:var(--md-sys-color-on-surface-variant); }
   .pager { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; }
   .hint { color:var(--md-sys-color-on-surface-variant); margin-top:8px; }
@@ -105,13 +124,16 @@
   @media (max-width:900px) {
     /* 窄屏改为顶部横向导航，折叠按钮在此布局下没有意义，隐藏。 */
     .shell { grid-template-columns:1fr; }
-    .sidebar { position:static; width:auto; max-height:none; flex-direction:row; align-items:center; gap:6px; padding:8px 12px; }
+    .sidebar { position:static; width:auto; max-height:none; padding:8px 12px; }
     .sidebar[data-collapsed="true"] { width:auto; }
-    .sidebar[data-collapsed="true"] .nav-item { display:block; }
-    .nav-toggle { display:none; }
-    .sidebar nav { flex-direction:row; overflow-x:auto; scrollbar-width:none; }
-    .sidebar nav::-webkit-scrollbar { display:none; }
-    .nav-item { padding:0 14px; flex:0 0 auto; }
+    .sidebar[data-collapsed="true"] .nav-groups { display:flex; }
+    .sidebar-head { display:none; }
+    .nav-groups { flex-direction:row; align-items:center; gap:0; overflow-x:auto; scrollbar-width:none; }
+    .nav-groups::-webkit-scrollbar { display:none; }
+    .nav-groups md-list { display:flex; flex-direction:row; }
+    .nav-groups md-divider { display:none; }
+    /* 横排时不要让标签折行：宽度够就铺开，不够就横向滚动。 */
+    .nav-groups md-list-item { flex:0 0 auto; white-space:nowrap; }
     main { padding:12px; }
   }
   @media (max-width:680px) {
@@ -122,26 +144,50 @@
 </style>
 </head>
 <body>
-<header>
+<header class="app-bar">
   <h1 class="md-typescale-title-large">内容与翻译管理</h1>
-  <span class="repo" id="repoLabel"></span>
+  <span class="repo md-typescale-body-medium" id="repoLabel"></span>
   <span style="flex:1"></span>
   <md-text-button id="loadBtn">重新加载</md-text-button>
   <md-filled-button id="saveBtn" disabled>保存并发布</md-filled-button>
   <md-linear-progress id="progress" indeterminate hidden></md-linear-progress>
+  <md-elevation level="2"></md-elevation>
 </header>
 
 <div class="shell">
   <aside class="sidebar" id="sidebar" data-collapsed="false">
-    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="true" aria-controls="nav" aria-label="折叠导航" title="折叠导航">«</button>
-    <nav id="nav" role="tablist" aria-orientation="vertical" aria-label="管理内容">
-      <button class="nav-item" type="button" role="tab" id="tabBanners" aria-controls="viewBanners" aria-selected="true" tabindex="0" data-view="banners">顶部轮播</button>
-      <button class="nav-item" type="button" role="tab" id="tabHero" aria-controls="viewHero" aria-selected="false" tabindex="-1" data-view="hero">顶部 Rive</button>
-      <button class="nav-item" type="button" role="tab" id="tabCards" aria-controls="viewCards" aria-selected="false" tabindex="-1" data-view="cards">创意橱柜</button>
-      <button class="nav-item" type="button" role="tab" id="tabContact" aria-controls="viewContact" aria-selected="false" tabindex="-1" data-view="contact">联系方式</button>
-      <button class="nav-item" type="button" role="tab" id="tabNotice" aria-controls="viewNotice" aria-selected="false" tabindex="-1" data-view="notice">弹窗</button>
-      <button class="nav-item" type="button" role="tab" id="tabTranslations" aria-controls="viewTranslations" aria-selected="false" tabindex="-1" data-view="translations">Rive 翻译</button>
-      <button class="nav-item" type="button" role="tab" id="tabRaw" aria-controls="viewRaw" aria-selected="false" tabindex="-1" data-view="raw">官网 JSON</button>
+    <div class="sidebar-head">
+      <md-icon-button id="navToggle" aria-label="折叠导航" title="折叠导航" aria-expanded="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+      </md-icon-button>
+    </div>
+    <nav class="nav-groups" id="nav" aria-label="管理内容">
+      <md-list>
+        <md-list-item class="nav-item" type="button" data-view="banners" data-active aria-current="page">
+          <div slot="headline">顶部轮播</div>
+        </md-list-item>
+        <md-list-item class="nav-item" type="button" data-view="hero">
+          <div slot="headline">顶部 Rive</div>
+        </md-list-item>
+        <md-list-item class="nav-item" type="button" data-view="cards">
+          <div slot="headline">创意橱柜</div>
+        </md-list-item>
+        <md-list-item class="nav-item" type="button" data-view="contact">
+          <div slot="headline">联系方式</div>
+        </md-list-item>
+        <md-list-item class="nav-item" type="button" data-view="notice">
+          <div slot="headline">弹窗</div>
+        </md-list-item>
+      </md-list>
+      <md-divider></md-divider>
+      <md-list>
+        <md-list-item class="nav-item" type="button" data-view="translations">
+          <div slot="headline">Rive 翻译</div>
+        </md-list-item>
+        <md-list-item class="nav-item" type="button" data-view="raw">
+          <div slot="headline">官网 JSON</div>
+        </md-list-item>
+      </md-list>
     </nav>
   </aside>
 
@@ -153,12 +199,12 @@
       <div class="status md-typescale-body-medium" id="status" role="status" aria-live="polite"></div>
     </div>
 
-  <section id="viewBanners" role="tabpanel" aria-labelledby="tabBanners">
+  <section id="viewBanners" role="region" aria-label="顶部轮播">
     <div class="bar"><md-outlined-button id="addBanner">添加横幅</md-outlined-button><span class="hint">按列表顺序轮播；关闭「显示」即从轮播中移除。</span></div>
     <div id="banners" class="editor-list"></div>
   </section>
 
-  <section id="viewHero" role="tabpanel" aria-labelledby="tabHero" hidden>
+  <section id="viewHero" role="region" aria-label="顶部 Rive" hidden>
     <div class="bar">
       <md-outlined-button id="uploadHeroRive">上传 .riv 文件</md-outlined-button>
       <md-outlined-button id="uploadHeroFallback">上传兜底图片</md-outlined-button>
@@ -167,17 +213,17 @@
     <div id="hero" class="editor-list"></div>
   </section>
 
-  <section id="viewCards" role="tabpanel" aria-labelledby="tabCards" hidden>
+  <section id="viewCards" role="region" aria-label="创意橱柜" hidden>
     <div class="bar"><md-outlined-button id="addCard">添加卡片</md-outlined-button><span class="hint">按列表顺序显示；勾选「精选」的卡片会进入橱柜顶部轮播。</span></div>
     <div id="cards" class="editor-list"></div>
   </section>
 
-  <section id="viewContact" role="tabpanel" aria-labelledby="tabContact" hidden>
+  <section id="viewContact" role="region" aria-label="联系方式" hidden>
     <div class="bar"><md-outlined-button id="addContactMethod">添加联系方式</md-outlined-button><span class="hint">关闭「显示」即整段隐藏。</span></div>
     <div id="contact" class="editor-list"></div>
   </section>
 
-  <section id="viewNotice" role="tabpanel" aria-labelledby="tabNotice" hidden>
+  <section id="viewNotice" role="region" aria-label="弹窗" hidden>
     <div class="bar">
       <md-outlined-button id="uploadNoticeImage">上传弹窗图片</md-outlined-button>
       <span class="hint">「打开时弹出」关闭后，网页打开时不再出现弹窗。</span>
@@ -185,7 +231,7 @@
     <div id="notice" class="editor-list"></div>
   </section>
 
-  <section id="viewTranslations" role="tabpanel" aria-labelledby="tabTranslations" hidden>
+  <section id="viewTranslations" role="region" aria-label="Rive 翻译" hidden>
     <div class="surface">
       <h2 class="md-typescale-title-medium">AI 筛选与翻译</h2>
       <div class="row">
@@ -221,7 +267,7 @@
     </div>
   </section>
 
-  <section id="viewRaw" role="tabpanel" aria-labelledby="tabRaw" hidden>
+  <section id="viewRaw" role="region" aria-label="官网 JSON" hidden>
     <div class="surface">
       <md-outlined-text-field id="raw" type="textarea" rows="24" label="官网 JSON" spellcheck="false"></md-outlined-text-field>
       <div class="hint md-typescale-body-small">这里是最终发布的官网内容，可整体粘贴或编辑。切换到其他页面前必须保持 JSON 合法。</div>
@@ -1072,15 +1118,21 @@ function refreshRaw() {
   rawBaseline = $('raw').value;
 }
 
-// 侧边导航：视图顺序由 DOM 里 nav-item 的顺序决定，不再单独维护一张表。
-function navItems() { return Array.from(document.querySelectorAll('#nav .nav-item')); }
+// 侧边导航：视图顺序由 DOM 里 md-list-item 的顺序决定，不再单独维护一张表。
+function navItems() { return Array.from(document.querySelectorAll('#nav md-list-item[data-view]')); }
 
 function setNavActive(which) {
   navItems().forEach((item) => {
     const active = item.dataset.view === which;
-    item.setAttribute('aria-selected', active ? 'true' : 'false');
-    // 漫游 tabindex：只有当前项可 Tab 聚焦，其余用方向键访问。
-    item.tabIndex = active ? 0 : -1;
+    // data-active 由 CSS 渲染成 M3 导航抽屉的选中指示器；
+    // aria-current 提供给读屏，md-list-item 自身没有选中状态。
+    if (active) {
+      item.setAttribute('data-active', '');
+      item.setAttribute('aria-current', 'page');
+    } else {
+      item.removeAttribute('data-active');
+      item.removeAttribute('aria-current');
+    }
   });
 }
 
@@ -1377,17 +1429,16 @@ async function initialize() {
     catch (e) { setStatus('加载失败：' + e.message, 'err'); }
   });
   $('saveBtn').addEventListener('click', save);
-  // 侧边导航：点击切换，方向键在导航内移动并切换（roving tabindex）。
+  // 侧边导航：md-list-item 自带按钮语义、涟漪与选中指示器，这里只负责切换视图。
   const items = navItems();
-  items.forEach((item, index) => {
+  items.forEach((item) => {
     item.addEventListener('click', () => { selectTab(item.dataset.view); });
   });
   // 折叠侧边栏，状态记在 localStorage 里，下次打开保持。
+  // 箭头方向由 CSS 翻转，这里只同步无障碍属性。
   const applyCollapsed = (collapsed) => {
-    const sidebar = $('sidebar');
-    sidebar.dataset.collapsed = collapsed ? 'true' : 'false';
+    $('sidebar').dataset.collapsed = collapsed ? 'true' : 'false';
     const toggle = $('navToggle');
-    toggle.textContent = collapsed ? '»' : '«';
     toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     toggle.setAttribute('aria-label', collapsed ? '展开导航' : '折叠导航');
     toggle.title = collapsed ? '展开导航' : '折叠导航';
@@ -1401,7 +1452,7 @@ async function initialize() {
     const step = { ArrowDown: 1, ArrowUp: -1, ArrowRight: 1, ArrowLeft: -1 }[event.key];
     if (step === undefined && event.key !== 'Home' && event.key !== 'End') return;
     event.preventDefault();
-    const current = items.findIndex((item) => item.getAttribute('aria-selected') === 'true');
+    const current = items.findIndex((item) => item.hasAttribute('data-active'));
     let next;
     if (event.key === 'Home') next = 0;
     else if (event.key === 'End') next = items.length - 1;
