@@ -276,19 +276,7 @@
 
   <section id="viewTranslations" role="region" aria-label="Rive 翻译" hidden>
     <div class="surface">
-      <h2 class="ts-title-medium">AI 筛选与翻译</h2>
-      <div class="row">
-        <label class="field"><span class="field-label">API 基础地址</span><input class="field-input" id="aiBase" type="text" placeholder="https://服务地址/v1"></label>
-        <label class="field"><span class="field-label">模型名称</span><input class="field-input" id="aiModel" type="text"></label>
-        <label class="field"><span class="field-label">AI API 密钥</span><input class="field-input" id="aiKey" type="password" autocomplete="off"></label>
-        <button class="btn btn--filled" id="aiReportBtn" type="button">导入报告，AI 筛选翻译并发布</button>
-      </div>
-      <div class="hint ts-body-small">AI 密钥仅保留在当前页面，不上传到仓库。</div>
-      <input id="aiReportFile" class="hidden" type="file" accept="application/json,.json">
-      <p class="hint">使用兼容 Chat Completions 的接口，服务需允许浏览器跨域访问。去除明显无关项后，将候选原文发送给所配置的 AI；模型筛选不能保证识别所有私人名称，请先移除敏感内容。全部批次成功后自动发布翻译及日期版本、哈希，不发布官网编辑。</p>
-      <details><summary>本次筛选结果</summary><pre id="aiResults" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>
-    </div>
-    <div class="surface">
+      <h2 class="ts-title-medium">词典与待翻译</h2>
       <div class="translation-toolbar">
         <label class="field"><span class="field-label">搜索词典</span><input class="field-input" id="translationSearch" type="search"></label>
         <button class="btn btn--outlined" id="importReportBtn" type="button">导入未翻译报告</button>
@@ -301,13 +289,25 @@
         <button class="btn btn--outlined" id="addTranslation" type="button">添加词条</button>
       </div>
       <div class="stats ts-body-medium" id="translationStats"></div>
-      <div class="hint ts-body-small">可直接导入三端导出的 rive-editor-unmatched-report.json。空译文不会写入云端，发布时会同步更新契约与发布清单的哈希。</div>
+      <div class="hint ts-body-small">导入三端导出的 rive-editor-unmatched-report.json，缺失的原文会加进下面的列表并标红。空译文不会写入云端，发布时会同步更新契约与发布清单的哈希。</div>
       <div id="translations" class="translation-list"></div>
       <div class="pager">
         <button class="btn btn--text" id="translationPrev" type="button">上一页</button>
         <span id="translationPage" class="hint ts-label-large"></span>
         <button class="btn btn--text" id="translationNext" type="button">下一页</button>
       </div>
+    </div>
+    <div class="surface">
+      <h2 class="ts-title-medium">AI 筛选与翻译</h2>
+      <div class="row">
+        <label class="field"><span class="field-label">API 基础地址</span><input class="field-input" id="aiBase" type="text" placeholder="https://服务地址/v1"></label>
+        <label class="field"><span class="field-label">模型名称</span><input class="field-input" id="aiModel" type="text"></label>
+        <label class="field"><span class="field-label">AI API 密钥</span><input class="field-input" id="aiKey" type="password" autocomplete="off"></label>
+        <button class="btn btn--filled" id="aiTranslateBtn" type="button">用 AI 翻译待翻译词条并发布</button>
+      </div>
+      <div class="hint ts-body-small">AI 密钥仅保留在当前页面，不上传到仓库。</div>
+      <p class="hint">处理上面列表里的待翻译词条：调用兼容 Chat Completions 的接口（服务需允许浏览器跨域访问），去掉明显无关项后逐条翻译。模型筛选不能保证识别所有私人名称，请先移除敏感内容。全部批次成功后自动发布翻译及日期版本、哈希，不发布官网编辑。</p>
+      <details><summary>本次筛选结果</summary><pre id="aiResults" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>
     </div>
   </section>
 
@@ -434,7 +434,7 @@ function setBusy(value) {
   $('workspace').inert = value;
   $('loadBtn').disabled = value;
   $('saveBtn').disabled = value || !dirty;
-  ['addCard', 'addBanner', 'addTranslation', 'importReportBtn', 'addContactMethod',
+  ['addCard', 'addBanner', 'addTranslation', 'importReportBtn', 'aiTranslateBtn', 'addContactMethod',
     'uploadHeroRive', 'uploadHeroFallback', 'uploadNoticeImage'].forEach((id) => { const node = $(id); if (node) node.disabled = value; });
 }
 function markDirty() {
@@ -1135,6 +1135,8 @@ function renderTranslations() {
   });
   if (!visible.length) box.append(el('div', 'hint', '没有符合条件的词条。'));
   $('translationPage').textContent = `${translationPage + 1} / ${pages}`;
+  // 没有待翻译词条时 AI 无事可做，按钮直接禁用。
+  $('aiTranslateBtn').disabled = busy || pendingTerms.size === 0;
   $('translationPrev').disabled = translationPage === 0;
   $('translationNext').disabled = translationPage >= pages - 1;
   updateTranslationStats(terms.length);
@@ -1189,15 +1191,16 @@ async function translateBatch(sources, config) {
   if (seen.size !== allowed.size) throw new Error('AI 遗漏了词条，未发布');
   return parsed.items;
 }
-async function aiTranslateAndPublish(file) {
+async function aiTranslateAndPublish() {
   if (busy) return;
   if (!token) throw new Error('请先填写 GitHub Token');
   if (!loadedHeadSha) throw new Error('请先加载云端内容');
   if (dirty) throw new Error('请先保存或重新加载当前编辑，再自动发布翻译');
+  // 处理已经导入到列表里的待翻译词条，不再单独选一次报告文件。
+  const candidates = Array.from(pendingTerms)
+    .filter(s => !Object.hasOwn(translation, s) && !skipReportText(s));
   const config = aiConfig();
-  const sources = reportSources(JSON.parse(await file.text()));
-  const candidates = sources.filter(s => !Object.hasOwn(translation, s) && !skipReportText(s));
-  if (!candidates.length) { setStatus('没有需要 AI 处理的新词条', 'ok'); return; }
+  if (!candidates.length) { setStatus('没有需要 AI 处理的待翻译词条，请先导入未翻译报告', 'ok'); return; }
   setBusy(true);
   const previous = translation;
   try {
@@ -1218,7 +1221,7 @@ async function aiTranslateAndPublish(file) {
     keys.forEach(k => { loadedTexts[k] = documents[k]; });
     contract = JSON.parse(documents.contract); release = JSON.parse(documents.release);
     renderTranslations();
-    setStatus(`已发布 ${accepted.length} 条 · 跳过/已有 ${sources.length - accepted.length} 条 · 版本 ${contract.translation.riveEditor.version} · ${sha.slice(0,7)} · 等待网站部署`, 'ok');
+    setStatus(`已发布 ${accepted.length} 条 · 跳过 ${candidates.length - accepted.length} 条 · 版本 ${contract.translation.riveEditor.version} · ${sha.slice(0,7)} · 等待网站部署`, 'ok');
   } catch (error) {
     translation = previous;
     throw error;
@@ -1226,13 +1229,11 @@ async function aiTranslateAndPublish(file) {
 }
 
 async function importUnmatchedReport(file) {
-  const value = JSON.parse(await file.text());
-  const entries = Array.isArray(value) ? value : value && Array.isArray(value.entries) ? value.entries : null;
-  if (!entries) throw new Error('报告中没有 entries 数组');
+  // 与 AI 流程共用同一个解析函数，避免两边规则不一致。
+  const sources = reportSources(JSON.parse(await file.text()));
   let added = 0;
-  entries.forEach((entry) => {
-    const source = typeof entry === 'string' ? entry.trim() : typeof entry?.text === 'string' ? entry.text.trim() : '';
-    if (!source || Object.prototype.hasOwnProperty.call(translation, source) || pendingTerms.has(source)) return;
+  sources.forEach((source) => {
+    if (Object.prototype.hasOwnProperty.call(translation, source) || pendingTerms.has(source)) return;
     pendingTerms.add(source);
     added += 1;
   });
@@ -1638,11 +1639,9 @@ async function initialize() {
   for (const [id, key] of [['aiBase', 'oneFuzhuAiBase'], ['aiModel', 'oneFuzhuAiModel']]) {
     $(id).addEventListener('input', () => localStorage.setItem(key, $(id).value.trim()));
   }
-  $('aiReportBtn').addEventListener('click', () => $('aiReportFile').click());
-  $('aiReportFile').addEventListener('change', async () => {
-    const file = $('aiReportFile').files?.[0]; $('aiReportFile').value = '';
-    if (!file) return;
-    try { await aiTranslateAndPublish(file); }
+  $('aiTranslateBtn').addEventListener('click', async () => {
+    if (!pendingTerms.size) { setStatus('请先导入未翻译报告，再让 AI 处理', 'err'); return; }
+    try { await aiTranslateAndPublish(); }
     catch (e) { setStatus('自动翻译发布失败：' + e.message, 'err'); }
   });
   $('importReportBtn').addEventListener('click', () => $('reportFile').click());
@@ -1659,7 +1658,7 @@ async function initialize() {
     renderCards();
   });
   $('addBanner').addEventListener('click', () => {
-    content.banners.push({ id: 'banner-' + Date.now(), label: '新横幅', title: '', summary: '', linkLabel: '了解更多', action: 'access', visible: true });
+    content.banners.push({ id: 'banner-' + Date.now(), label: '新横幅', title: '', summary: '', linkLabel: '了解更多', visible: true });
     markDirty();
     renderBanners();
   });
