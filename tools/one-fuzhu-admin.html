@@ -1164,6 +1164,9 @@ function splitList(value) { return String(value).split(/[,，]/).map((s) => s.tr
 function viewItems(view = activeView) {
   if (view === 'banners') return Array.isArray(content?.banners) ? content.banners : [];
   if (view === 'cards') return Array.isArray(content?.cards) ? content.cards : [];
+  // 单条目区块也占一行：左栏永远是列表，右侧永远是它对应的细节设置，
+  // 不因为换了个区块就整列消失。
+  if (LIST_VIEWS[view]?.single) return [null];
   return null;
 }
 
@@ -1203,6 +1206,53 @@ const LIST_VIEWS = {
     addLabel: '添加卡片',
     create: () => ({ id: 'card-' + Date.now(), name: '新卡片', summary: '', category: '互动组件', partnerName: '', platforms: ['HarmonyOS'], tags: [], visible: true }),
   },
+
+  // 以下区块只有一项，但左栏照样列一行——列表始终在，右侧始终是它的细节。
+  hero: {
+    title: '顶部 Rive', single: true,
+    count: () => '1 项',
+    name: () => '顶部 Rive',
+    meta: () => (content?.hero?.rive?.src ? [['已配置', 'pill--on']] : [['未配置', 'pill--off']]),
+    thumb: () => null,
+  },
+  contact: {
+    title: '联系方式', single: true,
+    count: () => '1 项',
+    name: () => '联系方式文案',
+    meta: () => {
+      const methods = content?.contact?.methods;
+      return [content?.contact?.visible === false ? ['已隐藏', 'pill--off'] : [`${(methods || []).length} 条入口`, '']];
+    },
+    thumb: () => null,
+  },
+  notice: {
+    title: '弹窗', single: true,
+    count: () => '1 项',
+    name: () => content?.notice?.title || '公告弹窗',
+    meta: () => (content?.notice?.enabled === true ? [['打开时弹出', 'pill--on']] : [['不弹出', 'pill--off']]),
+    thumb: () => null,
+  },
+  translations: {
+    title: 'Rive 翻译', single: true,
+    count: () => '1 项',
+    name: () => '翻译词典',
+    meta: () => [[`${Object.keys(translation || {}).length} 条`, '']],
+    thumb: () => null,
+  },
+  raw: {
+    title: '官网 JSON', single: true,
+    count: () => '1 项',
+    name: () => 'content.json',
+    meta: () => [],
+    thumb: () => null,
+  },
+  token: {
+    title: '访问令牌', single: true,
+    count: () => '1 项',
+    name: () => 'GitHub Token',
+    meta: () => [],
+    thumb: () => null,
+  },
 };
 
 // 列表里一眼能看出的状态，是这次改版的重点：不用点开每张卡才知道哪张精选、
@@ -1211,12 +1261,14 @@ function renderList() {
   const spec = LIST_VIEWS[activeView];
   const list = $('list');
   if (!spec) {
-    // 单条目区块没有列表：把这一列连同它的拖拽条一起收掉，画布因此变宽。
+    // 只有还没载入内容的极端情况会走到这里；正常每个区块都有列表。
     list.hidden = true;
     $('shell').dataset.list = 'off';
     layoutCanvas();
     return;
   }
+  // 左栏始终在位：区块之间只是换内容，不整列收起。
+  list.hidden = false;
   $('shell').dataset.list = 'on';
   const items = viewItems() || [];
   activeIndex = Math.min(Math.max(0, activeIndex), Math.max(0, items.length - 1));
@@ -1243,6 +1295,7 @@ function renderList() {
   });
   const foot = $('listFoot');
   foot.replaceChildren();
+  if (!spec.addLabel) return;
   const add = el('button', 'btn', `＋ ${spec.addLabel}`);
   add.type = 'button';
   add.addEventListener('click', () => {
