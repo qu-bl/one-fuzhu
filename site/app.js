@@ -274,11 +274,10 @@ function mountAccessDialog(item, trigger) {
 
 function renderAccessItems(item, accessItems) {
   const access = getAccess(item);
+  // 外链小卡片完全来自条目自己的 access.items。以前只要填了视频就会在这里
+  // 自动插一个对应平台的按钮，导致「没加过入口却多出一个」，视频和入口
+  // 是两件事，不该互相牵动。
   const entries = [...access.items];
-  const video = SiteMedia.videoSource(item.video);
-  if (video && !entries.some(entry => SiteMedia.accessAction(entry).href === video.href)) {
-    entries.unshift({platform: video.platform, value: video.href});
-  }
   entries.forEach((accessItem) => {
     const meta = ACCESS_META[accessItem.platform];
     if (!meta) return;

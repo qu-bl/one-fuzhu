@@ -886,7 +886,7 @@ function cardEditor(card, index) {
   renderVideoEditor(media.grid, card.video, (v) => { if (v) card.video = v; else delete card.video; });
 
   const links = section(details, '平台链接与联系方式',
-    '点开卡片后，底部出现的那排平台按钮。值是网址就跳转；是纯文本（例如 QQ 群号）就点了复制到剪贴板。');
+    '点开卡片后，底部出现的那排平台按钮。值是网址就跳转；是纯文本（例如 QQ 群号）就点了复制到剪贴板。每个入口都是独立的，填了视频也不会自动多出按钮——要哪个就加哪个。');
   renderAccessEditor(links.box, card.access, (a) => { if (a) card.access = a; else delete card.access; });
 
   const show = section(details, '显示');
