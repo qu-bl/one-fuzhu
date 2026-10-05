@@ -732,6 +732,8 @@ function createCaseCard(item, index, options = {}) {
       event.preventDefault(); expandCard(trigger);
     }
   });
+  // 管理台的画布靠这个 id 找到要打开的那张卡。
+  card.dataset.id = item.id || "";
   renderAccessItems(item, trigger.querySelector(".card-access"));
   const summary = item.summary || "";
   const summaryElement = fragment.querySelector(".case-summary");
@@ -1123,6 +1125,15 @@ function applyContent(content, options = {}) {
   renderFilters();
   renderCases();
   initNotice({ showNotice: options.showNotice });
+  // 管理台里改「平台链接与联系方式」时，入口渲染在卡片展开后的底部，
+  // 折叠状态下画布看不出任何变化。宿主因此可以直接把这张卡打开。
+  if (options.openCard) {
+    const target = state.cases.find((entry) => entry.id === options.openCard);
+    if (target) {
+      const trigger = document.querySelector(`.case-card[data-id="${CSS.escape(options.openCard)}"] .case-card-trigger`);
+      mountAccessDialog(target, trigger || undefined);
+    }
+  }
   if (options.scrollTo) {
     // 页面本身设了 scroll-behavior:smooth，用 auto 会走平滑滚动，
     // 预览跳转要的是立刻到位，所以显式 instant。

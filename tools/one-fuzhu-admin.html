@@ -782,7 +782,7 @@ function renderAccessEditor(container, access, onAccess) {
 
       const holdCheck = checkbox(item.copyable === false);
       const holdLabel = el('label', 'check-field');
-      holdLabel.append(holdCheck, document.createTextNode('暂不开放（前台显示为「待发布」，点了没反应）'));
+      holdLabel.append(holdCheck, document.createTextNode('暂不开放（入口照常列出，但按钮是灰的、写「待发布」，点了没反应）'));
       const holdRow = el('div', 'row');
       holdRow.append(holdLabel);
       box.append(holdRow);
@@ -886,8 +886,14 @@ function cardEditor(card, index) {
   renderVideoEditor(media.grid, card.video, (v) => { if (v) card.video = v; else delete card.video; });
 
   const links = section(details, '平台链接与联系方式',
-    '点开卡片后，底部出现的那排平台按钮。值是网址就跳转；是纯文本（例如 QQ 群号）就点了复制到剪贴板。每个入口都是独立的，填了视频也不会自动多出按钮——要哪个就加哪个。');
+    '点开卡片后，底部出现的那排平台按钮。值是网址就跳转；是纯文本（例如 QQ 群号）就点了复制到剪贴板。'
+    + '每个入口都是独立的，填了视频也不会自动多出按钮——要哪个就加哪个。'
+    + '「链接或内容」留空、或勾了「暂不开放」，前台都会画成灰色的「待发布」。'
+    + '这排按钮平时折在卡片里，画布上看不见，点下面的按钮可以直接把这张卡打开看。');
   renderAccessEditor(links.box, card.access, (a) => { if (a) card.access = a; else delete card.access; });
+  const openOnCanvas = actionButton('在画布上打开这张卡');
+  openOnCanvas.addEventListener('click', () => openCardInPreview(card.id));
+  links.box.append(openOnCanvas);
 
   const show = section(details, '显示');
   field(show.grid, '精选', bind(checkbox(card.featured), (v) => (card.featured = v)));
@@ -911,7 +917,9 @@ function bannerEditor(banner, index) {
   field(action.grid, '跳转分类', bind(textInput(banner.category, '留空＝全部'), (v) => (banner.category = v)));
 
   const links = section(details, '平台链接与联系方式',
-    '留空则按钮跳转到橱柜；填了内容，按钮就改为打开信息面板，并在面板里列出这些平台入口。');
+    '留空则按钮跳转到橱柜；填了内容，按钮就改为打开信息面板，并在面板里列出这些平台入口。'
+    + '每个入口都是独立的，填了视频也不会自动多出按钮。'
+    + '「链接或内容」留空、或勾了「暂不开放」，前台都会画成灰色的「待发布」。');
   renderAccessEditor(links.box, banner.access, (a) => { if (a) banner.access = a; else delete banner.access; });
 
   const show = section(details, '显示');
@@ -1403,6 +1411,19 @@ function syncPreview() {
     } catch (error) { /* 预览失败不影响编辑 */ }
   }, 120);
 }
+// 把画布上的某张卡直接打开，看它的入口按钮。不走防抖的 syncPreview：
+// 那是随每次输入重推内容的，会一遍遍重开弹窗。
+function openCardInPreview(id) {
+  if (!id) { setStatus('这张卡片还没有 id，先在「官网 JSON」里补一个', 'err'); return; }
+  const frame = $('previewFrame');
+  if (!frame?.contentWindow || !content) return;
+  frame.contentWindow.postMessage({
+    type: 'qianji:preview',
+    content: content,
+    options: { openCard: id, showNotice: false },
+  }, window.location.origin);
+}
+
 function initPreview() {
   const frame = $('previewFrame');
   if (!frame) return;
