@@ -4,7 +4,6 @@ const activityCarousel = document.querySelector("#activity-carousel");
 const activityStatus = document.querySelector("#activity-status");
 const activityTemplate = document.querySelector("#activity-template");
 const activityRiveCanvas = document.querySelector("#activity-rive-canvas");
-const activityRiveFallback = document.querySelector("#activity-rive-fallback");
 const caseTemplate = document.querySelector("#case-template");
 const caseGrid = document.querySelector("#case-grid");
 const categoryTabs = document.querySelector("#category-tabs");
@@ -41,7 +40,6 @@ const HERO_DEFAULTS = {
     stateMachine: "State Machine 1",
     autoplay: true,
   },
-  fallback: { src: "./assets/hero-cat.webp", alt: "猫咪触摸跟随动画预览" },
   ariaLabel: "猫咪触摸跟随互动动画",
 };
 
@@ -413,14 +411,7 @@ window.addEventListener("pagehide", () => {
 function initHeroRive() {
   const hero = state.hero || HERO_DEFAULTS;
   const rive = hero.rive || HERO_DEFAULTS.rive;
-  const fallback = hero.fallback || HERO_DEFAULTS.fallback;
 
-  // 兜底图先按数据设置，这样即使 Rive 运行时不可用（例如外部 CDN 被拦截），
-  // 首屏依然是内容里指定的那张图。
-  if (activityRiveFallback) {
-    if (fallback.src) activityRiveFallback.src = fallback.src;
-    if (fallback.alt) activityRiveFallback.alt = fallback.alt;
-  }
   if (hero.ariaLabel) {
     activityRiveCanvas?.closest(".activity-rive")?.setAttribute("aria-label", hero.ariaLabel);
   }
@@ -447,7 +438,6 @@ function initHeroRive() {
     onLoad: () => {
       resize();
       activityRiveCanvas.removeAttribute("aria-hidden");
-      activityRiveFallback?.setAttribute("hidden", "");
     },
   };
   // 留空表示使用 .riv 文件里的默认画板与状态机，交给 Rive 自行选择。

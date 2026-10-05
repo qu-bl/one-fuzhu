@@ -7,10 +7,6 @@
       "artboard": "Artboard 2",
       "stateMachine": "State Machine 1",
       "autoplay": true
-    },
-    "fallback": {
-      "src": "",
-      "alt": ""
     }
   },
   "notice": {

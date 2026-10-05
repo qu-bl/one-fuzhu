@@ -429,7 +429,6 @@ const CONFIG = {
     heroRive: { base: 'site/assets/hero-cat', exts: ['.riv'], maxBytes: 24 * 1024 * 1024 },
     // 图片只收 WebP。以前什么都收，结果一张 PNG 封面就有 900 KB，
     // 而同样的图转成 WebP 只有 60 KB 左右——这是在源头上堵住。
-    heroFallback: { base: 'site/assets/hero-cat', exts: ['.webp'], maxBytes: 4 * 1024 * 1024 },
     noticeImage: { base: 'site/assets/notice', exts: ['.webp'], maxBytes: 4 * 1024 * 1024 },
     // 卡片封面：基名按卡片 id 动态生成，见 coverSlot()。
     cardCover: { exts: ['.webp'], maxBytes: 4 * 1024 * 1024 }
@@ -453,7 +452,6 @@ const VIDEO_PLATFORMS = ['', 'bilibili', 'youtube', 'douyin'];
 const HERO_TEMPLATE = {
   ariaLabel: '猫咪触摸跟随互动动画',
   rive: { src: './assets/hero-cat.riv', artboard: 'Artboard 2', stateMachine: 'State Machine 1', autoplay: true },
-  fallback: { src: './assets/hero-cat.webp', alt: '猫咪触摸跟随动画预览' }
 };
 const CONTACT_TEMPLATE = {
   visible: true,
@@ -516,7 +514,7 @@ function setBusy(value) {
   $('formBody').inert = value;
   $('loadBtn').disabled = value;
   $('saveBtn').disabled = value || !dirty;
-  ['addTranslation', 'importReportBtn', 'uploadHeroRive', 'uploadHeroFallback', 'uploadNoticeImage']
+  ['addTranslation', 'importReportBtn', 'uploadHeroRive', 'uploadNoticeImage']
     .forEach((id) => { const node = $(id); if (node) node.disabled = value; });
 }
 function markDirty() {
@@ -997,15 +995,6 @@ function uploadHeroRive() {
   });
 }
 
-function uploadHeroFallback() {
-  stageUpload(CONFIG.uploads.heroFallback, (path) => {
-    if (!content.hero) content.hero = JSON.parse(JSON.stringify(HERO_TEMPLATE));
-    content.hero.fallback = content.hero.fallback || { ...HERO_TEMPLATE.fallback };
-    content.hero.fallback.src = versioned(repoPathToUrl(path));
-    renderHero();
-  });
-}
-
 function uploadNoticeImage() {
   stageUpload(CONFIG.uploads.noticeImage, (path) => {
     if (!content.notice) content.notice = { ...NOTICE_TEMPLATE };
@@ -1037,7 +1026,6 @@ function heroEditor() {
   if (!content.hero) content.hero = JSON.parse(JSON.stringify(HERO_TEMPLATE));
   const hero = content.hero;
   hero.rive = hero.rive || { ...HERO_TEMPLATE.rive };
-  hero.fallback = hero.fallback || { ...HERO_TEMPLATE.fallback };
 
   const details = el('section', 'surface editor');
   const header = el('div', 'editor-header');
@@ -1058,22 +1046,6 @@ function heroEditor() {
   const riveRow = el('div', 'row');
   riveRow.append(riveUpload);
   rive.box.append(riveRow);
-
-  const fallback = section(details, '兜底图片', 'Rive 载入前或不可用时显示这张图。只收 WebP 格式。');
-  const fallbackSrc = textInput(hero.fallback.src, './assets/xxx.webp');
-  field(fallback.grid, '兜底图片路径', bind(fallbackSrc, (v) => (hero.fallback.src = v)));
-  field(fallback.grid, '兜底图片说明', bind(textInput(hero.fallback.alt), (v) => (hero.fallback.alt = v)));
-  const preview = el('img');
-  preview.alt = '';
-  preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:12px;background:var(--c-surface-container)';
-  const syncPreview = (url) => { preview.src = siteAssetUrl(url); preview.hidden = !url; };
-  syncPreview(hero.fallback.src);
-  fallbackSrc.addEventListener('input', () => syncPreview(fallbackSrc.value.trim()));
-  const fallbackUpload = actionButton('上传兜底图片', 'outlined');
-  fallbackUpload.id = 'uploadHeroFallback';
-  const fallbackRow = el('div', 'row');
-  fallbackRow.append(fallbackUpload);
-  fallback.box.append(fallbackRow, preview);
 
   return details;
 }
@@ -1827,9 +1799,6 @@ function validateContent(value) {
       if (typeof rive.src !== 'string' || !rive.src.trim()) throw new Error('hero.rive.src 不能为空');
       if (rive.autoplay != null && typeof rive.autoplay !== 'boolean') throw new Error('hero.rive.autoplay 必须是布尔值');
     }
-    if (value.hero.fallback != null && (typeof value.hero.fallback !== 'object' || Array.isArray(value.hero.fallback))) {
-      throw new Error('hero.fallback 必须是对象');
-    }
   }
 
   if (value.contact != null) {
@@ -1953,7 +1922,6 @@ function currentUploadRefs() {
     refs.get(base).add(clean);
   };
   add(CONFIG.uploads.heroRive.base, content.hero?.rive?.src);
-  add(CONFIG.uploads.heroFallback.base, content.hero?.fallback?.src);
   add(CONFIG.uploads.noticeImage.base, content.notice?.image);
   // 每张卡片的封面基名不同，逐个登记，否则换扩展名时会被当成无人引用的旧文件删掉。
   (Array.isArray(content.cards) ? content.cards : []).forEach((card, index) => {
@@ -1962,7 +1930,7 @@ function currentUploadRefs() {
   return refs;
 }
 
-// 上传换过扩展名时（例如 hero-cat.webp -> hero-cat.png），把同基名下已无人引用的旧文件删掉。
+// 上传换过扩展名时（例如 notice.png -> notice.webp），把同基名下已无人引用的旧文件删掉。
 // 只处理本次确实上传过的基名，未编辑的槽位不受影响。
 async function staleUploadPaths() {
   const bases = new Set(Array.from(pendingUploads.keys()).map((path) => path.replace(/\.[A-Za-z0-9]+$/, '')));
@@ -2085,10 +2053,9 @@ async function initialize() {
   else window.addEventListener('resize', layoutCanvas);
   // 上传按钮由编辑器渲染，切换区块时会重建，所以代理绑一次就够。
   $('formBody').addEventListener('click', (event) => {
-    const button = event.target.closest('#uploadHeroRive, #uploadHeroFallback, #uploadNoticeImage');
+    const button = event.target.closest('#uploadHeroRive, #uploadNoticeImage');
     if (!button) return;
     if (button.id === 'uploadHeroRive') uploadHeroRive();
-    else if (button.id === 'uploadHeroFallback') uploadHeroFallback();
     else uploadNoticeImage();
   });
   $('translationSearch').addEventListener('input', () => { translationPage = 0; renderTranslations(); });
