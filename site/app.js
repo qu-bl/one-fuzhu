@@ -500,15 +500,15 @@ function bindCarouselControls() {
   reduceMotion.addEventListener?.("change", scheduleCarousel);
 }
 
-function setPlatformExpanded(expanded) {
+// 平台筛选常驻展开：全部选项一直列出来，不折叠，也不因宿主平台而隐藏。
+// 只同步选中态，没有展开/收起这回事。
+function syncPlatformButtons() {
   const picker = document.querySelector("#platform-picker");
-  picker.dataset.expanded = String(expanded);
+  picker.dataset.expanded = "true";
   platformButtons.querySelectorAll("button").forEach(button => {
-    const selected = button.dataset.platform === state.platform;
-    button.setAttribute("aria-pressed", String(selected));
-    button.inert = !expanded && !selected;
-    if (selected) button.setAttribute("aria-expanded", String(expanded));
-    else button.removeAttribute("aria-expanded");
+    button.setAttribute("aria-pressed", String(button.dataset.platform === state.platform));
+    button.inert = false;
+    button.removeAttribute("aria-expanded");
   });
   platformButtons.scrollLeft = 0;
 }
@@ -552,11 +552,6 @@ function renderFilters() {
   setCategoryExpanded(false);
 
   platformButtons.replaceChildren();
-  const platformPicker = document.querySelector("#platform-picker");
-  if (appPlatform) {
-    platformPicker.hidden = true;
-    return;
-  }
   ["全部平台", "Apple", "Android", "HarmonyOS"].forEach((platform) => {
     const button = document.createElement("button");
     const label = platformLabel(platform);
@@ -568,19 +563,14 @@ function renderFilters() {
     button.title = label;
     button.append(createPlatformIcon(platform));
     button.addEventListener("click", () => {
-      const expanded = document.querySelector("#platform-picker").dataset.expanded === "true";
-      if (!expanded) {
-        setPlatformExpanded(true);
-        return;
-      }
       state.platform = platform;
-      setPlatformExpanded(false);
+      syncPlatformButtons();
       button.focus({ preventScroll: true });
       renderCases();
     });
     platformButtons.append(button);
   });
-  setPlatformExpanded(false);
+  syncPlatformButtons();
 }
 
 function getFilteredCases() {
@@ -1102,9 +1092,6 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 }
 
 async function initialize() {
-  if (!appPlatform) {
-    bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
-  }
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
   // 卡片详情弹窗有 × 关闭键；公告弹窗没有，靠 Esc 与点击外部关闭。
   accessDialog?.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);

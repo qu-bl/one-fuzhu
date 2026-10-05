@@ -83,7 +83,6 @@ a { color: var(--accent); }
 .platform-picker { display: flex; align-items: center; flex: 0 1 auto; min-width: 0; max-width: 65%; border-radius: 24px; background: var(--surface); }
 .platform-buttons { display: flex; align-items: center; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
 .platform-picker .platform-button { display: flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; min-width: 0; height: 44px; min-height: 44px; padding: 12px; margin: 0; border-radius: 24px; overflow: hidden; transition: flex-basis 280ms var(--ease-out), padding 280ms var(--ease-out), opacity 180ms ease, background-color 220ms ease; }
-.platform-picker[data-expanded="false"] .platform-button[aria-pressed="false"] { flex-basis: 0; width: 0; padding-inline: 0; opacity: 0; pointer-events: none; }
 .platform-picker .platform-button:hover { background: var(--surface-soft); }
 .platform-picker .platform-button .platform-icon { flex-shrink: 0; }
 .platform-picker .platform-button:hover { background: var(--surface-soft); }
