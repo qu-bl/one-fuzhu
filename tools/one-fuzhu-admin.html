@@ -34,6 +34,8 @@
     /* 形状与尺寸 */
     --r-m:12px; --r-s:8px; --r-full:999px;
     --control-h:34px; --row-h:36px; --action-w:76px;
+    /* 画布区比页面底再深一档，与两侧白色面板形成三块平铺色区。 */
+    --canvas-bg:#e9e5f3;
     --elev:0 1px 3px rgb(20 18 40 / .07), 0 6px 20px rgb(20 18 40 / .05);
   }
   *{box-sizing:border-box}
@@ -51,67 +53,62 @@
   /* ============ 顶栏 ============ */
   .app-bar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--block);box-shadow:var(--elev);position:relative;z-index:3}
   .app-bar h1{margin:0;font-size:19px;font-weight:600}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  /* 顶栏的区块切换：一个平铺的下拉，不带圆角装饰。 */
+  .view-switch{display:flex;align-items:center}
+  .view-switch select{appearance:none;min-height:var(--control-h);padding:0 32px 0 12px;border:0;border-radius:5px;background:var(--field);color:var(--ink);font:inherit;font-weight:600;cursor:pointer;
+    background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+    background-position:calc(100% - 17px) 14px,calc(100% - 12px) 14px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .view-switch select:hover{background-color:var(--field-hi)}
   .progress{position:absolute;inset:auto 0 0;height:3px;overflow:hidden;background:var(--pri-c)}
   .progress::after{content:"";position:absolute;inset:0 auto 0 0;width:40%;background:var(--pri);animation:slide 1.4s ease-in-out infinite}
   @keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
 
-  /* ============ 工作台骨架：导航 | 列表 | 画布 | 检视器 ============ */
-  /* 面板宽度是 CSS 变量，拖拽条只改变量，不碰布局代码。 */
+  /* ============ 工作台骨架：列表 | 画布 | 检视器 ============ */
+  /* 三块平铺的色区，没有圆角、没有描边、没有卡片。面板宽度是 CSS 变量，
+     拖拽条只改变量，布局代码不用知道有拖拽这回事。 */
   .shell{
     flex:1;min-height:0;overflow:hidden;
-    /* 列宽走两级变量：--nav-w 等是拖出来的宽度（JS 内联设置），
-       --list-col 才是实际列宽，归样式表管——否则内联样式会压过下面的收起规则。 */
-    --list-col:var(--list-w,250px);
+    /* 列宽走两级变量：--list-w 是拖出来的宽度（JS 内联设置），
+       --list-col 才是实际列宽，归样式表管——否则内联样式会压过收起规则。 */
+    --list-col:var(--list-w,260px);
     --list-gutter:5px;
     display:grid;
     grid-template-columns:
-      var(--nav-w,184px) 5px
       var(--list-col) var(--list-gutter)
       minmax(0,1fr) 5px
-      var(--inspector-w,400px);
+      var(--inspector-w,420px);
+    background:var(--canvas-bg);
   }
-  /* 单条目区块没有列表，把那一列和它的拖拽条一起收掉。 */
+  /* 单条目区块没有列表，把那一列和它的拖拽条一起收掉，画布因此变宽。 */
   .shell[data-list="off"]{ --list-col:0px; --list-gutter:0px; }
-  /* 每一栏显式指定列号。display:none 会把元素移出栅格流，后面的元素就会
+  /* 每一块显式指定列号。display:none 会把元素移出栅格流，后面的元素就会
      往前顶、占错轨道（画布会掉进列表列、检视器会吃掉整条 1fr）。 */
-  .nav{grid-column:1}
-  [data-panel="nav"]{grid-column:2}
-  .list{grid-column:3}
-  [data-panel="list"]{grid-column:4}
-  .canvas{grid-column:5}
-  [data-panel="inspector"]{grid-column:6}
-  .inspector{grid-column:7}
-  .shell[data-list="off"] .list,
-  .shell[data-list="off"] [data-panel="list"]{ display:none; }
+  .list{grid-column:1}
+  [data-panel="list"]{grid-column:2}
+  .canvas{grid-column:3}
+  [data-panel="inspector"]{grid-column:4}
+  .inspector{grid-column:5}
 
-  /* 拖拽条：平时是一条极窄的空白，悬停/拖动时露出主色，不占视觉重量。 */
+  /* 拖拽条：平时是一条极窄的空白，悬停/拖动时露出主色。 */
   .gutter{position:relative;cursor:col-resize;background:transparent;align-self:stretch;touch-action:none}
-  .gutter::after{content:"";position:absolute;inset:0 2px;border-radius:99px;background:transparent;transition:background 120ms linear}
-  .gutter:hover::after{background:var(--field-hi)}
+  .gutter::after{content:"";position:absolute;inset:0 2px;background:transparent;transition:background 120ms linear}
+  .gutter:hover::after{background:#cfc7e4}
   .gutter[data-dragging]::after{background:var(--pri)}
   .gutter:focus-visible{outline:2px solid var(--pri);outline-offset:-1px}
 
-  /* ============ ① 导航 ============ */
-  .nav{padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow:auto;min-height:0;min-width:0}
-  .nav-group{padding:14px 14px 5px;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);white-space:nowrap;overflow:hidden}
-  .nav-item{display:flex;align-items:center;gap:8px;padding:0 14px;min-height:40px;border-radius:var(--r-full);color:var(--ink-2);text-align:left;font-weight:500;white-space:nowrap;overflow:hidden}
-  .nav-item:hover{background:var(--field)}
-  .nav-item[data-active]{background:var(--pri-c);color:var(--pri-ink);font-weight:700}
-  .nav-badge{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--r-full);background:var(--chip);color:var(--ink-2);flex-shrink:0}
-  .nav-item[data-active] .nav-badge{background:#c9d3ff;color:var(--pri-ink)}
-
-  /* ============ ② 条目列表 ============ */
-  .list{margin:14px 0;border-radius:16px;background:var(--block);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+  /* ============ ① 列表（左栏） ============ */
+  .list{background:var(--block);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
   .list[hidden]{display:none}
-  .list-head{padding:14px 14px 10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-  .list-head strong{font-size:14px}
+  .list-head{padding:16px 16px 10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .list-head strong{font-size:15px}
   .list-head .count{font-size:11px;color:var(--ink-3)}
-  .rows{flex:1;overflow:auto;padding:0 6px 6px;display:flex;flex-direction:column;gap:2px;min-height:0}
-  .entry-row{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:var(--r-m);text-align:left;width:100%;color:inherit;flex-wrap:nowrap}
+  .rows{flex:1;overflow:auto;padding:0 8px 8px;display:flex;flex-direction:column;gap:2px;min-height:0}
+  .entry-row{display:flex;align-items:center;gap:9px;padding:10px 8px;border-radius:6px;text-align:left;width:100%;color:inherit;flex-wrap:nowrap}
   .entry-row:hover{background:var(--field)}
   .entry-row[data-active]{background:var(--pri-c)}
   .entry-grip{color:#c8c3d8;font-size:14px;line-height:1;cursor:grab;user-select:none;flex-shrink:0}
-  .entry-thumb{flex:0 0 36px;width:36px;height:36px;border-radius:var(--r-s);background:var(--field);display:grid;place-items:center;overflow:hidden;font-size:10px;color:var(--ink-3);text-align:center;line-height:1.2}
+  .entry-thumb{flex:0 0 34px;width:34px;height:34px;border-radius:4px;background:var(--field);display:grid;place-items:center;overflow:hidden;font-size:10px;color:var(--ink-3);text-align:center;line-height:1.2}
   .entry-thumb img{width:100%;height:100%;object-fit:cover}
   .entry-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
   .entry-name{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -122,30 +119,31 @@
   .list-foot{padding:8px}
   .list-foot .btn{width:100%}
 
-  /* ============ ③ 中心画布（官网真实预览） ============ */
-  .canvas{display:flex;flex-direction:column;min-width:0;min-height:0;padding:14px 0}
-  .canvas-bar{display:flex;align-items:center;gap:8px;padding:0 4px 8px;font-size:11px;color:var(--ink-3);min-width:0}
+  /* ============ ② 中心画布（官网真实预览） ============ */
+  .canvas{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--canvas-bg)}
+  .canvas-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:11px;color:var(--ink-3);min-width:0}
   .canvas-bar .dot{width:7px;height:7px;border-radius:50%;background:#2e9e4f;flex-shrink:0}
   .canvas-hint{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .canvas-bar .spacer{flex:1}
-  .devices{display:flex;gap:2px;padding:2px;border-radius:var(--r-full);background:var(--field);flex-shrink:0}
-  .device{padding:0 10px;min-height:24px;border-radius:var(--r-full);background:transparent;color:var(--ink-2);font-size:11px;font-weight:600;white-space:nowrap}
+  .devices{display:flex;gap:2px;flex-shrink:0}
+  .device{padding:0 10px;min-height:24px;border-radius:5px;background:transparent;color:var(--ink-2);font-size:11px;font-weight:600;white-space:nowrap}
   .device:hover{background:var(--field-hi)}
   .device[data-active]{background:var(--block);color:var(--pri)}
-  .canvas-stage{flex:1;min-height:0;overflow:auto;border-radius:18px;background:var(--block);display:flex;justify-content:center;padding:12px}
-  /* 画布框按所选设备宽度渲染，装不下时整体缩放（zoom 会一并改变布局尺寸）。 */
-  .canvas-frame{background:#0f1115;border-radius:14px;overflow:hidden;box-shadow:var(--elev);flex-shrink:0;align-self:flex-start}
-  .canvas-frame iframe{width:100%;height:100%;border:0;display:block;background:#0f1115}
+  .canvas-stage{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;padding:0 14px 14px}
+  /* 画布按所选设备宽度渲染，装不下时整体缩放（zoom 会一并改变布局尺寸）。 */
+  /* 画布不加边框、不加圆角、不加投影：官网直接铺在画布底色上就是预览本身。 */
+  .canvas-frame{flex-shrink:0;align-self:flex-start;overflow:hidden}
+  .canvas-frame iframe{width:100%;height:100%;border:0;display:block;background:var(--block)}
 
-  /* ============ ④ 检视器（表单） ============ */
-  .inspector{display:flex;flex-direction:column;min-width:0;min-height:0}
+  /* ============ ③ 检视器（右栏） ============ */
+  .inspector{background:var(--block);display:flex;flex-direction:column;min-width:0;min-height:0}
 
   /* ============ ③ 表单 ============ */
-  .form{padding:14px 14px 48px 2px;overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-  .status{font-size:12px;line-height:1.6;color:var(--ink-3);padding:0 4px;min-height:19px;overflow-wrap:anywhere}
+  .form{padding:16px 18px 48px;overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0}
+  .status{font-size:12px;line-height:1.6;color:var(--ink-3);min-height:0;overflow-wrap:anywhere}
   .status.ok{color:var(--ok)}
   .status.err{color:var(--err)}
-  .surface{background:var(--block);border-radius:18px;padding:16px 18px}
+  .surface{background:var(--block);padding:16px 18px}
   .editor{display:flex;flex-direction:column;gap:0}
   .editor-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
   .editor-header .title{flex:1;min-width:0;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -173,20 +171,20 @@
   /* ============ 表单控件 ============ */
   .field{display:flex;flex-direction:column;gap:5px;width:100%;min-width:0}
   .field-label{font-size:11px;line-height:14px;color:var(--ink-3);padding-left:2px}
-  .field-input{width:100%;min-height:var(--control-h);padding:6px 12px;border:0;border-radius:var(--r-s);background:var(--field);color:var(--ink)}
+  .field-input{width:100%;min-height:var(--control-h);padding:6px 12px;border:0;border-radius:4px;background:var(--field);color:var(--ink)}
   .field-input::placeholder{color:var(--ink-3)}
   .field-input:hover{background:var(--field-hi)}
   .field-input:focus{background:var(--field-hi);box-shadow:inset 0 -2px 0 var(--pri)}
   .field-input:disabled{opacity:.5;cursor:not-allowed}
   textarea.field-input{min-height:70px;resize:vertical;line-height:1.55}
   select.field-input{cursor:pointer}
-  .check-field{display:flex;gap:8px;align-items:center;padding:6px 12px;border-radius:var(--r-full);background:var(--field);color:var(--ink-2);font-size:13px;cursor:pointer;min-height:var(--control-h)}
+  .check-field{display:flex;gap:8px;align-items:center;padding:6px 12px;border-radius:4px;background:var(--field);color:var(--ink-2);font-size:13px;cursor:pointer;min-height:var(--control-h)}
   .check-field:has(input:checked){background:var(--pri-c);color:var(--pri-ink);font-weight:600}
   .check-field input[type="checkbox"]{width:16px;height:16px;margin:0;accent-color:var(--pri)}
   .check-row{display:flex;flex-wrap:wrap;gap:10px}
 
   /* ============ 按钮 ============ */
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:var(--control-h);padding:0 16px;border-radius:var(--r-full);background:var(--field);color:var(--pri);font-weight:600;white-space:nowrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:var(--control-h);padding:0 14px;border-radius:5px;background:var(--field);color:var(--pri);font-weight:600;white-space:nowrap}
   .btn:hover{background:var(--field-hi)}
   .btn:disabled{opacity:.42;cursor:not-allowed}
   .btn--filled{background:var(--pri);color:#fff}
@@ -197,11 +195,11 @@
   .btn--text:hover{background:var(--field)}
   .btn--text.danger{color:var(--err)}
   .btn--text.danger:hover{background:var(--err-c)}
-  .btn-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:var(--r-full);background:transparent;color:var(--ink-2);flex-shrink:0}
+  .btn-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:5px;background:transparent;color:var(--ink-2);flex-shrink:0}
   .btn-icon:hover{background:var(--field)}
 
   /* ============ 访问入口 ============ */
-  .access-item{background:var(--field);border-radius:var(--r-m);padding:12px 14px;margin-top:10px}
+  .access-item{background:var(--field);padding:14px 16px;margin-top:12px}
   .access-item-head{display:flex;align-items:center;gap:10px}
   .access-item-title{flex:1;font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.04em}
   .access-item .row{margin-top:6px}
@@ -215,7 +213,7 @@
   .translation-head,.translation-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) var(--action-w);gap:8px;align-items:center}
   .translation-head{padding-bottom:4px;font-size:11px;color:var(--ink-3)}
   .translation-head > span{padding-inline:12px}
-  .translation-row .source{height:var(--row-h);display:flex;align-items:center;padding:0 12px;border-radius:var(--r-s);background:var(--field);white-space:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+  .translation-row .source{height:var(--row-h);display:flex;align-items:center;padding:0 12px;border-radius:4px;background:var(--field);white-space:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
   .translation-row .field-input{height:var(--row-h);min-height:var(--row-h);padding:0 12px}
   .translation-row .btn{min-height:var(--row-h);padding:0 12px;width:100%}
   .translation-row.missing .source{background:var(--err-c);color:var(--err)}
@@ -229,7 +227,7 @@
   }
 
   /* ============ 对话框 ============ */
-  dialog{width:min(520px,calc(100vw - 32px));padding:0;border:0;border-radius:24px;background:var(--block);color:var(--ink);box-shadow:var(--elev)}
+  dialog{width:min(520px,calc(100vw - 32px));padding:0;border:0;border-radius:10px;background:var(--block);color:var(--ink);box-shadow:var(--elev)}
   dialog::backdrop{background:rgb(20 18 40 / .45)}
   .dialog-head{padding:22px 22px 0;font-size:18px;font-weight:600}
   .dialog-body{padding:12px 22px;color:var(--ink-2);line-height:1.6}
@@ -240,6 +238,25 @@
 <body>
 <header class="app-bar">
   <h1>千机百变管理后台</h1>
+  <label class="view-switch">
+    <span class="sr-only">选择区块</span>
+    <select id="viewSelect">
+      <optgroup label="内容">
+        <option value="banners">顶部轮播</option>
+        <option value="hero">顶部 Rive</option>
+        <option value="cards">创意橱柜</option>
+        <option value="contact">联系方式</option>
+        <option value="notice">弹窗</option>
+      </optgroup>
+      <optgroup label="翻译">
+        <option value="translations">Rive 翻译</option>
+      </optgroup>
+      <optgroup label="设置">
+        <option value="raw">官网 JSON</option>
+        <option value="token">访问令牌</option>
+      </optgroup>
+    </select>
+  </label>
   <span class="pill pill--on" id="dirtyTag" hidden>有未发布改动</span>
   <span style="flex:1"></span>
   <button class="btn btn--text" id="loadBtn" type="button">重新加载</button>
@@ -248,22 +265,6 @@
 </header>
 
 <div class="shell" id="shell">
-  <nav class="nav" id="nav" aria-label="管理内容">
-    <div class="nav-group">内容</div>
-    <button class="nav-item" type="button" data-view="banners">顶部轮播<span class="nav-badge" data-count="banners"></span></button>
-    <button class="nav-item" type="button" data-view="hero">顶部 Rive</button>
-    <button class="nav-item" type="button" data-view="cards">创意橱柜<span class="nav-badge" data-count="cards"></span></button>
-    <button class="nav-item" type="button" data-view="contact">联系方式</button>
-    <button class="nav-item" type="button" data-view="notice">弹窗</button>
-    <div class="nav-group">翻译</div>
-    <button class="nav-item" type="button" data-view="translations">Rive 翻译<span class="nav-badge" data-count="terms"></span></button>
-    <div class="nav-group">设置</div>
-    <button class="nav-item" type="button" data-view="raw">官网 JSON</button>
-    <button class="nav-item" type="button" data-view="token">访问令牌</button>
-  </nav>
-
-  <div class="gutter" data-panel="nav" role="separator" aria-orientation="vertical" tabindex="0" aria-label="拖动调整导航宽度"></div>
-
   <section class="list" id="list" hidden>
     <div class="list-head"><strong id="listTitle"></strong><span class="count" id="listCount"></span></div>
     <div class="rows" id="listRows"></div>
@@ -1317,10 +1318,9 @@ function initPreview() {
 // ---------- 可拖拽面板 ----------
 // 面板宽度只存在 CSS 变量里。拖拽条改的是变量，布局代码不用知道有拖拽这回事。
 const PANELS = {
-  nav: { prop: '--nav-w', min: 132, max: 360, fallback: 184 },
-  list: { prop: '--list-w', min: 180, max: 420, fallback: 250 },
+  list: { prop: '--list-w', min: 190, max: 460, fallback: 260 },
   // 检视器在最右侧，指针往左拖才是变宽，所以方向要反过来。
-  inspector: { prop: '--inspector-w', min: 300, max: 760, fallback: 400, invert: true },
+  inspector: { prop: '--inspector-w', min: 300, max: 760, fallback: 420, invert: true },
 };
 
 function panelWidth(name) {
@@ -1561,16 +1561,19 @@ function renderAll() {
   syncPreview();
 }
 
-// 导航上直接标出条目数，不用点进去才知道有多少。
+// 下拉里直接标出条目数，不用点进去才知道有多少。
 function renderNavBadges() {
   const counts = {
     banners: (content?.banners || []).length,
     cards: (content?.cards || []).length,
-    terms: Object.keys(translation || {}).length,
+    translations: Object.keys(translation || {}).length,
   };
-  document.querySelectorAll('#nav [data-count]').forEach((node) => {
-    const value = counts[node.dataset.count];
-    node.textContent = value ? String(value) : '';
+  const labels = { banners: '顶部轮播', cards: '创意橱柜', translations: 'Rive 翻译' };
+  Object.entries(labels).forEach(([view, label]) => {
+    const option = Array.from($('viewSelect').options).find((o) => o.value === view);
+    if (!option) return;
+    const value = counts[view];
+    option.textContent = value ? `${label}（${value}）` : label;
   });
 }
 
@@ -1582,22 +1585,10 @@ function refreshRaw() {
   rawBaseline = $('raw').value;
 }
 
-// 侧边导航：视图顺序由 DOM 里 .nav-item 的顺序决定，不再单独维护一张表。
-function navItems() { return Array.from(document.querySelectorAll('#nav .nav-item[data-view]')); }
-
+// 区块切换是顶栏那个下拉。视图顺序由 option 顺序决定，选中态由浏览器原生渲染。
 function setNavActive(which) {
-  navItems().forEach((item) => {
-    const active = item.dataset.view === which;
-    // data-active 由 CSS 渲染成 M3 导航抽屉的选中指示器；
-    // aria-current 提供给读屏：选中态完全由 CSS 的 [data-active] 规则渲染。
-    if (active) {
-      item.setAttribute('data-active', '');
-      item.setAttribute('aria-current', 'page');
-    } else {
-      item.removeAttribute('data-active');
-      item.removeAttribute('aria-current');
-    }
-  });
+  const select = $('viewSelect');
+  if (select && select.value !== which) select.value = which;
 }
 
 function selectTab(which) {
@@ -1914,23 +1905,8 @@ async function initialize() {
     catch (e) { setStatus('加载失败：' + friendlyError(e), 'err'); }
   });
   $('saveBtn').addEventListener('click', save);
-  // 侧边导航：点击切换视图；选中态由 CSS 的 [data-active] 规则渲染。
-  const items = navItems();
-  items.forEach((item) => {
-    item.addEventListener('click', () => { selectTab(item.dataset.view); });
-  });
-  $('nav').addEventListener('keydown', (event) => {
-    const step = { ArrowDown: 1, ArrowUp: -1, ArrowRight: 1, ArrowLeft: -1 }[event.key];
-    if (step === undefined && event.key !== 'Home' && event.key !== 'End') return;
-    event.preventDefault();
-    const current = items.findIndex((item) => item.hasAttribute('data-active'));
-    let next;
-    if (event.key === 'Home') next = 0;
-    else if (event.key === 'End') next = items.length - 1;
-    else next = ((current < 0 ? 0 : current) + step + items.length) % items.length;
-    items[next].focus();
-    selectTab(items[next].dataset.view);
-  });
+  // 顶栏下拉切换区块；方向键是 <select> 的原生行为，不用自己实现。
+  $('viewSelect').addEventListener('change', () => { selectTab($('viewSelect').value); });
   initPreview();
   bindGutters();
   restorePanels();
