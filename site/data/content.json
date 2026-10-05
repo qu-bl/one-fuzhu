@@ -156,11 +156,12 @@
         "items": [
           {
             "platform": "bilibili",
-            "label": "测试",
+            "label": "B站",
             "url": "https://www.bilibili.com/video/BV1NahH6SEfV/?share_source=copy_web&vd_source=14eadbe419c9f5bda683a4a89fdd03a5"
           }
         ]
-      }
+      },
+      "cover": "./assets/cover-image-binding-cards.png?v=1791187585594"
     }
   ]
 }
