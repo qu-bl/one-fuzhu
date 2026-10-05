@@ -206,49 +206,34 @@ function createPlayerFrame(item, video) {
 }
 
 // 卡片媒体区。mode 决定这个位置上该出现什么：
-//   "poster" —— 折叠状态：只铺封面，不加播放按钮。点整张卡是展开，不是就地播放。
-//   "player" —— 展开状态：有视频就直接加载播放器，没有视频就退回封面。
-//   "dialog" —— 弹窗：封面作海报 + 播放按钮（第三方播放器等用户明确点了再加载，
-//               避免外部页面在 WebView 里接管顶层导航）。
-function renderAccessMedia(item, accessMedia = document.querySelector("#access-media"), mode = "dialog") {
+//   "poster" —— 折叠状态：只铺封面。点整张卡是展开，不是在卡片里就地播放。
+//   "player" —— 展开状态与弹窗：有视频就直接嵌播放器，没有就退回封面。
+// 播放/暂停这些交给播放器自带的控件，网页不再自己叠一个播放按钮。
+// 代价是第三方播放器会在展开或打开弹窗时立即加载（原来要等用户点一下），
+// 在 WebView 里这意味着外部页面更早拿到一个 iframe。
+function renderAccessMedia(item, accessMedia = document.querySelector("#access-media"), mode = "player") {
   accessMedia.replaceChildren();
   const video = SiteMedia.videoSource(item.video);
   accessMedia.hidden = !video && !item.cover;
   accessMedia.style.aspectRatio = String(video?.ratio || 16 / 9);
   accessMedia.classList.toggle("access-media--portrait", Boolean(video && video.ratio < 1));
 
-  const addPoster = () => {
-    if (!item.cover) return false;
+  if (video && mode !== "poster") {
+    accessMedia.append(createPlayerFrame(item, video));
+    return;
+  }
+  if (item.cover) {
     const poster = document.createElement("img");
     poster.src = item.cover;
     poster.alt = item.coverAlt || `${item.name || item.title}封面`;
     accessMedia.append(poster);
-    return true;
-  };
-
-  // 展开且真的有视频：直接上播放器。
-  if (video && mode === "player") {
-    accessMedia.append(createPlayerFrame(item, video));
     return;
   }
-
-  const hasPoster = addPoster();
-  if (!video) return;
-  // 折叠时：有封面就到此为止；没有封面则留一个播放按钮，免得媒体区空着。
-  if (mode === "poster" && hasPoster) return;
-
-  const loadButton = document.createElement("button");
-  loadButton.type = "button";
-  loadButton.className = "video-load";
-  loadButton.textContent = "播放视频";
-  loadButton.setAttribute("aria-label", `播放${item.name || item.title}视频`);
-  loadButton.addEventListener("click", event => {
-    event.stopPropagation();
-    if (loadButton.closest(".featured-carousel")) pauseFeatured();
-    accessMedia.replaceChildren(createPlayerFrame(item, video));
-  });
-  accessMedia.append(loadButton);
+  // 走到这里说明是折叠状态且没有封面：这里没有可显示的东西，整块收起，
+  // 别留一个空白框（有视频也不该在折叠时就嵌进去）。
+  accessMedia.hidden = true;
 }
+
 
 function mountAccessDialog(item, trigger, options = {}) {
   if (!accessDialog || !accessItems) return;
