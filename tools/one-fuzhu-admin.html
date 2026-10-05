@@ -53,6 +53,11 @@
   /* ============ 顶栏 ============ */
   .app-bar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--block);box-shadow:var(--elev);position:relative;z-index:3}
   .app-bar h1{margin:0;font-size:19px;font-weight:600}
+  /* 三栏的显隐开关。折叠后仍然留在这里，否则就没有入口把它拉回来。 */
+  .panel-toggles{display:flex;gap:2px;padding:2px;background:var(--field);border-radius:6px}
+  .toggle{padding:0 11px;min-height:28px;border-radius:4px;background:transparent;color:var(--ink-3);font-size:12px;font-weight:600;white-space:nowrap}
+  .toggle:hover{background:var(--field-hi)}
+  .toggle[data-active]{background:var(--block);color:var(--pri)}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
     background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
     background-position:calc(100% - 17px) 14px,calc(100% - 12px) 14px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
@@ -65,13 +70,28 @@
      拖拽条只改变量，布局代码不用知道有拖拽这回事。 */
   .shell{
     flex:1;min-height:0;overflow:hidden;
+    /* 每根竖栏的宽度都经过一层可归零的变量，折叠就是把那一层设成 0。
+       显式列号保证某栏隐藏后，其余栏不会往前顶、占错轨道。 */
+    --nav-col:var(--nav-w,184px);
+    --nav-gutter:5px;
+    --canvas-col:minmax(0,1fr);
+    --inspector-gutter:5px;
+    --inspector-col:var(--inspector-w,460px);
     display:grid;
     grid-template-columns:
-      var(--nav-w,184px) 5px
-      minmax(0,1fr) 5px
-      var(--inspector-w,460px);
+      var(--nav-col) var(--nav-gutter)
+      var(--canvas-col) var(--inspector-gutter)
+      var(--inspector-col);
     background:var(--canvas-bg);
   }
+  .shell[data-nav="off"]{ --nav-col:0px; --nav-gutter:0px; }
+  .shell[data-canvas="off"]{ --canvas-col:0px; }
+  .shell[data-inspector="off"]{ --inspector-col:0px; --inspector-gutter:0px; }
+  .shell[data-nav="off"] .nav,
+  .shell[data-nav="off"] [data-panel="nav"],
+  .shell[data-canvas="off"] .canvas,
+  .shell[data-inspector="off"] .inspector,
+  .shell[data-inspector="off"] [data-panel="inspector"]{ display:none; }
   /* 每一块显式指定列号。display:none 会把元素移出栅格流，后面的元素就会
      往前顶、占错轨道。 */
   .nav{grid-column:1}
@@ -101,13 +121,24 @@
   .nav-item[data-active] .nav-badge{background:#c9d3ff;color:var(--pri-ink)}
 
 
-  /* ============ ① 条目列表（右栏上半） ============ */
-  /* 高度是 CSS 变量，由列表与细节之间那条横向拖拽条控制。 */
-  .list{height:var(--entries-h,240px);flex:0 0 auto;background:var(--block);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
-  .list[hidden]{display:none}
-  .list-head{padding:16px 16px 10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-  .list-head strong{font-size:15px}
-  .list-head .count{font-size:11px;color:var(--ink-3)}
+  /* ============ ① 右栏：上下两块竖排面板 ============ */
+  /* 上面一块专门管列表项（看有哪些、加新的），下面一块是选中项的细节。
+     两块之间那条横向拖拽条把它们连起来，也能各自折叠。 */
+  .panel{display:flex;flex-direction:column;min-height:0;overflow:hidden;background:var(--block)}
+  .panel--entries{height:var(--entries-h,240px);flex:0 0 auto}
+  .panel--detail{flex:1;min-height:0}
+  .panel-head{display:flex;align-items:center;gap:8px;padding:11px 14px;background:transparent;text-align:left;width:100%;color:inherit}
+  .panel-head:hover{background:var(--field)}
+  .panel-head strong{font-size:12px;font-weight:700;color:var(--ink-2);white-space:nowrap}
+  .panel-head .count{margin-left:auto;font-size:11px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .panel-head .chev{flex-shrink:0;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--ink-3);transition:transform 150ms var(--ease-out)}
+  .panel-head[aria-expanded="false"] .chev{transform:rotate(-90deg)}
+  /* 折叠其中一段：另一段自动占满。 */
+  .inspector[data-entries="off"] .panel--entries,
+  .inspector[data-entries="off"] [data-panel="entries"]{display:none}
+  .inspector[data-detail="off"] .panel--detail{display:none}
+  .inspector[data-detail="off"] .panel--entries{height:auto;flex:1}
+
   .rows{flex:1;overflow:auto;padding:0 8px 8px;display:flex;flex-direction:column;gap:2px;min-height:0}
   .entry-row{display:flex;align-items:center;gap:9px;padding:10px 8px;border-radius:6px;text-align:left;width:100%;color:inherit;flex-wrap:nowrap}
   .entry-row:hover{background:var(--field)}
@@ -245,6 +276,11 @@
 <body>
 <header class="app-bar">
   <h1>千机百变管理后台</h1>
+  <div class="panel-toggles" id="panelToggles" role="group" aria-label="显示或隐藏面板">
+    <button class="toggle" type="button" data-toggle="nav" data-active>导航</button>
+    <button class="toggle" type="button" data-toggle="canvas" data-active>画布</button>
+    <button class="toggle" type="button" data-toggle="inspector" data-active>列表与细节</button>
+  </div>
   <span class="pill pill--on" id="dirtyTag" hidden>有未发布改动</span>
   <span style="flex:1"></span>
   <button class="btn btn--text" id="loadBtn" type="button">重新加载</button>
@@ -291,16 +327,26 @@
 
   <div class="gutter" data-panel="inspector" data-axis="x" role="separator" aria-orientation="vertical" tabindex="0" aria-label="拖动调整右栏宽度"></div>
 
-  <aside class="inspector" aria-label="列表与字段编辑">
-    <section class="list" id="list" hidden>
-      <div class="list-head"><strong id="listTitle"></strong><span class="count" id="listCount"></span></div>
+  <aside class="inspector" id="inspector" aria-label="列表与字段编辑">
+    <section class="panel panel--entries" id="list" hidden>
+      <button class="panel-head" id="entriesToggle" type="button" aria-expanded="true" aria-controls="listRows">
+        <span class="chev" aria-hidden="true"></span>
+        <strong id="listTitle"></strong>
+        <span class="count" id="listCount"></span>
+      </button>
       <div class="rows" id="listRows"></div>
       <div class="list-foot" id="listFoot"></div>
     </section>
 
     <div class="gutter gutter--h" data-panel="entries" data-axis="y" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="拖动调整列表高度"></div>
 
-    <main class="form" id="formBody">
+    <section class="panel panel--detail" id="detailPanel">
+      <button class="panel-head" id="detailToggle" type="button" aria-expanded="true" aria-controls="formBody">
+        <span class="chev" aria-hidden="true"></span>
+        <strong>具体细节</strong>
+        <span class="count" id="detailName"></span>
+      </button>
+      <main class="form" id="formBody">
     <div class="status" id="status" role="status" aria-live="polite"></div>
 
     <section id="viewBanners" hidden>
@@ -389,7 +435,8 @@
       </div>
     </div>
   </section>
-      </main>
+        </main>
+    </section>
   </aside>
 </div>
 
@@ -1267,18 +1314,16 @@ function renderList() {
   if (!spec) {
     // 只有还没载入内容的极端情况会走到这里；正常每个区块都有列表。
     list.hidden = true;
-    $('shell').dataset.list = 'off';
-    layoutCanvas();
     return;
   }
-  // 左栏始终在位：区块之间只是换内容，不整列收起。
-  list.hidden = false;
-  $('shell').dataset.list = 'on';
   const items = viewItems() || [];
   activeIndex = Math.min(Math.max(0, activeIndex), Math.max(0, items.length - 1));
   list.hidden = false;
   $('listTitle').textContent = spec.title;
   $('listCount').textContent = spec.count(items.length);
+  // 下面那块面板的表头跟着选中项走，一眼知道正在改哪一条。
+  const current = items[activeIndex];
+  $('detailName').textContent = current ? spec.name(current) : '';
   const rows = $('listRows');
   rows.replaceChildren();
   items.forEach((item, index) => {
@@ -1370,6 +1415,58 @@ function initPreview() {
   if (!frame) return;
   frame.addEventListener('load', () => syncPreview());
   frame.src = '../site/';
+}
+
+// ---------- 面板折叠 ----------
+// 三根竖栏各自可折叠。折叠只把那一栏的列宽归零，顶栏的开关始终留着，
+// 所以任何时候都能把它拉回来。
+function setColumnVisible(name, visible, persist = true) {
+  $('shell').dataset[name] = visible ? 'on' : 'off';
+  const button = document.querySelector(`#panelToggles [data-toggle="${name}"]`);
+  if (button) button.toggleAttribute('data-active', visible);
+  if (persist) {
+    try { localStorage.setItem('oneFuzhuColumn.' + name, visible ? '1' : '0'); } catch { /* 忽略 */ }
+  }
+  layoutCanvas();
+}
+
+function bindPanelToggles() {
+  document.querySelectorAll('#panelToggles [data-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const name = button.dataset.toggle;
+      setColumnVisible(name, $('shell').dataset[name] === 'off');
+    });
+  });
+  ['nav', 'canvas', 'inspector'].forEach((name) => {
+    let stored = null;
+    try { stored = localStorage.getItem('oneFuzhuColumn.' + name); } catch { /* 忽略 */ }
+    setColumnVisible(name, stored !== '0', false);
+  });
+}
+
+// 右栏那两段：列表项 / 具体细节。折叠其中一段，另一段自动占满。
+function setSubPanel(name, visible, persist = true) {
+  $('inspector').dataset[name] = visible ? 'on' : 'off';
+  const button = $(name === 'entries' ? 'entriesToggle' : 'detailToggle');
+  if (button) button.setAttribute('aria-expanded', String(visible));
+  if (persist) {
+    try { localStorage.setItem('oneFuzhuVisible.' + name, visible ? '1' : '0'); } catch { /* 忽略 */ }
+  }
+  layoutCanvas();
+}
+
+function bindSubPanels() {
+  $('entriesToggle').addEventListener('click', () => {
+    setSubPanel('entries', $('inspector').dataset.entries === 'off');
+  });
+  $('detailToggle').addEventListener('click', () => {
+    setSubPanel('detail', $('inspector').dataset.detail === 'off');
+  });
+  ['entries', 'detail'].forEach((name) => {
+    let stored = null;
+    try { stored = localStorage.getItem('oneFuzhuVisible.' + name); } catch { /* 忽略 */ }
+    setSubPanel(name, stored !== '0', false);
+  });
 }
 
 // ---------- 可拖拽面板 ----------
@@ -1994,6 +2091,8 @@ async function initialize() {
     selectTab(items[next].dataset.view);
   });
   initPreview();
+  bindPanelToggles();
+  bindSubPanels();
   bindGutters();
   restorePanels();
   bindDevices();
