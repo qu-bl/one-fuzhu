@@ -319,10 +319,6 @@
     <div class="gutter gutter--h" data-panel="entries" data-axis="y" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="拖动调整列表高度"></div>
 
     <section class="panel panel--detail" id="detailPanel">
-      <div class="panel-head">
-        <strong>具体细节</strong>
-        <span class="count" id="detailName"></span>
-      </div>
       <main class="form" id="formBody">
     <div class="status" id="status" role="status" aria-live="polite"></div>
 
@@ -332,13 +328,6 @@
 
     <section id="viewHero" hidden>
       <div class="surface editor">
-        <div class="form-section">
-          <h3 class="form-section-title">上传文件<span class="form-section-info" title="上传的文件随「保存并发布」一起写入仓库，并自动加版本号绕过缓存。">ⓘ</span></h3>
-          <div class="row">
-            <button class="btn" id="uploadHeroRive" type="button">上传 .riv 文件</button>
-            <button class="btn" id="uploadHeroFallback" type="button">上传兜底图片</button>
-          </div>
-        </div>
         <div id="hero"></div>
       </div>
     </section>
@@ -353,10 +342,6 @@
 
     <section id="viewNotice" hidden>
       <div class="surface editor">
-        <div class="form-section">
-          <h3 class="form-section-title">上传图片<span class="form-section-info" title="也可以直接在下面的「图片路径」里填写地址。">ⓘ</span></h3>
-          <div class="row"><button class="btn" id="uploadNoticeImage" type="button">上传弹窗图片</button></div>
-        </div>
         <div id="notice"></div>
       </div>
     </section>
@@ -505,7 +490,18 @@ let activeIndex = 0;   // 当前区块里选中的条目（仅列表型区块用
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
-const setStatus = (msg, kind = '') => { const s = $('status'); s.textContent = msg; s.className = 'status ' + kind; };
+let statusTimer = null;
+// 「已加载」「已发布」这类只是确认一下，几秒后自己消失——一直挂着占地方，
+// 而且和别处重复（翻译条数左栏角标已经写了）。出错信息留着，需要人处理。
+const setStatus = (msg, kind = '') => {
+  const s = $('status');
+  s.textContent = msg;
+  s.className = 'status ' + kind;
+  window.clearTimeout(statusTimer);
+  if (kind === 'ok' && msg) {
+    statusTimer = window.setTimeout(() => { s.textContent = ''; s.className = 'status'; }, 4000);
+  }
+};
 const actionButton = (text, kind = 'outlined') => {
   const variant = kind === 'filled' ? 'btn--filled' : (kind === 'text' || kind === 'danger') ? 'btn--text' : 'btn--outlined';
   const button = el('button', `btn ${variant}${kind === 'danger' ? ' danger' : ''}`, text);
@@ -1049,6 +1045,12 @@ function heroEditor() {
   field(rive.grid, '画板名', bind(textInput(hero.rive.artboard, 'Artboard 2'), (v) => (hero.rive.artboard = v)));
   field(rive.grid, '状态机名', bind(textInput(hero.rive.stateMachine, 'State Machine 1'), (v) => (hero.rive.stateMachine = v)));
   field(rive.grid, '自动播放', bind(checkbox(hero.rive.autoplay !== false), (v) => (hero.rive.autoplay = v)));
+  // 上传按钮放进它写入的那个分区里，别单开一段跑到标题前面去。
+  const riveUpload = actionButton('上传 .riv 文件', 'outlined');
+  riveUpload.id = 'uploadHeroRive';
+  const riveRow = el('div', 'row');
+  riveRow.append(riveUpload);
+  rive.box.append(riveRow);
 
   const fallback = section(details, '兜底图片', 'Rive 载入前或不可用时显示这张图。');
   const fallbackSrc = textInput(hero.fallback.src, './assets/xxx.webp');
@@ -1060,7 +1062,11 @@ function heroEditor() {
   const syncPreview = (url) => { preview.src = siteAssetUrl(url); preview.hidden = !url; };
   syncPreview(hero.fallback.src);
   fallbackSrc.addEventListener('input', () => syncPreview(fallbackSrc.value.trim()));
-  fallback.box.append(preview);
+  const fallbackUpload = actionButton('上传兜底图片', 'outlined');
+  fallbackUpload.id = 'uploadHeroFallback';
+  const fallbackRow = el('div', 'row');
+  fallbackRow.append(fallbackUpload);
+  fallback.box.append(fallbackRow, preview);
 
   return details;
 }
@@ -1161,7 +1167,11 @@ function noticeEditor() {
   };
   syncPreview();
   imageSrc.addEventListener('input', syncPreview);
-  image.box.append(preview);
+  const imageUpload = actionButton('上传弹窗图片', 'outlined');
+  imageUpload.id = 'uploadNoticeImage';
+  const imageRow = el('div', 'row');
+  imageRow.append(imageUpload);
+  image.box.append(imageRow, preview);
 
   const button = section(details, '弹窗按钮（可选）', '按钮文字和链接都填了才会显示按钮。');
   field(button.grid, '按钮文字', bind(textInput(notice.linkLabel), (v) => (notice.linkLabel = v)));
@@ -1301,10 +1311,6 @@ function renderList() {
   list.hidden = false;
   $('listTitle').textContent = spec.title;
   $('listCount').textContent = spec.count(items.length);
-  // 细节面板的表头跟着选中项走，一眼知道正在改哪一条。单条目区块没有
-  // 选中项，名称由区块自己给出（「弹窗」「翻译词典」这类）。
-  const current = items[activeIndex];
-  $('detailName').textContent = current != null ? spec.name(current) : (spec.single ? spec.name(null) : '');
   const rows = $('listRows');
   rows.replaceChildren();
   items.forEach((item, index) => {
@@ -2039,9 +2045,14 @@ async function initialize() {
   // 画布尺寸变化（拖拽条、窗口缩放、列表显隐）都要重算缩放。
   if (window.ResizeObserver) new ResizeObserver(() => layoutCanvas()).observe($('canvasStage'));
   else window.addEventListener('resize', layoutCanvas);
-  $('uploadHeroRive').addEventListener('click', uploadHeroRive);
-  $('uploadHeroFallback').addEventListener('click', uploadHeroFallback);
-  $('uploadNoticeImage').addEventListener('click', uploadNoticeImage);
+  // 上传按钮由编辑器渲染，切换区块时会重建，所以代理绑一次就够。
+  $('formBody').addEventListener('click', (event) => {
+    const button = event.target.closest('#uploadHeroRive, #uploadHeroFallback, #uploadNoticeImage');
+    if (!button) return;
+    if (button.id === 'uploadHeroRive') uploadHeroRive();
+    else if (button.id === 'uploadHeroFallback') uploadHeroFallback();
+    else uploadNoticeImage();
+  });
   $('translationSearch').addEventListener('input', () => { translationPage = 0; renderTranslations(); });
   $('missingOnly').addEventListener('change', () => { translationPage = 0; renderTranslations(); });
   $('translationPrev').addEventListener('click', () => { translationPage -= 1; renderTranslations(); });
