@@ -60,6 +60,9 @@ const state = {
   dialogTrigger: null,
   // 当前面板展示的是哪一张卡。重绘后要靠它把面板原样刷回来。
   dialogCardId: null,
+  // 上一份内容，用来判断哪一块真的变了；以及上次的弹窗显示要求。
+  source: null,
+  noticeShown: undefined,
 };
 
 const featured = {
@@ -1148,17 +1151,29 @@ function applyContent(content, options = {}) {
   // 管理台每敲一个字都会推一次内容。如果重绘把打开的面板关掉或留在旧内容上，
   // 改一个字段就得重新点开一次，等于没有反馈。这里先记下开着的是哪张卡。
   const reopenedCardId = accessDialog?.open ? state.dialogCardId : null;
+  // 上一份内容。管理台每敲一个字都会推一份完整内容，这里靠它判断哪一块真的变了。
+  const previous = state.source || null;
+  const changed = (key) => JSON.stringify(previous?.[key]) !== JSON.stringify(content?.[key]);
+  state.source = content;
   state.hero = content.hero || null;
   state.notice = content.notice || null;
   state.contact = content.contact || null;
   state.activities = (content.banners || []).filter((item) => item.visible !== false);
   state.cases = (content.cards || []).filter((item) => item.visible !== false);
-  initHeroRive();
-  renderContact();
-  renderActivities();
-  renderFilters();
-  renderCases();
-  initNotice({ showNotice: options.showNotice });
+  // 只重画真正变了的那一块。以前这里每次都把整页重画一遍——顶部 Rive、轮播、
+  // 筛选、联系区、所有卡片全部重建——改一个字段也这样，代价全花在没变的地方。
+  if (!previous || changed("hero")) initHeroRive();
+  if (!previous || changed("contact")) renderContact();
+  if (!previous || changed("banners")) renderActivities();
+  if (!previous || changed("cards")) {
+    // 分类筛选是从卡片里推出来的，卡片变了它也要跟着重建。
+    renderFilters();
+    renderCases();
+  }
+  if (!previous || changed("notice") || options.showNotice !== state.noticeShown) {
+    state.noticeShown = options.showNotice;
+    initNotice({ showNotice: options.showNotice });
+  }
   // 管理台在编辑某张卡的入口时，让这张卡把入口行露出来。这一行平时是
   // display:none，只有展开卡片才出现，不这样做画布上就没有它的位置。
   // 卡片每次都会重建，所以不用清理上一张的标记。
