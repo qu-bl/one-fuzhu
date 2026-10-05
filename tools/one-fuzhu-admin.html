@@ -427,10 +427,12 @@ const CONFIG = {
   // 上传槽位：固定前缀 + 上传文件的扩展名，避免把 PNG 字节写进 .webp 路径。
   uploads: {
     heroRive: { base: 'site/assets/hero-cat', exts: ['.riv'], maxBytes: 24 * 1024 * 1024 },
-    heroFallback: { base: 'site/assets/hero-cat', exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 },
-    noticeImage: { base: 'site/assets/notice', exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 },
+    // 图片只收 WebP。以前什么都收，结果一张 PNG 封面就有 900 KB，
+    // 而同样的图转成 WebP 只有 60 KB 左右——这是在源头上堵住。
+    heroFallback: { base: 'site/assets/hero-cat', exts: ['.webp'], maxBytes: 4 * 1024 * 1024 },
+    noticeImage: { base: 'site/assets/notice', exts: ['.webp'], maxBytes: 4 * 1024 * 1024 },
     // 卡片封面：基名按卡片 id 动态生成，见 coverSlot()。
-    cardCover: { exts: ['.webp', '.png', '.jpg', '.jpeg', '.avif', '.svg'], maxBytes: 4 * 1024 * 1024 }
+    cardCover: { exts: ['.webp'], maxBytes: 4 * 1024 * 1024 }
   },
   token: ''
 };
@@ -863,7 +865,7 @@ function cardEditor(card, index) {
     (v) => { card.platforms = v; markDirty(); }, (v) => CARD_PLATFORMS.find((p) => p.value === v).label);
   field(meta.grid, '标签', bind(textInput((card.tags || []).join(', '), 'Rive, 状态机'), (v) => (card.tags = splitList(v))));
 
-  const cover = section(details, '封面图（可选）', '有封面就显示封面，并把它当作视频海报；留空则只显示视频。以后去掉视频链接，卡片画面就直接用封面。');
+  const cover = section(details, '封面图（可选）', '有封面就显示封面，并把它当作视频海报；留空则只显示视频。以后去掉视频链接，卡片画面就直接用封面。只收 WebP 格式。');
   const coverInput = textInput(card.cover, './assets/xxx.webp');
   field(cover.grid, '封面图路径', bind(coverInput, (v) => { card.cover = v; renderList(); }));
   const coverRow = el('div', 'row');
@@ -1057,7 +1059,7 @@ function heroEditor() {
   riveRow.append(riveUpload);
   rive.box.append(riveRow);
 
-  const fallback = section(details, '兜底图片', 'Rive 载入前或不可用时显示这张图。');
+  const fallback = section(details, '兜底图片', 'Rive 载入前或不可用时显示这张图。只收 WebP 格式。');
   const fallbackSrc = textInput(hero.fallback.src, './assets/xxx.webp');
   field(fallback.grid, '兜底图片路径', bind(fallbackSrc, (v) => (hero.fallback.src = v)));
   field(fallback.grid, '兜底图片说明', bind(textInput(hero.fallback.alt), (v) => (hero.fallback.alt = v)));
@@ -1159,7 +1161,7 @@ function noticeEditor() {
   field(basic.grid, '标题', bind(textInput(notice.title), (v) => (notice.title = v)));
   field(basic.grid, '正文（支持换行）', bind(textArea(notice.body), (v) => (notice.body = v)));
 
-  const image = section(details, '弹窗图片（可选）');
+  const image = section(details, '弹窗图片（可选）', '只收 WebP 格式。');
   const imageSrc = textInput(notice.image, './assets/xxx.webp');
   field(image.grid, '图片路径', bind(imageSrc, (v) => (notice.image = v)));
   const preview = el('img');
