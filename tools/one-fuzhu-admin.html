@@ -146,6 +146,8 @@
   .row > .btn, .bar > .btn { flex:0 0 auto; }
 
   .check-field { display:flex; gap:8px; align-items:center; height:var(--control-h); color:var(--c-on-surface-variant); cursor:pointer; }
+  /* 一组勾选框并排，用于平台这类固定多选。 */
+  .check-row { display:flex; flex-wrap:wrap; gap:4px 20px; }
   .check-field input[type="checkbox"] { width:16px; height:16px; margin:0; accent-color:var(--c-primary); }
 
   /* ---------- 按钮（M3 三种形态） ---------- */
@@ -362,6 +364,13 @@ const REPO_API = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}`;
 const contentsApi = (path) => `${REPO_API}/contents/${path}`;
 
 const PLATFORM_OPTIONS = ['', 'youtube', 'bilibili', 'xiaohongshu', 'douyin', 'kdocs', 'qq', 'github'];
+// 卡片的「平台」必须是官网认得的名字：官网用固定的图标表查图标，
+// 筛选按钮也是写死的这四项，填别的会渲染成空白图标且筛选不到。
+const CARD_PLATFORMS = [
+  { value: 'HarmonyOS', label: '鸿蒙' },
+  { value: 'Android', label: '安卓' },
+  { value: 'Apple', label: '苹果' }
+];
 const VIDEO_PLATFORMS = ['', 'bilibili', 'youtube', 'douyin'];
 
 // 站点 app.js 的 HERO_DEFAULTS 与此保持一致，用于 content.json 还没有 hero 分节时的新建默认值。
@@ -523,6 +532,26 @@ async function loadContent() {
   } finally {
     setBusy(false);
   }
+}
+
+// 多选字段：一组勾选框，勾选结果按固定顺序写回数组。
+function checkGroupField(parent, labelText, options, values, onChange, labelOf = (o) => o) {
+  const wrap = el('div', 'field field-wide');
+  wrap.append(el('span', 'field-label', labelText));
+  const row = el('div', 'check-row');
+  const current = new Set(values || []);
+  options.forEach((option) => {
+    const cb = checkbox(current.has(option));
+    const label = el('label', 'check-field');
+    label.append(cb, document.createTextNode(labelOf(option)));
+    cb.addEventListener('change', () => {
+      if (cb.checked) current.add(option); else current.delete(option);
+      onChange(options.filter((o) => current.has(o)));
+    });
+    row.append(label);
+  });
+  wrap.append(row);
+  parent.append(wrap);
 }
 
 // 分区：把一个编辑器拆成若干有标题的段落，段落之间画分隔线。
@@ -728,7 +757,8 @@ function cardEditor(card, index) {
   const meta = section(details, '分类与标签', '决定卡片在橱柜里被哪个分类和平台筛出来。多个值用英文逗号分隔。');
   field(meta.grid, '伙伴', bind(textInput(card.partnerName), (v) => (card.partnerName = v)));
   field(meta.grid, '分类', bind(textInput(card.category), (v) => (card.category = v)));
-  field(meta.grid, '平台', bind(textInput((card.platforms || []).join(', '), 'HarmonyOS, Android, Apple'), (v) => (card.platforms = splitList(v))));
+  checkGroupField(meta.grid, '平台', CARD_PLATFORMS.map((p) => p.value), card.platforms,
+    (v) => { card.platforms = v; markDirty(); }, (v) => CARD_PLATFORMS.find((p) => p.value === v).label);
   field(meta.grid, '标签', bind(textInput((card.tags || []).join(', '), 'Rive, 状态机'), (v) => (card.tags = splitList(v))));
 
   const cover = section(details, '封面图（可选）', '有封面就显示封面，并把它当作视频海报；留空则只显示视频。以后去掉视频链接，卡片画面就直接用封面。');
