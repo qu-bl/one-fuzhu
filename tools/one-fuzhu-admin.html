@@ -865,7 +865,7 @@ function cardEditor(card, index) {
     (v) => { card.platforms = v; markDirty(); }, (v) => CARD_PLATFORMS.find((p) => p.value === v).label);
   field(meta.grid, '标签', bind(textInput((card.tags || []).join(', '), 'Rive, 状态机'), (v) => (card.tags = splitList(v))));
 
-  const cover = section(details, '封面图（可选）', '有封面就显示封面，并把它当作视频海报；留空则只显示视频。以后去掉视频链接，卡片画面就直接用封面。只收 WebP 格式。');
+  const cover = section(details, '封面图', '必填。折叠时卡片显示的就是这张封面；点开后如果有视频就播视频，没有视频仍然是这张封面。只收 WebP 格式。');
   const coverInput = textInput(card.cover, './assets/xxx.webp');
   field(cover.grid, '封面图路径', bind(coverInput, (v) => { card.cover = v; renderList(); }));
   const coverRow = el('div', 'row');
@@ -1237,7 +1237,7 @@ const LIST_VIEWS = {
       if (c.featured) out.push(['精选', 'pill--on']);
       if (c.visible === false) out.push(['已隐藏', 'pill--off']);
       if (((c.access || {}).items || []).some((it) => it.copyable === false)) out.push(['未开放', 'pill--off']);
-      if (!c.cover) out.push(['无封面', 'pill--off']);
+      if (!c.cover) out.push(['缺封面', 'pill--off']);
       if ((c.video || {}).platform) out.push([c.video.platform, '']);
       return out;
     },
@@ -1249,7 +1249,7 @@ const LIST_VIEWS = {
       return img;
     },
     addLabel: '添加卡片',
-    create: () => ({ id: 'card-' + Date.now(), name: '新卡片', summary: '', category: '互动组件', partnerName: '', platforms: ['HarmonyOS'], tags: [], visible: true }),
+    create: () => ({ id: 'card-' + Date.now(), name: '新卡片', summary: '', cover: '', category: '互动组件', partnerName: '', platforms: ['HarmonyOS'], tags: [], visible: true }),
   },
 
   // 以下区块只有一项，但左栏照样列一行——列表始终在，右侧始终是它的细节。
@@ -1789,10 +1789,14 @@ function validateContent(value) {
     if (entry.video != null && (typeof entry.video !== 'object' || !entry.video.platform || !entry.video.id)) {
       throw new Error(`${entry.id} 的 video 缺少 platform 或 id`);
     }
-    // 封面图只有卡片支持。
+    // 封面图只有卡片支持，而且是必填的：视频可以没有，封面不能没有。
+    // 折叠时卡片显示的就是封面，缺了它就是一块空白。
     if (kind === '卡片') {
-      for (const key of ['cover', 'coverAlt']) {
-        if (entry[key] != null && typeof entry[key] !== 'string') throw new Error(`${entry.id} 的 ${key} 必须是字符串`);
+      if (typeof entry.cover !== 'string' || !entry.cover.trim()) {
+        throw new Error(`${entry.id} 缺少封面图（封面是必填项）`);
+      }
+      if (entry.coverAlt != null && typeof entry.coverAlt !== 'string') {
+        throw new Error(`${entry.id} 的 coverAlt 必须是字符串`);
       }
     }
     if (entry.access != null) {
