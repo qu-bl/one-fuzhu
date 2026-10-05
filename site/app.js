@@ -500,15 +500,18 @@ function bindCarouselControls() {
   reduceMotion.addEventListener?.("change", scheduleCarousel);
 }
 
-// 平台筛选常驻展开：全部选项一直列出来，不折叠，也不因宿主平台而隐藏。
-// 只同步选中态，没有展开/收起这回事。
-function syncPlatformButtons() {
+// 平台筛选与分类栏一样是「选中项常驻、其余展开后可见」：
+// 选中一项后自动收起，点外部或按 Esc 也收起。
+// 与原始实现的唯一区别是不再因为宿主平台而整块隐藏。
+function setPlatformExpanded(expanded) {
   const picker = document.querySelector("#platform-picker");
-  picker.dataset.expanded = "true";
+  picker.dataset.expanded = String(expanded);
   platformButtons.querySelectorAll("button").forEach(button => {
-    button.setAttribute("aria-pressed", String(button.dataset.platform === state.platform));
-    button.inert = false;
-    button.removeAttribute("aria-expanded");
+    const selected = button.dataset.platform === state.platform;
+    button.setAttribute("aria-pressed", String(selected));
+    button.inert = !expanded && !selected;
+    if (selected) button.setAttribute("aria-expanded", String(expanded));
+    else button.removeAttribute("aria-expanded");
   });
   platformButtons.scrollLeft = 0;
 }
@@ -563,14 +566,19 @@ function renderFilters() {
     button.title = label;
     button.append(createPlatformIcon(platform));
     button.addEventListener("click", () => {
+      const expanded = document.querySelector("#platform-picker").dataset.expanded === "true";
+      if (!expanded) {
+        setPlatformExpanded(true);
+        return;
+      }
       state.platform = platform;
-      syncPlatformButtons();
+      setPlatformExpanded(false);
       button.focus({ preventScroll: true });
       renderCases();
     });
     platformButtons.append(button);
   });
-  syncPlatformButtons();
+  setPlatformExpanded(false);
 }
 
 function getFilteredCases() {
@@ -1092,6 +1100,7 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 }
 
 async function initialize() {
+  bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
   // 卡片详情弹窗有 × 关闭键；公告弹窗没有，靠 Esc 与点击外部关闭。
   accessDialog?.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);
