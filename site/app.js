@@ -58,6 +58,8 @@ const state = {
   timer: null,
   paused: false,
   dialogTrigger: null,
+  // 当前面板展示的是哪一张卡。重绘后要靠它把面板原样刷回来。
+  dialogCardId: null,
 };
 
 const featured = {
@@ -237,10 +239,14 @@ function renderAccessMedia(item, accessMedia = document.querySelector("#access-m
   }
 }
 
-function mountAccessDialog(item, trigger) {
+// options.refresh 表示只是把已经打开的面板按新内容刷一遍：不动 body 的滚动锁、
+// 不重新 showModal（对已打开的 <dialog> 调它会抛 InvalidStateError）、也不重播入场动画，
+// 否则管理台每敲一个字预览里的面板就抖一次。
+function mountAccessDialog(item, trigger, options = {}) {
   if (!accessDialog || !accessItems) return;
   const access = getAccess(item);
   state.dialogTrigger = trigger;
+  state.dialogCardId = item.id || null;
   const sourceBounds = trigger?.getBoundingClientRect();
   renderAccessMedia(item);
 
@@ -252,7 +258,13 @@ function mountAccessDialog(item, trigger) {
 
   renderAccessItems(item, accessItems);
 
+  if (options.refresh) return;
+
   document.body.classList.add("dialog-open");
+  if (accessDialog.open) {
+    // 已经开着：内容已经在上面换好了，不用再 showModal 一次。
+    return;
+  }
   if (typeof accessDialog.showModal === "function") {
     accessDialog.showModal();
   } else {
@@ -1114,6 +1126,9 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 // 用一份内容重绘整页。管理台的实时预览走的就是这个函数——预览和线上
 // 共用同一套渲染代码，所以看到的必然就是发布后的样子，不会有两套实现漂移。
 function applyContent(content, options = {}) {
+  // 管理台每敲一个字都会推一次内容。如果重绘把打开的面板关掉或留在旧内容上，
+  // 改一个字段就得重新点开一次，等于没有反馈。这里先记下开着的是哪张卡。
+  const reopenedCardId = accessDialog?.open ? state.dialogCardId : null;
   state.hero = content.hero || null;
   state.notice = content.notice || null;
   state.contact = content.contact || null;
@@ -1127,12 +1142,15 @@ function applyContent(content, options = {}) {
   initNotice({ showNotice: options.showNotice });
   // 管理台里改「平台链接与联系方式」时，入口渲染在卡片展开后的底部，
   // 折叠状态下画布看不出任何变化。宿主因此可以直接把这张卡打开。
-  if (options.openCard) {
-    const target = state.cases.find((entry) => entry.id === options.openCard);
-    if (target) {
-      const trigger = document.querySelector(`.case-card[data-id="${CSS.escape(options.openCard)}"] .case-card-trigger`);
-      mountAccessDialog(target, trigger || undefined);
-    }
+  const targetCardId = options.openCard || reopenedCardId;
+  const target = targetCardId ? state.cases.find((entry) => entry.id === targetCardId) : null;
+  if (target) {
+    const trigger = document.querySelector(`.case-card[data-id="${CSS.escape(targetCardId)}"] .case-card-trigger`);
+    // 重绘前就开着的话只刷新内容，不重播动画。
+    mountAccessDialog(target, trigger || undefined, { refresh: Boolean(reopenedCardId) && !options.openCard });
+  } else if (accessDialog?.open) {
+    // 面板开着但那张卡没了（被删掉或被隐藏）：收起来，别留一个空壳。
+    accessDialog.close();
   }
   if (options.scrollTo) {
     // 页面本身设了 scroll-behavior:smooth，用 auto 会走平滑滚动，
