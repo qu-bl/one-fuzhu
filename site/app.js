@@ -1140,14 +1140,23 @@ function applyContent(content, options = {}) {
   renderFilters();
   renderCases();
   initNotice({ showNotice: options.showNotice });
-  // 管理台里改「平台链接与联系方式」时，入口渲染在卡片展开后的底部，
-  // 折叠状态下画布看不出任何变化。宿主因此可以直接把这张卡打开。
-  const targetCardId = options.openCard || reopenedCardId;
+  // 管理台在编辑某张卡的入口时，让这张卡把入口行露出来。这一行平时是
+  // display:none，只有展开卡片才出现，不这样做画布上就没有它的位置。
+  // 卡片每次都会重建，所以不用清理上一张的标记。
+  if (options.previewAccess) {
+    const trigger = document.querySelector(`.case-card[data-id="${CSS.escape(options.previewAccess)}"] .case-card-trigger`);
+    if (trigger) {
+      trigger.classList.add("is-access-preview");
+      trigger.scrollIntoView({ block: "center", behavior: "instant" });
+    }
+  }
+
+  const targetCardId = reopenedCardId;
   const target = targetCardId ? state.cases.find((entry) => entry.id === targetCardId) : null;
   if (target) {
     const trigger = document.querySelector(`.case-card[data-id="${CSS.escape(targetCardId)}"] .case-card-trigger`);
     // 重绘前就开着的话只刷新内容，不重播动画。
-    mountAccessDialog(target, trigger || undefined, { refresh: Boolean(reopenedCardId) && !options.openCard });
+    mountAccessDialog(target, trigger || undefined, { refresh: true });
   } else if (accessDialog?.open) {
     // 面板开着但那张卡没了（被删掉或被隐藏）：收起来，别留一个空壳。
     accessDialog.close();

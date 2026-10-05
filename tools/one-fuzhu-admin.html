@@ -229,29 +229,6 @@
   .access-item .field-input:hover,.access-item .field-input:focus{background:#f8f6fc}
   .access-item .check-field{background:var(--block)}
 
-  /* ============ 入口按钮的前台效果预览 ============ */
-  /* 这排按钮平时折在卡片里，画布上无从刷新，所以在编辑器里照着前台的规则画一份。
-     版式与配色对应 site/styles.css 的 .access-option，尺寸按管理台缩小。 */
-  .entry-preview-box{margin-top:16px}
-  .entry-preview-title{font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:8px}
-  .entry-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
-  .entry-preview-option{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:92px;padding:12px 8px;border-radius:14px;background:var(--field);color:var(--ink);text-align:center;text-decoration:none;font-size:12px;font-weight:600}
-  .entry-preview-option:not(:disabled):hover{background:var(--field-hi)}
-  .entry-preview-option:disabled{opacity:.6;cursor:not-allowed}
-  .entry-preview-option strong{overflow-wrap:anywhere}
-  .entry-preview-option small{font-size:11px;font-weight:500;color:var(--ink-3)}
-  .entry-preview-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#2b4ea8}
-  .entry-preview-icon img{width:19px;height:19px;object-fit:contain}
-  /* 品牌底色，与官网同一组取值。 */
-  .entry-preview-option[data-platform="youtube"] .entry-preview-icon{background:#ff0033}
-  .entry-preview-option[data-platform="bilibili"] .entry-preview-icon{background:#00aeec}
-  .entry-preview-option[data-platform="xiaohongshu"] .entry-preview-icon{background:#e93b3b}
-  .entry-preview-option[data-platform="douyin"] .entry-preview-icon{background:#161823}
-  .entry-preview-option[data-platform="qq"] .entry-preview-icon{background:#3478f6}
-  .entry-preview-option[data-platform="github"] .entry-preview-icon{background:#181717}
-  .entry-preview-option[data-platform="kdocs"] .entry-preview-icon{background:#fff}
-  .entry-preview-empty{font-size:12px;color:var(--ink-3);margin:0}
-
   /* ============ 词典表格 ============ */
   .translation-toolbar{display:grid;grid-template-columns:minmax(180px,1fr) auto auto;gap:8px;align-items:end}
   .translation-list{display:flex;flex-direction:column;gap:4px;margin-top:14px}
@@ -780,79 +757,12 @@ function renderVideoEditor(grid, video, onChange) {
 }
 
 
-// 下面这两个函数是 site/media.js 里同名逻辑的拷贝。管理台是单文件、不引外部脚本，
-// 所以保留一份；规则以 site/media.js 为准，改那边时要同步这里。
-// webUrl：只认 http/https 且不带用户名密码的地址。
-function accessWebUrl(value) {
-  try {
-    const url = new URL(value);
-    return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password ? url.href : null;
-  } catch { return null; }
-}
-
-// 一个入口在前台会变成什么：链接 / 复制 / 灰色「待发布」。
-function accessActionOf(item) {
-  const value = item.url || item.value;
-  // 留空、或显式 copyable:false，都是「待发布」。
-  if (item.copyable === false || typeof value !== 'string' || !value.trim()) return { type: 'unavailable' };
-  const href = accessWebUrl(value);
-  if (item.platform === 'qq') return { type: 'copy', value };
-  if (href) return { type: 'link', href };
-  if (/^[a-z][a-z\d+.-]*:/i.test(value)) return { type: 'unavailable' };
-  return { type: 'copy', value };
-}
-
-// 平台名与图标，对应官网 app.js 里的 ACCESS_META。
-const ACCESS_LABELS = {
-  youtube: 'YouTube', bilibili: '哔哩哔哩', xiaohongshu: '小红书',
-  douyin: '抖音', kdocs: '金山文档', qq: 'QQ', github: 'GitHub',
-};
-
-// 这排按钮平时折在卡片里，画布上根本没有它的位置，改完看不到效果。
-// 所以在编辑器里直接按前台的规则画一份，改一个字立刻跟着变。
-function renderAccessPreview(container, items) {
-  container.replaceChildren();
-  const usable = items.filter((item) => ACCESS_LABELS[item.platform]);
-  if (!usable.length) {
-    container.append(el('p', 'entry-preview-empty', '还没有可显示的入口。'));
-    return;
-  }
-  usable.forEach((item) => {
-    const action = accessActionOf(item);
-    const option = el(action.type === 'link' ? 'a' : 'button', 'entry-preview-option');
-    option.dataset.platform = item.platform;
-    if (action.type === 'link') {
-      option.href = action.href;
-      option.target = '_blank';
-      option.rel = 'noopener noreferrer';
-    } else {
-      option.type = 'button';
-      option.disabled = action.type === 'unavailable';
-    }
-    // 图标本身是白色图形，官网靠品牌色的圆底把它衬出来（见 site/styles.css
-    // 里 .access-option[data-platform=…] 那一组）。
-    const icon = el('span', 'entry-preview-icon');
-    const image = el('img');
-    image.src = `../site/assets/platforms/${item.platform}.svg`;
-    image.alt = '';
-    icon.append(image);
-    option.append(icon, el('strong', null, item.label || ACCESS_LABELS[item.platform]));
-    if (action.type === 'unavailable') option.append(el('small', null, '待发布'));
-    container.append(option);
-  });
-}
-
 function renderAccessEditor(container, access, onAccess) {
   const state = access && Array.isArray(access.items) ? { items: access.items.map((it) => ({ ...it })) } : { items: [] };
   state.items = state.items || [];
   const commit = () => onAccess(state.items.length ? { items: JSON.parse(JSON.stringify(state.items)) } : null);
 
   const list = el('div');
-  const previewBox = el('div', 'entry-preview-box');
-  previewBox.append(el('div', 'entry-preview-title', '前台效果'));
-  const preview = el('div', 'entry-preview');
-  previewBox.append(preview);
-  const refreshPreview = () => renderAccessPreview(preview, state.items);
   const redraw = () => {
     list.replaceChildren();
     state.items.forEach((item, index) => {
@@ -892,7 +802,6 @@ function renderAccessEditor(container, access, onAccess) {
         state.items[index] = next;
         commit();
         markDirty();
-        refreshPreview();
       };
       const toggleHold = () => {
         const next = { ...state.items[index] };
@@ -900,7 +809,6 @@ function renderAccessEditor(container, access, onAccess) {
         state.items[index] = next;
         commit();
         markDirty();
-        refreshPreview();
       };
       platformSel.addEventListener('change', sync);
       labelIn.addEventListener('input', sync);
@@ -915,13 +823,12 @@ function renderAccessEditor(container, access, onAccess) {
       });
       list.append(box);
     });
-    refreshPreview();
   };
   redraw();
 
   const add = actionButton('添加入口');
   add.addEventListener('click', () => { state.items.push({ platform: 'bilibili', label: '', url: '' }); commit(); markDirty(); redraw(); });
-  container.append(list, add, previewBox);
+  container.append(list, add);
 }
 
 
@@ -982,11 +889,8 @@ function cardEditor(card, index) {
     '点开卡片后，底部出现的那排平台按钮。值是网址就跳转；是纯文本（例如 QQ 群号）就点了复制到剪贴板。'
     + '每个入口都是独立的，填了视频也不会自动多出按钮——要哪个就加哪个。'
     + '「链接或内容」留空、或勾了「暂不开放」，前台都会画成灰色的「待发布」。'
-    + '这排按钮平时折在卡片里，画布上看不见，点下面的按钮可以直接把这张卡打开看。');
+    + '这排按钮平时折在卡片里，你在管理台选中哪张卡，画布上就会把那张卡的入口行展开。');
   renderAccessEditor(links.box, card.access, (a) => { if (a) card.access = a; else delete card.access; });
-  const openOnCanvas = actionButton('在画布上打开这张卡');
-  openOnCanvas.addEventListener('click', () => openCardInPreview(card.id));
-  links.box.append(openOnCanvas);
 
   const show = section(details, '显示');
   field(show.grid, '精选', bind(checkbox(card.featured), (v) => (card.featured = v)));
@@ -1496,27 +1400,21 @@ function syncPreview() {
   window.clearTimeout(previewTimer);
   previewTimer = window.setTimeout(() => {
     try {
+      const card = activeView === 'cards' ? (viewItems() || [])[activeIndex] : null;
       frame.contentWindow.postMessage({
         type: 'qianji:preview',
         content: content,
-        options: { scrollTo: target.scrollTo || null, showNotice: target.showNotice === true },
+        options: {
+          scrollTo: target.scrollTo || null,
+          showNotice: target.showNotice === true,
+          // 入口行平时折在卡片里。告诉画布正在编辑哪张卡，让它把那一行露出来，
+          // 这样改入口时画布会实时反映，而不用在管理台里再画一份。
+          previewAccess: card?.id || null,
+        },
       }, window.location.origin);
     } catch (error) { /* 预览失败不影响编辑 */ }
   }, 120);
 }
-// 把画布上的某张卡直接打开，看它的入口按钮。不走防抖的 syncPreview：
-// 那是随每次输入重推内容的，会一遍遍重开弹窗。
-function openCardInPreview(id) {
-  if (!id) { setStatus('这张卡片还没有 id，先在「官网 JSON」里补一个', 'err'); return; }
-  const frame = $('previewFrame');
-  if (!frame?.contentWindow || !content) return;
-  frame.contentWindow.postMessage({
-    type: 'qianji:preview',
-    content: content,
-    options: { openCard: id, showNotice: false },
-  }, window.location.origin);
-}
-
 function initPreview() {
   const frame = $('previewFrame');
   if (!frame) return;

@@ -272,6 +272,8 @@ a.contact-method:hover { background: var(--md-sys-color-surface-container-highes
 .case-card-trigger.is-expanded .case-media img { transform: none; }
 .case-card-trigger.is-expanded .case-summary { display: block; -webkit-line-clamp: unset; overflow: visible; }
 .case-card-trigger.is-expanded .card-access { display: grid; width: 100%; margin: 0; order: 4; }
+/* 管理台在编辑这张卡的入口时，不用展开也把入口行露出来，好让画布实时反映改动。 */
+.case-card-trigger.is-access-preview .card-access { display: grid; width: 100%; margin: 0; order: 4; }
 .case-card-trigger:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 
 /* Keep the page width stable during scroll locking and never replay entry on collapse. */
