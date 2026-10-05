@@ -1311,15 +1311,21 @@ function renderList() {
     const row = el('button', 'entry-row');
     row.type = 'button';
     if (index === activeIndex) row.setAttribute('data-active', '');
-    const thumb = el('span', 'entry-thumb');
-    const t = spec.thumb(item);
-    if (t instanceof Node) thumb.append(t); else thumb.textContent = t || '';
     const main = el('span', 'entry-main');
     main.append(el('span', 'entry-name', spec.name(item)));
     const meta = el('span', 'entry-meta');
     spec.meta(item).forEach(([text, cls]) => meta.append(el('span', `pill ${cls}`.trim(), text)));
     main.append(meta);
-    row.append(el('span', 'entry-grip', '⠿'), thumb, main);
+    // 缩略图那一格只在真有内容时渲染：横幅没有封面，留一个空的灰方块
+    // 只会看起来像没加载完。
+    const thumbContent = spec.thumb(item);
+    const thumb = thumbContent
+      ? el('span', 'entry-thumb', thumbContent instanceof Node ? null : thumbContent)
+      : null;
+    if (thumb && thumbContent instanceof Node) thumb.append(thumbContent);
+    row.append(el('span', 'entry-grip', '⠿'));
+    if (thumb) row.append(thumb);
+    row.append(main);
     row.addEventListener('click', () => { activeIndex = index; renderList(); renderForm(); syncPreview(); });
     rows.append(row);
   });
@@ -1658,6 +1664,8 @@ function renderNavBadges() {
   document.querySelectorAll('#nav [data-count]').forEach((node) => {
     const value = counts[node.dataset.count];
     node.textContent = value ? String(value) : '';
+    // 数量为 0 时别留一个只有 padding 和底色的空壳，那看起来像加载了一半。
+    node.hidden = !value;
   });
 }
 
