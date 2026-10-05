@@ -205,46 +205,51 @@ function createPlayerFrame(item, video) {
   return frame;
 }
 
-function renderAccessMedia(item, accessMedia = document.querySelector("#access-media")) {
+// 卡片媒体区。mode 决定这个位置上该出现什么：
+//   "poster" —— 折叠状态：只铺封面，不加播放按钮。点整张卡是展开，不是就地播放。
+//   "player" —— 展开状态：有视频就直接加载播放器，没有视频就退回封面。
+//   "dialog" —— 弹窗：封面作海报 + 播放按钮（第三方播放器等用户明确点了再加载，
+//               避免外部页面在 WebView 里接管顶层导航）。
+function renderAccessMedia(item, accessMedia = document.querySelector("#access-media"), mode = "dialog") {
   accessMedia.replaceChildren();
   const video = SiteMedia.videoSource(item.video);
   accessMedia.hidden = !video && !item.cover;
   accessMedia.style.aspectRatio = String(video?.ratio || 16 / 9);
   accessMedia.classList.toggle("access-media--portrait", Boolean(video && video.ratio < 1));
-  // 第三方播放器只在用户明确操作后加载，避免外部页面在 WebView 中接管顶层导航。
-  if (video) {
-    // 有封面时先把封面当作视频海报铺上，播放按钮再叠加在其上（两者都是绝对/相对定位）。
-    // 否则封面会在这一步被 replaceChildren 清掉，表现为「填了封面却不显示」。
-    if (item.cover) {
-      const poster = document.createElement("img");
-      poster.src = item.cover;
-      poster.alt = item.coverAlt || `${item.name || item.title}封面`;
-      accessMedia.append(poster);
-    }
-    const loadButton = document.createElement("button");
-    loadButton.type = "button";
-    loadButton.className = "video-load";
-    loadButton.textContent = "播放视频";
-    loadButton.setAttribute("aria-label", `播放${item.name || item.title}视频`);
-    loadButton.addEventListener("click", event => {
-      event.stopPropagation();
-      if (loadButton.closest(".featured-carousel")) pauseFeatured();
-      accessMedia.replaceChildren(createPlayerFrame(item, video));
-    });
-    accessMedia.append(loadButton);
-    return;
-  }
-  if (item.cover) {
+
+  const addPoster = () => {
+    if (!item.cover) return false;
     const poster = document.createElement("img");
     poster.src = item.cover;
     poster.alt = item.coverAlt || `${item.name || item.title}封面`;
     accessMedia.append(poster);
+    return true;
+  };
+
+  // 展开且真的有视频：直接上播放器。
+  if (video && mode === "player") {
+    accessMedia.append(createPlayerFrame(item, video));
+    return;
   }
+
+  const hasPoster = addPoster();
+  if (!video) return;
+  // 折叠时：有封面就到此为止；没有封面则留一个播放按钮，免得媒体区空着。
+  if (mode === "poster" && hasPoster) return;
+
+  const loadButton = document.createElement("button");
+  loadButton.type = "button";
+  loadButton.className = "video-load";
+  loadButton.textContent = "播放视频";
+  loadButton.setAttribute("aria-label", `播放${item.name || item.title}视频`);
+  loadButton.addEventListener("click", event => {
+    event.stopPropagation();
+    if (loadButton.closest(".featured-carousel")) pauseFeatured();
+    accessMedia.replaceChildren(createPlayerFrame(item, video));
+  });
+  accessMedia.append(loadButton);
 }
 
-// options.refresh 表示只是把已经打开的面板按新内容刷一遍：不动 body 的滚动锁、
-// 不重新 showModal（对已打开的 <dialog> 调它会抛 InvalidStateError）、也不重播入场动画，
-// 否则管理台每敲一个字预览里的面板就抖一次。
 function mountAccessDialog(item, trigger, options = {}) {
   if (!accessDialog || !accessItems) return;
   const access = getAccess(item);
@@ -667,6 +672,10 @@ async function expandCard(card) {
     cardBackdrop.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: "ease-out" });
   }
   card.classList.add("is-expanded");
+  // 展开后如果有视频就直接加载，没有视频则维持封面。
+  const item = host.__item;
+  const media = card.querySelector(".case-media") || host.querySelector(".case-media");
+  if (item && media && SiteMedia.videoSource(item.video)) renderAccessMedia(item, media, "player");
   card.setAttribute("role", "dialog");
   card.setAttribute("aria-modal", "true");
   card.removeAttribute("aria-expanded");
@@ -710,6 +719,10 @@ async function collapseCard() {
   }
   card.getAnimations().forEach(animation => animation.cancel());
   card.classList.remove("is-expanded");
+  // 收起后回到封面（展开时可能已经换成播放器了）。
+  const hostItem = host.__item;
+  const hostMedia = host.querySelector(".case-media");
+  if (hostItem && hostMedia) renderAccessMedia(hostItem, hostMedia, "poster");
   card.removeAttribute("style");
   card.setAttribute("role", "button");
   card.setAttribute("aria-expanded", "false");
@@ -794,7 +807,8 @@ function createCaseCard(item, index, options = {}) {
     image.src = item.cover;
     image.alt = item.coverAlt || `${item.name}案例封面`;
   }
-  if (SiteMedia.videoSource(item.video)) renderAccessMedia(item, media);
+  card.__item = item;
+  if (SiteMedia.videoSource(item.video)) renderAccessMedia(item, media, "poster");
   else if (!item.cover) media.hidden = true;
   title.textContent = item.name;
   const visiblePlatforms = appPlatform ? [appPlatform] : item.platforms;
