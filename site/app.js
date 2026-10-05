@@ -404,6 +404,19 @@ function renderActivities() {
   scheduleCarousel();
 }
 
+// 顶部 Rive。管理台的实时预览会随每次输入重绘整页，而 Rive 实例很贵：
+// 以前每重绘一次就新建一个实例、一个 ResizeObserver、一个 pagehide 监听，
+// 旧的全都不回收，敲几下之后画布就卡到看不出响应。所以这里做了两件事：
+// 配置没变就直接复用，配置变了先把旧的收干净再建。
+let heroRiveInstance = null;
+let heroRiveObserver = null;
+let heroRiveKey = "";
+
+window.addEventListener("pagehide", () => {
+  heroRiveObserver?.disconnect();
+  heroRiveInstance?.cleanup?.();
+}, { once: true });
+
 function initHeroRive() {
   const hero = state.hero || HERO_DEFAULTS;
   const rive = hero.rive || HERO_DEFAULTS.rive;
@@ -421,12 +434,22 @@ function initHeroRive() {
 
   if (!activityRiveCanvas || !window.rive?.Rive || !rive.src) return;
 
-  let instance;
-  const resize = () => instance?.resizeDrawingSurfaceToCanvas();
+  // 决定实例长相的就是这几个值。它们没变，就没必要重建。
+  const autoplay = rive.autoplay !== false && !reduceMotion.matches;
+  const key = [rive.src, rive.artboard || "", rive.stateMachine || "", autoplay].join("|");
+  if (heroRiveInstance && heroRiveKey === key) return;
+  heroRiveKey = key;
+
+  heroRiveObserver?.disconnect();
+  heroRiveObserver = null;
+  heroRiveInstance?.cleanup?.();
+  heroRiveInstance = null;
+
+  const resize = () => heroRiveInstance?.resizeDrawingSurfaceToCanvas();
   const options = {
     src: rive.src,
     canvas: activityRiveCanvas,
-    autoplay: rive.autoplay !== false && !reduceMotion.matches,
+    autoplay: autoplay,
     isTouchScrollEnabled: true,
     onLoad: () => {
       resize();
@@ -437,14 +460,10 @@ function initHeroRive() {
   // 留空表示使用 .riv 文件里的默认画板与状态机，交给 Rive 自行选择。
   if (rive.artboard) options.artboard = rive.artboard;
   if (rive.stateMachine) options.stateMachine = rive.stateMachine;
-  instance = new window.rive.Rive(options);
+  heroRiveInstance = new window.rive.Rive(options);
 
-  const observer = "ResizeObserver" in window ? new ResizeObserver(resize) : null;
-  observer?.observe(activityRiveCanvas);
-  window.addEventListener("pagehide", () => {
-    observer?.disconnect();
-    instance.cleanup();
-  }, { once: true });
+  heroRiveObserver = "ResizeObserver" in window ? new ResizeObserver(resize) : null;
+  heroRiveObserver?.observe(activityRiveCanvas);
 }
 
 function setActivity(index, announce = false) {
