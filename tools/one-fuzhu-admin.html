@@ -852,7 +852,7 @@ function cardEditor(card, index) {
   const details = shell.details;
 
   const basic = section(details, '基本信息');
-  field(basic.grid, '名称', bind(textInput(card.name), (v) => { card.name = v; shell.title.textContent = `${index + 1}. ${v || card.id || '未命名'}`; }));
+  field(basic.grid, '名称', bind(textInput(card.name), (v) => { card.name = v; shell.title.textContent = `${index + 1}. ${v || card.id || '未命名'}`; renderList(); }));
   field(basic.grid, '简介', bind(textArea(card.summary), (v) => (card.summary = v)));
   field(basic.grid, '详情', bind(textArea(card.details), (v) => (card.details = v)));
 
@@ -865,7 +865,7 @@ function cardEditor(card, index) {
 
   const cover = section(details, '封面图（可选）', '有封面就显示封面，并把它当作视频海报；留空则只显示视频。以后去掉视频链接，卡片画面就直接用封面。');
   const coverInput = textInput(card.cover, './assets/xxx.webp');
-  field(cover.grid, '封面图路径', bind(coverInput, (v) => { card.cover = v; }));
+  field(cover.grid, '封面图路径', bind(coverInput, (v) => { card.cover = v; renderList(); }));
   const coverRow = el('div', 'row');
   const coverUpload = actionButton('上传封面图', 'outlined');
   coverUpload.addEventListener('click', () => uploadCardCover(card, index));
@@ -893,8 +893,8 @@ function cardEditor(card, index) {
   renderAccessEditor(links.box, card.access, (a) => { if (a) card.access = a; else delete card.access; });
 
   const show = section(details, '显示');
-  field(show.grid, '精选', bind(checkbox(card.featured), (v) => (card.featured = v)));
-  field(show.grid, '显示', bind(checkbox(card.visible), (v) => (card.visible = v)));
+  field(show.grid, '精选', bind(checkbox(card.featured), (v) => { card.featured = v; renderList(); }));
+  field(show.grid, '显示', bind(checkbox(card.visible), (v) => { card.visible = v; renderList(); }));
 
   return details;
 }
@@ -905,7 +905,7 @@ function bannerEditor(banner, index) {
   const details = shell.details;
 
   const text = section(details, '轮播文案');
-  field(text.grid, '标题', bind(textArea(banner.title), (v) => { banner.title = v; shell.title.textContent = `${index + 1}. ${v || '未命名'}`; }));
+  field(text.grid, '标题', bind(textArea(banner.title), (v) => { banner.title = v; shell.title.textContent = `${index + 1}. ${v || '未命名'}`; renderList(); }));
   field(text.grid, '圆点文字', bind(textInput(banner.label), (v) => (banner.label = v)));
   field(text.grid, '简介', bind(textArea(banner.summary), (v) => (banner.summary = v)));
 
@@ -920,7 +920,7 @@ function bannerEditor(banner, index) {
   renderAccessEditor(links.box, banner.access, (a) => { if (a) banner.access = a; else delete banner.access; });
 
   const show = section(details, '显示');
-  field(show.grid, '显示', bind(checkbox(banner.visible), (v) => (banner.visible = v)));
+  field(show.grid, '显示', bind(checkbox(banner.visible), (v) => { banner.visible = v; renderList(); }));
 
   return details;
 }
