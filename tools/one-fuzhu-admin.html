@@ -54,51 +54,56 @@
   .app-bar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--block);box-shadow:var(--elev);position:relative;z-index:3}
   .app-bar h1{margin:0;font-size:19px;font-weight:600}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-  /* 顶栏的区块切换：一个平铺的下拉，不带圆角装饰。 */
-  .view-switch{display:flex;align-items:center}
-  .view-switch select{appearance:none;min-height:var(--control-h);padding:0 32px 0 12px;border:0;border-radius:5px;background:var(--field);color:var(--ink);font:inherit;font-weight:600;cursor:pointer;
     background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
     background-position:calc(100% - 17px) 14px,calc(100% - 12px) 14px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
-  .view-switch select:hover{background-color:var(--field-hi)}
   .progress{position:absolute;inset:auto 0 0;height:3px;overflow:hidden;background:var(--pri-c)}
   .progress::after{content:"";position:absolute;inset:0 auto 0 0;width:40%;background:var(--pri);animation:slide 1.4s ease-in-out infinite}
   @keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
 
-  /* ============ 工作台骨架：列表 | 画布 | 检视器 ============ */
-  /* 三块平铺的色区，没有圆角、没有描边、没有卡片。面板宽度是 CSS 变量，
+  /* ============ 工作台骨架：区块导航 | 画布 | 列表+细节 ============ */
+  /* 三块平铺的色区，没有圆角、没有描边、没有卡片。面板尺寸是 CSS 变量，
      拖拽条只改变量，布局代码不用知道有拖拽这回事。 */
   .shell{
     flex:1;min-height:0;overflow:hidden;
-    /* 列宽走两级变量：--list-w 是拖出来的宽度（JS 内联设置），
-       --list-col 才是实际列宽，归样式表管——否则内联样式会压过收起规则。 */
-    --list-col:var(--list-w,260px);
-    --list-gutter:5px;
     display:grid;
     grid-template-columns:
-      var(--list-col) var(--list-gutter)
+      var(--nav-w,184px) 5px
       minmax(0,1fr) 5px
-      var(--inspector-w,420px);
+      var(--inspector-w,460px);
     background:var(--canvas-bg);
   }
-  /* 单条目区块没有列表，把那一列和它的拖拽条一起收掉，画布因此变宽。 */
-  .shell[data-list="off"]{ --list-col:0px; --list-gutter:0px; }
   /* 每一块显式指定列号。display:none 会把元素移出栅格流，后面的元素就会
-     往前顶、占错轨道（画布会掉进列表列、检视器会吃掉整条 1fr）。 */
-  .list{grid-column:1}
-  [data-panel="list"]{grid-column:2}
+     往前顶、占错轨道。 */
+  .nav{grid-column:1}
+  [data-panel="nav"]{grid-column:2}
   .canvas{grid-column:3}
   [data-panel="inspector"]{grid-column:4}
   .inspector{grid-column:5}
 
-  /* 拖拽条：平时是一条极窄的空白，悬停/拖动时露出主色。 */
-  .gutter{position:relative;cursor:col-resize;background:transparent;align-self:stretch;touch-action:none}
-  .gutter::after{content:"";position:absolute;inset:0 2px;background:transparent;transition:background 120ms linear}
+  /* 拖拽条：平时是一条极窄的空白，悬停/拖动时露出主色。横向竖向共用。 */
+  .gutter{position:relative;background:transparent;touch-action:none}
+  .gutter::after{content:"";position:absolute;background:transparent;transition:background 120ms linear}
+  .gutter[data-axis="x"]{cursor:col-resize;align-self:stretch}
+  .gutter[data-axis="x"]::after{inset:0 2px}
+  .gutter[data-axis="y"]{cursor:row-resize;flex:0 0 5px}
+  .gutter[data-axis="y"]::after{inset:2px 0}
   .gutter:hover::after{background:#cfc7e4}
   .gutter[data-dragging]::after{background:var(--pri)}
   .gutter:focus-visible{outline:2px solid var(--pri);outline-offset:-1px}
 
-  /* ============ ① 列表（左栏） ============ */
-  .list{background:var(--block);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+  /* ============ ① 区块导航（左栏） ============ */
+  .nav{background:var(--block);padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow:auto;min-height:0;min-width:0}
+  .nav-group{padding:14px 14px 5px;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);white-space:nowrap;overflow:hidden}
+  .nav-item{display:flex;align-items:center;gap:8px;padding:0 14px;min-height:40px;border-radius:5px;color:var(--ink-2);text-align:left;font-weight:500;white-space:nowrap;overflow:hidden}
+  .nav-item:hover{background:var(--field)}
+  .nav-item[data-active]{background:var(--pri-c);color:var(--pri-ink);font-weight:700}
+  .nav-badge{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--r-full);background:var(--chip);color:var(--ink-2);flex-shrink:0}
+  .nav-item[data-active] .nav-badge{background:#c9d3ff;color:var(--pri-ink)}
+
+
+  /* ============ ① 条目列表（右栏上半） ============ */
+  /* 高度是 CSS 变量，由列表与细节之间那条横向拖拽条控制。 */
+  .list{height:var(--entries-h,240px);flex:0 0 auto;background:var(--block);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
   .list[hidden]{display:none}
   .list-head{padding:16px 16px 10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
   .list-head strong{font-size:15px}
@@ -135,14 +140,16 @@
   .canvas-frame{flex-shrink:0;align-self:flex-start;overflow:hidden}
   .canvas-frame iframe{width:100%;height:100%;border:0;display:block;background:var(--block)}
 
-  /* ============ ③ 检视器（右栏） ============ */
-  .inspector{background:var(--block);display:flex;flex-direction:column;min-width:0;min-height:0}
+  /* ============ ③ 右栏：列表在上，细节在下 ============ */
+  .inspector{background:var(--block);display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
 
   /* ============ ③ 表单 ============ */
-  .form{padding:16px 18px 48px;overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-  .status{font-size:12px;line-height:1.6;color:var(--ink-3);min-height:0;overflow-wrap:anywhere}
+  .form{flex:1;min-height:0;padding:16px 18px 48px;overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0}
+  .status{font-size:12px;line-height:1.7;color:var(--ink-3);min-height:0;overflow-wrap:anywhere}
+  .status:empty{display:none}
+  /* 出错时给一块底色，否则长报错挤成一团看不清。 */
+  .status.err{background:var(--err-c);color:var(--err);padding:10px 12px;border-radius:6px}
   .status.ok{color:var(--ok)}
-  .status.err{color:var(--err)}
   .surface{background:var(--block);padding:16px 18px}
   .editor{display:flex;flex-direction:column;gap:0}
   .editor-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -238,25 +245,6 @@
 <body>
 <header class="app-bar">
   <h1>千机百变管理后台</h1>
-  <label class="view-switch">
-    <span class="sr-only">选择区块</span>
-    <select id="viewSelect">
-      <optgroup label="内容">
-        <option value="banners">顶部轮播</option>
-        <option value="hero">顶部 Rive</option>
-        <option value="cards">创意橱柜</option>
-        <option value="contact">联系方式</option>
-        <option value="notice">弹窗</option>
-      </optgroup>
-      <optgroup label="翻译">
-        <option value="translations">Rive 翻译</option>
-      </optgroup>
-      <optgroup label="设置">
-        <option value="raw">官网 JSON</option>
-        <option value="token">访问令牌</option>
-      </optgroup>
-    </select>
-  </label>
   <span class="pill pill--on" id="dirtyTag" hidden>有未发布改动</span>
   <span style="flex:1"></span>
   <button class="btn btn--text" id="loadBtn" type="button">重新加载</button>
@@ -265,13 +253,21 @@
 </header>
 
 <div class="shell" id="shell">
-  <section class="list" id="list" hidden>
-    <div class="list-head"><strong id="listTitle"></strong><span class="count" id="listCount"></span></div>
-    <div class="rows" id="listRows"></div>
-    <div class="list-foot" id="listFoot"></div>
-  </section>
+  <nav class="nav" id="nav" aria-label="管理内容">
+    <div class="nav-group">内容</div>
+    <button class="nav-item" type="button" data-view="banners">顶部轮播<span class="nav-badge" data-count="banners"></span></button>
+    <button class="nav-item" type="button" data-view="hero">顶部 Rive</button>
+    <button class="nav-item" type="button" data-view="cards">创意橱柜<span class="nav-badge" data-count="cards"></span></button>
+    <button class="nav-item" type="button" data-view="contact">联系方式</button>
+    <button class="nav-item" type="button" data-view="notice">弹窗</button>
+    <div class="nav-group">翻译</div>
+    <button class="nav-item" type="button" data-view="translations">Rive 翻译<span class="nav-badge" data-count="terms"></span></button>
+    <div class="nav-group">设置</div>
+    <button class="nav-item" type="button" data-view="raw">官网 JSON</button>
+    <button class="nav-item" type="button" data-view="token">访问令牌</button>
+  </nav>
 
-  <div class="gutter" data-panel="list" role="separator" aria-orientation="vertical" tabindex="0" aria-label="拖动调整条目列表宽度"></div>
+  <div class="gutter" data-panel="nav" data-axis="x" role="separator" aria-orientation="vertical" tabindex="0" aria-label="拖动调整导航宽度"></div>
 
   <main class="canvas" id="canvas" aria-label="官网实时预览">
     <div class="canvas-bar">
@@ -293,9 +289,17 @@
     </div>
   </main>
 
-  <div class="gutter" data-panel="inspector" role="separator" aria-orientation="vertical" tabindex="0" aria-label="拖动调整检视器宽度"></div>
+  <div class="gutter" data-panel="inspector" data-axis="x" role="separator" aria-orientation="vertical" tabindex="0" aria-label="拖动调整右栏宽度"></div>
 
-  <aside class="inspector" aria-label="字段编辑">
+  <aside class="inspector" aria-label="列表与字段编辑">
+    <section class="list" id="list" hidden>
+      <div class="list-head"><strong id="listTitle"></strong><span class="count" id="listCount"></span></div>
+      <div class="rows" id="listRows"></div>
+      <div class="list-foot" id="listFoot"></div>
+    </section>
+
+    <div class="gutter gutter--h" data-panel="entries" data-axis="y" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="拖动调整列表高度"></div>
+
     <main class="form" id="formBody">
     <div class="status" id="status" role="status" aria-live="polite"></div>
 
@@ -1371,9 +1375,11 @@ function initPreview() {
 // ---------- 可拖拽面板 ----------
 // 面板宽度只存在 CSS 变量里。拖拽条改的是变量，布局代码不用知道有拖拽这回事。
 const PANELS = {
-  list: { prop: '--list-w', min: 190, max: 460, fallback: 260 },
-  // 检视器在最右侧，指针往左拖才是变宽，所以方向要反过来。
-  inspector: { prop: '--inspector-w', min: 300, max: 760, fallback: 420, invert: true },
+  nav: { prop: '--nav-w', min: 150, max: 320, fallback: 184, axis: 'x' },
+  // 右栏在最右侧，指针往左拖才是变宽，所以方向要反过来。
+  inspector: { prop: '--inspector-w', min: 320, max: 820, fallback: 460, axis: 'x', invert: true },
+  // 右栏内部：列表高度，上下拖动。
+  entries: { prop: '--entries-h', min: 96, max: 640, fallback: 240, axis: 'y' },
 };
 
 function panelWidth(name) {
@@ -1396,14 +1402,17 @@ function setPanelWidth(name, width, persist = true) {
 function bindGutters() {
   document.querySelectorAll('.gutter').forEach((gutter) => {
     const name = gutter.dataset.panel;
-    const sign = PANELS[name].invert ? -1 : 1;
-    let startX = 0;
+    const spec = PANELS[name];
+    const sign = spec.invert ? -1 : 1;
+    const horizontal = spec.axis === 'y';
+    let startPos = 0;
     let startWidth = 0;
     let dragging = false;
 
     const move = (event) => {
       if (!dragging) return;
-      setPanelWidth(name, startWidth + sign * (event.clientX - startX));
+      const delta = (horizontal ? event.clientY : event.clientX) - startPos;
+      setPanelWidth(name, startWidth + sign * delta);
     };
     const stop = () => {
       if (!dragging) return;
@@ -1417,24 +1426,26 @@ function bindGutters() {
       if (event.button !== 0) return;
       event.preventDefault();
       dragging = true;
-      startX = event.clientX;
+      startPos = horizontal ? event.clientY : event.clientX;
       startWidth = panelWidth(name);
       gutter.setAttribute('data-dragging', '');
-      document.body.style.cursor = 'col-resize';
+      document.body.style.cursor = horizontal ? 'row-resize' : 'col-resize';
       // 指针很容易拖出这条 5px 的窄条，监听必须挂在 window 上。
       window.addEventListener('pointermove', move);
       window.addEventListener('pointerup', stop);
     });
     // 键盘也能调：方向键 16px 一档，Home / End 到最小 / 最大，双击复位。
     gutter.addEventListener('keydown', (event) => {
-      const step = { ArrowLeft: -16, ArrowRight: 16 }[event.key];
+      const step = horizontal
+        ? { ArrowUp: -16, ArrowDown: 16 }[event.key]
+        : { ArrowLeft: -16, ArrowRight: 16 }[event.key];
       if (step === undefined && event.key !== 'Home' && event.key !== 'End') return;
       event.preventDefault();
-      if (event.key === 'Home') setPanelWidth(name, PANELS[name].min);
-      else if (event.key === 'End') setPanelWidth(name, PANELS[name].max);
+      if (event.key === 'Home') setPanelWidth(name, spec.min);
+      else if (event.key === 'End') setPanelWidth(name, spec.max);
       else setPanelWidth(name, panelWidth(name) + sign * step);
     });
-    gutter.addEventListener('dblclick', () => setPanelWidth(name, PANELS[name].fallback));
+    gutter.addEventListener('dblclick', () => setPanelWidth(name, spec.fallback));
   });
 }
 
@@ -1614,19 +1625,16 @@ function renderAll() {
   syncPreview();
 }
 
-// 下拉里直接标出条目数，不用点进去才知道有多少。
+// 左侧栏直接标出条目数，不用点进去才知道有多少。
 function renderNavBadges() {
   const counts = {
     banners: (content?.banners || []).length,
     cards: (content?.cards || []).length,
-    translations: Object.keys(translation || {}).length,
+    terms: Object.keys(translation || {}).length,
   };
-  const labels = { banners: '顶部轮播', cards: '创意橱柜', translations: 'Rive 翻译' };
-  Object.entries(labels).forEach(([view, label]) => {
-    const option = Array.from($('viewSelect').options).find((o) => o.value === view);
-    if (!option) return;
-    const value = counts[view];
-    option.textContent = value ? `${label}（${value}）` : label;
+  document.querySelectorAll('#nav [data-count]').forEach((node) => {
+    const value = counts[node.dataset.count];
+    node.textContent = value ? String(value) : '';
   });
 }
 
@@ -1638,10 +1646,20 @@ function refreshRaw() {
   rawBaseline = $('raw').value;
 }
 
-// 区块切换是顶栏那个下拉。视图顺序由 option 顺序决定，选中态由浏览器原生渲染。
+// 区块导航是左栏。视图顺序由 DOM 里 .nav-item 的顺序决定，不另维护一张表。
+function navItems() { return Array.from(document.querySelectorAll('#nav .nav-item[data-view]')); }
+
 function setNavActive(which) {
-  const select = $('viewSelect');
-  if (select && select.value !== which) select.value = which;
+  navItems().forEach((item) => {
+    const active = item.dataset.view === which;
+    if (active) {
+      item.setAttribute('data-active', '');
+      item.setAttribute('aria-current', 'page');
+    } else {
+      item.removeAttribute('data-active');
+      item.removeAttribute('aria-current');
+    }
+  });
 }
 
 function selectTab(which) {
@@ -1958,8 +1976,23 @@ async function initialize() {
     catch (e) { setStatus('加载失败：' + friendlyError(e), 'err'); }
   });
   $('saveBtn').addEventListener('click', save);
-  // 顶栏下拉切换区块；方向键是 <select> 的原生行为，不用自己实现。
-  $('viewSelect').addEventListener('change', () => { selectTab($('viewSelect').value); });
+  // 左栏切换区块：点击选中；方向键在区块之间移动。
+  const items = navItems();
+  items.forEach((item) => {
+    item.addEventListener('click', () => { selectTab(item.dataset.view); });
+  });
+  $('nav').addEventListener('keydown', (event) => {
+    const step = { ArrowDown: 1, ArrowUp: -1, ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    if (step === undefined && event.key !== 'Home' && event.key !== 'End') return;
+    event.preventDefault();
+    const current = items.findIndex((item) => item.hasAttribute('data-active'));
+    let next;
+    if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = items.length - 1;
+    else next = ((current < 0 ? 0 : current) + step + items.length) % items.length;
+    items[next].focus();
+    selectTab(items[next].dataset.view);
+  });
   initPreview();
   bindGutters();
   restorePanels();
