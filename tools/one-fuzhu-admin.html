@@ -1639,12 +1639,9 @@ function addTranslationEntry() {
 }
 
 function renderAll() {
-  // 表单列只画当前区块，其余单条目区块要在切换时按需重画，这里统一初始化一次。
-  renderHero();
-  renderContactEditor();
-  renderNotice();
-  renderTranslations();
-  refreshRaw();
+  // 先让当前区块可见，再画它。其余区块交给 selectTab 在切换时按需重画，
+  // 不必在这里全渲染一遍（那会留下一堆看不见的旧副本）。
+  applyVisibility(activeView);
   renderList();
   renderForm();
   renderNavBadges();
@@ -1688,6 +1685,20 @@ function setNavActive(which) {
   });
 }
 
+// 决定哪个区块可见。载入完成和切换区块都必须走这里：只在 selectTab 里做的话，
+// 首次载入时 8 个区块全都带着初始的 hidden，右栏就会一片空白——
+// 表头写着「具体细节」、状态写着「已加载」，下面却没东西。
+function applyVisibility(which) {
+  $('viewBanners').hidden = which !== 'banners';
+  $('viewHero').hidden = which !== 'hero';
+  $('viewCards').hidden = which !== 'cards';
+  $('viewContact').hidden = which !== 'contact';
+  $('viewNotice').hidden = which !== 'notice';
+  $('viewTranslations').hidden = which !== 'translations';
+  $('viewRaw').hidden = which !== 'raw';
+  $('viewToken').hidden = which !== 'token';
+}
+
 function selectTab(which) {
   if (which === 'raw' && activeView !== 'raw') refreshRaw();
   if (which !== 'raw' && activeView === 'raw' && $('raw').value !== rawBaseline) {
@@ -1704,14 +1715,7 @@ function selectTab(which) {
       return false;
     }
   }
-  $('viewBanners').hidden = which !== 'banners';
-  $('viewHero').hidden = which !== 'hero';
-  $('viewCards').hidden = which !== 'cards';
-  $('viewContact').hidden = which !== 'contact';
-  $('viewNotice').hidden = which !== 'notice';
-  $('viewTranslations').hidden = which !== 'translations';
-  $('viewRaw').hidden = which !== 'raw';
-  $('viewToken').hidden = which !== 'token';
+  applyVisibility(which);
   activeView = which;
   activeIndex = 0;
   setNavActive(which);
