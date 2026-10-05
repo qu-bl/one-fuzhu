@@ -13,6 +13,12 @@ on:
       - 'site/data/content.json'
       - 'site/data/ai-profile.md'
       - 'site/scripts/build.mjs'
+      # 这些资源的内容哈希会写回 index.html 的 ?v=，所以它们一变就要重新盖章。
+      # 注意不要把 site/index.html 列进来：本工作流会改写它，列上会自我触发成死循环。
+      - 'site/styles.css'
+      - 'site/theme.js'
+      - 'site/media.js'
+      - 'site/app.js'
       - '.github/workflows/site-build.yml'
   workflow_dispatch:
 

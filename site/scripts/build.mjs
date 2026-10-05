@@ -4,6 +4,7 @@
 // 并向 index.html 注入供搜索引擎读取的 ItemList/FAQPage JSON-LD。
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -246,6 +247,26 @@ if (jsonldRe.test(html)) {
 } else {
   console.error("✗ 未找到 GEO:JSONLD 标记");
 }
+
+// 资源版本号按文件内容生成并写回 index.html。手工维护 ?v= 时，
+// 改了 styles.css / app.js 却忘记改版本号，浏览器会继续用旧文件
+// （GitHub Pages 对这些资源设了 max-age=600）。
+const stampedAssets = ["styles.css", "theme.js", "media.js", "app.js"];
+let stamped = 0;
+for (const name of stampedAssets) {
+  let digest;
+  try {
+    digest = createHash("sha256").update(readFileSync(join(ROOT, name))).digest("hex").slice(0, 8);
+  } catch {
+    console.error(`✗ 读不到 ${name}`);
+    continue;
+  }
+  const re = new RegExp(`(\\./${name.replace(/\\./g, "\\.")})\\?v=[^"']*`, "g");
+  const next = html.replace(re, `$1?v=${digest}`);
+  if (next === html) console.error(`✗ index.html 里未找到 ${name} 的 ?v= 引用`);
+  else { html = next; stamped += 1; }
+}
+console.log(`✓ index.html 资源版本号 ${stamped}/${stampedAssets.length} 个已按内容刷新`);
 
 writeFileSync(indexPath, html);
 console.log("done");
