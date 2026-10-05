@@ -26,7 +26,12 @@
      视口一宽它的左边界就比轮播/橱柜/页脚更靠右（1440px 视口下差 153px）。 */
   --page-max: 1440px;
   --app-safe-area-top: 0px;
+  /* --ease-out 就是 M3 的 standard 曲线，用于一般过渡。 */
   --ease-out: cubic-bezier(.2, 0, 0, 1);
+  /* M3 动效：进入用 emphasized decelerate，退出用更短更快的 emphasized accelerate。
+     M3 要求同一个元素内的属性共用一条曲线和时长，不再各走各的。 */
+  --motion-enter: 300ms cubic-bezier(.05, .7, .1, 1);
+  --motion-exit: 200ms cubic-bezier(.3, 0, .8, .15);
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -82,9 +87,12 @@ a { color: var(--accent); }
 .category-button[aria-pressed="true"] { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
 .platform-picker { display: flex; align-items: center; flex: 0 1 auto; min-width: 0; max-width: 65%; border-radius: 24px; background: var(--surface); }
 .platform-buttons { display: flex; align-items: center; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
-/* 折叠时只留选中项，其余收成 0 宽。 */
-.platform-picker[data-expanded="false"] .platform-button[aria-pressed="false"] { flex-basis: 0; width: 0; padding-inline: 0; opacity: 0; pointer-events: none; }
-.platform-picker .platform-button { display: flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; min-width: 0; height: 44px; min-height: 44px; padding: 12px; margin: 0; border-radius: 24px; overflow: hidden; transition: flex-basis 280ms var(--ease-out), padding 280ms var(--ease-out), opacity 180ms ease, background-color 220ms ease; }
+/* 折叠时只留选中项，其余收成 0 宽；收起走 motion-exit。 */
+.platform-picker[data-expanded="false"] .platform-button[aria-pressed="false"] { flex-basis: 0; width: 0; padding-inline: 0; opacity: 0; pointer-events: none; transition: flex-basis var(--motion-exit), width var(--motion-exit), padding var(--motion-exit), opacity var(--motion-exit); }
+/* 图标同步缩小淡出，避免在收窄过程中被 overflow 横向削掉。 */
+.platform-picker .platform-button .platform-icon { transition: transform var(--motion-enter); }
+.platform-picker[data-expanded="false"] .platform-button[aria-pressed="false"] .platform-icon { transform: scale(.5); transition: transform var(--motion-exit); }
+.platform-picker .platform-button { display: flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; min-width: 0; height: 44px; min-height: 44px; padding: 12px; margin: 0; border-radius: 24px; overflow: hidden; transition: flex-basis var(--motion-enter), width var(--motion-enter), padding var(--motion-enter), opacity var(--motion-enter), background-color 220ms var(--ease-out); }
 .platform-picker .platform-button:hover { background: var(--surface-soft); }
 .platform-picker .platform-button .platform-icon { flex-shrink: 0; }
 .platform-picker .platform-button:hover { background: var(--surface-soft); }
