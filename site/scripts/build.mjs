@@ -261,10 +261,15 @@ for (const name of stampedAssets) {
     console.error(`✗ 读不到 ${name}`);
     continue;
   }
-  const re = new RegExp(`(\\./${name.replace(/\\./g, "\\.")})\\?v=[^"']*`, "g");
-  const next = html.replace(re, `$1?v=${digest}`);
-  if (next === html) console.error(`✗ index.html 里未找到 ${name} 的 ?v= 引用`);
-  else { html = next; stamped += 1; }
+  const pattern = `(\\./${name.replace(/\\./g, "\\.")})\\?v=[^"']*`;
+  // 先确认引用存在：否则「值本来就对」和「压根没找到」会走同一个分支，
+  // 每次无变化的重跑都会误报找不到。
+  if (!new RegExp(pattern).test(html)) {
+    console.error(`✗ index.html 里未找到 ${name} 的 ?v= 引用`);
+    continue;
+  }
+  const next = html.replace(new RegExp(pattern, "g"), `$1?v=${digest}`);
+  if (next !== html) { html = next; stamped += 1; }
 }
 console.log(`✓ index.html 资源版本号 ${stamped}/${stampedAssets.length} 个已按内容刷新`);
 
