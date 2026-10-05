@@ -985,9 +985,36 @@ function renderContact() {
   contactSection.hidden = false;
 }
 
-function initNotice() {
+// 弹窗的关闭方式是固定的，只绑一次。重绘时不再重复添加监听，
+// 否则实时预览每敲一个字都会堆一批监听上去。
+function bindNoticeDialog() {
+  if (!noticeDialog) return;
+  const close = () => {
+    if (noticeDialog.open) noticeDialog.close();
+  };
+  // 公告弹窗不设关闭按钮：Esc 键（cancel）和点击弹窗外（backdrop）都能关掉。
+  noticeDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    close();
+  });
+  noticeDialog.addEventListener("click", (event) => {
+    if (event.target === noticeDialog) close();
+  });
+  noticeDialog.addEventListener("close", () => {
+    if (!accessDialog?.open) document.body.classList.remove("dialog-open");
+  });
+}
+
+function initNotice(options = {}) {
   const notice = state.notice;
-  if (!noticeDialog || !notice || notice.enabled !== true) return;
+  if (!noticeDialog) return;
+  // 先决定显示还是隐藏。不能让「没开启」的早退发生在关闭之前，
+  // 否则在管理台里关掉弹窗或切到别的区块时，已经打开的弹窗会一直留在预览里。
+  const shouldShow = options.showNotice !== false && Boolean(notice) && notice.enabled === true;
+  if (!shouldShow) {
+    if (noticeDialog.open) noticeDialog.close();
+    return;
+  }
 
   if (notice.title) {
     noticeTitle.textContent = notice.title;
@@ -1021,22 +1048,6 @@ function initNotice() {
     link.textContent = notice.linkLabel || "了解详情";
     noticeActions.append(link);
   }
-
-  const close = () => {
-    if (noticeDialog.open) noticeDialog.close();
-  };
-  const unlock = () => {
-    if (!accessDialog?.open) document.body.classList.remove("dialog-open");
-  };
-  // 公告弹窗不设关闭按钮：Esc 键（cancel）和点击弹窗外（backdrop）都能关掉。
-  noticeDialog.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    close();
-  });
-  noticeDialog.addEventListener("click", (event) => {
-    if (event.target === noticeDialog) close();
-  });
-  noticeDialog.addEventListener("close", unlock);
 
   // 与卡片弹窗一致：先确认浏览器支持 <dialog> 的模态方法，老 WebView 下静默跳过。
   if (!noticeDialog.open && typeof noticeDialog.showModal === "function") {
@@ -1099,6 +1110,40 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
   });
 }
 
+// 用一份内容重绘整页。管理台的实时预览走的就是这个函数——预览和线上
+// 共用同一套渲染代码，所以看到的必然就是发布后的样子，不会有两套实现漂移。
+function applyContent(content, options = {}) {
+  state.hero = content.hero || null;
+  state.notice = content.notice || null;
+  state.contact = content.contact || null;
+  state.activities = (content.banners || []).filter((item) => item.visible !== false);
+  state.cases = (content.cards || []).filter((item) => item.visible !== false);
+  initHeroRive();
+  renderContact();
+  renderActivities();
+  renderFilters();
+  renderCases();
+  initNotice({ showNotice: options.showNotice });
+  if (options.scrollTo) {
+    // 页面本身设了 scroll-behavior:smooth，用 auto 会走平滑滚动，
+    // 预览跳转要的是立刻到位，所以显式 instant。
+    document.querySelector(options.scrollTo)?.scrollIntoView({ block: "start", behavior: "instant" });
+  }
+}
+
+// 宿主（管理台）把未发布的 content 推过来。同源校验，避免别的页面往里塞东西。
+window.addEventListener("message", (event) => {
+  const data = event.data;
+  if (!data || data.type !== "qianji:preview") return;
+  if (event.origin !== window.location.origin) return;
+  document.documentElement.dataset.preview = "true";
+  try {
+    applyContent(data.content, data.options || {});
+  } catch (error) {
+    console.error("预览渲染失败", error);
+  }
+});
+
 async function initialize() {
   bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
@@ -1109,21 +1154,12 @@ async function initialize() {
   bindCaseControls();
 
   bindAccessDialog();
+  bindNoticeDialog();
   try {
     // 单一数据源：顶部 Rive、公告、联系方式、横幅、卡片都来自同一个 JSON，
     // 因此发布内容只需要编辑 data/content.json，不必改动页面代码。
     const content = await loadJson("./data/content.json");
-    state.hero = content.hero || null;
-    state.notice = content.notice || null;
-    state.contact = content.contact || null;
-    state.activities = (content.banners || []).filter((item) => item.visible !== false);
-    state.cases = (content.cards || []).filter((item) => item.visible !== false);
-    initHeroRive();
-    renderContact();
-    renderActivities();
-    renderFilters();
-    renderCases();
-    initNotice();
+    applyContent(content);
   } catch (error) {
     // 内容读取失败时仍然初始化顶部：hero 会回退到 HERO_DEFAULTS。
     initHeroRive();
