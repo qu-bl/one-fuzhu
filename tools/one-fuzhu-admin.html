@@ -1419,7 +1419,10 @@ function initPreview() {
   const frame = $('previewFrame');
   if (!frame) return;
   frame.addEventListener('load', () => syncPreview());
-  frame.src = '../site/';
+  // 预览 iframe 加时间戳：GitHub Pages 对 index.html 也设了 max-age=600，
+  // 不加的话 iframe 可能拿到缓存里的旧首页，进而引用旧的 app.js / styles.css，
+  // 表现就是「管理台改了、官网代码也改了，画布却没反应」。
+  frame.src = '../site/?t=' + Date.now();
 }
 
 // ---------- 可拖拽面板 ----------
@@ -2011,6 +2014,22 @@ async function save() {
 }
 
 let initialized = false;
+// 管理台自己也有 10 分钟缓存。改了文件之后普通刷新可能还是旧页面，
+// 表现就是「代码明明改了却不见效」。这里取一次线上文件，跟当前页面里的
+// 样式表长度比一下，不一致就明说。
+async function warnIfStale() {
+  try {
+    const res = await fetch(location.pathname, { cache: 'no-store' });
+    if (!res.ok) return;
+    const latest = (await res.text()).match(/<style>([\s\S]*?)<\/style>/);
+    const current = document.querySelector('style');
+    if (!latest || !current) return;
+    if (latest[1].trim().length !== current.textContent.trim().length) {
+      setStatus('管理台有新版本，浏览器用的是缓存里的旧版。按 Cmd+Shift+R 强制刷新后再操作。', 'err');
+    }
+  } catch { /* 离线或被拦截时不管 */ }
+}
+
 async function initialize() {
   if (initialized) return;
   initialized = true;
@@ -2049,6 +2068,7 @@ async function initialize() {
     items[next].focus();
     selectTab(items[next].dataset.view);
   });
+  warnIfStale();
   initPreview();
   bindGutters();
   restorePanels();
