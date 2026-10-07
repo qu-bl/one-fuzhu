@@ -1,1 +1,4 @@
 .DS_Store
+
+# 未匹配报告清洗脚本的字体名缓存，首次运行会自己拉取。
+tools/.google-fonts.txt

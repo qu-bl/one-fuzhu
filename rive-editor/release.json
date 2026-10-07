@@ -1,7 +1,7 @@
 {
   "url": "https://qu-bl.github.io/one-fuzhu/rive-editor/translation.json",
-  "version": "2026.10.06-103317",
-  "sha256": "6c68c582d857c6f5e2bd5f4ad8ac867d90e59b46e7564797900548ab63e41a6a",
+  "version": "2026.10.07-234004",
+  "sha256": "4f84fa668350229ef1fc19608dec87a402666befeebb1920ef88dc605d88f103",
   "loadPolicy": "firstUseOncePerColdStart",
   "fontPolicy": "sharedRemoteFont",
   "fontFamily": "Qu Translation Sans",
