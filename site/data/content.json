@@ -1,12 +1,18 @@
 {
   "schemaVersion": 2,
   "hero": {
-    "ariaLabel": "猫咪触摸跟随互动动画",
+    "ariaLabel": "千机百变品牌互动动画",
     "rive": {
-      "src": "./assets/hero-cat.riv",
-      "artboard": "Artboard 2",
-      "stateMachine": "State Machine 1",
-      "autoplay": true
+      "src": "./assets/hero-logo.riv",
+      "artboard": "Artboard",
+      "stateMachine": "主动画",
+      "autoplay": true,
+      "cycle": {
+        "input": "state",
+        "from": 0,
+        "to": 3,
+        "intervalMs": 8000
+      }
     }
   },
   "notice": {

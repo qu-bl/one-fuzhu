@@ -35,12 +35,18 @@ const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform
 // 保证只更新站点文件、不更新内容文件时页面仍然可用。
 const HERO_DEFAULTS = {
   rive: {
-    src: "./assets/hero-cat.riv",
-    artboard: "Artboard 2",
-    stateMachine: "State Machine 1",
+    src: "./assets/hero-logo.riv",
+    artboard: "Artboard",
+    stateMachine: "主动画",
     autoplay: true,
+    cycle: {
+      input: "state",
+      from: 0,
+      to: 3,
+      intervalMs: 8000,
+    },
   },
-  ariaLabel: "猫咪触摸跟随互动动画",
+  ariaLabel: "千机百变品牌互动动画",
 };
 
 const state = {
@@ -431,8 +437,36 @@ function renderActivities() {
 let heroRiveInstance = null;
 let heroRiveObserver = null;
 let heroRiveKey = "";
+let heroCycleTimer = null;
+
+// 数据绑定输入轮换：每隔 intervalMs 把 input 的值在 from..to 之间循环一次。
+// 只依赖 Rive 官方 ViewModel 实例 API（vmi.number(name).value）。
+function startHeroCycle(rive, riveInstance) {
+  stopHeroCycle();
+  const cycle = rive.cycle;
+  if (!cycle || !riveInstance?.viewModelInstance) return;
+  const prop = riveInstance.viewModelInstance.number(cycle.input);
+  if (!prop) return;
+  const from = Number.isFinite(cycle.from) ? cycle.from : 0;
+  const to = Number.isFinite(cycle.to) ? cycle.to : from;
+  const intervalMs = Number.isFinite(cycle.intervalMs) && cycle.intervalMs > 0 ? cycle.intervalMs : 8000;
+  let current = from;
+  try { current = prop.value; } catch { /* 用 from 起步 */ }
+  heroCycleTimer = window.setInterval(() => {
+    current = current >= to ? from : current + 1;
+    try { prop.value = current; } catch { /* 输入被外部清理时静默跳过 */ }
+  }, intervalMs);
+}
+
+function stopHeroCycle() {
+  if (heroCycleTimer !== null) {
+    window.clearInterval(heroCycleTimer);
+    heroCycleTimer = null;
+  }
+}
 
 window.addEventListener("pagehide", () => {
+  stopHeroCycle();
   heroRiveObserver?.disconnect();
   heroRiveInstance?.cleanup?.();
 }, { once: true });
@@ -449,10 +483,11 @@ function initHeroRive() {
 
   // 决定实例长相的就是这几个值。它们没变，就没必要重建。
   const autoplay = rive.autoplay !== false && !reduceMotion.matches;
-  const key = [rive.src, rive.artboard || "", rive.stateMachine || "", autoplay].join("|");
+  const key = [rive.src, rive.artboard || "", rive.stateMachine || "", autoplay, JSON.stringify(rive.cycle || null)].join("|");
   if (heroRiveInstance && heroRiveKey === key) return;
   heroRiveKey = key;
 
+  stopHeroCycle();
   heroRiveObserver?.disconnect();
   heroRiveObserver = null;
   heroRiveInstance?.cleanup?.();
@@ -464,9 +499,11 @@ function initHeroRive() {
     canvas: activityRiveCanvas,
     autoplay: autoplay,
     isTouchScrollEnabled: true,
+    autoBind: true, // 官方推荐：自动绑定画板默认 ViewModel，之后可用 viewModelInstance 读写数据绑定输入。
     onLoad: () => {
       resize();
       activityRiveCanvas.removeAttribute("aria-hidden");
+      startHeroCycle(rive, heroRiveInstance);
     },
   };
   // 留空表示使用 .riv 文件里的默认画板与状态机，交给 Rive 自行选择。
