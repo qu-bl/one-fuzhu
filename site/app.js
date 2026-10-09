@@ -147,9 +147,32 @@ function openAccessDialog(item, trigger) {
 }
 
 function closeAccessDialog() {
-  accessMedia.replaceChildren();
-  if (accessDialog.open) accessDialog.close();
-  document.body.classList.remove("dialog-open");
+  if (!accessDialog.open || accessDialog.dataset.closing === "true") return;
+  // 结束退场后真正关闭；close 事件里统一做内容清理、解锁滚动与焦点归还。
+  const finish = () => {
+    accessDialog.classList.remove("closing");
+    delete accessDialog.dataset.closing;
+    accessDialog.close();
+  };
+  if (reduceMotion.matches || !accessDialog.animate) { finish(); return; }
+  accessDialog.dataset.closing = "true";
+  // 反向缩回触发点，与打开动画镜像。
+  const sourceBounds = state.dialogTrigger?.getBoundingClientRect();
+  const target = accessDialog.getBoundingClientRect();
+  const dx = sourceBounds ? sourceBounds.left + sourceBounds.width / 2 - (target.left + target.width / 2) : 0;
+  const dy = sourceBounds ? sourceBounds.top + sourceBounds.height / 2 - (target.top + target.height / 2) : 24;
+  const scale = sourceBounds ? Math.max(.25, Math.min(.8, sourceBounds.width / target.width)) : .88;
+  accessDialog.classList.add("closing");
+  const exit = accessDialog.animate([
+    { opacity: 1, transform: "translate(0, 0) scale(1)" },
+    { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(${scale})` }
+  ], { duration: 240, easing: "cubic-bezier(.3, 0, .8, .15)" });
+  exit.onfinish = finish;
+  // 动画被主动取消（例如退场途中重开另一张卡）：只清理状态，不关闭弹窗。
+  exit.oncancel = () => {
+    accessDialog.classList.remove("closing");
+    delete accessDialog.dataset.closing;
+  };
 }
 
 function fallbackCopy(value) {
@@ -253,6 +276,12 @@ function mountAccessDialog(item, trigger, options = {}) {
 
   document.body.classList.add("dialog-open");
   if (accessDialog.open) {
+    // 正在退场时用户又点了别的卡：取消退场动画，直接停在已换好的新内容上。
+    if (accessDialog.dataset.closing === "true") {
+      accessDialog.getAnimations?.().forEach((animation) => animation.cancel());
+      accessDialog.classList.remove("closing");
+      delete accessDialog.dataset.closing;
+    }
     // 已经开着：内容已经在上面换好了，不用再 showModal 一次。
     return;
   }
@@ -614,9 +643,13 @@ document.body.append(cardBackdrop);
 cardBackdrop.addEventListener("click", () => collapseCard());
 
 function cardBounds() {
-  const margin = innerWidth < 720 ? 12 : 32;
-  const width = Math.min(760, innerWidth - margin * 2);
-  return { left: (innerWidth - width) / 2, top: margin, width, height: innerHeight - margin * 2 };
+  // 移动端留出更明显的四周留白，让展开卡像“浮层”而不是贴满全屏；
+  // 桌面端维持既有尺寸。
+  const narrow = innerWidth < 720;
+  const margin = narrow ? 24 : 32;
+  const width = Math.min(narrow ? 640 : 760, innerWidth - margin * 2);
+  const height = Math.min(innerHeight - margin * 2, narrow ? innerHeight * 0.88 : innerHeight - margin * 2);
+  return { left: (innerWidth - width) / 2, top: margin, width, height };
 }
 
 function geometry(rect) {
@@ -661,6 +694,12 @@ async function expandCard(card) {
   }
   Object.assign(card.style, geometry(cardBounds()));
   card.focus({ preventScroll: true });
+  // 展开态侧滑保护：压入一条占位历史。用户侧滑返回时先收起展开视图，
+  // 避免在展开态直接触发 WebView 返回、跳出页面。占位只保留一条，
+  // 重复展开不会把历史栈越压越深。
+  if (history.pushState && !(history.state && history.state.qianjiCard)) {
+    history.pushState({ qianjiCard: true }, "");
+  }
   if (!reduceMotion.matches) {
     await card.animate([geometry(from), geometry(cardBounds())], {
       duration: 480, easing: "cubic-bezier(.16,1,.3,1)"
@@ -715,6 +754,14 @@ async function collapseCard() {
 
 window.addEventListener("resize", () => {
   if (expandedCard && !expandedCard.closing) Object.assign(expandedCard.card.style, geometry(cardBounds()));
+});
+// 侧滑/浏览器返回：展开卡片开着时先收起浮层并压回占位历史，
+// 把这次返回"吞掉"——第一次返回只收起浮层，不会直接退到主页。
+// 收起后再返回才真正放行（expandedCard 为 null，直接 return）。
+window.addEventListener("popstate", () => {
+  if (!expandedCard) return;
+  collapseCard();
+  if (history.pushState) history.pushState({ qianjiCard: true }, "");
 });
 document.addEventListener("keydown", event => {
   if (!expandedCard) return;
@@ -906,6 +953,45 @@ function bindFeaturedControls() {
   });
 }
 
+// 区块滚动入场：.reveal 元素进入视口后由 .reveal-init 过渡到 .is-visible。
+// 管理台预览与 reduce-motion 下直接可见，不做隐藏。
+function initReveal() {
+  const targets = document.querySelectorAll(".reveal");
+  if (!targets.length) return;
+  if (reduceMotion.matches || document.documentElement.dataset.preview === "true" || !("IntersectionObserver" in window)) {
+    targets.forEach((el) => el.classList.add("is-visible"));
+    return;
+  }
+  targets.forEach((el) => el.classList.add("reveal-init"));
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-visible");
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+  targets.forEach((el) => observer.observe(el));
+}
+
+// M3 涟漪：pointerdown 时在按钮内生成一个扩散圆，动画结束后移除。
+function initRipples() {
+  if (reduceMotion.matches || !window.PointerEvent) return;
+  const RIPPLE_TARGETS = ".banner-action, .category-button, .activity-dot, .platform-button, .access-option, .dialog-close, .contact-method";
+  document.addEventListener("pointerdown", (event) => {
+    const host = event.target.closest(RIPPLE_TARGETS);
+    if (!host) return;
+    const rect = host.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const ripple = document.createElement("span");
+    ripple.className = "ripple";
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+    ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+    host.append(ripple);
+    ripple.addEventListener("animationend", () => ripple.remove());
+  });
+}
+
 function renderCases() {
   if (!caseGrid || !caseTemplate || expandedCard) return;
   const items = getFilteredCases();
@@ -1013,20 +1099,42 @@ function renderContact() {
 // 否则实时预览每敲一个字都会堆一批监听上去。
 function bindNoticeDialog() {
   if (!noticeDialog) return;
-  const close = () => {
-    if (noticeDialog.open) noticeDialog.close();
-  };
   // 公告弹窗不设关闭按钮：Esc 键（cancel）和点击弹窗外（backdrop）都能关掉。
   noticeDialog.addEventListener("cancel", (event) => {
     event.preventDefault();
-    close();
+    closeNoticeDialog();
   });
   noticeDialog.addEventListener("click", (event) => {
-    if (event.target === noticeDialog) close();
+    if (event.target === noticeDialog) closeNoticeDialog();
   });
   noticeDialog.addEventListener("close", () => {
+    noticeDialog.classList.remove("closing");
+    delete noticeDialog.dataset.closing;
     if (!accessDialog?.open) document.body.classList.remove("dialog-open");
   });
+}
+
+// 公告弹窗退场：缩放淡出后真正关闭（与详情弹窗共用 closing 类过渡遮罩）。
+function closeNoticeDialog() {
+  if (!noticeDialog.open || noticeDialog.dataset.closing === "true") return;
+  const finish = () => {
+    noticeDialog.classList.remove("closing");
+    delete noticeDialog.dataset.closing;
+    noticeDialog.close();
+  };
+  if (reduceMotion.matches || !noticeDialog.animate) { finish(); return; }
+  noticeDialog.dataset.closing = "true";
+  noticeDialog.classList.add("closing");
+  const exit = noticeDialog.animate([
+    { opacity: 1, transform: "translate(0, 0) scale(1)" },
+    { opacity: 0, transform: "translate(0, 14px) scale(.94)" }
+  ], { duration: 220, easing: "cubic-bezier(.3, 0, .8, .15)" });
+  exit.onfinish = finish;
+  // 动画被主动取消（例如重绘后重新显示）：只清理状态，不关闭弹窗。
+  exit.oncancel = () => {
+    noticeDialog.classList.remove("closing");
+    delete noticeDialog.dataset.closing;
+  };
 }
 
 function initNotice(options = {}) {
@@ -1082,6 +1190,11 @@ function initNotice(options = {}) {
     // 改为聚焦弹窗容器本身：默认无环，键盘 Tab 到按钮时环照常出现。
     noticeDialog.focus();
     noticeDialog.scrollTop = 0;
+  } else if (noticeDialog.open && noticeDialog.dataset.closing === "true") {
+    // 上一轮退场还没走完就被要求重新显示（管理台重绘等）：取消退场，停在已更新的内容上。
+    noticeDialog.getAnimations?.().forEach((animation) => animation.cancel());
+    noticeDialog.classList.remove("closing");
+    delete noticeDialog.dataset.closing;
   }
 }
 
@@ -1215,6 +1328,7 @@ async function initialize() {
 
   bindAccessDialog();
   bindNoticeDialog();
+  initRipples();
   try {
     // 单一数据源：顶部 Rive、公告、联系方式、横幅、卡片都来自同一个 JSON，
     // 因此发布内容只需要编辑 data/content.json，不必改动页面代码。
@@ -1225,6 +1339,8 @@ async function initialize() {
     initHeroRive();
     renderLoadError(error);
   }
+  // 内容渲染后再观察滚动入场，避免 content 加载前区块就已“进入视口”。
+  initReveal();
 }
 
 initialize();
