@@ -184,11 +184,10 @@ a.contact-method:hover { background: var(--md-sys-color-surface-container-highes
   .activity-slide { padding: 4px 0 16px; min-height: 260px; }
   .activity-content h2 { font-size: clamp(28px,7.7vw,44px); margin-bottom: 16px; }
   .activity-content p { margin-bottom: 20px; }
-  .activity-rive { min-height: 0; aspect-ratio: 4 / 3; }
   /* 竖屏下给一个高度下限。WebView 首次布局时 vw 可能还是 0，
      此时 aspect-ratio 算出来也是 0 高，Rive 画布就永远起不来；
      clamp 的下限保证它至少 220px。 */
-  .activity-rive { min-height: clamp(220px, 62vw, 340px); }
+  .activity-rive { min-height: clamp(220px, 62vw, 340px); aspect-ratio: 4 / 3; }
   .banner-navigation { padding: 8px 0; flex-wrap: wrap; gap: 8px; }
   .activity-dots { gap: 8px; }
   .activity-dot { padding: 9px 14px; }
