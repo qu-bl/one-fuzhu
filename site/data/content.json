@@ -3,7 +3,7 @@
   "hero": {
     "ariaLabel": "千机百变品牌互动动画",
     "rive": {
-      "src": "./assets/hero-logo.riv",
+      "src": "./assets/hero-logo.riv?v=06f156fe",
       "artboard": "Artboard",
       "stateMachine": "主动画",
       "autoplay": true,
