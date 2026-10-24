@@ -165,3 +165,21 @@ for (const presentation of ['persistent','runtime']) {
  assert.ok(inspect({kind:'ui',sets:{...currentSet,presentation}}).errors.length);
 }
 console.log('PASS explicit inline/dialog presentation; old UI scope rejected');
+
+// New hosts opt into structured readback; old clients must remain protected by the shared rules.
+for (const [type, flag] of [['list','supportsRiveListReadback'], ['viewModel','supportsRiveNestedReadback']]) {
+ for (const direction of ['fromRive','twoWay']) {
+  const manifest=structuredClone(minimal);
+  manifest.rive.viewModel='Test';manifest.rive.instance='default';
+  manifest.values.push({path:'package.probe.value',type,writable:true});
+  manifest.bindings=[{id:'probe',qu:'package.probe.value',quType:type,rive:['Property'],riveType:type,direction,mode:'latest',required:true}];
+  const source=JSON.stringify(manifest);
+  assert.deepEqual(inspect({kind:'manifest',source,[flag]:true}).errors,[],`${type} ${direction}`);
+  assert.ok(inspect({kind:'manifest',source}).errors.some(x=>x.includes('direction')),`legacy host must reject ${type}`);
+  const other=flag==='supportsRiveListReadback'?'supportsRiveNestedReadback':'supportsRiveListReadback';
+  assert.ok(inspect({kind:'manifest',source,[other]:true}).errors.some(x=>x.includes('direction')),`unrelated capability must not allow ${type}`);
+  manifest.values[manifest.values.length-1].writable=false;
+  assert.ok(inspect({kind:'manifest',source:JSON.stringify(manifest),[flag]:true}).errors.some(x=>x.includes('可写')));
+ }
+}
+console.log('PASS structured readback capability gates, old-host compatibility and QVMI write permissions');
