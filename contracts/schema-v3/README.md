@@ -49,3 +49,19 @@ AI 生成请求还必须携带宿主实际加载的契约版本和哈希；与�
   "text": "允许个人使用。商业使用须另行获得作者授权。"
 }
 ```
+
+## 11.0.2：按原生 Rive 属性能力校验
+
+`manifest.riveTypes` 与 QVMI 值类型分开，包含官方的 Font、Blob 属性。Font／Blob 使用
+`quType: resource` 传递资源引用；Image、Font、Blob、Artboard 只允许 `toRive`，不把资源引用
+作为可回读或可双向同步的普通值。空资源引用由当前客户端交给官方空值接口清除。
+
+检查器读取宿主声明的 `riveWritableResourceTypes` 与平台标识。当前 Apple、鸿蒙可以设置
+Font、Blob；Android 的 Compose SDK 可以设置 Font，但没有公开 Blob 写入接口，声明会被拒绝。
+没有声明新资源能力的旧宿主也不会被误判为支持 Font／Blob。
+
+List／View Model 的回读继续由宿主能力标识控制；回读只是可读属性投影，跳过只写资源、
+Trigger 事件和计算索引，不代表完整实例复制。Trigger 允许分别发送或监听，禁止 `twoWay` 状态同步。
+`manifest.validation.binding.runtimeOperations` 记录各平台真实公开操作；没有公开接口的操作不通过其他类型模拟。
+
+规则版本与三端当前实现配套；未升级客户端不会因为拉取新规则而自动获得新的原生能力。

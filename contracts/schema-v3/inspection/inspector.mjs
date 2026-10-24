@@ -167,8 +167,10 @@ function run(input, c) {
     for(const [i,b] of list(m.bindings).entries())if(object(b)) {
       const p=`bindings[${i}]`,r=mv.binding;
       pattern(b.id,'identifier',`${p}.id`);pattern(b.qu,'qvmiPath',`${p}.qu`);
-      const image=b.quType==='resource'&&b.riveType==='image';
+      const image=b.quType==='resource'&&list(r.resourceTargetTypes??['image']).includes(b.riveType);
       if(!image&&b.quType!=='object'&&b.quType!==b.riveType)add(p,'QVMI 与 Rive 类型不匹配');
+      if(['font','blob'].includes(b.riveType)&&!list(input.riveWritableResourceTypes).includes(b.riveType))add(`${p}.riveType`,'当前客户端未提供该资源属性的官方写入接口');
+      if(b.direction!=='fromRive'&&r.runtimeOperations?.[input.platform]?.[b.riveType]?.length===0)add(`${p}.riveType`,'当前官方运行时没有该属性的公开写入接口');
       const hostReadsStructured=(b.riveType==='list'&&input.supportsRiveListReadback===true)||(b.riveType==='viewModel'&&input.supportsRiveNestedReadback===true);
       if((image||(r.structuredRiveTypes.includes(b.riveType)&&!(hostReadsStructured&&list(r.readableStructuredRiveTypes).includes(b.riveType))))&&b.direction!==r.resourceToImageDirection)add(`${p}.direction`,'结构化属性只允许 toRive');
       if(!r.triggerTwoWayAllowed&&b.riveType==='trigger'&&b.direction==='twoWay')add(`${p}.direction`,'事件不允许双向状态同步');

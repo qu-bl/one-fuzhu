@@ -183,3 +183,30 @@ for (const [type, flag] of [['list','supportsRiveListReadback'], ['viewModel','s
  }
 }
 console.log('PASS structured readback capability gates, old-host compatibility and QVMI write permissions');
+
+// Public resource capabilities are checked per platform, separately from QVMI's resource tokens.
+for (const type of ['image','font','blob','artboard']) {
+ const valueType=type==='font'||type==='blob'?'resource':type;
+ const manifest=structuredClone(minimal);manifest.rive.viewModel='Test';manifest.rive.instance='default';
+ manifest.values.push({path:'package.probe.asset',type:valueType,writable:true});
+ manifest.bindings=[{id:'asset',qu:'package.probe.asset',quType:valueType,rive:['Asset'],riveType:type,direction:'toRive',mode:'latest',required:true}];
+ for (const platform of ['ios','macos','harmony','android']) {
+  const options={kind:'manifest',source:JSON.stringify(manifest),platform,riveWritableResourceTypes:['image','font','blob','artboard']};
+  const errors=inspect(options).errors;
+  if(platform==='android'&&type==='blob') assert.ok(errors.some(x=>x.includes('公开写入接口')));
+  else assert.deepEqual(errors,[],`${platform} ${type}`);
+  for(const direction of ['fromRive','twoWay']) {
+   const reverse=structuredClone(manifest);reverse.bindings[0].direction=direction;
+   assert.ok(inspect({...options,source:JSON.stringify(reverse)}).errors.some(x=>x.includes('toRive')));
+  }
+ }
+ if(type==='font'||type==='blob') assert.ok(inspect({kind:'manifest',source:JSON.stringify(manifest)}).errors.some(x=>x.includes('客户端')));
+}
+for(const direction of ['toRive','fromRive','twoWay']) {
+ const manifest=structuredClone(minimal);manifest.rive.viewModel='Test';manifest.rive.instance='default';
+ manifest.values.push({path:'package.probe.event',type:'trigger',writable:true});
+ manifest.bindings=[{id:'event',qu:'package.probe.event',quType:'trigger',rive:['Event'],riveType:'trigger',direction,mode:'latest',required:true}];
+ const errors=inspect({kind:'manifest',source:JSON.stringify(manifest)}).errors;
+ if(direction==='twoWay') assert.ok(errors.some(x=>x.includes('事件')));else assert.deepEqual(errors,[]);
+}
+console.log('PASS public resource setters, Android blob boundary, trigger events');

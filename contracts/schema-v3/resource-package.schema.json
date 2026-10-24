@@ -485,9 +485,11 @@
               "trigger",
               "enum",
               "image",
+              "font",
+              "blob",
               "artboard",
-              "list",
-              "viewModel"
+              "viewModel",
+              "list"
             ]
           },
           "direction": {
