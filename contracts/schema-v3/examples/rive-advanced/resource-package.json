@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 3,
+  "id": "com.example.rive-advanced",
+  "version": "1.0.0",
+  "name": "千机百变·Rive 高级对象",
+  "author": "千机百变",
+  "description": "使用共享 Worker 独立加载文件，显式推进状态机并读取离屏像素。",
+  "preview": "preview.webp",
+  "rive": {
+    "file": "main.riv",
+    "layout": {
+      "fit": "contain",
+      "alignment": "center"
+    },
+    "artboard": "Artboard",
+    "stateMachine": "State Machine 2"
+  },
+  "javascript": {
+    "entry": "main.js",
+    "networkDomains": []
+  },
+  "values": [],
+  "capabilities": {
+    "observe": [],
+    "trigger": []
+  },
+  "bindings": [],
+  "assets": {
+    "audio": []
+  },
+  "ui": []
+}

@@ -1,5 +1,5 @@
 {
-  "contractVersion": "11.0.3",
+  "contractVersion": "11.0.4",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -2009,14 +2009,891 @@
         "artboard"
       ],
       "capabilityFlags": [
-        "listObserve",
-        "nestedObserve",
+        "fileMetadata",
+        "assetCatalog",
+        "enumCatalog",
+        "instanceName",
+        "instanceEquals",
+        "decodedAssets",
+        "globalAssets",
         "imageSet",
         "fontSet",
+        "artboardSet",
+        "playback",
+        "advance",
+        "volume",
+        "fit",
+        "frameRate",
+        "backgroundColor",
+        "globalBinding",
+        "settledObserve",
+        "semanticsObserve",
+        "semanticsActions",
+        "listObserve",
+        "nestedObserve",
         "blobSet",
-        "artboardSet"
+        "globalNames",
+        "frameRateRange",
+        "globalClear",
+        "focus",
+        "pointerInput",
+        "keyInput",
+        "textInput",
+        "runtimeMessages",
+        "blobDecode",
+        "systemFontDecode",
+        "artboardResetSize"
       ],
-      "notificationTiming": "Official state-machine/artboard advance and render message processing; not setter echo or polling."
+      "notificationTiming": "Official state-machine/artboard advance and render message processing; not setter echo or polling.",
+      "advancedObjects": "script.rive"
+    },
+    "rive": {
+      "protocol": 1,
+      "transport": {
+        "call": "rive.instance.call",
+        "observe": "rive.instance.observe",
+        "newHostOperationsRequired": false
+      },
+      "availability": {
+        "queryBeforeUse": true,
+        "currentPlayer": "qu.rive.capabilities()",
+        "independentObjects": "qu.rive.files.capabilities()",
+        "oldClientPolicy": "Cloud rules do not install native APIs; check method presence and capability flags. Missing methods or false flags must not be simulated.",
+        "baseline": {
+          "apple": {
+            "sdk": "Rive 6.28.1 Swift concurrency API",
+            "clientVersion": "1.9",
+            "build": "1.2.11"
+          },
+          "android": {
+            "sdk": "Rive 11.14.3 Compose API",
+            "clientVersion": "1.0.11",
+            "build": 53
+          },
+          "harmony": {
+            "sdk": "BolinRiveHarmony official C++ adapter",
+            "adapterCommit": "1291778",
+            "clientCommit": "e65ffb3",
+            "requiresUpdatedClient": true
+          }
+        },
+        "currentPlayerFlags": {
+          "apple": {
+            "fileMetadata": true,
+            "assetCatalog": true,
+            "enumCatalog": true,
+            "instanceName": true,
+            "instanceEquals": true,
+            "decodedAssets": true,
+            "globalAssets": true,
+            "imageSet": true,
+            "fontSet": true,
+            "artboardSet": true,
+            "playback": true,
+            "advance": true,
+            "volume": true,
+            "fit": true,
+            "frameRate": true,
+            "backgroundColor": true,
+            "globalBinding": true,
+            "settledObserve": true,
+            "semanticsObserve": true,
+            "semanticsActions": true,
+            "listObserve": false,
+            "nestedObserve": false,
+            "blobSet": true,
+            "globalNames": true,
+            "frameRateRange": true,
+            "globalClear": false,
+            "focus": false,
+            "pointerInput": false,
+            "keyInput": false,
+            "textInput": false,
+            "runtimeMessages": false,
+            "blobDecode": true,
+            "systemFontDecode": true,
+            "artboardResetSize": false
+          },
+          "android": {
+            "fileMetadata": true,
+            "assetCatalog": true,
+            "enumCatalog": true,
+            "instanceName": true,
+            "instanceEquals": true,
+            "decodedAssets": true,
+            "globalAssets": true,
+            "imageSet": true,
+            "fontSet": true,
+            "artboardSet": true,
+            "playback": true,
+            "advance": true,
+            "volume": true,
+            "fit": true,
+            "frameRate": true,
+            "backgroundColor": true,
+            "globalBinding": true,
+            "settledObserve": true,
+            "semanticsObserve": true,
+            "semanticsActions": true,
+            "listObserve": false,
+            "nestedObserve": false,
+            "blobSet": false,
+            "globalNames": false,
+            "frameRateRange": false,
+            "globalClear": true,
+            "focus": true,
+            "pointerInput": true,
+            "keyInput": false,
+            "textInput": false,
+            "runtimeMessages": false,
+            "blobDecode": false,
+            "systemFontDecode": false,
+            "artboardResetSize": true
+          },
+          "harmony": {
+            "fileMetadata": true,
+            "assetCatalog": true,
+            "enumCatalog": true,
+            "instanceName": true,
+            "instanceEquals": true,
+            "decodedAssets": true,
+            "globalAssets": true,
+            "imageSet": true,
+            "fontSet": true,
+            "artboardSet": true,
+            "playback": true,
+            "advance": true,
+            "volume": true,
+            "fit": true,
+            "frameRate": true,
+            "backgroundColor": true,
+            "globalBinding": true,
+            "settledObserve": true,
+            "semanticsObserve": true,
+            "semanticsActions": true,
+            "listObserve": true,
+            "nestedObserve": false,
+            "blobSet": true,
+            "globalNames": true,
+            "frameRateRange": true,
+            "globalClear": true,
+            "focus": true,
+            "pointerInput": true,
+            "keyInput": true,
+            "textInput": true,
+            "runtimeMessages": true,
+            "blobDecode": true,
+            "systemFontDecode": false,
+            "artboardResetSize": true
+          }
+        },
+        "independentObjectFlags": {
+          "apple": {
+            "multipleFiles": true,
+            "independentArtboards": true,
+            "independentStateMachines": true,
+            "offscreenRender": true,
+            "sharedWorkerFiles": true,
+            "semantics": true,
+            "focus": false,
+            "pointerInput": false,
+            "keyInput": false,
+            "textInput": false,
+            "blobDecode": true,
+            "systemFontDecode": true,
+            "artboardResetSize": false
+          },
+          "android": {
+            "multipleFiles": true,
+            "independentArtboards": true,
+            "independentStateMachines": true,
+            "offscreenRender": true,
+            "sharedWorkerFiles": true,
+            "semantics": true,
+            "focus": true,
+            "pointerInput": true,
+            "keyInput": false,
+            "textInput": false,
+            "blobDecode": false,
+            "systemFontDecode": false,
+            "artboardResetSize": true
+          },
+          "harmony": {
+            "multipleFiles": true,
+            "independentArtboards": true,
+            "independentStateMachines": true,
+            "offscreenRender": true,
+            "sharedWorkerFiles": true,
+            "semantics": true,
+            "focus": true,
+            "pointerInput": true,
+            "keyInput": true,
+            "textInput": true,
+            "blobDecode": true,
+            "systemFontDecode": false,
+            "artboardResetSize": true
+          }
+        }
+      },
+      "api": {
+        "qu.rive": {
+          "capabilities": [],
+          "viewModelInstance": [],
+          "createViewModelInstance": [
+            "source"
+          ],
+          "state": [],
+          "load": [
+            "options"
+          ],
+          "font": [
+            "path"
+          ],
+          "playback.pause": [],
+          "playback.resume": [],
+          "playback.isPaused": [],
+          "playback.advance": [
+            "seconds"
+          ],
+          "volume.get": [],
+          "volume.set": [
+            "value"
+          ],
+          "setFit": [
+            "options"
+          ],
+          "setFrameRate": [
+            "options"
+          ],
+          "setBackgroundColor": [
+            "color"
+          ],
+          "globalViewModel": [
+            "name"
+          ],
+          "observe": [
+            "event",
+            "listener",
+            "onError"
+          ],
+          "focus.get": [],
+          "focus.hasNodes": [],
+          "focus.move": [
+            "direction"
+          ],
+          "focus.clear": [],
+          "semantics.enable": [],
+          "semantics.drain": [
+            "options"
+          ],
+          "semantics.action": [
+            "nodeID",
+            "action"
+          ],
+          "semantics.focus": [
+            "nodeID"
+          ],
+          "semantics.clearFocus": [],
+          "pointer": [
+            "options"
+          ],
+          "keyInput": [
+            "options"
+          ],
+          "textInput": [
+            "text"
+          ]
+        },
+        "qu.rive.file": {
+          "artboardNames": [],
+          "stateMachineNames": [
+            "artboard"
+          ],
+          "viewModelNames": [],
+          "globalViewModelNames": [],
+          "instanceNames": [
+            "model"
+          ],
+          "properties": [
+            "model"
+          ],
+          "enums": [],
+          "assets": [],
+          "defaultViewModel": [
+            "artboard"
+          ]
+        },
+        "qu.rive.files": {
+          "capabilities": [],
+          "open": [
+            "source",
+            "options"
+          ]
+        },
+        "qu.rive.workers": {
+          "create": [
+            "options"
+          ]
+        },
+        "instance": {
+          "viewModelName": [],
+          "name": [],
+          "properties": [],
+          "equals": [
+            "other"
+          ],
+          "close": [],
+          "number": [
+            "path"
+          ],
+          "boolean": [
+            "path"
+          ],
+          "string": [
+            "path"
+          ],
+          "enumeration": [
+            "path"
+          ],
+          "color": [
+            "path"
+          ],
+          "trigger": [
+            "path"
+          ],
+          "viewModel": [
+            "path"
+          ],
+          "list": [
+            "path"
+          ],
+          "image": [
+            "path"
+          ],
+          "font": [
+            "path"
+          ],
+          "blob": [
+            "path"
+          ],
+          "artboard": [
+            "path"
+          ]
+        },
+        "scalar": {
+          "get": [],
+          "set": [
+            "value"
+          ],
+          "observe": [
+            "listener",
+            "onError"
+          ]
+        },
+        "trigger": {
+          "fire": [],
+          "observe": [
+            "listener",
+            "onError"
+          ]
+        },
+        "resourceProperty": {
+          "set": [
+            "reference"
+          ]
+        },
+        "nested": {
+          "get": [],
+          "set": [
+            "instance"
+          ]
+        },
+        "list": {
+          "size": [],
+          "at": [
+            "index"
+          ],
+          "append": [
+            "instance"
+          ],
+          "insert": [
+            "index",
+            "instance"
+          ],
+          "removeAt": [
+            "index"
+          ],
+          "remove": [
+            "instance"
+          ],
+          "swap": [
+            "first",
+            "second"
+          ],
+          "observe": [
+            "listener",
+            "onError"
+          ]
+        },
+        "global": {
+          "get": [],
+          "bind": [
+            "source"
+          ],
+          "set": [
+            "instance"
+          ],
+          "clear": []
+        },
+        "legacyFont": {
+          "set": [
+            "resourceId"
+          ]
+        },
+        "assets": {
+          "decode": [
+            "type",
+            "source"
+          ],
+          "systemFont": [
+            "name",
+            "size"
+          ],
+          "artboard": [
+            "name"
+          ],
+          "register": [
+            "name",
+            "resource"
+          ],
+          "unregister": [
+            "type",
+            "name"
+          ]
+        },
+        "resource": {
+          "equals": [
+            "other"
+          ],
+          "register": [
+            "name"
+          ],
+          "close": []
+        },
+        "artboardResource": {
+          "stateMachineNames": [],
+          "volume.get": [],
+          "volume.set": [
+            "value"
+          ],
+          "resetSize": []
+        },
+        "worker": {
+          "open": [
+            "source"
+          ],
+          "close": []
+        },
+        "file": {
+          "artboardNames": [],
+          "viewModelNames": [],
+          "globalViewModelNames": [],
+          "instanceNames": [
+            "model"
+          ],
+          "properties": [
+            "model"
+          ],
+          "enums": [],
+          "assetCatalog": [],
+          "createViewModelInstance": [
+            "source"
+          ],
+          "createArtboard": [
+            "name"
+          ],
+          "close": []
+        },
+        "artboard": {
+          "stateMachineNames": [],
+          "volume.get": [],
+          "volume.set": [
+            "value"
+          ],
+          "resetSize": [],
+          "createStateMachine": [
+            "name"
+          ],
+          "close": []
+        },
+        "stateMachine": {
+          "advance": [
+            "seconds"
+          ],
+          "bind": [
+            "main",
+            "globals"
+          ],
+          "setFit": [
+            "options"
+          ],
+          "setBackgroundColor": [
+            "color"
+          ],
+          "pointer": [
+            "options"
+          ],
+          "keyInput": [
+            "options"
+          ],
+          "textInput": [
+            "text"
+          ],
+          "focus.get": [],
+          "focus.hasNodes": [],
+          "focus.move": [
+            "direction"
+          ],
+          "focus.clear": [],
+          "semantics.enable": [],
+          "semantics.drain": [
+            "options"
+          ],
+          "semantics.action": [
+            "nodeID",
+            "action"
+          ],
+          "semantics.focus": [
+            "nodeID"
+          ],
+          "semantics.clearFocus": [],
+          "render": [
+            "options"
+          ],
+          "observe": [
+            "event",
+            "listener",
+            "onError"
+          ],
+          "close": []
+        }
+      },
+      "receivers": {
+        "scalar": "instance.number/boolean/string/enumeration/color(path)",
+        "trigger": "instance.trigger(path)",
+        "resourceProperty": "instance.image/font/blob/artboard(path)",
+        "nested": "instance.viewModel(path)",
+        "list": "instance.list(path)",
+        "global": "qu.rive.globalViewModel(name)",
+        "legacyFont": "qu.rive.font(path)",
+        "assets": "qu.rive.assets or file.assets",
+        "resource": "assets.decode/systemFont/artboard result",
+        "artboardResource": "assets.artboard result, also has resource methods",
+        "worker": "qu.rive.workers.create result",
+        "file": "qu.rive.files.open or worker.open result; has assets receiver",
+        "artboard": "file.createArtboard result",
+        "stateMachine": "artboard.createStateMachine result"
+      },
+      "parameters": {
+        "instanceSource": {
+          "fields": [
+            "viewModel",
+            "source",
+            "instance"
+          ],
+          "sources": [
+            "default",
+            "blank",
+            "named"
+          ],
+          "namedRequires": "instance",
+          "names": "Use actual file metadata; do not invent names."
+        },
+        "fileSource": {
+          "kinds": [
+            "owned resource reference string",
+            "Uint8Array"
+          ],
+          "urlPolicy": "No automatic URL fetching. Use declared qu.network APIs then pass the owned resource token or bytes.",
+          "limits": [
+            "resources.readBinaryMaxBytes",
+            "resources.riveAssetMaxBytes"
+          ],
+          "permissions": "Same script/package resource ownership and network domain permissions as existing resource readers."
+        },
+        "workerOptions": {
+          "fields": [
+            "enableGPUCanvas"
+          ],
+          "default": {
+            "enableGPUCanvas": true
+          },
+          "fixedAfterCreation": true
+        },
+        "fileOptions": {
+          "fields": [
+            "enableGPUCanvas",
+            "worker"
+          ],
+          "withoutWorker": "Creates an independent native Worker.",
+          "withWorker": "Requires a live Worker reference from the same script. enableGPUCanvas must be omitted."
+        },
+        "fit": {
+          "fields": [
+            "fit",
+            "alignment",
+            "scaleFactor"
+          ],
+          "values": [
+            "fill",
+            "contain",
+            "cover",
+            "fitWidth",
+            "fitHeight",
+            "none",
+            "scaleDown",
+            "layout"
+          ],
+          "alignments": [
+            "topLeft",
+            "topCenter",
+            "topRight",
+            "centerLeft",
+            "center",
+            "centerRight",
+            "bottomLeft",
+            "bottomCenter",
+            "bottomRight"
+          ],
+          "scaleFactor": "Positive finite number for layout; omitted defaults follow the current SDK/host."
+        },
+        "frameRate": {
+          "fields": [
+            "kind",
+            "fps",
+            "minimum",
+            "maximum",
+            "preferred"
+          ],
+          "kindsByPlatform": {
+            "apple": [
+              "default",
+              "fps",
+              "range"
+            ],
+            "android": [
+              "default",
+              "fps",
+              "unbounded"
+            ],
+            "harmony": [
+              "default",
+              "fps",
+              "range"
+            ]
+          },
+          "fps": "Positive integer.",
+          "range": "minimum >= 0, maximum > 0, minimum <= maximum, preferred when supplied is within range; native display caps apply.",
+          "default": "Native platform policy; Android restores the application 60 fps cap.",
+          "scope": "Current displayed player only; independent objects advance explicitly."
+        },
+        "volume": {
+          "minimum": 0,
+          "maximum": 1,
+          "scope": "The addressed artboard; not a per-file global mixer."
+        },
+        "color": "#RRGGBB or #AARRGGBB; native Rive clear color, not an overlay.",
+        "advance": {
+          "unit": "seconds",
+          "minimum": 0,
+          "currentPlayerRequiresPause": true,
+          "independentStateMachine": "No autoplay clock is created; advance explicitly."
+        },
+        "pointer": {
+          "fields": [
+            "phase",
+            "id",
+            "x",
+            "y",
+            "width",
+            "height",
+            "fit",
+            "alignment",
+            "scaleFactor"
+          ],
+          "phases": [
+            "down",
+            "move",
+            "up",
+            "exit"
+          ],
+          "coordinates": "Physical pixels of the Rive viewport, not screen logical coordinates.",
+          "viewport": "width and height positive; optional fit/alignment/scaleFactor use addressed graph configuration."
+        },
+        "keyInput": {
+          "platforms": [
+            "harmony"
+          ],
+          "currentPlayerFields": [
+            "key",
+            "modifiers",
+            "pressed",
+            "repeat"
+          ],
+          "independentStateMachineFields": [
+            "key",
+            "modifiers",
+            "isPressed",
+            "isRepeat"
+          ],
+          "keyAndModifiers": "Official unsigned key/modifier values; no synthetic platform key remapping.",
+          "note": "The shipped current-player and independent-object adapters use different boolean option names. Use the receiver-specific fields; do not mix them."
+        },
+        "semanticsDrain": {
+          "fields": [
+            "width",
+            "height"
+          ],
+          "dimensions": "Positive viewport dimensions; enable before advance/drain/observe.",
+          "actions": [
+            "tap",
+            "increase",
+            "decrease"
+          ],
+          "nodeID": "Use real nodes from the official semantics event payload, not guessed IDs."
+        },
+        "assetDecode": {
+          "typesByPlatform": {
+            "apple": [
+              "image",
+              "font",
+              "audio",
+              "blob"
+            ],
+            "android": [
+              "image",
+              "font",
+              "audio"
+            ],
+            "harmony": [
+              "image",
+              "font",
+              "audio",
+              "blob"
+            ]
+          },
+          "source": [
+            "owned resource reference string",
+            "Uint8Array"
+          ],
+          "limits": {
+            "image": "resources.riveImageMaxBytes",
+            "other": "resources.riveAssetMaxBytes"
+          },
+          "deferredDecode": "GPU Canvas may return recorded/deferred resources. A handle alone does not prove complete image decoding.",
+          "audio": "Register as an out-of-band asset; there is no RVMI Audio property.",
+          "systemFont": "Apple only: name defaults to empty, size defaults to 16.",
+          "registration": "Global names are Worker-scoped. close releases the script resource reference and does not implicitly unregister the name."
+        },
+        "resourceSetter": {
+          "accepted": [
+            "existing string resource reference",
+            "matching live decoded resource",
+            "null"
+          ],
+          "clear": [
+            "null",
+            "empty string"
+          ],
+          "readable": false,
+          "observable": false
+        },
+        "render": {
+          "fields": [
+            "width",
+            "height"
+          ],
+          "positiveIntegerDimensions": true,
+          "maximumDimension": 4096,
+          "result": {
+            "skipped": "boolean",
+            "width": "integer when not skipped",
+            "height": "integer when not skipped",
+            "format": [
+              "rgba8",
+              "bgra8"
+            ],
+            "pixels": "Uint8Array, width * height * 4 bytes when not skipped"
+          },
+          "skip": "Only {skipped:true}; never return a fabricated cached frame.",
+          "output": "Raw native pixels, not PNG/JPEG or a screen capture; channel order is determined by format.",
+          "nativeBackend": {
+            "apple": "Official Metal renderer",
+            "android": "Official createImageSurface/drawToBuffer on OpenGL CommandQueue",
+            "harmony": "Official RiveRenderer/CommandQueue, adapter Vulkan offscreen readback"
+          }
+        }
+      },
+      "events": {
+        "currentPlayer": {
+          "settled": "settledObserve",
+          "semantics": "semanticsObserve",
+          "focus": "focus",
+          "runtimeMessage": "runtimeMessages",
+          "keyHandled": "keyInput",
+          "textHandled": "textInput"
+        },
+        "independentStateMachine": {
+          "settled": "always",
+          "semantics": "semantics",
+          "focus": "focus",
+          "runtimeMessage": "harmony only",
+          "keyHandled": "keyInput",
+          "textHandled": "textInput"
+        },
+        "listenerReturns": "Synchronous cancel function; callbacks are native notifications, not setter echoes.",
+        "settled": "Current state machine is settled, not a generic animation-finished event.",
+        "semanticsPayload": {
+          "apple": "Official semantic diff",
+          "android": "Official current semantic tree snapshot",
+          "harmony": "Official semantic diff"
+        },
+        "focusPayload": "Official focus state, including focused and expectsKeyboardInput when supplied by SDK.",
+        "runtimeMessagePayload": "Harmony: {tag, payload:number[]} from native runtime message bytes.",
+        "timing": "Native advance/render/lifecycle message processing. Independent graphs require explicit enable/advance/drain as applicable; observation does not run a clock or fabricate initial snapshots."
+      },
+      "ownership": {
+        "referenceIdentity": "Official SDK instance/resource identity; equals uses native identity. No JSON cloning, same-name matching or field-content matching.",
+        "currentPlayer": "Graph-scoped handles and subscriptions become invalid on graph replacement or script stop.",
+        "independentObjects": "Script-scoped and independent of current player replacement; file close invalidates its scoped handles and listeners.",
+        "sameWorkerOnly": "Cross-file native VMI and decoded resource references are accepted only within one Worker and script; model/property compatibility remains an SDK decision.",
+        "workerClose": "Releases the JS Worker owner and forbids new opens; already-open files retain the Worker until they close.",
+        "fileClose": "Closes only this file, not other files sharing the Worker.",
+        "artboardClose": "Closes its child state machines.",
+        "instanceClose": "Releases this script handle; does not remove a list element or clear a still-bound native instance.",
+        "importFailure": "A failed file import must not terminate other files on the Worker.",
+        "scriptStop": "Releases objects and subscriptions owned by this script.",
+        "globals": "get returns only explicitly retained global overrides. Default SDK global instances are not synthesized; Apple global clear remains unavailable."
+      },
+      "integration": {
+        "directJS": "Direct SDK instance operations need no same-named QVMI fields.",
+        "manifestBindings": "Keep declarative bindings for shared QVMI values; scalar directions remain as declared.",
+        "dynamicJSBindings": "Keep JS reads/observations of QVMI and explicit operations on genuine RVMI references.",
+        "sharedUI": "Resource package UI continues to use its owner-scoped QVMI values.",
+        "writes": "QVMI writes obey existing declarations, ownership and writable permissions; no automatic RVMI backflow. Scripts may explicitly publish an observed Rive property into a writable field they own.",
+        "containerPolicy": "List is a collection of native ViewModelInstance references. No whole-JSON automatic round trip or simulated container observation."
+      },
+      "examples": {
+        "package": "contracts/schema-v3/examples/rive-advanced",
+        "guide": "contracts/schema-v3/RIVE_JS.md"
+      },
+      "officialSources": [
+        "https://rive.app/docs/runtimes/apple/apple",
+        "https://rive.app/docs/runtimes/android/android",
+        "https://github.com/rive-app/rive-ios",
+        "https://github.com/rive-app/rive-android",
+        "https://github.com/rive-app/rive-runtime"
+      ]
     }
   },
   "archive": {

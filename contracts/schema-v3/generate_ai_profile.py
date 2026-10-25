@@ -58,6 +58,7 @@ def build_profile():
             "applicationOnlyOperations": script["applicationOnlyOperations"],
             "hostOperations": script["hostOperations"],
             "riveInstanceReferences": script.get("riveInstanceReferences", {}),
+            "rive": script["rive"],
             "operationArguments": script["operationArguments"],
             "operationOptionFields": script["operationOptionFields"],
             "storage": script["storage"],

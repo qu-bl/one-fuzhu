@@ -98,3 +98,11 @@ Apple／Android 为假；`nestedObserve` 均为假。只有实际公开了结构
 Android 的 `blobSet` 为假，沿用 SDK 限制。资源属性不提供 `.get()` 或 `.observe()`。
 所有属性通知遵守官方状态机／画板推进与帧消息处理时机，不把 setter 的调用当作已收到 Rive 通知。
 Trigger 事件回调不携带伪造的布尔状态；重复事件不参与 QVMI 状态去重。
+
+## 11.0.4：JS 高级对象与共享 Worker
+
+本版补全 script.rive 的公开方法、参数、平台能力矩阵、对象归属与释放语义。
+当前播放器的元数据、播放、全局实例、资源解码、语义与输入，以及独立文件/画板/状态机、
+离屏原始像素输出、共享 Worker 均按已实现的官方接口记录。详见 [RIVE_JS.md](RIVE_JS.md)。
+不新增 hostOperations，不改变 schemaVersion，不修改 QVMI/UI 或现有三种连接方式。
+规则仅发布说明和检查依据；旧客户端不会自动增加原生能力，脚本必须先查询能力。
