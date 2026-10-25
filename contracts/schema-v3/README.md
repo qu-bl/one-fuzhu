@@ -65,3 +65,36 @@ Trigger 事件和计算索引，不代表完整实例复制。Trigger 允许分�
 `manifest.validation.binding.runtimeOperations` 记录各平台真实公开操作；没有公开接口的操作不通过其他类型模拟。
 
 规则版本与三端当前实现配套；未升级客户端不会因为拉取新规则而自动获得新的原生能力。
+
+## 11.0.3：按真实实例操作列表
+
+撤销 11.0.1／11.0.2 的整表 JSON 回读及自动双向镜像约定。官方列表是 View Model
+实例集合；JSON 可读属性快照不包含身份、资源和内部状态，不能充当实例或用于猜测复用。
+
+资源包脚本通过 `qu.rive.viewModelInstance()` 取得当前根实例，通过
+`qu.rive.createViewModelInstance({viewModel, source, instance})` 创建官方来源实例。
+引用只在当前脚本及当前 Rive 图有效；停止脚本、切换画板或关闭文件会释放引用和监听。
+`instance.close()` 释放脚本自己的包装引用，不删除列表中的实例。
+
+`instance.list(path)` 提供 `size()`、`at(index)`、`append(instance)`、
+`insert(index, instance)`、`removeAt(index)`、`remove(instance)`、`swap(a,b)`。
+`at` 返回真实列表项引用。`instance.viewModel(path).get()/set(instance)` 读取或替换嵌套实例。
+数字、布尔、文本、枚举、颜色属性使用 `.get()`／`.set(value)`／`.observe(listener,onError)`；
+Trigger 只有 `.fire()`／`.observe()`，不作为可读取的布尔状态。
+
+`ListProperty` 没有数组整值 setter，也没有跨平台统一的原生结构流，应用不再模拟。
+逐项值更新订阅官方属性流；结构在官方增删交换后显式读取，调试台也提供刷新按钮。
+同一个实例添加两次会共享状态，创建两个实例则分别持有状态，完全沿用官方行为。
+
+旧 `toRive` 实例描述仍作为显式整值替换输入保留，不承诺保留旧组件状态；旧
+`fromRive`／`twoWay` 容器描述会被明确拒绝。普通标量属性的双向绑定继续可用。
+需要从列表项同步 QVMI 时，在保留的实例上订阅对应属性，再显式写入已声明的 QVMI 字段；
+反向写入同一实例的属性即可，不把整个列表做 JSON 往返。
+
+原生订阅能力通过 `await qu.rive.capabilities()` 查询：目前鸿蒙 `listObserve` 为真，
+Apple／Android 为假；`nestedObserve` 均为假。只有实际公开了结构订阅的宿主可调用
+`instance.list(path).observe(listener,onError)`，其他宿主明确拒绝，绝不以定时器模拟。
+图片、字体、Blob、画板通过对应 `.set(resourceReference)` 赋值，空字符串清空；
+Android 的 `blobSet` 为假，沿用 SDK 限制。资源属性不提供 `.get()` 或 `.observe()`。
+所有属性通知遵守官方状态机／画板推进与帧消息处理时机，不把 setter 的调用当作已收到 Rive 通知。
+Trigger 事件回调不携带伪造的布尔状态；重复事件不参与 QVMI 状态去重。

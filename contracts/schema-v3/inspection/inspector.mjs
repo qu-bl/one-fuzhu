@@ -171,8 +171,7 @@ function run(input, c) {
       if(!image&&b.quType!=='object'&&b.quType!==b.riveType)add(p,'QVMI 与 Rive 类型不匹配');
       if(['font','blob'].includes(b.riveType)&&!list(input.riveWritableResourceTypes).includes(b.riveType))add(`${p}.riveType`,'当前客户端未提供该资源属性的官方写入接口');
       if(b.direction!=='fromRive'&&r.runtimeOperations?.[input.platform]?.[b.riveType]?.length===0)add(`${p}.riveType`,'当前官方运行时没有该属性的公开写入接口');
-      const hostReadsStructured=(b.riveType==='list'&&input.supportsRiveListReadback===true)||(b.riveType==='viewModel'&&input.supportsRiveNestedReadback===true);
-      if((image||(r.structuredRiveTypes.includes(b.riveType)&&!(hostReadsStructured&&list(r.readableStructuredRiveTypes).includes(b.riveType))))&&b.direction!==r.resourceToImageDirection)add(`${p}.direction`,'结构化属性只允许 toRive');
+      if((image||r.structuredRiveTypes.includes(b.riveType))&&b.direction!==r.resourceToImageDirection)add(`${p}.direction`,'资源属性或实例描述仅支持 toRive；List／View Model 的读取和逐项编辑请使用 qu.rive 的真实实例引用接口');
       if(!r.triggerTwoWayAllowed&&b.riveType==='trigger'&&b.direction==='twoWay')add(`${p}.direction`,'事件不允许双向状态同步');
       if(b.transform&&(b.quType!==r.transformSourceType||b.riveType!==r.transformTargetType||b.direction!==r.transformDirection))add(`${p}.transform`,'转换仅允许 number → number 的 toRive');
       if(Array.isArray(b.transform?.clamp)&&b.transform.clamp[0]>b.transform.clamp[1])add(`${p}.transform.clamp`,'区间顺序无效');

@@ -57,6 +57,7 @@ def build_profile():
             "generationChecks": script["validation"]["generationChecks"],
             "applicationOnlyOperations": script["applicationOnlyOperations"],
             "hostOperations": script["hostOperations"],
+            "riveInstanceReferences": script.get("riveInstanceReferences", {}),
             "operationArguments": script["operationArguments"],
             "operationOptionFields": script["operationOptionFields"],
             "storage": script["storage"],

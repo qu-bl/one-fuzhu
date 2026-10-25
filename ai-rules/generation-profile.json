@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "11.0.2",
+  "contractVersion": "11.0.3",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -620,8 +620,66 @@
       "resources.readBinary",
       "rive.state",
       "rive.load",
-      "rive.font.set"
+      "rive.font.set",
+      "rive.instance.call",
+      "rive.instance.observe"
     ],
+    "riveInstanceReferences": {
+      "root": "qu.rive.viewModelInstance()",
+      "create": "qu.rive.createViewModelInstance({viewModel, source, instance})",
+      "sources": [
+        "default",
+        "blank",
+        "named"
+      ],
+      "scope": "scriptAndCurrentRiveGraph",
+      "persistent": false,
+      "jsonClone": false,
+      "release": "instance.close()",
+      "scalars": [
+        "number",
+        "boolean",
+        "string",
+        "enum",
+        "color"
+      ],
+      "events": [
+        "trigger"
+      ],
+      "listOperations": [
+        "size",
+        "at",
+        "append",
+        "insert",
+        "removeAt",
+        "remove",
+        "swap",
+        "observeIfSupported"
+      ],
+      "nestedOperations": [
+        "get",
+        "set"
+      ],
+      "observation": "officialPropertyStreamsOrListeners",
+      "containerObservation": "notSynthesized",
+      "migration": "Use retained instance references for list/nested edits; JSON descriptor bindings only explicitly replace the whole value.",
+      "capabilities": "qu.rive.capabilities()",
+      "resourceSetters": [
+        "image",
+        "font",
+        "blob",
+        "artboard"
+      ],
+      "capabilityFlags": [
+        "listObserve",
+        "nestedObserve",
+        "imageSet",
+        "fontSet",
+        "blobSet",
+        "artboardSet"
+      ],
+      "notificationTiming": "Official state-machine/artboard advance and render message processing; not setter echo or polling."
+    },
     "operationArguments": {
       "values.get": [
         "path",
@@ -727,7 +785,18 @@
         "key"
       ],
       "storage.clear": [],
-      "storage.keys": []
+      "storage.keys": [],
+      "rive.instance.call": [
+        "operation",
+        "handle",
+        "arguments"
+      ],
+      "rive.instance.observe": [
+        "handle",
+        "propertyPath",
+        "type",
+        "listener"
+      ]
     },
     "operationOptionFields": {
       "network.request": [

@@ -166,23 +166,19 @@ for (const presentation of ['persistent','runtime']) {
 }
 console.log('PASS explicit inline/dialog presentation; old UI scope rejected');
 
-// New hosts opt into structured readback; old clients must remain protected by the shared rules.
-for (const [type, flag] of [['list','supportsRiveListReadback'], ['viewModel','supportsRiveNestedReadback']]) {
- for (const direction of ['fromRive','twoWay']) {
-  const manifest=structuredClone(minimal);
-  manifest.rive.viewModel='Test';manifest.rive.instance='default';
+// No host flag may turn a JSON projection into a native List / View Model value.
+for (const type of ['list','viewModel']) {
+ for (const direction of ['fromRive','twoWay','toRive']) {
+  const manifest=structuredClone(minimal);manifest.rive.viewModel='Test';manifest.rive.instance='default';
   manifest.values.push({path:'package.probe.value',type,writable:true});
   manifest.bindings=[{id:'probe',qu:'package.probe.value',quType:type,rive:['Property'],riveType:type,direction,mode:'latest',required:true}];
-  const source=JSON.stringify(manifest);
-  assert.deepEqual(inspect({kind:'manifest',source,[flag]:true}).errors,[],`${type} ${direction}`);
-  assert.ok(inspect({kind:'manifest',source}).errors.some(x=>x.includes('direction')),`legacy host must reject ${type}`);
-  const other=flag==='supportsRiveListReadback'?'supportsRiveNestedReadback':'supportsRiveListReadback';
-  assert.ok(inspect({kind:'manifest',source,[other]:true}).errors.some(x=>x.includes('direction')),`unrelated capability must not allow ${type}`);
-  manifest.values[manifest.values.length-1].writable=false;
-  assert.ok(inspect({kind:'manifest',source:JSON.stringify(manifest),[flag]:true}).errors.some(x=>x.includes('可写')));
+  for (const supports of [false,true]) {
+   const errors=inspect({kind:'manifest',source:JSON.stringify(manifest),supportsRiveListReadback:supports,supportsRiveNestedReadback:supports}).errors;
+   if(direction==='toRive')assert.deepEqual(errors,[]);else assert.ok(errors.some(x=>x.includes('direction')),`${type} must not be a JSON mirror`);
+  }
  }
 }
-console.log('PASS structured readback capability gates, old-host compatibility and QVMI write permissions');
+console.log('PASS List / View Model references reject automatic whole-JSON readback on every host');
 
 // Public resource capabilities are checked per platform, separately from QVMI's resource tokens.
 for (const type of ['image','font','blob','artboard']) {
