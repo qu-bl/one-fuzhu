@@ -29,7 +29,7 @@
 
 已修复的差异：Android 补全了 15 个 `deviceInfo` 字段并把 `buildTime` 改为字符串；三端 `distributionOSApiVersion` 统一为数字；鸿蒙与 Apple 补齐名称、说明和默认值类型限制；Apple 补上纯域名检查；鸿蒙递归检查嵌套资源引用；三端脚本 `@id` 现在强制存在并拒绝尾随非空白字符，文件名不再充当身份。三端 QVMI 现在统一为纯运行时数据通道，跨冷启动数据统一使用独立脚本存储。
 
-`qu.viewModel.define` 的扩展选项仍有平台差异：`label` 三端通用；`description`、`unit`、`nullable`、`writable`、`delivery`、`range`、`values`、`maxLength`、`access`、`valueLabels`、`displayPrecision`、`displayMultiplier`、`displaySuffix` 目前由鸿蒙和 Android 实现，Apple 不接受。此差异已写入云端契约并由调用端按平台执行。
+`qu.viewModel.define` 的完整字段元数据由 `script.definitionOptions.shared` 统一发布：新版 Apple 与 Android、鸿蒙均实现说明、单位、空值、可写性、投递方式、范围、候选值、长度、访问规则和值显示格式。旧版 Apple 仍只读取 `portable`，因此保留其 `label` 安全基线；`harmonyAndroidOnly` 仅保留供旧 Android／鸿蒙读取，名称不再表示新版平台能力差异。云端更新不会为旧 Apple 安装原生能力，使用完整选项需要包含本次实现的 Apple 客户端。
 
 音频触发参数三端统一使用 `audio`／`policy`／`volume`。`id`／`options` 已从公开契约和三端运行路径删除。
 

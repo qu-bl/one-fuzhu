@@ -106,3 +106,9 @@ Trigger 事件回调不携带伪造的布尔状态；重复事件不参与 QVMI 
 离屏原始像素输出、共享 Worker 均按已实现的官方接口记录。详见 [RIVE_JS.md](RIVE_JS.md)。
 不新增 hostOperations，不改变 schemaVersion，不修改 QVMI/UI 或现有三种连接方式。
 规则仅发布说明和检查依据；旧客户端不会自动增加原生能力，脚本必须先查询能力。
+
+## 11.1.0：字段元数据对齐
+
+新版 Apple 的 `viewModel.define` 接入完整字段元数据，`viewModel.list` 返回实际定义，数据流检查器展示说明和格式；显示倍率、精度、后缀及值标签不改变共享原值。范围、候选值、UTF-16 长度和空值在写入时校验，访问规则参与 JS 读写与订阅，投递方式保留 state 去重、event 不回放、stream 回放最新值的语义。
+
+完整选项表使用 `script.definitionOptions.shared`。为避免旧 Apple 接受后忽略元数据，保留 `portable: ["label"]` 作为旧读取器安全基线，并保留旧 Android／鸿蒙使用的扩展选项表；新版 Apple 显式读取 `shared`，旧云端缺少该键时退回安全基线。客户端必须实际包含本次实现，云端更新不能替代客户端升级。
