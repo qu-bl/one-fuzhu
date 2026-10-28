@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 3,
+  "id": "com.example.clock",
+  "version": "1.0.0",
+  "name": "时钟",
+  "author": "示例作者",
+  "preview": "preview.webp",
+  "rive": {
+    "file": "main.riv",
+    "artboard": "Main",
+    "stateMachine": "State Machine 1",
+    "layout": {
+      "fit": "contain",
+      "alignment": "center"
+    }
+  },
+  "values": [],
+  "capabilities": {
+    "observe": [
+      "system.time.epochMs"
+    ],
+    "trigger": []
+  },
+  "bindings": [],
+  "assets": {
+    "audio": []
+  },
+  "ui": [
+    {
+      "id": "dialogSlots",
+      "title": "弹窗位置示例",
+      "presentation": "dialog",
+      "components": [
+        {
+          "id": "dialogExample",
+          "type": "group",
+          "label": "通用位置示例",
+          "description": "通用位置示例",
+          "layout": "column",
+          "children": [
+            {
+              "id": "heading",
+              "type": "text",
+              "label": "标题内容",
+              "description": "标题内容",
+              "placement": "title",
+              "text": "任意标题组件"
+            },
+            {
+              "id": "name",
+              "type": "input",
+              "label": "名称",
+              "description": "名称",
+              "inputMode": "text",
+              "bindings": {
+                "value": {
+                  "path": "dialog.name",
+                  "type": "string",
+                  "default": "默认名称"
+                }
+              }
+            },
+            {
+              "id": "customAction",
+              "type": "button",
+              "label": "通用动作",
+              "description": "通用动作",
+              "placement": "actions",
+              "text": "自定义操作",
+              "action": "emit",
+              "hug": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

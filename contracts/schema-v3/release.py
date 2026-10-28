@@ -240,6 +240,20 @@ def verify_schema_and_fixtures():
         "initialDeclarationTiming": "beforeOnStart",
         "declareMode": "replaceAllSlots",
         "clearRestoresInitialDeclaration": False,
+        'dialogGroupOpen': 'qu.viewModel.openUi(groupId)',
+        'dialogRegions': ['title', 'content', 'actions'],
+        'dialogRegionComponents': 'existingNativeComponents',
+        'dialogRegionPlacementChangesBehavior': False,
+        'dialogFixedRegions': ['title', 'actions'],
+        'dialogScrollRegion': 'content',
+        'dialogContentLayout': 'sameAsMountedGroup',
+        'dialogGroupImplicitButtons': False,
+        'dialogGroupRootMetadata': 'containerMetadata',
+        'dialogGroupValueWrites': 'sameAsMountedComponents',
+        'dialogGroupActionsCloseAutomatically': False,
+        'dialogClose': 'qu.ui.close()',
+        'dialogCloseScope': 'currentOwnerAndRuntime',
+        'dialogRequiresUpdatedClient': True,
     }:
         raise ValueError("UI runtime semantics must keep QVMI as the single dynamic data path")
     forbidden_appearance = {"style", "size", "density", "presentation", "format"}

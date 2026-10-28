@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "11.1.0",
+  "contractVersion": "11.2.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -85,7 +85,28 @@
       "declareMode": "replaceAllSlots",
       "clearRestoresInitialDeclaration": false,
       "presentationControlsMountOnly": true,
-      "uiPersistsData": false
+      "uiPersistsData": false,
+      "dialogGroupOpen": "qu.viewModel.openUi(groupId)",
+      "dialogRegions": [
+        "title",
+        "content",
+        "actions"
+      ],
+      "dialogRegionComponents": "existingNativeComponents",
+      "dialogRegionPlacementChangesBehavior": false,
+      "dialogFixedRegions": [
+        "title",
+        "actions"
+      ],
+      "dialogScrollRegion": "content",
+      "dialogGroupImplicitButtons": false,
+      "dialogGroupRootMetadata": "containerMetadata",
+      "dialogGroupValueWrites": "sameAsMountedComponents",
+      "dialogGroupActionsCloseAutomatically": false,
+      "dialogClose": "qu.ui.close()",
+      "dialogCloseScope": "currentOwnerAndRuntime",
+      "dialogRequiresUpdatedClient": true,
+      "dialogContentLayout": "sameAsMountedGroup"
     },
     "forbiddenDeclarationFields": [
       "defaultValue",
@@ -119,6 +140,7 @@
         "label",
         "type",
         "visible",
+        "placement",
         "children",
         "layout",
         "align",
@@ -133,6 +155,7 @@
         "label",
         "type",
         "visible",
+        "placement",
         "text",
         "copyable"
       ],
@@ -142,7 +165,8 @@
         "id",
         "label",
         "type",
-        "visible"
+        "visible",
+        "placement"
       ],
       "button": [
         "bindings",
@@ -151,6 +175,7 @@
         "label",
         "type",
         "visible",
+        "placement",
         "text",
         "action",
         "acceptedFileExtensions",
@@ -165,6 +190,7 @@
         "label",
         "type",
         "visible",
+        "placement",
         "placeholder",
         "inputMode",
         "enabled",
@@ -177,6 +203,7 @@
         "label",
         "type",
         "visible",
+        "placement",
         "enabled",
         "hug"
       ],
@@ -187,6 +214,7 @@
         "label",
         "type",
         "visible",
+        "placement",
         "min",
         "max",
         "step",
@@ -200,6 +228,7 @@
         "label",
         "type",
         "visible",
+        "placement",
         "options",
         "enabled",
         "hug"
@@ -272,7 +301,8 @@
           "bindings.text"
         ],
         "allowedPresentations": [
-          "inline"
+          "inline",
+          "dialog"
         ]
       },
       {
@@ -501,6 +531,11 @@
       "presentation": [
         "inline",
         "dialog"
+      ],
+      "placement": [
+        "title",
+        "content",
+        "actions"
       ]
     },
     "limits": {
@@ -615,6 +650,7 @@
       "values.observe",
       "values.trigger",
       "ui.open",
+      "ui.close",
       "ui.declare",
       "ui.clear",
       "editor.read",
@@ -1689,7 +1725,8 @@
         "propertyPath",
         "type",
         "listener"
-      ]
+      ],
+      "ui.close": []
     },
     "operationOptionFields": {
       "network.request": [

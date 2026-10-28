@@ -53,6 +53,11 @@ function run(input, c) {
       if(ids.has(item.id))add(`${p}.id`, `控件 id 重复 ${item.id}`);ids.add(item.id);
       if(!text(item.label))add(`${p}.label`,'必须包含非空文字');
       if(context==='resourcePackage'&&!text(item.description))add(`${p}.description`,'资源包组件需要说明');
+      if(own(item,'placement')) {
+        const rule=uv.dialogPlacement;
+        if(set.presentation!==uv.dialogPresentation||depth!==rule.childDepth)
+          add(`${p}.placement`,'位置只允许用于弹窗顶层 group 的直接子组件');
+      }
       const b=object(item.bindings)?item.bindings:{};
       for(const key of c.ui.forbiddenDeclarationFields||[])if(own(item,key))add(`${p}.${key}`,'已移除的声明字段');
       unknown(b,Object.keys(uv.bindingKinds),`${p}.bindings`);

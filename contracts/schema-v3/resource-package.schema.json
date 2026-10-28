@@ -675,6 +675,13 @@
             "visible": {
               "type": "boolean"
             },
+            "placement": {
+              "enum": [
+                "title",
+                "content",
+                "actions"
+              ]
+            },
             "children": {
               "type": "array",
               "items": {
@@ -995,6 +1002,13 @@
             "visible": {
               "type": "boolean"
             },
+            "placement": {
+              "enum": [
+                "title",
+                "content",
+                "actions"
+              ]
+            },
             "text": {
               "type": "string"
             },
@@ -1154,6 +1168,13 @@
             "visible": {
               "type": "boolean"
             },
+            "placement": {
+              "enum": [
+                "title",
+                "content",
+                "actions"
+              ]
+            },
             "bindings": {
               "type": "object",
               "properties": {
@@ -1293,6 +1314,13 @@
             },
             "visible": {
               "type": "boolean"
+            },
+            "placement": {
+              "enum": [
+                "title",
+                "content",
+                "actions"
+              ]
             },
             "text": {
               "type": "string"
@@ -1819,6 +1847,13 @@
             },
             "visible": {
               "type": "boolean"
+            },
+            "placement": {
+              "enum": [
+                "title",
+                "content",
+                "actions"
+              ]
             },
             "placeholder": {
               "type": "string"
@@ -2469,6 +2504,13 @@
             "visible": {
               "type": "boolean"
             },
+            "placement": {
+              "enum": [
+                "title",
+                "content",
+                "actions"
+              ]
+            },
             "enabled": {
               "type": "boolean"
             },
@@ -2947,6 +2989,13 @@
             },
             "visible": {
               "type": "boolean"
+            },
+            "placement": {
+              "enum": [
+                "title",
+                "content",
+                "actions"
+              ]
             },
             "min": {
               "type": "number"
@@ -3477,6 +3526,13 @@
             },
             "visible": {
               "type": "boolean"
+            },
+            "placement": {
+              "enum": [
+                "title",
+                "content",
+                "actions"
+              ]
             },
             "options": {
               "type": "array",

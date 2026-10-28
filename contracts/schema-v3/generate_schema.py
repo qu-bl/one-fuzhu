@@ -58,6 +58,7 @@ ui_properties = {
     "label": {"type": "string", "minLength": 1, "maxLength": UV["limits"]["labelMax"]},
     "description": {"type": "string", "maxLength": UV["limits"]["labelMax"]}, "enabled": boolean,
     "visible": boolean,
+    "placement": {"enum": UV["enums"]["placement"]},
     "flex": number,
     # Removed 5.2 fields stay known so old declarations are rejected rather than treated as
     # harmless third-party extensions.

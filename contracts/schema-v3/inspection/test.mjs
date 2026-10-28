@@ -206,3 +206,29 @@ for(const direction of ['toRive','fromRive','twoWay']) {
  if(direction==='twoWay') assert.ok(errors.some(x=>x.includes('事件')));else assert.deepEqual(errors,[]);
 }
 console.log('PASS public resource setters, Android blob boundary, trigger events');
+
+// A native dialog region hosts existing components; it adds no button semantics.
+const dialogFixture=JSON.parse(fs.readFileSync(new URL('../fixtures/valid/dialog-slots.json',import.meta.url)));
+assert.deepEqual(inspect({kind:'manifest',source:JSON.stringify(dialogFixture)}).errors,[]);
+for(const mutate of [
+  x=>x.ui[0].components[0].placement='title',
+  x=>x.ui[0].presentation='inline',
+  x=>x.ui[0].components[0].children[0].placement='unknown',
+  x=>x.ui[0].components[0].children.unshift({id:'nested',type:'group',label:'嵌套',description:'嵌套',layout:'column',children:[{id:'deepTitle',type:'text',label:'深层',description:'深层',text:'深层',placement:'title'}]})
+]) {
+  const bad=structuredClone(dialogFixture);mutate(bad);
+  assert.ok(inspect({kind:'manifest',source:JSON.stringify(bad)}).errors.some(x=>x.includes('placement')));
+}
+assert.ok(c.script.hostOperations.includes('ui.close'));
+assert.deepEqual(c.script.operationArguments['ui.close'],[]);
+console.log('PASS generic dialog regions, placement boundaries and scoped close operation');
+
+// The host shell must not normalize the declared content layout into a column.
+for (const layout of ['row','column','stack']) {
+  const source=JSON.parse(fs.readFileSync(new URL('fixtures/valid/dialog-slots.json',root)));
+  source.ui[0].components[0].layout=layout;
+  const result=inspect({kind:'manifest',source:JSON.stringify(source)});
+  assert.deepEqual(result.errors,[]);
+  assert.equal(result.document.ui[0].components[0].layout,layout);
+}
+console.log('PASS dialog content preserves the ordinary group layout');

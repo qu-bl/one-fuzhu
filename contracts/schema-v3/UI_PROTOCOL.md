@@ -1,4 +1,4 @@
-# 三端动态原生 UI 规范 11.0.0
+# 三端动态原生 UI 规范 11.2.0
 
 本规范是 Apple、Android、鸿蒙动态 UI 的共同最小集合。权威机器规则位于
 [`contract.json`](contract.json) 的 `ui` 段；本文用于说明它能表达什么。
@@ -152,3 +152,24 @@
 - visible 缺值时使用它声明的 fallback；未声明 fallback 才默认可见。静态 visible=false 始终隐藏。
 - 动态选项字符串在普通选择中作为 value，在资源选择中作为 resource；显示文案均为该字符串。
 - 完全未知的扩展键（包括 bindings 中的未知键）按兼容策略警告并忽略；已知绑定用错组件仍是错误。扩展键不参与绑定订阅或必填判定。
+
+
+## 弹窗的通用位置（11.2.0）
+
+在 `presentation=dialog` 集合中，可以通过 `qu.viewModel.openUi(groupId)` 打开顶层
+`group`。该 group 的直接子组件可声明 `placement=title/content/actions`，缺省为
+`content`。这是宿主位置，不是组件类型或按钮角色；三个区域都使用原有通用组件、绑定和事件。
+标题和操作区固定，正文由宿主提供原生滚动。正文复用常驻 UI 的同一套分组渲染，保留
+root group 的 layout/align/valign；横排、纵排、叠放与内部自由拼装不因弹窗而改变。root group 的 label/description 是容器元数据，
+不自动生成另一份标题、正文或按钮；需要展示的内容应声明为相应区域的普通组件。
+
+标题区可以放 text、输入控件或组合 group。操作区可以放一个或多个普通按钮、开关或组合 group。
+不自动添加确认/取消按钮，不因 placement 改变动作，不为按钮增加自动关闭含义。
+值控件与常驻 UI 一样直接读写自身绑定；emit 仍发送自己的动作事件。脚本可以按业务需要调用
+`qu.ui.close()`，它只关闭当前脚本/资源包在本运行位置拥有的弹窗，不清空 UI 声明或字段。
+旧的原子 `openUi(componentId)` 仍保留单次输入与提交行为。
+
+`placement` 只允许出现在弹窗顶层 group 的直接子组件上。需要更复杂内容时，在该位置放置
+普通 group，再通过其 layout/children 组合；内部组件不重复声明 placement。
+该能力需要新版客户端。云端规则本身不会安装原生 API，使用前应确认
+`typeof qu.ui.close === "function"`，旧客户端不得模拟该能力。
