@@ -112,3 +112,10 @@ Trigger 事件回调不携带伪造的布尔状态；重复事件不参与 QVMI 
 新版 Apple 的 `viewModel.define` 接入完整字段元数据，`viewModel.list` 返回实际定义，数据流检查器展示说明和格式；显示倍率、精度、后缀及值标签不改变共享原值。范围、候选值、UTF-16 长度和空值在写入时校验，访问规则参与 JS 读写与订阅，投递方式保留 state 去重、event 不回放、stream 回放最新值的语义。
 
 完整选项表使用 `script.definitionOptions.shared`。为避免旧 Apple 接受后忽略元数据，保留 `portable: ["label"]` 作为旧读取器安全基线，并保留旧 Android／鸿蒙使用的扩展选项表；新版 Apple 显式读取 `shared`，旧云端缺少该键时退回安全基线。客户端必须实际包含本次实现，云端更新不能替代客户端升级。
+
+## 12.0.0：仅保留组合弹窗
+
+`presentation: dialog` 集合的每个顶层组件必须是 `group`，`openUi` 只能打开它的 id。
+单个控件也放在 group 中，继续使用普通绑定和事件；没有统一草稿提交或自动确认/取消按钮。
+原单控件弹窗需要同时修改声明和 JS 调用，保留内部控件 id 与绑定路径即可沿用数据。
+这属于 UI 契约变更，资源包 `schemaVersion` 仍为 3。新版规则须与三端客户端配套发布。

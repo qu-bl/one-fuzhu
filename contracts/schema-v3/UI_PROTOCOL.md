@@ -1,4 +1,4 @@
-# 三端动态原生 UI 规范 11.2.0
+# 三端动态原生 UI 规范 12.0.0
 
 本规范是 Apple、Android、鸿蒙动态 UI 的共同最小集合。权威机器规则位于
 [`contract.json`](contract.json) 的 `ui` 段；本文用于说明它能表达什么。
@@ -154,9 +154,9 @@
 - 完全未知的扩展键（包括 bindings 中的未知键）按兼容策略警告并忽略；已知绑定用错组件仍是错误。扩展键不参与绑定订阅或必填判定。
 
 
-## 弹窗的通用位置（11.2.0）
+## 组合弹窗与通用位置
 
-在 `presentation=dialog` 集合中，可以通过 `qu.viewModel.openUi(groupId)` 打开顶层
+在 `presentation=dialog` 集合中，只能通过 `qu.viewModel.openUi(groupId)` 打开顶层
 `group`。该 group 的直接子组件可声明 `placement=title/content/actions`，缺省为
 `content`。这是宿主位置，不是组件类型或按钮角色；三个区域都使用原有通用组件、绑定和事件。
 标题和操作区固定，正文由宿主提供原生滚动。正文复用常驻 UI 的同一套分组渲染，保留
@@ -167,7 +167,16 @@ root group 的 layout/align/valign；横排、纵排、叠放与内部自由拼�
 不自动添加确认/取消按钮，不因 placement 改变动作，不为按钮增加自动关闭含义。
 值控件与常驻 UI 一样直接读写自身绑定；emit 仍发送自己的动作事件。脚本可以按业务需要调用
 `qu.ui.close()`，它只关闭当前脚本/资源包在本运行位置拥有的弹窗，不清空 UI 声明或字段。
-旧的原子 `openUi(componentId)` 仍保留单次输入与提交行为。
+从 12.0.0 起，`presentation=dialog` 的 `components` 每一项都必须是顶层 `group`；
+`openUi` 只接受该顶层 group 的 id，不能打开其内部子组件，也不能直接打开单个输入框、
+开关、滑杆、选择器或按钮。即使只有一个控件，也需要在组合弹窗中声明它。
+单控件弹窗的草稿、统一提交、自动确认/取消按钮及文件暂存流程已删除。
+普通文件选择按钮在选择成功后按自身绑定立即写入，与常驻 UI 保持一致。
+
+这是弹窗声明的破坏式收紧，资源包格式仍为 `schemaVersion: 3`。
+旧包需要同时更新清单和 `main.js`：把原控件放入顶层 group 的 children，保留原控件 id 和
+bindings 路径，并将 `openUi` 改为该 group 的 id。若原按钮依赖自动关闭，事件处理中需显式调用
+`qu.ui.close()`。已有数据和常驻 UI 无需迁移；宿主不自动包装旧声明或回退到另一套弹窗。
 
 `placement` 只允许出现在弹窗顶层 group 的直接子组件上。需要更复杂内容时，在该位置放置
 普通 group，再通过其 layout/children 组合；内部组件不重复声明 placement。

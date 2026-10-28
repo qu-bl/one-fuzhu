@@ -47,11 +47,11 @@ assert.equal(result.uiSets[0].components[0].description,'');
 const missing=structuredClone(mounted);delete missing.components[0].bindings;
 assert.ok(inspect({kind:'ui',sets:missing}).errors.some(x=>x.includes('.bindings')));
 assert.ok(inspect({kind:'ui',sets:[]}).errors.length);
-const defaults={id:'status',slot:'dialog',presentation:'dialog',components:[{id:'text',type:'text',label:'状态',bindings:{text:{path:'app.status',fallback:'就绪'}}}]};
+const defaults={id:'status',slot:'dialog',presentation:'dialog',components:[{id:'statusDialog',type:'group',label:'状态',layout:'column',children:[{id:'text',type:'text',label:'状态',bindings:{text:{path:'app.status',fallback:'就绪'}}}]}]};
 result=inspect({kind:'ui',sets:defaults});
 assert.deepEqual(result.errors,[]);
 assert.equal(result.uiSets[0].presentation,c.ui.validation.dialogPresentation);
-assert.equal(result.uiSets[0].components[0].text,'就绪');
+assert.equal(result.uiSets[0].components[0].children[0].text,'就绪');
 const tooMany={id:'many',slot:'scriptUi',presentation:'inline',components:[{id:'group',type:'group',label:'组',layout:'column',children:Array.from({length:c.ui.validation.limits.childrenMax+1},(_,i)=>({id:'item'+i,type:'spacer',label:'占位'}))}]};
 assert.ok(inspect({kind:'ui',sets:tooMany}).errors.some(x=>x.includes('.children')));
 const extra=structuredClone(mounted);extra.components[0].vendorField=true;
@@ -232,3 +232,33 @@ for (const layout of ['row','column','stack']) {
   assert.equal(result.document.ui[0].components[0].layout,layout);
 }
 console.log('PASS dialog content preserves the ordinary group layout');
+
+// Dialog roots are groups in both declaration contexts; ordinary children retain their bindings.
+assert.equal(c.ui.validation.dialogRootType,'group');
+assert.equal(c.ui.runtimeSemantics.atomicDialogAllowed,false);
+for(const context of ['applicationScript','resourcePackage']) {
+  const set={id:'composed',title:'组合弹窗',presentation:'dialog',components:[]};
+  if(context==='applicationScript')set.slot='dialog';
+  const atoms=[
+    {id:'text',type:'text',label:'文本',description:'正文',text:'内容'},
+    {id:'input',type:'input',label:'输入',description:'输入',inputMode:'text',bindings:{value:{path:'probe.name',type:'string',default:''}}},
+    {id:'toggle',type:'toggle',label:'开关',description:'开关',bindings:{value:{path:'probe.enabled',type:'boolean',default:false}}},
+    {id:'slider',type:'slider',label:'数值',description:'数值',min:0,max:100,step:1,bindings:{value:{path:'probe.level',type:'number',default:50}}},
+    {id:'choice',type:'choice',label:'选择',description:'选择',options:[{label:'一',value:'one'}],bindings:{value:{path:'probe.choice',type:'string',default:'one'}}},
+    {id:'button',type:'button',label:'动作',description:'动作',action:'emit',text:'执行'},
+    {id:'picker',type:'button',label:'文件',description:'文件',action:'pickFile',maxBytes:100,acceptedFileExtensions:['.txt'],bindings:{value:{path:'probe.file',type:'resource',default:''}}},
+    {id:'spacer',type:'spacer',label:'间隔',description:'间隔'}
+  ];
+  const check=components=>inspect({kind:'ui',context,sets:{...set,components}});
+  for(const atom of atoms) {
+    const failure=check([atom]);
+    assert.ok(failure.errors.some(x=>x.startsWith('ui[0].components[0].type:')&&x.includes('group')),`${context} ${atom.type}`);
+    const group={id:'dialog',type:'group',label:'组合',description:'组合',layout:'column',children:[atom]};
+    const valid=check([group]);
+    assert.deepEqual(valid.errors,[],`${context} group containing ${atom.type}`);
+    assert.equal(valid.uiSets[0].components[0].children[0].id,atom.id);
+    if(atom.bindings?.value)assert.deepEqual(valid.uiSets[0].components[0].children[0].bindings.value,atom.bindings.value);
+    assert.ok(check([group,{...atom,id:atom.id+'Outside'}]).errors.some(x=>x.includes('components[1].type')));
+  }
+}
+console.log('PASS group-only dialog roots, atomic rejection and unchanged child value bindings');

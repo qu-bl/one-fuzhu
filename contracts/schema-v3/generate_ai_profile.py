@@ -29,6 +29,8 @@ def build_profile():
         },
         "ui": {
             "runtimeSemantics": ui["runtimeSemantics"],
+            "dialogRootType": validation["dialogRootType"],
+            "dialogPlacement": validation["dialogPlacement"],
             "forbiddenDeclarationFields": ui["forbiddenDeclarationFields"],
             "allowedFieldsByType": {
                 name: ui["commonFields"] + fields for name, fields in ui["typeFields"].items()

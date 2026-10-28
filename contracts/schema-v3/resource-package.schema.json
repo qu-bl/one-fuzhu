@@ -628,7 +628,37 @@
               "density"
             ]
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "presentation": {
+                  "const": "dialog"
+                }
+              },
+              "required": [
+                "presentation"
+              ]
+            },
+            "then": {
+              "properties": {
+                "components": {
+                  "items": {
+                    "properties": {
+                      "type": {
+                        "const": "group"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       "maxItems": 8
     }

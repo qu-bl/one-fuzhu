@@ -234,6 +234,12 @@ schema = obj({
                   ["id", "title", "presentation", "components"]), maxItems=UV["limits"]["setsMax"]),
 }, CONTRACT["manifest"]["required"])
 schema["properties"]["ui"]["items"]["propertyNames"] = {"not": {"enum": ["density"]}}
+schema["properties"]["ui"]["items"]["allOf"] = [{
+    "if": {"properties": {"presentation": {"const": UV["dialogPresentation"]}}, "required": ["presentation"]},
+    "then": {"properties": {"components": {"items": {
+        "properties": {"type": {"const": UV["dialogRootType"]}}, "required": ["type"]
+    }}}},
+}]
 schema.update({"$schema": "https://json-schema.org/draft/2020-12/schema",
                "title": "千机百变资源包 schema v3",
                "$defs": {"uiComponent": {"oneOf": variants}}})

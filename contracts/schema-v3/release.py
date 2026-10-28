@@ -211,6 +211,8 @@ def verify_schema_and_fixtures():
     if set(ui_validation["inputTypes"]) - set(contract["ui"]["typeFields"]):
         raise ValueError("input UI type is not a component type")
     verify_ui_generation_rules(contract)
+    if ui_validation.get("dialogRootType") != "group":
+        raise ValueError("dialog roots must be top-level groups")
     if contract["ui"].get("runtimeSemantics") != {
         "dynamicBindingTransport": "qvmi",
         "bindingScope": "owner",
@@ -241,6 +243,9 @@ def verify_schema_and_fixtures():
         "declareMode": "replaceAllSlots",
         "clearRestoresInitialDeclaration": False,
         'dialogGroupOpen': 'qu.viewModel.openUi(groupId)',
+        'dialogRootType': 'group',
+        'dialogRootLevel': 'topLevel',
+        'atomicDialogAllowed': False,
         'dialogRegions': ['title', 'content', 'actions'],
         'dialogRegionComponents': 'existingNativeComponents',
         'dialogRegionPlacementChangesBehavior': False,

@@ -44,6 +44,8 @@ function run(input, c) {
       const p=`${path}[${i}]`;
       if(!object(item)) {add(p,'组件必须是对象');continue;}
       if(!own(c.ui.typeFields,item.type)) {add(`${p}.type`,'未开放的组件类型');continue;}
+      if(set.presentation===uv.dialogPresentation&&depth===0&&item.type!==uv.dialogRootType)
+        add(`${p}.type`,'弹窗只支持顶层 group 组合组件，请更新声明并调用 openUi(groupId)');
       // Avoid recursively validating children twice.
       const shallow={...item};if(Array.isArray(shallow.children))shallow.children=[];
       schema(schemas['validate_'+item.type],shallow,p);

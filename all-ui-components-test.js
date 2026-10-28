@@ -12,178 +12,394 @@
  *     "presentation": "dialog",
  *     "components": [
  *       {
- *         "id": "dialogTextInput",
- *         "type": "input",
+ *         "id": "dialogTextInputDialog",
+ *         "type": "group",
  *         "label": "弹窗单行文本",
- *         "description": "测试 dialog 中的单行输入",
- *         "placeholder": "请输入文字",
- *         "inputMode": "text",
- *         "hug": true,
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogText",
- *             "type": "string",
- *             "default": "弹窗文字"
+ *         "layout": "column",
+ *         "children": [
+ *           {
+ *             "id": "dialogTextInputTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗单行文本",
+ *             "placement": "title"
+ *           },
+ *           {
+ *             "id": "dialogTextInput",
+ *             "type": "input",
+ *             "label": "弹窗单行文本",
+ *             "description": "测试 dialog 中的单行输入",
+ *             "placeholder": "请输入文字",
+ *             "inputMode": "text",
+ *             "hug": true,
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogText",
+ *                 "type": "string",
+ *                 "default": "弹窗文字"
+ *               }
+ *             }
+ *           },
+ *           {
+ *             "id": "dialogTextInputClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         }
+ *         ]
  *       },
  *       {
- *         "id": "dialogMultilineInput",
- *         "type": "input",
+ *         "id": "dialogMultilineInputDialog",
+ *         "type": "group",
  *         "label": "弹窗多行文本",
- *         "description": "测试内容换行与原生多行输入",
- *         "placeholder": "请输入多行文字",
- *         "inputMode": "multiline",
- *         "hug": false,
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogMultiline",
- *             "type": "string",
- *             "default": "第一行\n第二行"
+ *         "layout": "column",
+ *         "children": [
+ *           {
+ *             "id": "dialogMultilineInputTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗多行文本",
+ *             "placement": "title"
+ *           },
+ *           {
+ *             "id": "dialogMultilineInput",
+ *             "type": "input",
+ *             "label": "弹窗多行文本",
+ *             "description": "测试内容换行与原生多行输入",
+ *             "placeholder": "请输入多行文字",
+ *             "inputMode": "multiline",
+ *             "hug": false,
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogMultiline",
+ *                 "type": "string",
+ *                 "default": "第一行\n第二行"
+ *               }
+ *             }
+ *           },
+ *           {
+ *             "id": "dialogMultilineInputClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         }
+ *         ]
  *       },
  *       {
- *         "id": "dialogNumberInput",
- *         "type": "input",
+ *         "id": "dialogNumberInputDialog",
+ *         "type": "group",
  *         "label": "弹窗数字输入",
- *         "description": "测试原生数字键盘",
- *         "placeholder": "请输入数字",
- *         "inputMode": "number",
- *         "hug": true,
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogNumber",
- *             "type": "number",
- *             "default": 8
+ *         "layout": "column",
+ *         "children": [
+ *           {
+ *             "id": "dialogNumberInputTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗数字输入",
+ *             "placement": "title"
+ *           },
+ *           {
+ *             "id": "dialogNumberInput",
+ *             "type": "input",
+ *             "label": "弹窗数字输入",
+ *             "description": "测试原生数字键盘",
+ *             "placeholder": "请输入数字",
+ *             "inputMode": "number",
+ *             "hug": true,
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogNumber",
+ *                 "type": "number",
+ *                 "default": 8
+ *               }
+ *             }
+ *           },
+ *           {
+ *             "id": "dialogNumberInputClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         }
+ *         ]
  *       },
  *       {
- *         "id": "dialogPasswordInput",
- *         "type": "input",
+ *         "id": "dialogPasswordInputDialog",
+ *         "type": "group",
  *         "label": "弹窗密码输入",
- *         "description": "测试原生密码输入",
- *         "placeholder": "请输入密码",
- *         "inputMode": "password",
- *         "hug": true,
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogPassword",
- *             "type": "string",
- *             "default": ""
+ *         "layout": "column",
+ *         "children": [
+ *           {
+ *             "id": "dialogPasswordInputTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗密码输入",
+ *             "placement": "title"
+ *           },
+ *           {
+ *             "id": "dialogPasswordInput",
+ *             "type": "input",
+ *             "label": "弹窗密码输入",
+ *             "description": "测试原生密码输入",
+ *             "placeholder": "请输入密码",
+ *             "inputMode": "password",
+ *             "hug": true,
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogPassword",
+ *                 "type": "string",
+ *                 "default": ""
+ *               }
+ *             }
+ *           },
+ *           {
+ *             "id": "dialogPasswordInputClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         }
+ *         ]
  *       },
  *       {
- *         "id": "dialogToggle",
- *         "type": "toggle",
+ *         "id": "dialogToggleDialog",
+ *         "type": "group",
  *         "label": "弹窗开关",
- *         "description": "测试 dialog 中的布尔值",
- *         "hug": true,
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogToggle",
- *             "type": "boolean",
- *             "default": true
+ *         "layout": "column",
+ *         "children": [
+ *           {
+ *             "id": "dialogToggleTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗开关",
+ *             "placement": "title"
+ *           },
+ *           {
+ *             "id": "dialogToggle",
+ *             "type": "toggle",
+ *             "label": "弹窗开关",
+ *             "description": "测试 dialog 中的布尔值",
+ *             "hug": true,
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogToggle",
+ *                 "type": "boolean",
+ *                 "default": true
+ *               }
+ *             }
+ *           },
+ *           {
+ *             "id": "dialogToggleClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         }
+ *         ]
  *       },
  *       {
- *         "id": "dialogSlider",
- *         "type": "slider",
+ *         "id": "dialogSliderDialog",
+ *         "type": "group",
  *         "label": "弹窗滑杆",
- *         "description": "测试 dialog 中的数值范围",
- *         "min": 0,
- *         "max": 100,
- *         "step": 5,
- *         "hug": false,
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogSlider",
- *             "type": "number",
- *             "default": 50
+ *         "layout": "column",
+ *         "children": [
+ *           {
+ *             "id": "dialogSliderTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗滑杆",
+ *             "placement": "title"
+ *           },
+ *           {
+ *             "id": "dialogSlider",
+ *             "type": "slider",
+ *             "label": "弹窗滑杆",
+ *             "description": "测试 dialog 中的数值范围",
+ *             "min": 0,
+ *             "max": 100,
+ *             "step": 5,
+ *             "hug": false,
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogSlider",
+ *                 "type": "number",
+ *                 "default": 50
+ *               }
+ *             }
+ *           },
+ *           {
+ *             "id": "dialogSliderClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         }
+ *         ]
  *       },
  *       {
- *         "id": "dialogSingleChoice",
- *         "type": "choice",
+ *         "id": "dialogSingleChoiceDialog",
+ *         "type": "group",
  *         "label": "弹窗单选",
- *         "description": "string 类型自动使用单选",
- *         "hug": true,
- *         "options": [
+ *         "layout": "column",
+ *         "children": [
  *           {
- *             "value": "first",
- *             "label": "第一项"
+ *             "id": "dialogSingleChoiceTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗单选",
+ *             "placement": "title"
  *           },
  *           {
- *             "value": "second",
- *             "label": "第二项"
+ *             "id": "dialogSingleChoice",
+ *             "type": "choice",
+ *             "label": "弹窗单选",
+ *             "description": "string 类型自动使用单选",
+ *             "hug": true,
+ *             "options": [
+ *               {
+ *                 "value": "first",
+ *                 "label": "第一项"
+ *               },
+ *               {
+ *                 "value": "second",
+ *                 "label": "第二项"
+ *               },
+ *               {
+ *                 "value": "third",
+ *                 "label": "第三项"
+ *               }
+ *             ],
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogSingle",
+ *                 "type": "string",
+ *                 "default": "first"
+ *               }
+ *             }
  *           },
  *           {
- *             "value": "third",
- *             "label": "第三项"
+ *             "id": "dialogSingleChoiceClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         ],
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogSingle",
- *             "type": "string",
- *             "default": "first"
- *           }
- *         }
+ *         ]
  *       },
  *       {
- *         "id": "dialogMultiChoice",
- *         "type": "choice",
+ *         "id": "dialogMultiChoiceDialog",
+ *         "type": "group",
  *         "label": "弹窗多选",
- *         "description": "list 类型自动使用多选",
- *         "hug": false,
- *         "options": [
+ *         "layout": "column",
+ *         "children": [
  *           {
- *             "value": "native",
- *             "label": "原生"
+ *             "id": "dialogMultiChoiceTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗多选",
+ *             "placement": "title"
  *           },
  *           {
- *             "value": "adaptive",
- *             "label": "自适应"
+ *             "id": "dialogMultiChoice",
+ *             "type": "choice",
+ *             "label": "弹窗多选",
+ *             "description": "list 类型自动使用多选",
+ *             "hug": false,
+ *             "options": [
+ *               {
+ *                 "value": "native",
+ *                 "label": "原生"
+ *               },
+ *               {
+ *                 "value": "adaptive",
+ *                 "label": "自适应"
+ *               },
+ *               {
+ *                 "value": "cloud",
+ *                 "label": "云端规则"
+ *               }
+ *             ],
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogMulti",
+ *                 "type": "list",
+ *                 "default": [
+ *                   "native"
+ *                 ]
+ *               }
+ *             }
  *           },
  *           {
- *             "value": "cloud",
- *             "label": "云端规则"
+ *             "id": "dialogMultiChoiceClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         ],
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogMulti",
- *             "type": "list",
- *             "default": [
- *               "native"
- *             ]
- *           }
- *         }
+ *         ]
  *       },
  *       {
- *         "id": "dialogFilePicker",
- *         "type": "button",
+ *         "id": "dialogFilePickerDialog",
+ *         "type": "group",
  *         "label": "弹窗文件选择",
- *         "description": "测试系统原生文件选择器",
- *         "text": "选择 JSON 或文本文件",
- *         "action": "pickFile",
- *         "acceptedFileExtensions": [
- *           ".json",
- *           ".txt"
- *         ],
- *         "maxBytes": 1048576,
- *         "hug": true,
- *         "bindings": {
- *           "value": {
- *             "path": "app.uiLab80.dialogFile",
- *             "type": "resource",
- *             "default": ""
+ *         "layout": "column",
+ *         "children": [
+ *           {
+ *             "id": "dialogFilePickerTitle",
+ *             "type": "text",
+ *             "label": "标题",
+ *             "text": "弹窗文件选择",
+ *             "placement": "title"
+ *           },
+ *           {
+ *             "id": "dialogFilePicker",
+ *             "type": "button",
+ *             "label": "弹窗文件选择",
+ *             "description": "测试系统原生文件选择器",
+ *             "text": "选择 JSON 或文本文件",
+ *             "action": "pickFile",
+ *             "acceptedFileExtensions": [
+ *               ".json",
+ *               ".txt"
+ *             ],
+ *             "maxBytes": 1048576,
+ *             "hug": true,
+ *             "bindings": {
+ *               "value": {
+ *                 "path": "app.uiLab80.dialogFile",
+ *                 "type": "resource",
+ *                 "default": ""
+ *               }
+ *             }
+ *           },
+ *           {
+ *             "id": "dialogFilePickerClose",
+ *             "type": "button",
+ *             "label": "关闭",
+ *             "text": "关闭",
+ *             "action": "emit",
+ *             "placement": "actions",
+ *             "hug": true
  *           }
- *         }
+ *         ]
  *       }
  *     ]
  *   },
@@ -1379,16 +1595,17 @@ defineQuScript({
     if (path === 'app.uiLab80.numberValue') qu.storage.set('numberValue', value);
   },
   onUiAction(id, qu) {
+    if (["dialogTextInputClose", "dialogMultilineInputClose", "dialogNumberInputClose", "dialogPasswordInputClose", "dialogToggleClose", "dialogSliderClose", "dialogSingleChoiceClose", "dialogMultiChoiceClose", "dialogFilePickerClose"].includes(id)) { qu.ui.close(); return; }
     const dialogs = {
-      openDialogTextInput: 'dialogTextInput',
-      openDialogMultilineInput: 'dialogMultilineInput',
-      openDialogNumberInput: 'dialogNumberInput',
-      openDialogPasswordInput: 'dialogPasswordInput',
-      openDialogToggle: 'dialogToggle',
-      openDialogSlider: 'dialogSlider',
-      openDialogSingleChoice: 'dialogSingleChoice',
-      openDialogMultiChoice: 'dialogMultiChoice',
-      openDialogFilePicker: 'dialogFilePicker'
+      openDialogTextInput: 'dialogTextInputDialog',
+      openDialogMultilineInput: 'dialogMultilineInputDialog',
+      openDialogNumberInput: 'dialogNumberInputDialog',
+      openDialogPasswordInput: 'dialogPasswordInputDialog',
+      openDialogToggle: 'dialogToggleDialog',
+      openDialogSlider: 'dialogSliderDialog',
+      openDialogSingleChoice: 'dialogSingleChoiceDialog',
+      openDialogMultiChoice: 'dialogMultiChoiceDialog',
+      openDialogFilePicker: 'dialogFilePickerDialog'
     };
     const componentId = dialogs[id];
     if (componentId) qu.viewModel.openUi(componentId).catch(() => {});

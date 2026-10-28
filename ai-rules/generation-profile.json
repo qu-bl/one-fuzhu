@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "11.2.0",
+  "contractVersion": "12.0.0",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -106,7 +106,16 @@
       "dialogClose": "qu.ui.close()",
       "dialogCloseScope": "currentOwnerAndRuntime",
       "dialogRequiresUpdatedClient": true,
-      "dialogContentLayout": "sameAsMountedGroup"
+      "dialogContentLayout": "sameAsMountedGroup",
+      "dialogRootType": "group",
+      "dialogRootLevel": "topLevel",
+      "atomicDialogAllowed": false
+    },
+    "dialogRootType": "group",
+    "dialogPlacement": {
+      "parent": "topLevelDialogGroup",
+      "childDepth": 1,
+      "default": "content"
     },
     "forbiddenDeclarationFields": [
       "defaultValue",
