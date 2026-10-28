@@ -90,7 +90,7 @@ assert.deepEqual(inspect({kind:'ui',sets:localResourceSet,context:'resourcePacka
 assert.deepEqual(inspect({kind:'packageScript',source:'defineResourcePackage({});'}).errors,[]);
 assert.ok(inspect({kind:'applicationScript',source:'defineResourcePackage({});'}).errors.length);
 assert.ok(inspect({kind:'packageScript',source:'/** @id Demo */\ndefineQuScript({});'}).errors.length);
-// Application UI can omit package-only title/description, but must have a mounting slot.
+// Application UI can omit the package set title, but must have a mounting slot.
 assert.deepEqual(inspect({kind:'ui',sets:{id:'plain',slot:'scriptUi',presentation:'inline',components:[{id:'t',type:'text',label:'文字'}]}}).errors,[]);
 assert.ok(inspect({kind:'ui',context:'resourcePackage',sets:{id:'plain',presentation: 'inline',components:[{id:'t',type:'text',label:'文字'}]}}).errors.length);
 assert.ok(inspect({kind:'ui',sets:pkgResourceSet,context:'applicationScript'}).errors.some(x=>x.includes('.slot')));
@@ -262,3 +262,41 @@ for(const context of ['applicationScript','resourcePackage']) {
   }
 }
 console.log('PASS group-only dialog roots, atomic rejection and unchanged child value bindings');
+
+// Descriptions are optional for every type and both hosts, including nested dialog controls.
+assert.ok(!c.ui.validation.requiredWhen.some(rule=>(rule.required||[]).includes('description')));
+const optionalFixture=JSON.parse(fs.readFileSync(new URL('../fixtures/valid/ui-optional-descriptions.json',import.meta.url)));
+const flatten=nodes=>nodes.flatMap(node=>[node,...flatten(node.children||[])]);
+for(const context of ['resourcePackage','applicationScript']) {
+  const contexts=structuredClone(optionalFixture.ui);
+  if(context==='applicationScript')contexts.forEach(set=>set.slot=set.presentation==='dialog'?'dialog':'scriptUi');
+  for(const mode of ['omitted','empty','blank','text']) {
+    const sets=structuredClone(contexts);
+    const nodes=flatten(sets.flatMap(set=>set.components));
+    for(const node of nodes) {
+      if(mode==='omitted')delete node.description;
+      else node.description=mode==='empty'?'':mode==='blank'?' \n\t ':'有效辅助说明';
+    }
+    const result=inspect({kind:'ui',context,sets});
+    assert.deepEqual(result.errors,[],context+' '+mode);
+    for(const node of flatten(result.uiSets.flatMap(set=>set.components)))
+      assert.equal(node.description,mode==='text'?'有效辅助说明':mode==='omitted'?(node.bindings?.description?.fallback||''):'');
+  }
+  for(const invalid of [42,false,null,[],{}]) {
+    const sets=structuredClone(contexts);
+    sets[0].components[0].description=invalid;
+    assert.ok(inspect({kind:'ui',context,sets}).errors.some(error=>error.includes('.description')));
+  }
+  const dialog=structuredClone(dialogFixture.ui);
+  if(context==='applicationScript')dialog.forEach(set=>set.slot='dialog');
+  for(const node of flatten(dialog.flatMap(set=>set.components)))delete node.description;
+  assert.deepEqual(inspect({kind:'ui',context,sets:dialog}).errors,[]);
+  const bound=structuredClone(dialog);
+  const input=bound[0].components[0].children.find(node=>node.type==='input');
+  delete input.description;
+  input.bindings.description={path:'probe.help',fallback:'动态说明的默认内容'};
+  const result=inspect({kind:'ui',context,sets:bound});
+  assert.deepEqual(result.errors,[]);
+  assert.equal(result.uiSets[0].components[0].children.find(node=>node.type==='input').description,'动态说明的默认内容');
+}
+console.log('PASS optional descriptions for all UI types: omitted/empty/blank/text, both contexts, nested dialogs and dynamic fallbacks');

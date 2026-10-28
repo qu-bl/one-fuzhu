@@ -13,3 +13,6 @@ Rive 高级操作先读取 `script.rive`：以当前播放器或独立对象的 
 `slot: dialog`、`presentation: dialog` 集合只声明顶层 `group` 组合弹窗。
 通过 `qu.viewModel.openUi(groupId)` 打开；控件在 children 内，直接使用原有绑定和事件。
 需要关闭时调用 `qu.ui.close()`；不依赖单控件弹窗、草稿提交或宿主生成的确认/取消按钮。
+
+所有 UI 组件的 `description` 都是可选的用户可见辅助说明。没有帮助文案时省略；
+不要为按钮、文字、布局或其他控件自动补充用途注释。空字符串和仅空白字符串不展示说明。

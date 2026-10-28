@@ -1,4 +1,4 @@
-# 三端动态原生 UI 规范 12.0.0
+# 三端动态原生 UI 规范 12.0.1
 
 本规范是 Apple、Android、鸿蒙动态 UI 的共同最小集合。权威机器规则位于
 [`contract.json`](contract.json) 的 `ui` 段；本文用于说明它能表达什么。
@@ -25,6 +25,12 @@
 ## 八种组件
 
 所有组件共有 `id`、`type`、非空 `label`，并可带 `description`、`visible`、`bindings`。
+
+所有组件类型在资源包和应用脚本中都可省略 `description`；不填写、空字符串或仅含空白时，
+不显示辅助说明，也不占用说明区域。只有需要向用户提供帮助内容时才填写。
+`description` 是用户可见文案，不是必填的开发注释；不得根据控件 id、label 或 action 自动补写。
+支持 `bindings.description` 的组件可以继续绑定动态说明，或使用其 fallback，无需同时填写静态说明。
+填写静态说明或 fallback 时仍须为合法字符串，保留现有长度限制。
 
 | 类型 | 用途 | 可用静态字段 |
 | --- | --- | --- |

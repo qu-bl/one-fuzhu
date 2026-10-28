@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "12.0.0",
+  "contractVersion": "12.0.1",
   "notes": [
     "示例只提供当前协议骨架；${...} 占位符在交付前必须由真实信息替换。",
     "不要复制示例中未被用户需求使用的字段或组件。",
@@ -9,7 +9,8 @@
     "控件固定必填字段、条件必填字段和任选字段组以 generation-profile.json 为准。",
     "应用脚本示例中的多选 list 由 @ui 值绑定交给宿主管理，不调用 viewModel.define，也不加入 @observe。",
     "@observe 只列出 onValue 实际消费的字段；UI binding 不需要重复观察。",
-    "所有 QVMI 均为纯运行时数据；示例中的 UI scope 只控制挂载方式，跨冷启动值必须由脚本显式使用 qu.storage 保存和恢复。"
+    "所有 QVMI 均为纯运行时数据；示例中的 UI scope 只控制挂载方式，跨冷启动值必须由脚本显式使用 qu.storage 保存和恢复。",
+    "所有 UI 组件的 description 均为可选的用户可见辅助说明；没有实际帮助内容时省略，不得为了补齐字段生成占位说明。"
   ],
   "examples": {
     "applicationScript": {
@@ -55,7 +56,6 @@
                 "id": "Enabled",
                 "type": "toggle",
                 "label": "启用",
-                "description": "当前运行会话中的开关状态",
                 "bindings": {
                   "value": {
                     "path": "settings.enabled",
@@ -75,7 +75,6 @@
           "id": "layout",
           "type": "group",
           "label": "布局",
-          "description": "纵向组合",
           "layout": "column",
           "children": []
         },
@@ -83,7 +82,6 @@
           "id": "summary",
           "type": "text",
           "label": "说明",
-          "description": "静态文字",
           "text": "内容",
           "copyable": true
         },
@@ -91,7 +89,6 @@
           "id": "name",
           "type": "input",
           "label": "名称",
-          "description": "输入名称",
           "inputMode": "text",
           "bindings": {
             "value": {
@@ -105,7 +102,6 @@
           "id": "enabled",
           "type": "toggle",
           "label": "启用",
-          "description": "控制功能",
           "bindings": {
             "value": {
               "path": "enabled",
@@ -118,7 +114,6 @@
           "id": "amount",
           "type": "slider",
           "label": "数值",
-          "description": "调整数值",
           "min": 0,
           "max": 100,
           "step": 1,
@@ -134,7 +129,6 @@
           "id": "mode",
           "type": "choice",
           "label": "模式",
-          "description": "选择一种模式",
           "options": [
             {
               "value": "normal",
@@ -157,21 +151,18 @@
           "id": "apply",
           "type": "button",
           "label": "应用",
-          "description": "执行操作",
           "text": "应用",
           "action": "emit"
         },
         "spacer": {
           "id": "flexibleSpace",
           "type": "spacer",
-          "label": "间隔",
-          "description": "留出空间"
+          "label": "间隔"
         },
         "filePicker": {
           "id": "sourceFile",
           "type": "button",
           "label": "选择文件",
-          "description": "选择一个资源文件",
           "text": "选择文件",
           "action": "pickFile",
           "acceptedFileExtensions": [
@@ -190,7 +181,6 @@
           "id": "features",
           "type": "choice",
           "label": "功能",
-          "description": "选择一个或多个功能",
           "options": [
             {
               "value": "a",

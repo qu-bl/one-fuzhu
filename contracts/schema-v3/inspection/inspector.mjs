@@ -33,6 +33,7 @@ function run(input, c) {
         if(item[key]===undefined&&item.bindings[key]?.fallback!==undefined)item[key]=item.bindings[key].fallback;
       }
       item.description ??= '';
+      if(typeof item.description==='string'&&!item.description.trim())item.description='';
       for(const child of list(item.children))normalize(child);
     }
     for(const set of sets){set.title ??= '';for(const item of list(set.components))normalize(item);}
@@ -54,7 +55,6 @@ function run(input, c) {
       if(depth>uv.limits.depthMax)add(p,`嵌套超过 ${uv.limits.depthMax} 层`);
       if(ids.has(item.id))add(`${p}.id`, `控件 id 重复 ${item.id}`);ids.add(item.id);
       if(!text(item.label))add(`${p}.label`,'必须包含非空文字');
-      if(context==='resourcePackage'&&!text(item.description))add(`${p}.description`,'资源包组件需要说明');
       if(own(item,'placement')) {
         const rule=uv.dialogPlacement;
         if(set.presentation!==uv.dialogPresentation||depth!==rule.childDepth)
