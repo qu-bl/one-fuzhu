@@ -18,6 +18,7 @@ on:
       - 'site/styles.css'
       - 'site/theme.js'
       - 'site/media.js'
+      - 'site/links.js'
       - 'site/app.js'
       - '.github/workflows/site-build.yml'
   workflow_dispatch:

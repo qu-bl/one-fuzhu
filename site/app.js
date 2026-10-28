@@ -15,7 +15,6 @@ const accessTitle = document.querySelector("#access-title");
 const accessSummary = document.querySelector("#access-summary");
 const accessMedia = document.querySelector("#access-media");
 const accessItems = document.querySelector("#access-items");
-const copyToast = document.querySelector("#copy-toast");
 const contactSection = document.querySelector("#contact");
 const contactLabel = document.querySelector("#contact-label");
 const contactTitle = document.querySelector("#contact-title");
@@ -181,43 +180,10 @@ function closeAccessDialog() {
   };
 }
 
-function fallbackCopy(value) {
-  const input = document.createElement("textarea");
-  input.value = value;
-  input.setAttribute("readonly", "");
-  input.style.position = "fixed";
-  input.style.opacity = "0";
-  document.body.append(input);
-  input.select();
-  const copied = document.execCommand("copy");
-  input.remove();
-  if (!copied) throw new Error("copy failed");
-}
-
 async function copyAccessValue(value, label, button) {
-  try {
-    if (navigator.clipboard?.writeText && window.isSecureContext) {
-      await navigator.clipboard.writeText(value);
-    } else {
-      fallbackCopy(value);
-    }
-    button.dataset.copied = "true";
-    if (copyToast) {
-      copyToast.textContent = `已复制${label}`;
-      copyToast.dataset.visible = "true";
-    }
-    window.setTimeout(() => {
-      delete button.dataset.copied;
-      if (copyToast) delete copyToast.dataset.visible;
-    }, 1600);
-  } catch (error) {
-    console.error(error);
-    if (copyToast) {
-      copyToast.textContent = "复制失败，请重试";
-      copyToast.dataset.visible = "true";
-      window.setTimeout(() => delete copyToast.dataset.visible, 2200);
-    }
-  }
+  if (!await SiteLinks.copy(value, label)) return;
+  button.dataset.copied = "true";
+  window.setTimeout(() => { delete button.dataset.copied; }, 2600);
 }
 
 function createPlayerFrame(item, video) {
@@ -240,12 +206,23 @@ function createPlayerFrame(item, video) {
 // 在 WebView 里这意味着外部页面更早拿到一个 iframe。
 function renderAccessMedia(item, accessMedia = document.querySelector("#access-media"), mode = "player") {
   accessMedia.replaceChildren();
-  const video = SiteMedia.videoSource(item.video);
+  const video = SiteMedia.videoSource(item.video, { inApp: Boolean(appPlatform) });
   accessMedia.hidden = !video && !item.cover;
   accessMedia.style.aspectRatio = String(video?.ratio || 16 / 9);
   accessMedia.classList.toggle("access-media--portrait", Boolean(video && video.ratio < 1));
 
-  if (video && mode !== "poster") {
+  accessMedia.classList.toggle("external-video", Boolean(video && !video.embed && mode !== "poster"));
+  if (video && !video.embed && mode !== "poster") {
+    accessMedia.style.aspectRatio = "auto";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "banner-action";
+    button.textContent = "复制视频网址，到浏览器打开";
+    button.addEventListener("click", () => copyAccessValue(video.href, "视频网址", button));
+    accessMedia.append(button);
+    return;
+  }
+  if (video?.embed && mode !== "poster") {
     accessMedia.append(createPlayerFrame(item, video));
     return;
   }
@@ -319,7 +296,8 @@ function renderAccessItems(item, accessItems) {
   entries.forEach((accessItem) => {
     const meta = ACCESS_META[accessItem.platform];
     if (!meta) return;
-    const action = SiteMedia.accessAction(accessItem);
+    const action = SiteMedia.accessAction(accessItem, { copyLinks: Boolean(appPlatform) });
+    const copiesUrl = action.type === "copy" && Boolean(SiteMedia.webUrl(action.value));
     const option = document.createElement(action.type === "link" ? "a" : "button");
     const icon = document.createElement("span");
     const logo = document.createElement("img");
@@ -341,7 +319,7 @@ function renderAccessItems(item, accessItems) {
     logo.decoding = "async";
     logo.setAttribute("aria-hidden", "true");
     icon.append(logo);
-    label.textContent = accessItem.label || meta.label;
+    label.textContent = `${accessItem.label || meta.label}${copiesUrl ? " · 复制网址" : ""}`;
     option.append(icon, label);
     if (action.type === "unavailable") {
       const status = document.createElement("small");
@@ -349,7 +327,8 @@ function renderAccessItems(item, accessItems) {
       option.append(status);
     }
     if (action.type === "copy") {
-      option.setAttribute("aria-label", `复制${accessItem.label || meta.label}`);
+      option.setAttribute("aria-label", `复制${accessItem.label || meta.label}${copiesUrl ? "网址" : ""}`);
+      if (copiesUrl) option.title = "复制网址，到浏览器打开";
       option.addEventListener("click", () => copyAccessValue(action.value, accessItem.label || meta.label, option));
     } else if (action.type === "link") {
       option.setAttribute("aria-label", `前往${accessItem.label || meta.label}（新窗口）`);
@@ -1107,9 +1086,10 @@ function renderContact() {
 
   methods.forEach((method) => {
     const href = contactHref(method.href);
-    // 有合法协议就渲染成可点的原生链接；只有号码之类的纯值则退化成可复制按钮。
-    const node = document.createElement(href ? "a" : "button");
-    if (href) {
+    const webHref = SiteMedia.webUrl(href);
+    const copiesValue = Boolean(appPlatform) || !href;
+    const node = document.createElement(copiesValue ? "button" : "a");
+    if (!copiesValue) {
       node.href = href;
       if (!href.startsWith("mailto:") && !href.startsWith("tel:") && !href.startsWith("sms:")) {
         node.target = "_blank";
@@ -1117,12 +1097,13 @@ function renderContact() {
       }
     } else {
       node.type = "button";
-      const value = String(method.value ?? "");
+      const value = webHref || String(method.value || href || "");
+      node.setAttribute("aria-label", `${webHref ? "复制网址" : "复制联系方式"}：${method.label || "联系方式"}`);
       node.addEventListener("click", () => copyAccessValue(value, method.label || "联系方式", node));
     }
     node.className = "contact-method";
     const small = document.createElement("small");
-    small.textContent = method.label || "";
+    small.textContent = `${copiesValue ? (webHref ? "复制网址 · " : "复制 · ") : ""}${method.label || ""}`;
     const strong = document.createElement("strong");
     strong.textContent = method.value || "";
     node.append(small, strong);
@@ -1209,12 +1190,19 @@ function initNotice(options = {}) {
   noticeActions.replaceChildren();
   const href = contactHref(notice.linkHref);
   if (href) {
-    const link = document.createElement("a");
+    const link = document.createElement(appPlatform ? "button" : "a");
     link.className = "banner-action";
-    link.href = href;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = notice.linkLabel || "了解详情";
+    if (appPlatform) {
+      link.type = "button";
+      link.textContent = "复制链接";
+      link.title = "复制网址，到浏览器打开";
+      link.addEventListener("click", () => copyAccessValue(href, "链接", link));
+    } else {
+      link.href = href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = notice.linkLabel || "了解详情";
+    }
     noticeActions.append(link);
   }
 

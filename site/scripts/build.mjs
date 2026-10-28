@@ -60,6 +60,7 @@ function caseHTML(w) {
   <link rel="alternate" type="text/markdown" href="${url.replace(/\.html$/, ".md")}">
   <link rel="describedby" type="text/markdown" href="${url.replace(/\.html$/, ".md")}">
   <title>${esc(w.name)} · 千机百变</title>
+  <script src="../links.js?v=${createHash("sha256").update(readFileSync(join(ROOT, "links.js"))).digest("hex").slice(0, 8)}" defer></script>
   <link rel="stylesheet" href="../styles.css">
   <script type="application/ld+json">
   {
@@ -251,7 +252,7 @@ if (jsonldRe.test(html)) {
 // 资源版本号按文件内容生成并写回 index.html。手工维护 ?v= 时，
 // 改了 styles.css / app.js 却忘记改版本号，浏览器会继续用旧文件
 // （GitHub Pages 对这些资源设了 max-age=600）。
-const stampedAssets = ["styles.css", "theme.js", "media.js", "app.js"];
+const stampedAssets = ["styles.css", "theme.js", "media.js", "links.js", "app.js"];
 let stamped = 0;
 for (const name of stampedAssets) {
   let digest;
@@ -274,4 +275,10 @@ for (const name of stampedAssets) {
 console.log(`✓ index.html 资源版本号 ${stamped}/${stampedAssets.length} 个已按内容刷新`);
 
 writeFileSync(indexPath, html);
+for (const name of ["terms.html", "privacy.html"]) {
+  const path = join(ROOT, name);
+  const source = readFileSync(path, "utf-8");
+  const digest = createHash("sha256").update(readFileSync(join(ROOT, "links.js"))).digest("hex").slice(0, 8);
+  writeFileSync(path, source.replace(/(\.\/links\.js)\?v=[^"']*/g, `$1?v=${digest}`));
+}
 console.log("done");
