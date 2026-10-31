@@ -19,7 +19,7 @@
     "enabled": true,
     "title": "长荷专注资源包已上线",
     "body": "如需购买请进官方群：862835994。群内持续发布售后更新、更多资源包信息。",
-    "image": "./assets/notice.webp?v=1791131808991",
+    "image": "./assets/notice.webp?v=1793449569735",
     "linkLabel": "去看看",
     "linkHref": "https://qm.qq.com/q/cARWUthgDC"
   },
@@ -148,7 +148,7 @@
         "课程系列",
         "测试"
       ],
-      "featured": true,
+      "featured": false,
       "visible": true,
       "video": {
         "platform": "bilibili",
@@ -164,6 +164,32 @@
         ]
       },
       "cover": "./assets/cover-image-binding-cards.webp?v=1791188188462"
+    },
+    {
+      "id": "card-1793449583904",
+      "name": "新卡片",
+      "summary": "",
+      "cover": "./assets/cover-card-1793449583904.webp?v=1793449619005",
+      "category": "互动组件",
+      "partnerName": "官方",
+      "platforms": [
+        "HarmonyOS",
+        "Android",
+        "Apple"
+      ],
+      "tags": [
+        "专注"
+      ],
+      "visible": true,
+      "access": {
+        "items": [
+          {
+            "platform": "xiaohongshu",
+            "url": "https://xhslink.cn/o/7JElliDiDFe"
+          }
+        ]
+      },
+      "featured": true
     }
   ]
 }
