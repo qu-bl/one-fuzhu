@@ -481,6 +481,12 @@ let translationPage = 0;
 const TRANSLATION_PAGE_SIZE = 80;
 // 待发布的二进制文件：仓库路径 -> base64；随「保存并发布」一起提交。
 const pendingUploads = new Map();
+// 本地预览与提交内容分开保存，blob 地址绝不写进仓库。
+const uploadPreviews = new Map();
+function clearUploadPreviews() {
+  for (const url of uploadPreviews.values()) URL.revokeObjectURL(url);
+  uploadPreviews.clear();
+}
 let token = CONFIG.token || sessionStorage.getItem('oneFuzhuToken') || '';
 let dirty = false;
 let busy = false;
@@ -497,7 +503,7 @@ const setStatus = (msg, kind = '') => {
   s.textContent = msg;
   s.className = 'status ' + kind;
   window.clearTimeout(statusTimer);
-  if (kind === 'ok' && msg) {
+  if (kind === 'ok' && msg && !msg.startsWith('已暂存')) {
     statusTimer = window.setTimeout(() => { s.textContent = ''; s.className = 'status'; }, 4000);
   }
 };
@@ -621,6 +627,7 @@ async function loadContent() {
     release = nextRelease;
     pendingTerms = new Set();
     pendingUploads.clear();
+    clearUploadPreviews();
     translationPage = 0;
     renderAll();
     markClean();
@@ -943,6 +950,8 @@ function repoPathToUrl(path) { return './' + path.replace(/^site\//, ''); }
 function siteAssetUrl(url) {
   const clean = String(url || '').split('?')[0].trim();
   if (!clean) return '';
+  const staged = uploadPreviews.get('site/' + clean.replace(/^\.\//, ''));
+  if (staged) return staged;
   if (/^(https?:)?\/\//i.test(clean) || clean.startsWith('data:')) return clean;
   return '../site/' + clean.replace(/^\.\//, '');
 }
@@ -991,6 +1000,7 @@ function stageUpload(slot, onStaged) {
   input.accept = slot.exts.join(',');
   input.addEventListener('change', async () => {
     const file = input.files && input.files[0];
+    input.remove();
     if (!file) return;
     const match = String(file.name).match(/\.[A-Za-z0-9]+$/);
     const ext = match ? match[0].toLowerCase() : '';
@@ -1009,16 +1019,26 @@ function stageUpload(slot, onStaged) {
       for (const key of Array.from(pendingUploads.keys())) {
         if (key.startsWith(slot.base + '.')) pendingUploads.delete(key);
       }
-      pendingUploads.set(path, bytesToBase64(bytes));
+      const base64 = bytesToBase64(bytes);
+      const previewUrl = URL.createObjectURL(prepared.file);
+      for (const [key, url] of uploadPreviews) {
+        if (key.startsWith(slot.base + '.')) { URL.revokeObjectURL(url); uploadPreviews.delete(key); }
+      }
+      uploadPreviews.set(path, previewUrl);
+      pendingUploads.set(path, base64);
       onStaged(path, prepared.file.size);
       markDirty();
-      setStatus(`已暂存 ${path}（${(prepared.file.size / 1024).toFixed(0)} KB），点「保存并发布」写入仓库`, 'ok');
+      setStatus(`已暂存 ${path}（${(prepared.file.size / 1024).toFixed(0)} KB），预览已更新；点「保存并发布」后才会更新网站`, 'ok');
     } catch (error) {
       setStatus('读取文件失败：' + error.message, 'err');
     } finally {
       setBusy(false);
     }
   }, { once: true });
+  input.hidden = true;
+  input.addEventListener('cancel', () => input.remove(), { once: true });
+  document.body.append(input);
+  setStatus('请选择文件；选好后会在此显示处理结果。');
   input.click();
 }
 
@@ -1402,6 +1422,17 @@ const PREVIEW_TARGETS = {
   token: { scrollTo: '.showcase-section', hint: '首页' },
 };
 let previewTimer = null;
+function previewContent() {
+  const draft = JSON.parse(JSON.stringify(content));
+  const replaceAsset = (url) => {
+    const clean = String(url || '').split('?')[0].trim();
+    return uploadPreviews.get('site/' + clean.replace(/^\.\//, '')) || url;
+  };
+  if (draft.hero?.rive?.src) draft.hero.rive.src = replaceAsset(draft.hero.rive.src);
+  if (draft.notice?.image) draft.notice.image = replaceAsset(draft.notice.image);
+  for (const card of draft.cards || []) if (card.cover) card.cover = replaceAsset(card.cover);
+  return draft;
+}
 function syncPreview() {
   const frame = $('previewFrame');
   const target = PREVIEW_TARGETS[activeView] || {};
@@ -1413,7 +1444,7 @@ function syncPreview() {
       const card = activeView === 'cards' ? (viewItems() || [])[activeIndex] : null;
       frame.contentWindow.postMessage({
         type: 'qianji:preview',
-        content: content,
+        content: previewContent(),
         options: {
           scrollTo: target.scrollTo || null,
           showNotice: target.showNotice === true,
