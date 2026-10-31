@@ -427,11 +427,10 @@ const CONFIG = {
   // 上传槽位：固定前缀 + 上传文件的扩展名，避免把 PNG 字节写进 .webp 路径。
   uploads: {
     heroRive: { base: 'site/assets/hero-cat', exts: ['.riv'], maxBytes: 24 * 1024 * 1024 },
-    // 图片只收 WebP。以前什么都收，结果一张 PNG 封面就有 900 KB，
-    // 而同样的图转成 WebP 只有 60 KB 左右——这是在源头上堵住。
-    noticeImage: { base: 'site/assets/notice', exts: ['.webp'], maxBytes: 4 * 1024 * 1024 },
+    // JPEG 在浏览器本地转为 WebP，仓库仍只保存 WebP 图片。
+    noticeImage: { base: 'site/assets/notice', exts: ['.webp', '.jpg', '.jpeg'], maxBytes: 4 * 1024 * 1024, convertJpeg: true },
     // 卡片封面：基名按卡片 id 动态生成，见 coverSlot()。
-    cardCover: { exts: ['.webp'], maxBytes: 4 * 1024 * 1024 }
+    cardCover: { exts: ['.webp', '.jpg', '.jpeg'], maxBytes: 4 * 1024 * 1024, convertJpeg: true }
   },
   token: ''
 };
@@ -863,7 +862,7 @@ function cardEditor(card, index) {
     (v) => { card.platforms = v; markDirty(); }, (v) => CARD_PLATFORMS.find((p) => p.value === v).label);
   field(meta.grid, '标签', bind(textInput((card.tags || []).join(', '), 'Rive, 状态机'), (v) => (card.tags = splitList(v))));
 
-  const cover = section(details, '封面图', '必填。折叠时卡片显示的就是这张封面；点开后如果有视频就播视频，没有视频仍然是这张封面。只收 WebP 格式。');
+  const cover = section(details, '封面图', '必填。折叠时卡片显示的就是这张封面；点开后如果有视频就播视频，没有视频仍然是这张封面。支持 WebP、JPEG/JPG；JPEG 自动转为 WebP（质量 82%，保留尺寸），转换后不超过 4 MB。');
   const coverInput = textInput(card.cover, './assets/xxx.webp');
   field(cover.grid, '封面图路径', bind(coverInput, (v) => { card.cover = v; renderList(); }));
   const coverRow = el('div', 'row');
@@ -951,6 +950,41 @@ function siteAssetUrl(url) {
 // 加版本号，避免 GitHub Pages 缓存导致替换文件后站点仍拿到旧内容。
 function versioned(url) { return url ? url.split('?')[0] + '?v=' + Date.now() : url; }
 
+// JPEG 只在当前浏览器中解码和转换；原始文件不会上传。
+async function prepareUpload(file, slot, ext) {
+  const convert = slot.convertJpeg && ['.jpg', '.jpeg'].includes(ext);
+  const sourceLimit = convert ? 20 * 1024 * 1024 : slot.maxBytes;
+  if (file.size > sourceLimit) throw new Error(`原文件超过 ${(sourceLimit / 1048576).toFixed(0)} MB 上限`);
+  if (!convert) return { file, ext };
+  const signature = new Uint8Array(await file.slice(0, 3).arrayBuffer());
+  if (signature[0] !== 0xff || signature[1] !== 0xd8 || signature[2] !== 0xff) {
+    throw new Error('文件内容不是 JPEG，请选择有效的 JPEG/JPG 图片');
+  }
+  const url = URL.createObjectURL(file);
+  const image = new Image();
+  try {
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error('JPEG 图片无法解码，请重新导出图片'));
+      image.src = url;
+    });
+    const width = image.naturalWidth, height = image.naturalHeight;
+    if (!width || !height || width * height > 40000000) throw new Error('图片尺寸无效或超过 4000 万像素，请先缩小图片');
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('浏览器无法创建图片转换画布');
+    context.drawImage(image, 0, 0);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.82));
+    canvas.width = canvas.height = 0;
+    if (!blob || blob.type !== 'image/webp') throw new Error('浏览器不支持 WebP 转换，请使用新版浏览器或直接上传 WebP');
+    if (blob.size > slot.maxBytes) throw new Error('转换后的 WebP 超过 4 MB，请先缩小图片');
+    return { file: blob, ext: '.webp' };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 function stageUpload(slot, onStaged) {
   const input = el('input');
   input.type = 'file';
@@ -964,23 +998,25 @@ function stageUpload(slot, onStaged) {
       setStatus(`只支持 ${slot.exts.join(' / ')} 格式`, 'err');
       return;
     }
-    if (file.size > slot.maxBytes) {
-      setStatus(`文件 ${(file.size / 1048576).toFixed(2)} MB 超过上限 ${(slot.maxBytes / 1048576).toFixed(1)} MB`, 'err');
-      return;
-    }
+    if (busy) { setStatus('正在处理文件，请稍后再试', 'err'); return; }
+    setBusy(true);
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const path = slot.base + ext;
+      setStatus('正在处理上传文件…');
+      const prepared = await prepareUpload(file, slot, ext);
+      const bytes = new Uint8Array(await prepared.file.arrayBuffer());
+      const path = slot.base + prepared.ext;
       // 同一槽位若已暂存别的扩展名，先移除，避免一次提交两个同名不同后缀的文件。
       for (const key of Array.from(pendingUploads.keys())) {
         if (key.startsWith(slot.base + '.')) pendingUploads.delete(key);
       }
       pendingUploads.set(path, bytesToBase64(bytes));
-      onStaged(path, file.size);
+      onStaged(path, prepared.file.size);
       markDirty();
-      setStatus(`已暂存 ${path}（${(file.size / 1024).toFixed(0)} KB），点「保存并发布」写入仓库`, 'ok');
+      setStatus(`已暂存 ${path}（${(prepared.file.size / 1024).toFixed(0)} KB），点「保存并发布」写入仓库`, 'ok');
     } catch (error) {
       setStatus('读取文件失败：' + error.message, 'err');
+    } finally {
+      setBusy(false);
     }
   }, { once: true });
   input.click();
@@ -1133,7 +1169,7 @@ function noticeEditor() {
   field(basic.grid, '标题', bind(textInput(notice.title), (v) => (notice.title = v)));
   field(basic.grid, '正文（支持换行）', bind(textArea(notice.body), (v) => (notice.body = v)));
 
-  const image = section(details, '弹窗图片（可选）', '只收 WebP 格式。');
+  const image = section(details, '弹窗图片（可选）', '支持 WebP、JPEG/JPG；JPEG 自动转为 WebP（质量 82%，保留尺寸），转换后不超过 4 MB。');
   const imageSrc = textInput(notice.image, './assets/xxx.webp');
   field(image.grid, '图片路径', bind(imageSrc, (v) => (notice.image = v)));
   const preview = el('img');
