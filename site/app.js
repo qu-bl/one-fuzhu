@@ -462,8 +462,7 @@ function initHeroRive() {
   const rive = hero.rive || HERO_DEFAULTS.rive;
 
   if (hero.ariaLabel) {
-    document.querySelector('.information-rive-target')?.setAttribute('aria-label', hero.ariaLabel);
-    activityRiveCanvas?.closest(".activity-rive")?.setAttribute("aria-label", hero.ariaLabel);
+    document.querySelector('.information-rive-target')?.setAttribute('aria-label', `${hero.ariaLabel}，点击返回创意橱柜`);
   }
 
   if (!activityRiveCanvas || !window.rive?.Rive || !rive.src) return;
@@ -1824,7 +1823,7 @@ function closeInformation({ instant = false } = {}) {
 }
 function bindInformation() {
   profileEntry?.addEventListener('click', () => openInformation());
-  informationPanel?.querySelector('[data-close-information]')?.addEventListener('click', () => closeInformation());
+  informationTarget?.addEventListener('click', () => closeInformation(), { capture: true });
   document.addEventListener('keydown', event => {
     if (informationState === 'closed' || accessDialog?.open || noticeDialog?.open) return;
     if (event.key === 'Escape') { event.preventDefault(); closeInformation(); }
