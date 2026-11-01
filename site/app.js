@@ -180,9 +180,10 @@ function closeAccessDialog() {
 }
 
 async function copyAccessValue(value, label, button) {
-  if (!await SiteLinks.copy(value, label)) return;
+  if (!await SiteLinks.copy(value, label)) return false;
   button.dataset.copied = "true";
   window.setTimeout(() => { delete button.dataset.copied; }, 2600);
+  return true;
 }
 
 function createPlayerFrame(item, video) {
@@ -1223,6 +1224,7 @@ function stopNoticeEntry(freeze = false) {
   snapshots.forEach(({ element, opacity, transform }) => Object.assign(element.style, { opacity, transform }));
 }
 function resetNoticeMotion() {
+  if (noticeActivation) finishNoticeActivation(noticeActivation);
   stopNoticeEntry();
   noticeExitAnimation?.cancel();
   noticeExitAnimation = null;
@@ -1258,6 +1260,7 @@ function playNoticeEnter() {
   });
 }
 function closeNoticeDialog() {
+  if (noticeActivation) { noticeDialog.close(); resetNoticeMotion(); return; }
   if (!noticeDialog.open || noticeDialog.dataset.closing === 'true') return;
   const finish = () => { noticeDialog.close(); resetNoticeMotion(); };
   if (reduceMotion.matches || !noticeDialog.animate) { finish(); return; }
@@ -1277,8 +1280,188 @@ function closeNoticeDialog() {
   }, () => {});
 }
 
+let noticeActivation = null;
+function finishNoticeActivation(effect, completed = false) {
+  if (noticeActivation !== effect) return;
+  noticeActivation = null;
+  effect.cancelled = true;
+  cancelAnimationFrame(effect.frame);
+  effect.bounce?.cancel();
+  if (effect.stage) {
+    try { effect.stage.hidePopover?.(); } catch {}
+    effect.stage.remove();
+  }
+  effect.action.style.removeProperty('visibility');
+  effect.action.removeAttribute('aria-disabled');
+  noticeMedia.style.removeProperty('visibility');
+  noticeDialog.style.removeProperty('overflow');
+  effect.resolve?.(completed);
+}
+function roundedNoticePath(ctx, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath(); ctx.moveTo(r, 0); ctx.lineTo(width - r, 0);
+  ctx.quadraticCurveTo(width, 0, width, r); ctx.lineTo(width, height - r);
+  ctx.quadraticCurveTo(width, height, width - r, height); ctx.lineTo(r, height);
+  ctx.quadraticCurveTo(0, height, 0, height - r); ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0); ctx.closePath();
+}
+function noticeRaster(element, image = null) {
+  const rect = element.getBoundingClientRect();
+  const ratio = Math.min(devicePixelRatio || 1, 1.5);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.ceil(rect.width * ratio));
+  canvas.height = Math.max(1, Math.ceil(rect.height * ratio));
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas unavailable');
+  ctx.scale(ratio, ratio);
+  const style = getComputedStyle(element);
+  roundedNoticePath(ctx, rect.width, rect.height, image ? 24 : parseFloat(style.borderRadius) || 24);
+  ctx.clip();
+  if (image) ctx.drawImage(image, 0, 0, rect.width, rect.height);
+  else {
+    ctx.fillStyle = style.backgroundColor; ctx.fillRect(0, 0, rect.width, rect.height);
+    const label = element.querySelector('.notice-button-label');
+    const labelRect = label.getBoundingClientRect(), textStyle = getComputedStyle(label);
+    ctx.font = `${textStyle.fontWeight} ${textStyle.fontSize} ${textStyle.fontFamily}`;
+    ctx.fillStyle = textStyle.color; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+    const lineHeight = parseFloat(textStyle.lineHeight) || parseFloat(textStyle.fontSize) * 1.5;
+    const maxWidth = Math.max(16, labelRect.width);
+    const lines = [''];
+    for (const char of label.textContent) {
+      const line = lines.length - 1;
+      if (char === '\n') lines.push('');
+      else if (lines[line] && ctx.measureText(lines[line] + char).width > maxWidth) lines.push(char);
+      else lines[line] += char;
+    }
+    lines.forEach((line, index) => ctx.fillText(line,
+      labelRect.left - rect.left + labelRect.width / 2,
+      labelRect.top - rect.top + labelRect.height / 2 + (index - (lines.length - 1) / 2) * lineHeight));
+  }
+  return { canvas, rect, ratio };
+}
+function noticeDust(raster, count, start, anchor) {
+  const { rect } = raster;
+  const cell = Math.max(3, Math.ceil(Math.sqrt(rect.width * rect.height / count)));
+  const particles = [];
+  const diagonal = Math.hypot(rect.width, rect.height);
+  for (let y = 0; y < rect.height; y += cell) for (let x = 0; x < rect.width; x += cell) {
+    const width = Math.min(cell, rect.width - x), height = Math.min(cell, rect.height - y);
+    const cx = rect.left + x + width / 2, cy = rect.top + y + height / 2;
+    const distance = Math.min(1, Math.hypot(cx - anchor.x, cy - anchor.y) / diagonal);
+    particles.push({ raster, x, y, width, height, cx, cy,
+      start: start + (start ? distance * 190 : 0) + Math.random() * 70,
+      life: (start ? 620 : 420) + Math.random() * 140,
+      dx: (Math.random() - .28) * (start ? 180 : 130),
+      dy: -35 - Math.random() * (start ? 180 : 110),
+      spin: (Math.random() - .5) * 2.2,
+    });
+  }
+  return particles;
+}
+function dissolveNotice(effect) {
+  return new Promise((resolve, reject) => {
+    effect.resolve = resolve;
+    try {
+      const image = noticeMedia.querySelector('img');
+      const button = noticeRaster(effect.action);
+      const poster = noticeRaster(noticeMedia, image);
+      const anchor = { x: button.rect.left + button.rect.width / 2, y: button.rect.top + button.rect.height / 2 };
+      const mobile = innerWidth < 720;
+      const buttonDust = noticeDust(button, mobile ? 120 : 170, 0, anchor);
+      const posterStart = 330;
+      const posterDust = noticeDust(poster, mobile ? 720 : 1050, posterStart, anchor);
+      const end = Math.max(...posterDust.map(p => p.start + p.life));
+      const stage = document.createElement('canvas');
+      stage.className = 'notice-particle-stage'; stage.setAttribute('aria-hidden', 'true');
+      const ratio = Math.min(devicePixelRatio || 1, 1.5);
+      stage.width = Math.ceil(innerWidth * ratio); stage.height = Math.ceil(innerHeight * ratio);
+      stage.style.width = `${innerWidth}px`; stage.style.height = `${innerHeight}px`;
+      noticeDialog.append(stage); effect.stage = stage;
+      if (stage.showPopover) { stage.setAttribute('popover', 'manual'); stage.showPopover(); }
+      else noticeDialog.style.overflow = 'visible';
+      const ctx = stage.getContext('2d');
+      if (!ctx) throw new Error('Canvas unavailable');
+      ctx.scale(ratio, ratio);
+      effect.action.style.visibility = 'hidden';
+      noticeDialog.dataset.motion = 'button-particles';
+      const began = performance.now();
+      let posterStarted = false;
+      const draw = (particles, elapsed) => particles.forEach(p => {
+        const t = Math.max(0, Math.min(1, (elapsed - p.start) / p.life));
+        if (t === 1) return;
+        const travel = 1 - Math.pow(1 - t, 3), scale = Math.pow(1 - t, 1.25);
+        ctx.save();
+        ctx.globalAlpha = Math.pow(1 - t, .8);
+        ctx.translate(p.cx + p.dx * travel, p.cy + p.dy * travel + 18 * t * t);
+        ctx.rotate(p.spin * travel);
+        ctx.scale(scale, scale);
+        ctx.drawImage(p.raster.canvas, p.x * p.raster.ratio, p.y * p.raster.ratio,
+          p.width * p.raster.ratio, p.height * p.raster.ratio,
+          -p.width / 2 - .2, -p.height / 2 - .2, p.width + .4, p.height + .4);
+        ctx.restore();
+      });
+      const render = now => {
+        if (noticeActivation !== effect || effect.cancelled) return;
+        const elapsed = now - began;
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        if (elapsed >= posterStart) {
+          if (!posterStarted) {
+            posterStarted = true;
+            noticeMedia.style.visibility = 'hidden';
+            noticeDialog.dataset.motion = 'poster-particles';
+          }
+          draw(posterDust, elapsed);
+        }
+        draw(buttonDust, elapsed);
+        if (elapsed >= end) finishNoticeActivation(effect, true);
+        else effect.frame = requestAnimationFrame(render);
+      };
+      effect.frame = requestAnimationFrame(render);
+    } catch (error) { reject(error); }
+  });
+}
+async function activateNoticeButton(event, action, behavior, href, value) {
+  if (behavior === 'link' && !appPlatform && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
+  event.preventDefault();
+  if (noticeActivation || noticeDialog.dataset.closing === 'true') return;
+  noticeDialog.scrollTop = 0;
+  noticeDialog.querySelector('.notice-sheet').scrollTop = 0;
+  const effect = { action, cancelled: false, frame: 0 };
+  noticeActivation = effect;
+  stopNoticeEntry(true);
+  noticeDialog.dataset.closing = 'true';
+  noticeDialog.dataset.motion = 'button-bounce';
+  action.setAttribute('aria-disabled', 'true');
+  // Clipboard access must start within this click's user activation.
+  const operation = behavior === 'copy' || (behavior === 'link' && appPlatform)
+    ? copyAccessValue(value, behavior === 'copy' ? '内容' : '链接', action) : Promise.resolve(true);
+  const base = getComputedStyle(action).transform;
+  const pose = base === 'none' ? '' : base;
+  effect.bounce = action.animate?.(reduceMotion.matches ? [{ opacity: 1 }, { opacity: .65 }, { opacity: 1 }] : [
+    { transform: `${pose} scale(1)`, offset: 0 },
+    { transform: `${pose} scale(.88)`, offset: .22 },
+    { transform: `${pose} scale(1.1)`, offset: .58 },
+    { transform: `${pose} scale(1)`, offset: 1 },
+  ], { duration: reduceMotion.matches ? 140 : 300, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' }) || { finished: Promise.resolve(), cancel() {} };
+  try {
+    const [success] = await Promise.all([operation, effect.bounce.finished.catch(() => false)]);
+    if (noticeActivation !== effect || effect.cancelled) return;
+    effect.bounce.cancel(); effect.bounce = null;
+    if (!success) { finishNoticeActivation(effect); resetNoticeMotion(); return; }
+    const completed = reduceMotion.matches ? (finishNoticeActivation(effect, true), true) : await dissolveNotice(effect);
+    if (!completed) return;
+    noticeDialog.close(); resetNoticeMotion();
+    if (behavior === 'link' && !appPlatform) location.assign(href);
+  } catch {
+    if (noticeActivation !== effect) return;
+    finishNoticeActivation(effect); resetNoticeMotion(); closeNoticeDialog();
+    if (behavior === 'link' && !appPlatform) location.assign(href);
+  }
+}
+
 let noticeGeneration = 0;
 function initNotice(options = {}) {
+  if (noticeActivation) { finishNoticeActivation(noticeActivation); resetNoticeMotion(); }
   const generation = ++noticeGeneration;
   const notice = state.notice;
   if (!noticeDialog) return;
@@ -1319,20 +1502,17 @@ function initNotice(options = {}) {
     const validColor = value => typeof value === 'string' && /^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent)$/i.test(value);
     if (validColor(notice.buttonColor)) action.style.backgroundColor = notice.buttonColor;
     if (validColor(notice.textColor)) action.style.color = notice.textColor;
-    if (behavior === 'link' && href && !appPlatform) {
+    const value = behavior === 'copy' ? notice.copyValue?.trim() : href;
+    if (action.tagName === 'A') {
       action.href = href;
       action.target = '_blank';
       action.rel = 'noopener noreferrer';
     } else {
       action.type = 'button';
-      if (behavior === 'close') action.addEventListener('click', closeNoticeDialog);
-      else {
-        const value = behavior === 'copy' ? notice.copyValue?.trim() : href;
-        action.disabled = !value;
-        action.addEventListener('click', () => copyAccessValue(value, behavior === 'copy' ? '内容' : '链接', action));
-        if (behavior === 'link') action.title = '复制网址，到浏览器打开';
-      }
+      action.disabled = behavior !== 'close' && !value;
+      if (behavior === 'link' && appPlatform) action.title = '复制网址，到浏览器打开';
     }
+    action.addEventListener('click', event => activateNoticeButton(event, action, behavior, href, value));
     noticeActions.append(action);
     if (!noticeDialog.open && typeof noticeDialog.showModal === 'function') {
       document.body.classList.add('dialog-open');

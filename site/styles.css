@@ -126,7 +126,7 @@ a { color: var(--accent); }
 /* The entire notice is a poster with one action overlaid on its bottom edge. */
 .notice-dialog { width: min(480px, calc(100vw - 32px), calc((100dvh - 48px) * var(--notice-ratio, .75))); max-width: none; max-height: calc(100dvh - 48px); padding: 0; border: 0; border-radius: 24px; overflow: hidden; color: var(--text); background: transparent; }
 .notice-dialog::backdrop { background: rgb(12 17 32 / .48); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
-.notice-sheet { position: relative; padding: 0; overflow: hidden; }
+.notice-sheet { position: relative; padding: 0; overflow: clip; }
 .notice-media { width: 100%; }
 .notice-media img { display: block; width: 100%; height: auto; }
 .notice-dialog:focus, .notice-dialog:focus-visible { outline: none; }
@@ -568,3 +568,12 @@ html, body { min-height: 100%; background: var(--page); }
   24% { opacity: .7; }
   100% { transform: translateX(85%); opacity: 0; }
 }
+
+.notice-particle-stage { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; pointer-events: none; overflow: visible; z-index: 1000; }
+.notice-particle-stage::backdrop { background: transparent; pointer-events: none; }
+.notice-dialog[data-motion="poster-particles"] { box-shadow: none; }
+.notice-dialog[data-motion="poster-particles"]::backdrop { animation: none; opacity: 0; transition: opacity 720ms ease; }
+.notice-dialog[data-motion="button-bounce"] .notice-sheet::after,
+.notice-dialog[data-motion="button-particles"] .notice-sheet::after,
+.notice-dialog[data-motion="poster-particles"] .notice-sheet::after { animation: none; opacity: 0; }
+.notice-actions .banner-action:active { scale: .94; }
