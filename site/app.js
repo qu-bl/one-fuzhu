@@ -22,9 +22,7 @@ const contactTitle = document.querySelector("#contact-title");
 const contactSummary = document.querySelector("#contact-summary");
 const contactMethods = document.querySelector("#contact-methods");
 const noticeDialog = document.querySelector("#notice-dialog");
-const noticeTitle = document.querySelector("#notice-title");
 const noticeMedia = document.querySelector("#notice-media");
-const noticeBody = document.querySelector("#notice-body");
 const noticeActions = document.querySelector("#notice-actions");
 const requestedPlatform = new URLSearchParams(window.location.search).get("appPlatform");
 const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform)
@@ -1221,72 +1219,55 @@ function closeNoticeDialog() {
   };
 }
 
+let noticeGeneration = 0;
 function initNotice(options = {}) {
+  const generation = ++noticeGeneration;
   const notice = state.notice;
   if (!noticeDialog) return;
-  // 先决定显示还是隐藏。不能让「没开启」的早退发生在关闭之前，
-  // 否则在管理台里关掉弹窗或切到别的区块时，已经打开的弹窗会一直留在预览里。
-  const shouldShow = options.showNotice !== false && Boolean(notice) && notice.enabled === true;
+  const shouldShow = options.showNotice !== false && notice?.enabled === true
+    && typeof notice.image === 'string' && notice.image.trim();
   if (!shouldShow) {
     if (noticeDialog.open) noticeDialog.close();
     return;
   }
 
-  if (notice.title) {
-    noticeTitle.textContent = notice.title;
-    noticeTitle.hidden = false;
-  } else {
-    noticeTitle.hidden = true;
-  }
-
-  if (notice.image) {
-    const image = document.createElement("img");
-    image.src = notice.image;
-    image.alt = "";
-    image.loading = "lazy";
-    image.decoding = "async";
+  const image = document.createElement('img');
+  image.alt = '';
+  image.decoding = 'async';
+  image.onload = () => {
+    if (generation !== noticeGeneration) return;
+    noticeDialog.style.setProperty('--notice-ratio', String(image.naturalWidth / image.naturalHeight));
     noticeMedia.replaceChildren(image);
-    noticeMedia.hidden = false;
-  } else {
-    noticeMedia.replaceChildren();
-    noticeMedia.hidden = true;
-  }
-
-  noticeBody.textContent = notice.body || "";
-  noticeActions.replaceChildren();
-  const href = contactHref(notice.linkHref);
-  if (href) {
-    const link = document.createElement(appPlatform ? "button" : "a");
-    link.className = "banner-action";
-    if (appPlatform) {
-      link.type = "button";
-      link.textContent = "复制链接";
-      link.title = "复制网址，到浏览器打开";
-      link.addEventListener("click", () => copyAccessValue(href, "链接", link));
+    noticeActions.replaceChildren();
+    const href = contactHref(notice.linkHref);
+    const action = document.createElement(href && !appPlatform ? 'a' : 'button');
+    action.className = 'banner-action';
+    action.textContent = notice.linkLabel?.trim() || (href ? '了解详情' : '知道了');
+    if (href && !appPlatform) {
+      action.href = href;
+      action.target = '_blank';
+      action.rel = 'noopener noreferrer';
     } else {
-      link.href = href;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = notice.linkLabel || "了解详情";
+      action.type = 'button';
+      action.addEventListener('click', () => href
+        ? copyAccessValue(href, '链接', action) : closeNoticeDialog());
+      if (href) action.title = '复制网址，到浏览器打开';
     }
-    noticeActions.append(link);
-  }
-
-  // 与卡片弹窗一致：先确认浏览器支持 <dialog> 的模态方法，老 WebView 下静默跳过。
-  if (!noticeDialog.open && typeof noticeDialog.showModal === "function") {
-    document.body.classList.add("dialog-open");
-    noticeDialog.showModal();
-    // showModal 会把焦点给第一个可聚焦子元素。弹窗里唯一那个是底部按钮，
-    // 它会因此被画出焦点环（看起来像双层边框），还会被滚进视野把标题顶出屏幕。
-    // 改为聚焦弹窗容器本身：默认无环，键盘 Tab 到按钮时环照常出现。
-    noticeDialog.focus();
-    noticeDialog.scrollTop = 0;
-  } else if (noticeDialog.open && noticeDialog.dataset.closing === "true") {
-    // 上一轮退场还没走完就被要求重新显示（管理台重绘等）：取消退场，停在已更新的内容上。
-    noticeDialog.getAnimations?.().forEach((animation) => animation.cancel());
-    noticeDialog.classList.remove("closing");
-    delete noticeDialog.dataset.closing;
-  }
+    noticeActions.append(action);
+    if (!noticeDialog.open && typeof noticeDialog.showModal === 'function') {
+      document.body.classList.add('dialog-open');
+      noticeDialog.showModal();
+      noticeDialog.focus();
+    } else if (noticeDialog.dataset.closing === 'true') {
+      noticeDialog.getAnimations?.().forEach(animation => animation.cancel());
+      noticeDialog.classList.remove('closing');
+      delete noticeDialog.dataset.closing;
+    }
+  };
+  image.onerror = () => {
+    if (generation === noticeGeneration && noticeDialog.open) noticeDialog.close();
+  };
+  image.src = notice.image;
 }
 
 function renderLoadError(error) {

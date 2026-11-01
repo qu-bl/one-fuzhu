@@ -461,8 +461,6 @@ const CONTACT_TEMPLATE = {
 };
 const NOTICE_TEMPLATE = {
   enabled: false,
-  title: '',
-  body: '',
   image: '',
   linkLabel: '',
   linkHref: ''
@@ -1203,19 +1201,19 @@ function contactEditor() {
 function noticeEditor() {
   if (!content.notice) content.notice = { ...NOTICE_TEMPLATE };
   const notice = content.notice;
+  delete notice.title;
+  delete notice.body;
   const details = el('section', 'surface editor');
   const header = el('div', 'editor-header');
   header.append(el('div', 'title ts-title-medium', '公告弹窗'));
   details.append(header);
 
-  const basic = section(details, '弹窗内容', '「打开时弹出」是总开关：关闭后网页打开时不再出现弹窗。弹窗右上角始终可以关闭。');
+  const basic = section(details, '海报弹窗', '启用后在创意橱柜打开时展示。整张海报作为背景，只叠加一个按钮；点击外部或按 Esc 可关闭。');
   field(basic.grid, '打开时弹出', bind(checkbox(notice.enabled === true), (v) => (notice.enabled = v)));
-  field(basic.grid, '标题', bind(textInput(notice.title), (v) => (notice.title = v)));
-  field(basic.grid, '正文（支持换行）', bind(textArea(notice.body), (v) => (notice.body = v)));
 
-  const image = section(details, '弹窗图片（可选）', '支持 WebP、JPEG/JPG；JPEG 自动转为 WebP（质量 82%，保留尺寸），转换后不超过 4 MB。');
+  const image = section(details, '背景海报（开启弹窗时必填）', '海报保留原始比例完整铺满弹窗，按钮叠加在底部。支持 WebP、JPEG/JPG；JPEG 自动转为 WebP（质量 82%，保留尺寸），转换后不超过 4 MB。');
   const imageSrc = textInput(notice.image, './assets/xxx.webp');
-  field(image.grid, '图片路径', bind(imageSrc, (v) => (notice.image = v)));
+  field(image.grid, '海报图片路径', bind(imageSrc, (v) => (notice.image = v)));
   const preview = el('img');
   preview.alt = '';
   preview.style.cssText = 'max-width:260px;width:100%;border-radius:16px;display:block;margin-top:12px;background:var(--c-surface-container)';
@@ -1226,13 +1224,13 @@ function noticeEditor() {
   };
   syncPreview();
   imageSrc.addEventListener('input', syncPreview);
-  const imageUpload = actionButton('上传弹窗图片', 'outlined');
+  const imageUpload = actionButton('上传背景海报', 'outlined');
   imageUpload.id = 'uploadNoticeImage';
   const imageRow = el('div', 'row');
   imageRow.append(imageUpload);
   image.box.append(imageRow, preview);
 
-  const button = section(details, '弹窗按钮（可选）', '按钮文字和链接都填了才会显示按钮。');
+  const button = section(details, '唯一叠加按钮', '显示在海报底部居中。填写链接后打开链接；链接留空时关闭弹窗。');
   field(button.grid, '按钮文字', bind(textInput(notice.linkLabel), (v) => (notice.linkLabel = v)));
   field(button.grid, '按钮链接', bind(textInput(notice.linkHref, 'https://…'), (v) => (notice.linkHref = v)));
 
@@ -1325,7 +1323,7 @@ const LIST_VIEWS = {
   notice: {
     title: '弹窗', single: true,
     count: () => '1 项',
-    name: () => content?.notice?.title || '公告弹窗',
+    name: () => '海报弹窗',
     meta: () => (content?.notice?.enabled === true ? [['打开时弹出', 'pill--on']] : [['不弹出', 'pill--off']]),
     thumb: () => null,
   },
@@ -1926,6 +1924,12 @@ function validateContent(value) {
   if (value.notice != null) {
     if (!value.notice || typeof value.notice !== 'object' || Array.isArray(value.notice)) throw new Error('notice 必须是对象');
     if (value.notice.enabled != null && typeof value.notice.enabled !== 'boolean') throw new Error('notice.enabled 必须是布尔值');
+    delete value.notice.title;
+    delete value.notice.body;
+    for (const key of ['image', 'linkLabel', 'linkHref']) {
+      if (value.notice[key] != null && typeof value.notice[key] !== 'string') throw new Error(`notice.${key} 必须是字符串`);
+    }
+    if (value.notice.enabled === true && !String(value.notice.image || '').trim()) throw new Error('开启海报弹窗前请先上传背景海报');
     if (String(value.notice.linkHref || '').trim() && !linkSchemeOk(value.notice.linkHref)) {
       throw new Error(`notice.linkHref 的链接协议不受支持：${value.notice.linkHref}`);
     }
