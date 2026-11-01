@@ -1498,7 +1498,46 @@ async function activateNoticeButton(event, action, behavior, href, value) {
 }
 
 let noticeGeneration = 0;
+let noticePreparation = null;
+function cancelNoticePreparation() {
+  noticePreparation?.cancel();
+  noticePreparation = null;
+}
+function waitForNoticeFrames(generation) {
+  return new Promise(resolve => {
+    let frame = 0, idle = 0, previous = 0, stable = 0;
+    const finish = ready => {
+      cancelAnimationFrame(frame);
+      if (idle) window.cancelIdleCallback?.(idle);
+      if (noticePreparation?.cancel === cancel) noticePreparation = null;
+      resolve(ready);
+    };
+    const cancel = () => finish(false);
+    const sample = now => {
+      if (generation !== noticeGeneration) { finish(false); return; }
+      // The poster belongs to the cabinet; never interrupt another panel or a background tab.
+      if (document.hidden || document.body.classList.contains('information-open') || accessDialog?.open) {
+        previous = 0; stable = 0;
+      } else {
+        const interval = previous ? now - previous : 0;
+        stable = interval > 0 && interval <= 34 ? stable + 1 : 0;
+        previous = now;
+        // A stalled frame restarts the check instead of forcing the modal onto a busy page.
+        if (stable >= 5) { finish(true); return; }
+      }
+      frame = requestAnimationFrame(sample);
+    };
+    noticePreparation = { cancel };
+    if (window.requestIdleCallback) {
+      idle = window.requestIdleCallback(() => {
+        idle = 0;
+        frame = requestAnimationFrame(sample);
+      }, { timeout: 1000 });
+    } else frame = requestAnimationFrame(sample);
+  });
+}
 function initNotice(options = {}) {
+  cancelNoticePreparation();
   if (noticeActivation) { finishNoticeActivation(noticeActivation); resetNoticeMotion(); }
   const generation = ++noticeGeneration;
   const notice = state.notice;
@@ -1513,8 +1552,21 @@ function initNotice(options = {}) {
   const image = document.createElement('img');
   image.alt = '';
   image.decoding = 'async';
-  image.onload = () => {
+  const fail = () => {
     if (generation !== noticeGeneration) return;
+    cancelNoticePreparation();
+    if (noticeDialog.open) noticeDialog.close();
+  };
+  image.onload = async () => {
+    if (generation !== noticeGeneration) return;
+    try {
+      if (typeof image.decode === 'function') await image.decode();
+      if (!image.complete || !image.naturalWidth || !image.naturalHeight) { fail(); return; }
+      await document.fonts?.ready;
+    } catch { fail(); return; }
+    if (generation !== noticeGeneration) return;
+    const ready = await waitForNoticeFrames(generation);
+    if (!ready || generation !== noticeGeneration) return;
     noticeDialog.style.setProperty('--notice-ratio', String(image.naturalWidth / image.naturalHeight));
     noticeMedia.replaceChildren(image);
     noticeActions.replaceChildren();
@@ -1561,9 +1613,7 @@ function initNotice(options = {}) {
       playNoticeEnter();
     }
   };
-  image.onerror = () => {
-    if (generation === noticeGeneration && noticeDialog.open) noticeDialog.close();
-  };
+  image.onerror = fail;
   image.src = notice.image;
 }
 
