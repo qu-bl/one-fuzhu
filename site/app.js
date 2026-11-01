@@ -1190,33 +1190,91 @@ function bindNoticeDialog() {
     if (event.target === noticeDialog) closeNoticeDialog();
   });
   noticeDialog.addEventListener("close", () => {
-    noticeDialog.classList.remove("closing");
-    delete noticeDialog.dataset.closing;
+    resetNoticeMotion();
     if (!accessDialog?.open) document.body.classList.remove("dialog-open");
   });
 }
 
-// 公告弹窗退场：缩放淡出后真正关闭（与详情弹窗共用 closing 类过渡遮罩）。
+// Damped motion keeps the poster buoyant without repeatedly bouncing.
+let noticeMotionEpoch = 0;
+let noticeEntryAnimations = [];
+let noticeExitAnimation = null;
+function noticeSpringFrames() {
+  return Array.from({ length: 46 }, (_, index) => {
+    const t = index / 45;
+    const progress = index === 45 ? 1 : 1 - Math.exp(-8 * t) * (Math.cos(12 * t) + 2 / 3 * Math.sin(12 * t));
+    const remaining = 1 - progress;
+    return {
+      offset: t,
+      opacity: Math.min(1, t / .16),
+      transform: `perspective(1000px) translate3d(0, ${64 * remaining}px, 0) scale(${1 - .16 * remaining}) rotateX(${9 * remaining}deg) rotateZ(${-1 * remaining}deg)`,
+    };
+  });
+}
+function stopNoticeEntry(freeze = false) {
+  const targets = [noticeDialog, noticeMedia, noticeActions];
+  const snapshots = freeze ? targets.map(element => {
+    const style = getComputedStyle(element);
+    return { element, opacity: style.opacity, transform: style.transform };
+  }) : [];
+  noticeMotionEpoch++;
+  noticeEntryAnimations.forEach(animation => animation.cancel());
+  noticeEntryAnimations = [];
+  snapshots.forEach(({ element, opacity, transform }) => Object.assign(element.style, { opacity, transform }));
+}
+function resetNoticeMotion() {
+  stopNoticeEntry();
+  noticeExitAnimation?.cancel();
+  noticeExitAnimation = null;
+  [noticeDialog, noticeMedia, noticeActions].forEach(element => {
+    element.style.removeProperty('opacity');
+    element.style.removeProperty('transform');
+  });
+  noticeDialog.classList.remove('closing');
+  delete noticeDialog.dataset.closing;
+  delete noticeDialog.dataset.motion;
+}
+function playNoticeEnter() {
+  resetNoticeMotion();
+  if (reduceMotion.matches || !noticeDialog.animate) return;
+  const epoch = noticeMotionEpoch;
+  noticeDialog.dataset.motion = 'entering';
+  noticeEntryAnimations = [
+    noticeDialog.animate(noticeSpringFrames(), { duration: 780, easing: 'linear', fill: 'both' }),
+    noticeMedia.animate([
+      { transform: 'translateY(6px) scale(1.055)' },
+      { transform: 'translateY(0) scale(1)' },
+    ], { duration: 1040, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' }),
+    noticeActions.animate([
+      { opacity: 0, transform: 'translateY(14px) scale(.92)', offset: 0 },
+      { opacity: 1, transform: 'translateY(-2px) scale(1.025)', offset: .7 },
+      { opacity: 1, transform: 'translateY(0) scale(1)', offset: 1 },
+    ], { duration: 470, delay: 200, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' }),
+  ];
+  Promise.allSettled(noticeEntryAnimations.map(animation => animation.finished)).then(() => {
+    if (noticeMotionEpoch !== epoch || !noticeDialog.open || noticeDialog.dataset.closing === 'true') return;
+    stopNoticeEntry();
+    noticeDialog.dataset.motion = 'settled';
+  });
+}
 function closeNoticeDialog() {
-  if (!noticeDialog.open || noticeDialog.dataset.closing === "true") return;
-  const finish = () => {
-    noticeDialog.classList.remove("closing");
-    delete noticeDialog.dataset.closing;
-    noticeDialog.close();
-  };
+  if (!noticeDialog.open || noticeDialog.dataset.closing === 'true') return;
+  const finish = () => { noticeDialog.close(); resetNoticeMotion(); };
   if (reduceMotion.matches || !noticeDialog.animate) { finish(); return; }
-  noticeDialog.dataset.closing = "true";
-  noticeDialog.classList.add("closing");
+  // Freeze all layers at their actual pose so closing mid-entry never jumps.
+  stopNoticeEntry(true);
+  const from = { opacity: noticeDialog.style.opacity, transform: noticeDialog.style.transform };
+  noticeDialog.dataset.closing = 'true';
+  noticeDialog.dataset.motion = 'closing';
+  noticeDialog.classList.add('closing');
   const exit = noticeDialog.animate([
-    { opacity: 1, transform: "translate(0, 0) scale(1)" },
-    { opacity: 0, transform: "translate(0, 14px) scale(.94)" }
-  ], { duration: 220, easing: "cubic-bezier(.3, 0, .8, .15)" });
-  exit.onfinish = finish;
-  // 动画被主动取消（例如重绘后重新显示）：只清理状态，不关闭弹窗。
-  exit.oncancel = () => {
-    noticeDialog.classList.remove("closing");
-    delete noticeDialog.dataset.closing;
-  };
+    from,
+    { opacity: 0, transform: 'perspective(1000px) translate3d(0, 28px, 0) scale(.93) rotateX(-3deg)' },
+  ], { duration: 240, easing: 'cubic-bezier(.4,0,.8,.2)', fill: 'both' });
+  noticeExitAnimation = exit;
+  exit.finished.then(() => {
+    if (noticeExitAnimation === exit) { noticeExitAnimation = null; finish(); }
+  }, () => {});
 }
 
 let noticeGeneration = 0;
@@ -1254,6 +1312,7 @@ function initNotice(options = {}) {
       : snap(notice.buttonY, 2) * 3 + snap(notice.buttonX, 1);
     const textIndex = positions.includes(notice.textPosition) ? positions.indexOf(notice.textPosition) : 4;
     action.dataset.position = positions[buttonIndex];
+    noticeActions.style.transformOrigin = `${buttonIndex % 3 * 50}% ${Math.floor(buttonIndex / 3) * 50}%`;
     action.style.setProperty('--notice-button-x', `${buttonIndex % 3 * 50}%`);
     action.style.setProperty('--notice-button-y', `${Math.floor(buttonIndex / 3) * 50}%`);
     label.style.transform = `translate(${(textIndex % 3 - 1) * 8}px, ${(Math.floor(textIndex / 3) - 1) * 6}px)`;
@@ -1279,10 +1338,9 @@ function initNotice(options = {}) {
       document.body.classList.add('dialog-open');
       noticeDialog.showModal();
       noticeDialog.focus();
+      playNoticeEnter();
     } else if (noticeDialog.dataset.closing === 'true') {
-      noticeDialog.getAnimations?.().forEach(animation => animation.cancel());
-      noticeDialog.classList.remove('closing');
-      delete noticeDialog.dataset.closing;
+      playNoticeEnter();
     }
   };
   image.onerror = () => {
