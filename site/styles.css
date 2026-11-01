@@ -499,8 +499,17 @@ body { min-width: 0; }
 [data-page="about"] .activity-section { padding-top: 28px; }
 @media (max-width: 719px) {
   [data-page="showcase"] .showcase-header,
-  [data-page="showcase"] .showcase-header:has(.platform-picker[data-expanded="true"]) { grid-template-columns: 1fr; gap: 10px; }
-  .search-tools { width: 100%; gap: 10px; }
+  [data-page="showcase"] .showcase-header:has(.platform-picker[data-expanded="true"]) { grid-template-columns: fit-content(40%) minmax(0, 1fr); gap: 6px; }
+  .category-button { padding-inline: 14px; font-size: 14px; }
+  .search-tools { width: auto; gap: 6px; }
+  .platform-picker { max-width: calc(100% - 40px); }
+  .showcase-header:has(.platform-picker[data-expanded="true"]) .category-button[aria-pressed="true"] { max-width: 48px; padding-inline: 8px; }
+}
+@media (max-width: 359px) {
+  [data-page="showcase"] .showcase-header,
+  [data-page="showcase"] .showcase-header:has(.platform-picker[data-expanded="true"]) { gap: 4px; }
+  .search-tools { gap: 4px; }
+  .category-button { padding-inline: 10px; font-size: 13px; }
 }
 
 [data-page] .app-page { padding-top: max(env(safe-area-inset-top, 0px), var(--app-safe-area-top)); }
