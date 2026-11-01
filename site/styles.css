@@ -480,3 +480,7 @@ body { min-width: 0; }
 .case-grid .case-media img { width: 100%; height: auto; object-fit: contain; transform: none; }
 .case-grid .case-card-trigger:hover .case-media img { transform: none; }
 .case-grid .case-media[hidden] { display: none; }
+
+/* Explicit shortest-column placement avoids multi-column balancing on tablets. */
+.case-grid { position: relative; display: block; columns: auto; }
+.case-grid > .case-card { position: absolute; display: block; margin: 0; }

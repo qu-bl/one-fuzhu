@@ -1009,21 +1009,63 @@ function initRipples() {
   });
 }
 
+// Place each tile into the shortest column; columns stay close to 240px.
+function waterfallGeometry(width, viewportWidth, heights) {
+  const gap = viewportWidth < 720 ? 12 : 24;
+  const columns = viewportWidth < 320 ? 1 : viewportWidth < 720 ? 2
+    : Math.max(1, Math.round((width + gap) / (240 + gap)));
+  const cardWidth = (width - gap * (columns - 1)) / columns;
+  const bottoms = Array(columns).fill(0);
+  const positions = heights.map(height => {
+    const column = bottoms.indexOf(Math.min(...bottoms));
+    const position = { left: column * (cardWidth + gap), top: bottoms[column] };
+    bottoms[column] += height + gap;
+    return position;
+  });
+  return { cardWidth, columns, positions, height: Math.max(0, ...bottoms) - (heights.length ? gap : 0) };
+}
+let waterfallFrame = 0;
+function scheduleWaterfall() {
+  if (waterfallFrame) return;
+  waterfallFrame = requestAnimationFrame(() => {
+    waterfallFrame = 0;
+    if (!caseGrid || !caseGrid.clientWidth) return;
+    const cards = [...caseGrid.children];
+    const width = waterfallGeometry(caseGrid.clientWidth, window.innerWidth, []).cardWidth;
+    cards.forEach(card => { card.style.width = `${width}px`; });
+    const layout = waterfallGeometry(caseGrid.clientWidth, window.innerWidth,
+      cards.map(card => card.getBoundingClientRect().height));
+    cards.forEach((card, index) => {
+      card.style.left = `${layout.positions[index].left}px`;
+      card.style.top = `${layout.positions[index].top}px`;
+    });
+    caseGrid.style.height = `${layout.height}px`;
+  });
+}
+const waterfallObserver = new ResizeObserver(scheduleWaterfall);
+if (caseGrid) waterfallObserver.observe(caseGrid);
+window.addEventListener("resize", scheduleWaterfall);
+document.fonts?.ready.then(scheduleWaterfall);
+
 function renderCases() {
   if (!caseGrid || !caseTemplate || expandedCard) return;
   const items = getFilteredCases();
   cardObserver?.disconnect();
   destroyFeatured();
+  waterfallObserver.disconnect();
+  waterfallObserver.observe(caseGrid);
   caseGrid.replaceChildren();
 
   // Every content item is its own waterfall tile, including featured items.
   items.forEach((item, index) => {
     const card = createCaseCard(item, index);
     caseGrid.append(card);
+    waterfallObserver.observe(card);
     if (cardObserver) cardObserver.observe(card);
     else card.dataset.visible = "true";
   });
 
+  scheduleWaterfall();
   if (emptyState) emptyState.hidden = items.length !== 0;
 }
 
