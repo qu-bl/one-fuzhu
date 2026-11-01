@@ -1357,8 +1357,8 @@ function noticeSand(raster, count, start, duration) {
   for (let y = 0; y < rect.height; y += cell) for (let x = 0; x < rect.width; x += cell) {
     const width = Math.min(cell, rect.width - x), height = Math.min(cell, rect.height - y);
     const u = x / rect.width, v = y / rect.height;
-    const ripple = Math.sin(v * 15) * .035 + Math.sin(v * 31 + u * 9) * .02;
-    const progress = Math.max(0, Math.min(1, ((1 - u) * .78 + v * .22 + ripple + (Math.random() - .5) * .15 + .12) / 1.24));
+    const ripple = Math.sin(u * 15) * .035 + Math.sin(u * 31 + v * 9) * .02;
+    const progress = Math.max(0, Math.min(1, (1 - v + ripple + (Math.random() - .5) * .1 + .11) / 1.22));
     const cut = { x, y, width, height, at: start + progress * duration };
     if (Math.random() < density) {
       const sx = Math.min(canvas.width - 1, Math.floor((x + width / 2) * ratio));
@@ -1370,7 +1370,7 @@ function noticeSand(raster, count, start, duration) {
         at: cut.at, life: 740 + Math.random() * 420,
         size: .55 + Math.random() * 1.05, alpha,
         color: pixels ? `rgb(${pixels[offset]} ${pixels[offset + 1]} ${pixels[offset + 2]})` : null,
-        dx: 45 + Math.random() * 115, dy: -18 - Math.random() * 65,
+        dx: (Math.random() - .4) * 45, dy: -40 - Math.random() * 90,
         phase: Math.random() * Math.PI * 2, flutter: 3 + Math.random() * 9,
       };
     }
