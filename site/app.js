@@ -1849,7 +1849,7 @@ function morphBrand(from, to, opening, instant) {
   ] : [
     { transform: 'none', borderRadius: '0px' },
     { transform: compact, borderRadius: '50%' },
-  ], { duration: 680, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' });
+  ], { duration: 850, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' });
   return animation.finished.catch(() => {});
 }
 function settleBrand(home) {
@@ -1872,8 +1872,8 @@ function revealInformation(opening, instant) {
       { opacity: 0, transform: 'translateY(24px)' },
       { opacity: 1, transform: 'translateY(0)' },
     ] : [{ opacity: 1 }, { opacity: 0 }], {
-      duration: opening ? 420 : 180,
-      delay: opening ? 160 + Math.min(index, 3) * 65 : 0,
+      duration: opening ? 520 : 220,
+      delay: opening ? 200 + Math.min(index, 3) * 80 : 0,
       easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both',
     });
   }).filter(Boolean);
@@ -1892,7 +1892,7 @@ function openInformation({ instant = false } = {}) {
   const circles = maskCircle(circle);
   const maskAnimation = instant ? null : informationMask.animate(
     [{ clipPath: circles[0] }, { clipPath: circles[1] }],
-    { duration: 620, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' });
+    { duration: 780, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' });
   const reveals = revealInformation(true, instant);
   cabinetContent.inert = true;
   profileEntry.setAttribute('aria-expanded', 'true');
@@ -1920,7 +1920,7 @@ function closeInformation({ instant = false } = {}) {
   const circles = maskCircle(profileEntry.getBoundingClientRect());
   const maskAnimation = instant ? null : informationMask.animate(
     [{ clipPath: circles[1] }, { clipPath: circles[0] }],
-    { duration: 620, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' });
+    { duration: 780, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' });
   const reveals = revealInformation(false, instant);
   informationTransition = Promise.all([
     morphBrand(from, to, false, instant),
