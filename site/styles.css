@@ -450,3 +450,26 @@ html[data-preview="true"] .reveal-init { opacity: 1; transform: none; transition
   .site-footer a:hover::after { transform: scaleX(1); transform-origin: left; }
   .site-footer a:hover { text-decoration: none; }
 }
+
+/* Equal-width waterfall columns, with no desktop column-count ceiling. */
+.showcase-section { max-width: none; }
+.case-grid { column-count: auto; column-width: 240px; column-gap: 24px; }
+.case-grid > .case-card { display: inline-block; width: 100%; margin-bottom: 24px; vertical-align: top; }
+.case-grid .case-card-trigger:not(.is-expanded) { height: auto; max-height: none; }
+.case-grid .case-summary { display: block; -webkit-line-clamp: unset; overflow: visible; overflow-wrap: anywhere; }
+/* Featured cards use the same width and natural height as other cards. */
+.case-grid > .featured-carousel { column-span: none; break-inside: avoid; margin-bottom: 24px; }
+.case-grid .featured-carousel .case-card-trigger:not(.is-expanded) { flex-direction: column; min-height: 0; }
+.case-grid .featured-carousel .case-media { flex: none; width: 100%; border-radius: 24px 24px 0 0; }
+.case-grid .featured-carousel .case-body { width: 100%; padding: 20px; gap: 16px; }
+.case-grid .featured-carousel .case-title { font-size: 20px; }
+@media (max-width: 719px) {
+  .case-grid { column-width: auto; column-count: 2; column-gap: 12px; }
+  .case-grid > .case-card, .case-grid > .featured-carousel { margin-bottom: 12px; }
+  .case-grid .case-body, .case-grid .featured-carousel .case-body { padding: 12px; gap: 12px; }
+  .case-grid .case-title, .case-grid .featured-carousel .case-title { font-size: 16px; }
+  .case-grid .case-summary { font-size: 14px; }
+}
+@media (max-width: 319px) {
+  .case-grid { column-count: 1; }
+}
