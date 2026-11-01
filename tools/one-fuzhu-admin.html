@@ -888,7 +888,7 @@ function cardEditor(card, index) {
   coverInput.addEventListener('input', syncCover);
   cover.box.append(coverRow, coverPreview);
 
-  const banner = section(details, '精选横幅图（可选）', '仅开启精选后生效。电脑和平板建议 3:1，手机显示在 16:9 容器内，完整保留图片。默认只显示海报，点击后展开视频、文字和入口。未上传时回退到普通封面。');
+  const banner = section(details, '精选横幅图（可选）', '仅开启精选后生效。电脑和平板建议 3:1，手机显示在 16:9 容器内。图片等比铺满、居中裁切，短边贴边，长边超出部分裁掉。默认只显示海报，点击后展开视频、文字和入口。未上传时回退到普通封面。');
   const bannerInput = textInput(card.bannerCover || '', './assets/banner-xxx.webp');
   field(banner.grid, '横幅图路径', bind(bannerInput, v => { card.bannerCover = v; }));
   field(banner.grid, '横幅图片说明', bind(textInput(card.bannerAlt || ''), v => { card.bannerAlt = v; }));
@@ -899,7 +899,7 @@ function cardEditor(card, index) {
   }));
   const bannerPreview = el('img');
   bannerPreview.alt = '精选横幅预览';
-  bannerPreview.style.cssText = 'width:100%;max-width:450px;aspect-ratio:3/1;object-fit:contain;display:block;margin-top:8px';
+  bannerPreview.style.cssText = 'width:100%;max-width:450px;aspect-ratio:3/1;object-fit:cover;object-position:center;display:block;margin-top:8px';
   const syncBanner = () => {
     const url = siteAssetUrl(bannerInput.value.trim());
     bannerPreview.hidden = !url;

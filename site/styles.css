@@ -493,7 +493,7 @@ body { min-width: 0; }
 .featured-banners .featured-slide { display: none; }
 .featured-banners .featured-slide.is-active { display: block; }
 .featured-banners .case-card-trigger:not(.is-expanded) { display: block; height: auto; min-height: 0; }
-.featured-poster { display: block; width: 100%; aspect-ratio: 3 / 1; height: auto; object-fit: contain; background: var(--surface-soft); }
+.featured-poster { display: block; width: 100%; aspect-ratio: 3 / 1; height: auto; object-fit: cover; object-position: center; background: var(--surface-soft); }
 .featured-banners .case-card-trigger:not(.is-expanded) .case-media,
 .featured-banners .case-card-trigger:not(.is-expanded) .case-body,
 .featured-banners .featured-dots { display: none; }
