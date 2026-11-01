@@ -1180,7 +1180,18 @@ function renderContact() {
 // 否则实时预览每敲一个字都会堆一批监听上去。
 function bindNoticeDialog() {
   if (!noticeDialog) return;
-  // 公告弹窗不设关闭按钮：Esc 键（cancel）和点击弹窗外（backdrop）都能关掉。
+  // Once exit begins, all dismissal/repeated link clicks wait for its completion.
+  for (const type of ['click', 'auxclick']) noticeDialog.addEventListener(type, event => {
+    if (noticeDialog.dataset.closing !== 'true') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, { capture: true });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !noticeDialog.matches(':modal') || noticeDialog.dataset.closing !== 'true') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, { capture: true });
+  // Esc and the backdrop dismiss an idle poster, but cannot interrupt its exit.
   noticeDialog.addEventListener("cancel", (event) => {
     event.preventDefault();
     closeNoticeDialog();
@@ -1189,8 +1200,11 @@ function bindNoticeDialog() {
     if (event.target === noticeDialog) closeNoticeDialog();
   });
   noticeDialog.addEventListener("close", () => {
+    // Releasing modal input below does not end the visual exit.
+    if (noticeReleasedCloses > 0) { noticeReleasedCloses--; return; }
     resetNoticeMotion();
     if (!accessDialog?.open) document.body.classList.remove("dialog-open");
+    flushNoticeUpdate();
   });
 }
 
@@ -1198,6 +1212,29 @@ function bindNoticeDialog() {
 let noticeMotionEpoch = 0;
 let noticeEntryAnimations = [];
 let noticeExitAnimation = null;
+let noticeReleasedCloses = 0;
+let noticeExitBackdrop = null;
+function releaseNoticeModal(backdropDuration = 480) {
+  if (noticeDialog.classList.contains('notice-free-exit')) return;
+  // Keep the same decoded image/button in place, but release native modal input.
+  const transform = noticeDialog.style.transform;
+  noticeDialog.style.transform = 'none';
+  const rect = noticeDialog.getBoundingClientRect();
+  noticeDialog.style.transform = transform;
+  noticeExitBackdrop = document.createElement('div');
+  noticeExitBackdrop.className = 'notice-exit-backdrop';
+  noticeExitBackdrop.style.animationDuration = `${backdropDuration}ms`;
+  noticeExitBackdrop.setAttribute('aria-hidden', 'true');
+  document.body.append(noticeExitBackdrop);
+  noticeDialog.classList.add('notice-free-exit');
+  Object.assign(noticeDialog.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
+  noticeDialog.inert = true;
+  noticeDialog.setAttribute('aria-hidden', 'true');
+  noticeReleasedCloses++;
+  noticeDialog.close();
+  noticeDialog.show();
+  if (!accessDialog?.open) document.body.classList.remove('dialog-open');
+}
 function noticeSpringFrames() {
   return Array.from({ length: 46 }, (_, index) => {
     const t = index / 45;
@@ -1226,13 +1263,29 @@ function resetNoticeMotion() {
   stopNoticeEntry();
   noticeExitAnimation?.cancel();
   noticeExitAnimation = null;
+  const released = noticeDialog.classList.contains('notice-free-exit');
+  const retry = released && noticeDialog.open;
+  if (retry) { noticeReleasedCloses++; noticeDialog.close(); }
+  noticeExitBackdrop?.remove();
+  noticeExitBackdrop = null;
+  noticeDialog.classList.remove('notice-free-exit');
+  if (released) {
+    for (const name of ['left', 'top', 'width', 'height']) noticeDialog.style.removeProperty(name);
+    noticeDialog.inert = false;
+    noticeDialog.removeAttribute('aria-hidden');
+  }
   [noticeDialog, noticeMedia, noticeActions].forEach(element => {
     element.style.removeProperty('opacity');
     element.style.removeProperty('transform');
   });
   noticeDialog.classList.remove('closing');
+  noticeDialog.removeAttribute('closedby');
   delete noticeDialog.dataset.closing;
   delete noticeDialog.dataset.motion;
+  if (retry && !accessDialog?.open && !document.body.classList.contains('information-open')) {
+    document.body.classList.add('dialog-open');
+    noticeDialog.showModal();
+  }
 }
 function playNoticeEnter() {
   resetNoticeMotion();
@@ -1258,16 +1311,17 @@ function playNoticeEnter() {
   });
 }
 function closeNoticeDialog() {
-  if (noticeActivation) { noticeDialog.close(); resetNoticeMotion(); return; }
-  if (!noticeDialog.open || noticeDialog.dataset.closing === 'true') return;
+  if (noticeActivation || !noticeDialog.open || noticeDialog.dataset.closing === 'true') return;
   const finish = () => { noticeDialog.close(); resetNoticeMotion(); };
   if (reduceMotion.matches || !noticeDialog.animate) { finish(); return; }
   // Freeze all layers at their actual pose so closing mid-entry never jumps.
   stopNoticeEntry(true);
   const from = { opacity: noticeDialog.style.opacity, transform: noticeDialog.style.transform };
   noticeDialog.dataset.closing = 'true';
+  noticeDialog.setAttribute('closedby', 'none');
   noticeDialog.dataset.motion = 'closing';
   noticeDialog.classList.add('closing');
+  releaseNoticeModal(240);
   const exit = noticeDialog.animate([
     from,
     { opacity: 0, transform: 'perspective(1000px) translate3d(0, 28px, 0) scale(.93) rotateX(-3deg)' },
@@ -1417,10 +1471,11 @@ function dissolveNotice(effect) {
       const button = noticeRaster(effect.action);
       const poster = noticeRaster(noticeMedia, image);
       const mobile = innerWidth < 720;
-      const buttonSand = noticeSand(button, 1400, 0, 520);
-      const posterStart = 680;
+      const buttonDuration = 1400;
+      const buttonSand = noticeSand(button, 1400, 0, buttonDuration);
+      const posterStart = buttonDuration / 2;
       const posterSand = noticeSand(poster, mobile ? 11000 : 15000, posterStart, 2050);
-      const end = posterSand.end;
+      const end = Math.max(buttonSand.end, posterSand.end);
       const stage = document.createElement('canvas');
       stage.className = 'notice-particle-stage'; stage.setAttribute('aria-hidden', 'true');
       const ratio = Math.min(devicePixelRatio || 1, 1.5);
@@ -1458,20 +1513,25 @@ function dissolveNotice(effect) {
   });
 }
 async function activateNoticeButton(event, action, behavior, href, value) {
+  if (noticeActivation || noticeDialog.dataset.closing === 'true') {
+    event.preventDefault();
+    return;
+  }
   if (behavior === 'link' && !appPlatform && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
   event.preventDefault();
-  if (noticeActivation || noticeDialog.dataset.closing === 'true') return;
   noticeDialog.scrollTop = 0;
   noticeDialog.querySelector('.notice-sheet').scrollTop = 0;
   const effect = { action, cancelled: false, frame: 0 };
   noticeActivation = effect;
   stopNoticeEntry(true);
   noticeDialog.dataset.closing = 'true';
+  noticeDialog.setAttribute('closedby', 'none');
   noticeDialog.dataset.motion = 'button-bounce';
   action.setAttribute('aria-disabled', 'true');
   // Clipboard access must start within this click's user activation.
   const operation = behavior === 'copy' || (behavior === 'link' && appPlatform)
     ? copyAccessValue(value, behavior === 'copy' ? '内容' : '链接', action) : Promise.resolve(true);
+  releaseNoticeModal();
   const base = getComputedStyle(action).transform;
   const pose = base === 'none' ? '' : base;
   effect.bounce = action.animate?.(reduceMotion.matches ? [{ opacity: 1 }, { opacity: .65 }, { opacity: 1 }] : [
@@ -1484,10 +1544,10 @@ async function activateNoticeButton(event, action, behavior, href, value) {
     const [success] = await Promise.all([operation, effect.bounce.finished.catch(() => false)]);
     if (noticeActivation !== effect || effect.cancelled) return;
     effect.bounce.cancel(); effect.bounce = null;
-    if (!success) { finishNoticeActivation(effect); resetNoticeMotion(); return; }
+    if (!success) { finishNoticeActivation(effect); resetNoticeMotion(); flushNoticeUpdate(); return; }
     const completed = reduceMotion.matches ? (finishNoticeActivation(effect, true), true) : await dissolveNotice(effect);
     if (!completed) return;
-    noticeDialog.close(); resetNoticeMotion();
+    noticeDialog.close(); resetNoticeMotion(); flushNoticeUpdate();
     if (behavior === 'link' && !appPlatform) location.assign(href);
   } catch {
     if (noticeActivation !== effect) return;
@@ -1498,6 +1558,13 @@ async function activateNoticeButton(event, action, behavior, href, value) {
 
 let noticeGeneration = 0;
 let noticePreparation = null;
+let noticePendingOptions = null;
+function flushNoticeUpdate() {
+  if (!noticePendingOptions) return;
+  const options = noticePendingOptions;
+  noticePendingOptions = null;
+  initNotice(options);
+}
 function cancelNoticePreparation() {
   noticePreparation?.cancel();
   noticePreparation = null;
@@ -1515,7 +1582,8 @@ function waitForNoticeFrames(generation) {
     const sample = now => {
       if (generation !== noticeGeneration) { finish(false); return; }
       // The poster belongs to the cabinet; never interrupt another panel or a background tab.
-      if (document.hidden || document.body.classList.contains('information-open') || accessDialog?.open) {
+      if (document.hidden || document.body.classList.contains('information-open') || accessDialog?.open
+        || noticeDialog?.dataset.closing === 'true') {
         previous = 0; stable = 0;
       } else {
         const interval = previous ? now - previous : 0;
@@ -1536,8 +1604,12 @@ function waitForNoticeFrames(generation) {
   });
 }
 function initNotice(options = {}) {
+  // Admin/live content updates also wait until the current exit has finished.
+  if (noticeDialog?.dataset.closing === 'true') {
+    noticePendingOptions = { ...options };
+    return;
+  }
   cancelNoticePreparation();
-  if (noticeActivation) { finishNoticeActivation(noticeActivation); resetNoticeMotion(); }
   const generation = ++noticeGeneration;
   const notice = state.notice;
   if (!noticeDialog) return;
@@ -1554,7 +1626,7 @@ function initNotice(options = {}) {
   const fail = () => {
     if (generation !== noticeGeneration) return;
     cancelNoticePreparation();
-    if (noticeDialog.open) noticeDialog.close();
+    if (noticeDialog.open && noticeDialog.dataset.closing !== 'true') noticeDialog.close();
   };
   image.onload = async () => {
     if (generation !== noticeGeneration) return;
@@ -1874,7 +1946,7 @@ function bindInformation() {
   profileEntry?.addEventListener('click', () => openInformation());
   informationTarget?.addEventListener('click', () => closeInformation(), { capture: true });
   document.addEventListener('keydown', event => {
-    if (informationState === 'closed' || accessDialog?.open || noticeDialog?.open) return;
+    if (informationState === 'closed' || accessDialog?.open || noticeDialog?.matches(':modal')) return;
     if (event.key === 'Escape') { event.preventDefault(); closeInformation(); }
     if (event.key === 'Tab') {
       const controls = [...informationPanel.querySelectorAll('button:not(:disabled), a[href], [tabindex="0"]')]
