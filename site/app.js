@@ -1339,24 +1339,77 @@ function noticeRaster(element, image = null) {
   }
   return { canvas, rect, ratio };
 }
-function noticeDust(raster, count, start, anchor) {
-  const { rect } = raster;
-  const cell = Math.max(3, Math.ceil(Math.sqrt(rect.width * rect.height / count)));
-  const particles = [];
-  const diagonal = Math.hypot(rect.width, rect.height);
+function noticeSand(raster, count, start, duration) {
+  const { rect, canvas, ratio } = raster;
+  const remaining = document.createElement('canvas');
+  remaining.width = canvas.width; remaining.height = canvas.height;
+  const mask = remaining.getContext('2d');
+  if (!mask) throw new Error('Canvas unavailable');
+  mask.drawImage(canvas, 0, 0);
+  mask.globalCompositeOperation = 'destination-out';
+  // Erase tiny cells from an intact image; never break it into large moving tiles.
+  const cell = Math.max(2, Math.ceil(Math.sqrt(canvas.width * canvas.height / 110000))) / ratio;
+  const density = Math.min(1, count * cell * cell / (rect.width * rect.height));
+  let pixels;
+  try { pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data; }
+  catch { /* Remote posters can still supply grain-sized image samples without pixel access. */ }
+  const cuts = [], active = [];
   for (let y = 0; y < rect.height; y += cell) for (let x = 0; x < rect.width; x += cell) {
     const width = Math.min(cell, rect.width - x), height = Math.min(cell, rect.height - y);
-    const cx = rect.left + x + width / 2, cy = rect.top + y + height / 2;
-    const distance = Math.min(1, Math.hypot(cx - anchor.x, cy - anchor.y) / diagonal);
-    particles.push({ raster, x, y, width, height, cx, cy,
-      start: start + (start ? distance * 190 : 0) + Math.random() * 70,
-      life: (start ? 620 : 420) + Math.random() * 140,
-      dx: (Math.random() - .28) * (start ? 180 : 130),
-      dy: -35 - Math.random() * (start ? 180 : 110),
-      spin: (Math.random() - .5) * 2.2,
-    });
+    const u = x / rect.width, v = y / rect.height;
+    const ripple = Math.sin(v * 15) * .035 + Math.sin(v * 31 + u * 9) * .02;
+    const progress = Math.max(0, Math.min(1, ((1 - u) * .78 + v * .22 + ripple + (Math.random() - .5) * .15 + .12) / 1.24));
+    const cut = { x, y, width, height, at: start + progress * duration };
+    if (Math.random() < density) {
+      const sx = Math.min(canvas.width - 1, Math.floor((x + width / 2) * ratio));
+      const sy = Math.min(canvas.height - 1, Math.floor((y + height / 2) * ratio));
+      const offset = (sy * canvas.width + sx) * 4;
+      const alpha = pixels ? pixels[offset + 3] / 255 : 1;
+      if (alpha > .05) cut.grain = {
+        x: rect.left + x + width / 2, y: rect.top + y + height / 2, sx, sy,
+        at: cut.at, life: 740 + Math.random() * 420,
+        size: .55 + Math.random() * 1.05, alpha,
+        color: pixels ? `rgb(${pixels[offset]} ${pixels[offset + 1]} ${pixels[offset + 2]})` : null,
+        dx: 45 + Math.random() * 115, dy: -18 - Math.random() * 65,
+        phase: Math.random() * Math.PI * 2, flutter: 3 + Math.random() * 9,
+      };
+    }
+    cuts.push(cut);
   }
-  return particles;
+  cuts.sort((a, b) => a.at - b.at);
+  return { raster, remaining, mask, cuts, active, next: 0, end: start + duration + 1160 };
+}
+function drawNoticeSand(ctx, sand, elapsed) {
+  const { mask, cuts, active, raster } = sand;
+  mask.beginPath();
+  while (sand.next < cuts.length && cuts[sand.next].at <= elapsed) {
+    const cut = cuts[sand.next++];
+    const x = Math.round(cut.x * raster.ratio), y = Math.round(cut.y * raster.ratio);
+    // Whole backing pixels prevent antialiased cell edges from leaving a mesh behind.
+    mask.rect(x, y, Math.round((cut.x + cut.width) * raster.ratio) - x,
+      Math.round((cut.y + cut.height) * raster.ratio) - y);
+    if (cut.grain) active.push(cut.grain);
+  }
+  mask.fill();
+  ctx.globalAlpha = 1;
+  ctx.drawImage(sand.remaining, raster.rect.left, raster.rect.top, raster.rect.width, raster.rect.height);
+  let retained = 0;
+  for (const grain of active) {
+    const t = (elapsed - grain.at) / grain.life;
+    if (t >= 1) continue;
+    active[retained++] = grain;
+    // Accelerating breeze and a little turbulence give the sand a soft trailing plume.
+    const travel = t * (.35 + .65 * t);
+    const flutter = (Math.sin(grain.phase + t * 5) - Math.sin(grain.phase)) * grain.flutter * t;
+    const x = grain.x + grain.dx * travel + flutter;
+    const y = grain.y + grain.dy * travel + Math.sin(t * 4 + grain.phase) * 5 * t;
+    const size = grain.size * (1 - .55 * t);
+    ctx.globalAlpha = grain.alpha * Math.pow(1 - t, .75);
+    if (grain.color) { ctx.fillStyle = grain.color; ctx.fillRect(x, y, size, size); }
+    else ctx.drawImage(raster.canvas, grain.sx, grain.sy, 1, 1, x, y, size, size);
+  }
+  active.length = retained;
+  ctx.globalAlpha = 1;
 }
 function dissolveNotice(effect) {
   return new Promise((resolve, reject) => {
@@ -1365,12 +1418,11 @@ function dissolveNotice(effect) {
       const image = noticeMedia.querySelector('img');
       const button = noticeRaster(effect.action);
       const poster = noticeRaster(noticeMedia, image);
-      const anchor = { x: button.rect.left + button.rect.width / 2, y: button.rect.top + button.rect.height / 2 };
       const mobile = innerWidth < 720;
-      const buttonDust = noticeDust(button, mobile ? 120 : 170, 0, anchor);
-      const posterStart = 330;
-      const posterDust = noticeDust(poster, mobile ? 720 : 1050, posterStart, anchor);
-      const end = Math.max(...posterDust.map(p => p.start + p.life));
+      const buttonSand = noticeSand(button, 1400, 0, 520);
+      const posterStart = 680;
+      const posterSand = noticeSand(poster, mobile ? 11000 : 15000, posterStart, 2050);
+      const end = posterSand.end;
       const stage = document.createElement('canvas');
       stage.className = 'notice-particle-stage'; stage.setAttribute('aria-hidden', 'true');
       const ratio = Math.min(devicePixelRatio || 1, 1.5);
@@ -1386,20 +1438,6 @@ function dissolveNotice(effect) {
       noticeDialog.dataset.motion = 'button-particles';
       const began = performance.now();
       let posterStarted = false;
-      const draw = (particles, elapsed) => particles.forEach(p => {
-        const t = Math.max(0, Math.min(1, (elapsed - p.start) / p.life));
-        if (t === 1) return;
-        const travel = 1 - Math.pow(1 - t, 3), scale = Math.pow(1 - t, 1.25);
-        ctx.save();
-        ctx.globalAlpha = Math.pow(1 - t, .8);
-        ctx.translate(p.cx + p.dx * travel, p.cy + p.dy * travel + 18 * t * t);
-        ctx.rotate(p.spin * travel);
-        ctx.scale(scale, scale);
-        ctx.drawImage(p.raster.canvas, p.x * p.raster.ratio, p.y * p.raster.ratio,
-          p.width * p.raster.ratio, p.height * p.raster.ratio,
-          -p.width / 2 - .2, -p.height / 2 - .2, p.width + .4, p.height + .4);
-        ctx.restore();
-      });
       const render = now => {
         if (noticeActivation !== effect || effect.cancelled) return;
         const elapsed = now - began;
@@ -1410,9 +1448,10 @@ function dissolveNotice(effect) {
             noticeMedia.style.visibility = 'hidden';
             noticeDialog.dataset.motion = 'poster-particles';
           }
-          draw(posterDust, elapsed);
+          if (elapsed >= posterStart + 800) noticeDialog.dataset.motion = 'sand-settling';
+          drawNoticeSand(ctx, posterSand, elapsed);
         }
-        draw(buttonDust, elapsed);
+        drawNoticeSand(ctx, buttonSand, elapsed);
         if (elapsed >= end) finishNoticeActivation(effect, true);
         else effect.frame = requestAnimationFrame(render);
       };

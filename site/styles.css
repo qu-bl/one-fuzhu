@@ -571,9 +571,12 @@ html, body { min-height: 100%; background: var(--page); }
 
 .notice-particle-stage { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; pointer-events: none; overflow: visible; z-index: 1000; }
 .notice-particle-stage::backdrop { background: transparent; pointer-events: none; }
-.notice-dialog[data-motion="poster-particles"] { box-shadow: none; }
-.notice-dialog[data-motion="poster-particles"]::backdrop { animation: none; opacity: 0; transition: opacity 720ms ease; }
+.notice-dialog[data-motion="poster-particles"],
+.notice-dialog[data-motion="sand-settling"] { box-shadow: none; }
+.notice-dialog[data-motion="sand-settling"]::backdrop { animation: notice-sand-backdrop 1800ms cubic-bezier(.4,0,.2,1) both; }
+@keyframes notice-sand-backdrop { from { opacity: 1; } to { opacity: 0; } }
 .notice-dialog[data-motion="button-bounce"] .notice-sheet::after,
 .notice-dialog[data-motion="button-particles"] .notice-sheet::after,
-.notice-dialog[data-motion="poster-particles"] .notice-sheet::after { animation: none; opacity: 0; }
+.notice-dialog[data-motion="poster-particles"] .notice-sheet::after,
+.notice-dialog[data-motion="sand-settling"] .notice-sheet::after { animation: none; opacity: 0; }
 .notice-actions .banner-action:active { scale: .94; }
