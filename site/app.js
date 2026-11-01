@@ -26,7 +26,6 @@ const noticeTitle = document.querySelector("#notice-title");
 const noticeMedia = document.querySelector("#notice-media");
 const noticeBody = document.querySelector("#notice-body");
 const noticeActions = document.querySelector("#notice-actions");
-const isAboutPage = document.body.dataset.page === "about";
 const requestedPlatform = new URLSearchParams(window.location.search).get("appPlatform");
 const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform)
   ? requestedPlatform
@@ -379,14 +378,8 @@ function renderActivities() {
       action.addEventListener("click", () => openAccessDialog(activity, action));
     } else if (activity.linkLabel) {
       action.querySelector("span").textContent = activity.linkLabel;
-      action.addEventListener("click", () => {
-        if (!caseGrid) {
-          const url = new URL('./', location.href);
-          if (activity.category) url.searchParams.set('category', activity.category);
-          if (appPlatform) url.searchParams.set('appPlatform', appPlatform);
-          location.href = url.href;
-          return;
-        }
+      action.addEventListener("click", async () => {
+        await closeInformation();
         state.category = activity.category || "全部";
         state.platform = "全部平台";
         state.query = "";
@@ -470,6 +463,7 @@ function initHeroRive() {
   const rive = hero.rive || HERO_DEFAULTS.rive;
 
   if (hero.ariaLabel) {
+    document.querySelector('.information-rive-target')?.setAttribute('aria-label', hero.ariaLabel);
     activityRiveCanvas?.closest(".activity-rive")?.setAttribute("aria-label", hero.ariaLabel);
   }
 
@@ -487,7 +481,9 @@ function initHeroRive() {
   heroRiveInstance?.cleanup?.();
   heroRiveInstance = null;
 
-  const resize = () => heroRiveInstance?.resizeDrawingSurfaceToCanvas();
+  const resize = () => {
+    if (!activityRiveCanvas.closest('#rive-flight')) heroRiveInstance?.resizeDrawingSurfaceToCanvas();
+  };
   const options = {
     src: rive.src,
     canvas: activityRiveCanvas,
@@ -1370,7 +1366,7 @@ function applyContent(content, options = {}) {
   }
   if (!previous || changed("notice") || options.showNotice !== state.noticeShown) {
     state.noticeShown = options.showNotice;
-    initNotice({ showNotice: !isAboutPage && options.showNotice });
+    initNotice({ showNotice: new URLSearchParams(location.search).get('view') !== 'about' && options.showNotice });
   }
   // 管理台在编辑某张卡的入口时，让这张卡把入口行露出来。这一行平时是
   // display:none，只有展开卡片才出现，不这样做画布上就没有它的位置。
@@ -1393,6 +1389,10 @@ function applyContent(content, options = {}) {
     // 面板开着但那张卡没了（被删掉或被隐藏）：收起来，别留一个空壳。
     accessDialog.close();
   }
+  if (typeof options.showInformation === 'boolean') {
+    if (options.showInformation) openInformation({ instant: true });
+    else closeInformation({ instant: true });
+  }
   if (options.scrollTo) {
     // 页面本身设了 scroll-behavior:smooth，用 auto 会走平滑滚动，
     // 预览跳转要的是立刻到位，所以显式 instant。
@@ -1413,7 +1413,157 @@ window.addEventListener("message", (event) => {
   }
 });
 
+// A single live Rive canvas moves between its two homes; the cabinet stays mounted.
+const informationPanel = document.querySelector('#information-panel');
+const informationScroll = document.querySelector('.information-scroll');
+const informationMask = document.querySelector('.information-mask');
+const informationTarget = document.querySelector('.information-rive-target');
+const profileEntry = document.querySelector('.profile-entry');
+const riveFlight = document.querySelector('#rive-flight');
+const cabinetContent = document.querySelector('main.app-page');
+let informationState = 'closed';
+let informationTransition = Promise.resolve();
+
+function brandRect(element) {
+  const { left, top, width, height } = element.getBoundingClientRect();
+  return { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` };
+}
+function morphBrand(from, to, opening, instant) {
+  if (!activityRiveCanvas || !riveFlight) return Promise.resolve();
+  // Keep the drawing surface fixed while flying. Resizing it every frame clears
+  // the canvas repeatedly and can make the live Rive disappear during the move.
+  const base = opening ? to : from;
+  const small = opening ? from : to;
+  const width = parseFloat(base.width), height = parseFloat(base.height);
+  const dx = parseFloat(small.left) + parseFloat(small.width) / 2 - parseFloat(base.left) - width / 2;
+  const dy = parseFloat(small.top) + parseFloat(small.height) / 2 - parseFloat(base.top) - height / 2;
+  const scale = Math.min(parseFloat(small.width), parseFloat(small.height)) / Math.min(width, height);
+  const compact = `translate(${dx}px, ${dy}px) scale(${scale})`;
+  riveFlight.hidden = false;
+  Object.assign(riveFlight.style, base);
+  riveFlight.style.transform = 'none';
+  riveFlight.append(activityRiveCanvas);
+  heroRiveInstance?.resizeDrawingSurfaceToCanvas();
+  riveFlight.style.transform = opening ? compact : 'none';
+  if (instant) return Promise.resolve();
+  const animation = riveFlight.animate(opening ? [
+    { transform: compact, borderRadius: '50%' },
+    { transform: 'none', borderRadius: '0px' },
+  ] : [
+    { transform: 'none', borderRadius: '0px' },
+    { transform: compact, borderRadius: '50%' },
+  ], { duration: 680, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' });
+  return animation.finished.catch(() => {});
+}
+function settleBrand(home) {
+  home.append(activityRiveCanvas);
+  riveFlight.hidden = true;
+  riveFlight.getAnimations().forEach(animation => animation.cancel());
+  riveFlight.removeAttribute('style');
+  heroRiveInstance?.resizeDrawingSurfaceToCanvas();
+}
+function maskCircle(rect) {
+  const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  return [`circle(${rect.width / 2}px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`];
+}
+function revealInformation(opening, instant) {
+  const elements = [...informationPanel.querySelectorAll('.info-reveal')];
+  return elements.map((element, index) => {
+    if (instant) return null;
+    return element.animate(opening ? [
+      { opacity: 0, transform: 'translateY(24px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ] : [{ opacity: 1 }, { opacity: 0 }], {
+      duration: opening ? 420 : 180,
+      delay: opening ? 160 + Math.min(index, 3) * 65 : 0,
+      easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both',
+    });
+  }).filter(Boolean);
+}
+function openInformation({ instant = false } = {}) {
+  if (!informationPanel || informationState !== 'closed') return informationTransition;
+  instant ||= reduceMotion.matches;
+  informationState = 'opening';
+  const circle = profileEntry.getBoundingClientRect();
+  const from = brandRect(profileEntry);
+  document.body.classList.add('information-open');
+  informationPanel.hidden = false;
+  informationPanel.inert = false;
+  informationScroll.scrollTop = 0;
+  const to = brandRect(informationTarget);
+  const circles = maskCircle(circle);
+  const maskAnimation = instant ? null : informationMask.animate(
+    [{ clipPath: circles[0] }, { clipPath: circles[1] }],
+    { duration: 620, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' });
+  const reveals = revealInformation(true, instant);
+  cabinetContent.inert = true;
+  profileEntry.setAttribute('aria-expanded', 'true');
+  informationPanel.focus({ preventScroll: true });
+  informationTransition = Promise.all([
+    morphBrand(from, to, true, instant),
+    maskAnimation?.finished.catch(() => {}),
+    ...reveals.map(animation => animation.finished.catch(() => {})),
+  ]).then(() => {
+    settleBrand(informationTarget);
+    maskAnimation?.cancel();
+    reveals.forEach(animation => animation.cancel());
+    informationState = 'open';
+  });
+  return informationTransition;
+}
+function closeInformation({ instant = false } = {}) {
+  if (!informationPanel || informationState === 'closed') return Promise.resolve();
+  if (informationState === 'opening') return informationTransition.then(() => closeInformation({ instant }));
+  if (informationState === 'closing') return informationTransition;
+  instant ||= reduceMotion.matches;
+  informationState = 'closing';
+  const from = brandRect(informationTarget);
+  const to = brandRect(profileEntry);
+  const circles = maskCircle(profileEntry.getBoundingClientRect());
+  const maskAnimation = instant ? null : informationMask.animate(
+    [{ clipPath: circles[1] }, { clipPath: circles[0] }],
+    { duration: 620, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' });
+  const reveals = revealInformation(false, instant);
+  informationTransition = Promise.all([
+    morphBrand(from, to, false, instant),
+    maskAnimation?.finished.catch(() => {}),
+    ...reveals.map(animation => animation.finished.catch(() => {})),
+  ]).then(() => {
+    settleBrand(profileEntry);
+    informationPanel.hidden = true;
+    informationPanel.inert = true;
+    maskAnimation?.cancel();
+    reveals.forEach(animation => animation.cancel());
+    cabinetContent.inert = false;
+    document.body.classList.remove('information-open');
+    profileEntry.setAttribute('aria-expanded', 'false');
+    informationState = 'closed';
+    profileEntry.focus({ preventScroll: true });
+  });
+  return informationTransition;
+}
+function bindInformation() {
+  profileEntry?.addEventListener('click', () => openInformation());
+  informationPanel?.querySelector('[data-close-information]')?.addEventListener('click', () => closeInformation());
+  document.addEventListener('keydown', event => {
+    if (informationState === 'closed' || accessDialog?.open || noticeDialog?.open) return;
+    if (event.key === 'Escape') { event.preventDefault(); closeInformation(); }
+    if (event.key === 'Tab') {
+      const controls = [...informationPanel.querySelectorAll('button:not(:disabled), a[href], [tabindex="0"]')]
+        .filter(element => element.getClientRects().length && !element.closest('[inert]'));
+      const first = controls[0], last = controls.at(-1);
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === informationPanel)) {
+        event.preventDefault(); last?.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === informationPanel)) {
+        event.preventDefault(); first?.focus();
+      }
+    }
+  });
+}
+
 async function initialize() {
+  bindInformation();
   document.querySelectorAll('[data-site-page]').forEach(link => {
     if (!appPlatform) return;
     const url = new URL(link.href);
@@ -1436,6 +1586,7 @@ async function initialize() {
     // 因此发布内容只需要编辑 data/content.json，不必改动页面代码。
     const content = await loadJson("./data/content.json");
     applyContent(content);
+    if (new URLSearchParams(location.search).get('view') === 'about') openInformation({ instant: true });
   } catch (error) {
     // 内容读取失败时仍然初始化顶部：hero 会回退到 HERO_DEFAULTS。
     initHeroRive();

@@ -1436,10 +1436,10 @@ function renderBanners() { renderList(); renderForm(); }
 // 预览就是把官网装进 iframe，再把内存里未发布的 content 推给它。官网那边
 // 用的是同一套渲染代码，所以看到的就是发布后的样子，不存在两套实现漂移。
 const PREVIEW_TARGETS = {
-  banners: { page: 'about.html', scrollTo: '.activity-section', hint: '关于千机百变 › 内容轮播' },
+  banners: { showInformation: true, scrollTo: '.activity-section', hint: '信息面板 › 内容轮播' },
   hero: { scrollTo: '.profile-entry', hint: '创意橱柜 › 圆形 Rive 入口' },
   cards: { scrollTo: '#showcase', hint: '首页 › 创意橱柜' },
-  contact: { page: 'about.html', scrollTo: '#contact', hint: '关于千机百变 › 联系方式' },
+  contact: { showInformation: true, scrollTo: '#contact', hint: '信息面板 › 联系方式' },
   notice: { showNotice: true, hint: '公告弹窗' },
   translations: { scrollTo: '#showcase', hint: '首页 › 创意橱柜' },
   raw: { scrollTo: '.showcase-section', hint: '首页' },
@@ -1481,6 +1481,7 @@ function syncPreview() {
         options: {
           scrollTo: target.scrollTo || null,
           showNotice: target.showNotice === true,
+          showInformation: target.showInformation === true,
           // 入口行平时折在卡片里。告诉画布正在编辑哪张卡，让它把那一行露出来，
           // 这样改入口时画布会实时反映，而不用在管理台里再画一份。
           previewAccess: card?.id || null,

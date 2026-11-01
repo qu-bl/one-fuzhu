@@ -532,3 +532,25 @@ body { min-width: 0; }
 }
 
 [data-page] .app-page { padding-top: max(env(safe-area-inset-top, 0px), var(--app-safe-area-top)); }
+
+/* One background surface, with no extra layer or white strip below the feed. */
+html, body { min-height: 100%; background: var(--page); }
+[data-page="showcase"] .app-page::before { content: none; }
+[data-page="showcase"] .app-page { padding-bottom: 0; }
+[data-page="showcase"] .showcase-section { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.profile-entry { border: 0; padding: 0; cursor: pointer; }
+.information-open { overflow: hidden; }
+.information-panel { position: fixed; inset: 0; z-index: 100; isolation: isolate; }
+.information-panel[hidden], .rive-flight[hidden] { display: none; }
+.information-mask { position: absolute; inset: 0; background: var(--page); pointer-events: none; }
+.information-scroll { position: relative; height: 100%; overflow-y: auto; overscroll-behavior: contain; padding-top: max(env(safe-area-inset-top, 0px), var(--app-safe-area-top)); scrollbar-gutter: stable; }
+.information-page .about-header h2 { font-size: clamp(26px, 4vw, 40px); margin: 20px 0 12px; }
+.information-page .activity-section { padding-top: 28px; }
+.info-close { padding: 0; border: 0; background: transparent; font: inherit; cursor: pointer; }
+.information-rive-target { position: relative; }
+.rive-flight { position: fixed; z-index: 115; pointer-events: none; overflow: hidden; }
+.rive-flight canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
+.information-panel .activity-rive { background: transparent; }
+@media (max-width: 719px) {
+  .information-page .activity-rive { grid-row: 1; min-height: 190px; height: 190px; aspect-ratio: auto; }
+}

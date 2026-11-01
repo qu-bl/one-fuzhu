@@ -18,12 +18,12 @@
   <meta name="twitter:description" content="发现互动作品，交流屏幕定制，学习创作，让设计走进日常。">
   <link rel="icon" href="./assets/favicon.svg?v=58" type="image/svg+xml">
   <title>千机百变 · 官方与伙伴们的创意橱柜</title>
-  <link rel="stylesheet" href="./styles.css?v=c9a8f4ca">
+  <link rel="stylesheet" href="./styles.css?v=66e54fd7">
   <script src="./theme.js?v=044c9338"></script>
   <script src="./links.js?v=a782055f" defer></script>
   <script src="./media.js?v=1edbcf1e" defer></script>
   <script src="https://unpkg.com/@rive-app/canvas@2.43.1/rive.js" defer></script>
-  <script src="./app.js?v=90d70d3d" defer></script>
+  <script src="./app.js?v=55231853" defer></script>
   <!-- GEO:JSONLD:START -->
 <script type="application/ld+json">
 {
@@ -134,10 +134,10 @@
           <label class="sr-only" for="case-search">搜索创意案例</label>
           <input id="case-search" type="search" placeholder="搜索案例或伙伴" autocomplete="off">
         </div>
-        <a class="profile-entry" href="./about.html" data-site-page aria-label="关于千机百变，官方信息与联系" title="关于千机百变">
+        <button class="profile-entry" type="button" aria-label="关于千机百变，官方信息与联系" aria-haspopup="dialog" aria-controls="information-panel" aria-expanded="false" title="关于千机百变">
           <img class="profile-fallback" src="./assets/favicon.svg" alt="">
           <canvas id="activity-rive-canvas" aria-hidden="true"></canvas>
-        </a>
+        </button>
         </div>
       </div>
 
@@ -162,6 +162,61 @@
   </main>
 
 
+
+  <section id="information-panel" class="information-panel" role="dialog" aria-modal="true" aria-labelledby="information-title" tabindex="-1" hidden inert>
+    <div class="information-mask" aria-hidden="true"></div>
+    <div class="information-scroll">
+      <div class="information-page">
+    <header class="about-header info-reveal">
+      <button class="back-to-showcase info-close" type="button" data-close-information>← 创意橱柜</button>
+      <h2 id="information-title">关于千机百变</h2>
+      <nav class="about-links" aria-label="官方信息">
+        <a href="#contact">联系与合作</a><a href="./terms.html">用户协议</a><a href="./privacy.html">隐私政策</a>
+      </nav>
+    </header>
+    <section class="activity-section" aria-label="探索千机百变">
+      <div class="activity-carousel" id="activity-carousel" aria-roledescription="轮播">
+        <div class="activity-layout">
+          <div class="activity-copy info-reveal">
+            <div class="activity-copy-viewport">
+              <div class="activity-track" id="activity-track"></div>
+            </div>
+            <div class="banner-navigation"><div class="activity-dots" id="activity-dots" aria-label="选择主题"></div></div>
+          </div>
+          <div class="activity-rive information-rive-target" aria-label="猫咪触摸跟随互动动画">
+
+          </div>
+        </div>
+        <p class="sr-only" id="activity-status" aria-live="polite"></p>
+      </div>
+    </section>
+
+
+
+    <section class="contact-section info-reveal" id="contact" aria-labelledby="contact-title" hidden>
+      <div class="contact-card">
+        <div class="contact-copy">
+          <span class="contact-label" id="contact-label"></span>
+          <h2 id="contact-title"></h2>
+          <p id="contact-summary"></p>
+        </div>
+        <div class="contact-methods" id="contact-methods"></div>
+      </div>
+    </section>
+
+  </div>
+      <footer class="site-footer info-reveal">
+    <span>© 2026 千机百变</span>
+    <span class="site-footer-sep" aria-hidden="true">·</span>
+    <a href="./terms.html">用户协议</a>
+    <span class="site-footer-sep" aria-hidden="true">·</span>
+    <a href="./privacy.html">隐私政策</a>
+    <span class="site-footer-sep" aria-hidden="true">·</span>
+    <a href="https://beian.miit.gov.cn/">APP 备案号：冀ICP备2026040445号-1A</a>
+  </footer>
+    </div>
+  </section>
+  <div id="rive-flight" class="rive-flight" aria-hidden="true" hidden></div>
 
   <template id="activity-template">
     <article class="activity-slide">

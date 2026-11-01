@@ -146,7 +146,6 @@ for (const name of readdirSync(join(ROOT, "cases"))) {
 const now = new Date().toISOString().slice(0, 10);
 const urls = [
   { url: SITE, changefreq: "weekly", priority: "1.0" },
-  { url: SITE + "about.html", changefreq: "monthly", priority: "0.6" },
   { url: SITE + "terms.html", changefreq: "monthly", priority: "0.4" },
   { url: SITE + "privacy.html", changefreq: "monthly", priority: "0.4" },
   ...works.map((w) => ({ url: caseUrl(w), changefreq: "weekly", priority: "0.7" })),
