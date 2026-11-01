@@ -8,6 +8,8 @@ const caseTemplate = document.querySelector("#case-template");
 const caseGrid = document.querySelector("#case-grid");
 const featuredBanners = document.querySelector("#featured-banners");
 const categoryTabs = document.querySelector("#category-tabs");
+const categoryPicker = document.querySelector("#category-picker");
+const categoryTrigger = document.querySelector("#category-trigger");
 const searchInput = document.querySelector("#case-search");
 const platformButtons = document.querySelector("#platform-buttons");
 const emptyState = document.querySelector("#empty-state");
@@ -568,38 +570,38 @@ function bindCarouselControls() {
   reduceMotion.addEventListener?.("change", scheduleCarousel);
 }
 
-// 平台筛选与分类栏一样是「选中项常驻、其余展开后可见」：
-// 选中一项后自动收起，点外部或按 Esc 也收起。
-// 与原始实现的唯一区别是不再因为宿主平台而整块隐藏。
+// Filters live in the cabinet title and search field; options appear on demand.
 function setPlatformExpanded(expanded) {
   const picker = document.querySelector("#platform-picker");
+  const trigger = document.querySelector("#platform-trigger");
   picker.dataset.expanded = String(expanded);
+  trigger.setAttribute("aria-expanded", String(expanded));
+  trigger.setAttribute("aria-label", `筛选系统：${platformLabel(state.platform)}`);
+  trigger.title = `筛选系统：${platformLabel(state.platform)}`;
+  document.querySelector("#platform-current-icon").replaceChildren(createPlatformIcon(state.platform));
+  platformButtons.hidden = !expanded;
   platformButtons.querySelectorAll("button").forEach(button => {
-    const selected = button.dataset.platform === state.platform;
-    button.setAttribute("aria-pressed", String(selected));
-    button.inert = !expanded && !selected;
-    if (selected) button.setAttribute("aria-expanded", String(expanded));
-    else button.removeAttribute("aria-expanded");
+    button.setAttribute("aria-pressed", String(button.dataset.platform === state.platform));
   });
-  platformButtons.scrollLeft = 0;
 }
 
 function setCategoryExpanded(expanded) {
-  categoryTabs.dataset.expanded = String(expanded);
+  categoryPicker.dataset.expanded = String(expanded);
+  categoryTrigger.setAttribute("aria-expanded", String(expanded));
+  categoryTrigger.setAttribute("aria-label", `创意橱柜，当前关键词：${state.category}`);
+  const current = document.querySelector("#category-current");
+  current.textContent = state.category;
+  current.hidden = state.category === "全部";
+  categoryTabs.hidden = !expanded;
   categoryTabs.querySelectorAll("button").forEach(button => {
-    const selected = button.dataset.category === state.category;
-    button.setAttribute("aria-pressed", String(selected));
-    button.inert = !expanded && !selected;
-    if (selected) button.setAttribute("aria-expanded", String(expanded));
-    else button.removeAttribute("aria-expanded");
+    button.setAttribute("aria-pressed", String(button.dataset.category === state.category));
   });
-  categoryTabs.scrollLeft = 0;
 }
 
 function renderFilters() {
   if (!categoryTabs || !platformButtons) return;
-  if (!categoryTabs || !platformButtons) return;
-  const categories = ["全部", ...new Set(state.cases.map((item) => item.category))];
+  const categories = ["全部", ...new Set(state.cases.map((item) => item.category).filter(Boolean))];
+  if (!categories.includes(state.category)) state.category = "全部";
 
   categoryTabs.replaceChildren();
   categories.forEach((category) => {
@@ -610,13 +612,9 @@ function renderFilters() {
     button.dataset.category = category;
     button.setAttribute("aria-pressed", category === state.category ? "true" : "false");
     button.addEventListener("click", () => {
-      if (categoryTabs.dataset.expanded !== "true") {
-        setCategoryExpanded(true);
-        return;
-      }
       state.category = category;
       setCategoryExpanded(false);
-      button.focus({ preventScroll: true });
+      categoryTrigger.focus({ preventScroll: true });
       renderCases();
     });
     categoryTabs.append(button);
@@ -634,15 +632,13 @@ function renderFilters() {
     button.setAttribute("aria-pressed", platform === state.platform ? "true" : "false");
     button.title = label;
     button.append(createPlatformIcon(platform));
+    const text = document.createElement("span");
+    text.textContent = label;
+    button.append(text);
     button.addEventListener("click", () => {
-      const expanded = document.querySelector("#platform-picker").dataset.expanded === "true";
-      if (!expanded) {
-        setPlatformExpanded(true);
-        return;
-      }
       state.platform = platform;
       setPlatformExpanded(false);
-      button.focus({ preventScroll: true });
+      document.querySelector("#platform-trigger").focus({ preventScroll: true });
       renderCases();
     });
     platformButtons.append(button);
@@ -1708,13 +1704,15 @@ function renderLoadError(error) {
 
 function bindCollapsibleFilter(picker, options, setExpanded) {
   if (!picker || !options) return;
+  const trigger = picker.querySelector('.filter-trigger');
+  trigger.addEventListener("click", () => setExpanded(picker.dataset.expanded !== "true"));
   document.addEventListener("click", event => {
     if ((picker.dataset.expanded === "true") && !picker.contains(event.target)) setExpanded(false);
   });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && (picker.dataset.expanded === "true")) {
       setExpanded(false);
-      options.querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true });
+      trigger.focus({ preventScroll: true });
       event.preventDefault();
     }
   });
@@ -1724,7 +1722,7 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
   });
   picker.addEventListener("keydown", event => {
     const buttons = [...options.querySelectorAll("button")];
-    if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key) || !buttons.length) return;
+    if (!["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp", "Home", "End"].includes(event.key) || !buttons.length) return;
     event.preventDefault();
     const wasOpen = (picker.dataset.expanded === "true");
     setExpanded(true);
@@ -1732,7 +1730,7 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
     const selected = buttons.findIndex(button => button.getAttribute("aria-pressed") === "true");
     const next = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1
       : !wasOpen || index < 0 ? Math.max(0, selected)
-      : (index + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
+      : (index + (["ArrowRight", "ArrowDown"].includes(event.key) ? 1 : -1) + buttons.length) % buttons.length;
     buttons[next].focus({ preventScroll: true });
     buttons[next].scrollIntoView({ block: "nearest", inline: "nearest" });
   });
@@ -1970,7 +1968,7 @@ async function initialize() {
     link.href = url.href;
   });
   bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
-  bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
+  bindCollapsibleFilter(categoryPicker, categoryTabs, setCategoryExpanded);
   // 卡片详情弹窗有 × 关闭键；公告弹窗没有，靠 Esc 与点击外部关闭。
   accessDialog?.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);
   bindCarouselControls();

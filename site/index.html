@@ -18,12 +18,12 @@
   <meta name="twitter:description" content="发现互动作品，交流屏幕定制，学习创作，让设计走进日常。">
   <link rel="icon" href="./assets/favicon.svg?v=58" type="image/svg+xml">
   <title>千机百变 · 官方与伙伴们的创意橱柜</title>
-  <link rel="stylesheet" href="./styles.css?v=721d8ff0">
+  <link rel="stylesheet" href="./styles.css?v=4d5de103">
   <script src="./theme.js?v=044c9338"></script>
   <script src="./links.js?v=a782055f" defer></script>
   <script src="./media.js?v=1edbcf1e" defer></script>
   <script src="https://unpkg.com/@rive-app/canvas@2.43.1/rive.js" defer></script>
-  <script src="./app.js?v=943be049" defer></script>
+  <script src="./app.js?v=77a948ec" defer></script>
   <!-- GEO:JSONLD:START -->
 <script type="application/ld+json">
 {
@@ -128,22 +128,31 @@
     <section class="showcase-section reveal" id="showcase" aria-labelledby="showcase-title">
       <div class="showcase-controls">
       <div class="showcase-header">
-        <h2 id="showcase-title">创意橱柜</h2>
+        <div class="category-picker" id="category-picker" data-expanded="false">
+          <h2 id="showcase-title">
+            <button class="filter-trigger category-trigger" id="category-trigger" type="button" aria-expanded="false" aria-controls="category-tabs">
+              <span>创意橱柜</span>
+              <span class="category-current" id="category-current" hidden></span>
+              <svg class="filter-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+            </button>
+          </h2>
+          <div class="filter-options category-tabs" id="category-tabs" role="group" aria-label="创意关键词" hidden></div>
+        </div>
         <div class="search-tools">
         <div class="search-wrap">
+          <div class="platform-picker" id="platform-picker" data-expanded="false">
+            <button class="filter-trigger platform-trigger" id="platform-trigger" type="button" aria-label="筛选系统：全部平台" aria-expanded="false" aria-controls="platform-buttons" title="筛选系统：全部平台">
+              <span id="platform-current-icon" aria-hidden="true"></span>
+              <svg class="filter-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+            </button>
+            <div class="filter-options platform-buttons" id="platform-buttons" role="group" aria-label="按运行系统筛选" hidden></div>
+          </div>
           <label class="sr-only" for="case-search">搜索创意案例</label>
           <input id="case-search" type="search" placeholder="搜索案例或伙伴" autocomplete="off">
         </div>
         <button class="profile-entry" type="button" aria-label="个人中心" aria-haspopup="dialog" aria-controls="information-panel" aria-expanded="false" title="个人中心">
           <canvas id="activity-rive-canvas" aria-hidden="true"></canvas>
         </button>
-        </div>
-      </div>
-
-      <div class="showcase-toolbar" aria-label="创意案例筛选">
-        <div class="category-tabs" id="category-tabs" role="group" aria-label="案例分类"></div>
-        <div class="platform-picker" id="platform-picker" data-expanded="false">
-          <div class="platform-buttons" id="platform-buttons" role="group" aria-label="按运行平台筛选"></div>
         </div>
       </div>
 
