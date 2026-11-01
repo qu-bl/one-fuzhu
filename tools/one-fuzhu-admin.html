@@ -888,6 +888,27 @@ function cardEditor(card, index) {
   coverInput.addEventListener('input', syncCover);
   cover.box.append(coverRow, coverPreview);
 
+  const banner = section(details, '精选横幅图（可选）', '仅开启精选后生效。电脑和平板建议 3:1，手机显示在 16:9 容器内，完整保留图片。默认只显示海报，点击后展开视频、文字和入口。未上传时回退到普通封面。');
+  const bannerInput = textInput(card.bannerCover || '', './assets/banner-xxx.webp');
+  field(banner.grid, '横幅图路径', bind(bannerInput, v => { card.bannerCover = v; }));
+  field(banner.grid, '横幅图片说明', bind(textInput(card.bannerAlt || ''), v => { card.bannerAlt = v; }));
+  const bannerUpload = actionButton('上传精选横幅图', 'outlined');
+  bannerUpload.addEventListener('click', () => stageUpload(bannerSlot(card, index), path => {
+    card.bannerCover = versioned(repoPathToUrl(path));
+    renderCards();
+  }));
+  const bannerPreview = el('img');
+  bannerPreview.alt = '精选横幅预览';
+  bannerPreview.style.cssText = 'width:100%;max-width:450px;aspect-ratio:3/1;object-fit:contain;display:block;margin-top:8px';
+  const syncBanner = () => {
+    const url = siteAssetUrl(bannerInput.value.trim());
+    bannerPreview.hidden = !url;
+    if (url) bannerPreview.src = url; else bannerPreview.removeAttribute('src');
+  };
+  bannerInput.addEventListener('input', syncBanner);
+  syncBanner();
+  banner.box.append(bannerUpload, bannerPreview);
+
   const media = section(details, '视频', '填了就在卡片和弹窗里显示「播放视频」按钮；不填则只显示封面。');
   renderVideoEditor(media.grid, card.video, (v) => { if (v) card.video = v; else delete card.video; });
 
@@ -1067,6 +1088,9 @@ function safeId(value, index) {
 }
 function coverSlot(card, index) {
   return { ...CONFIG.uploads.cardCover, base: `site/assets/cover-${safeId(card.id, index)}` };
+}
+function bannerSlot(card, index) {
+  return { ...CONFIG.uploads.cardCover, base: `site/assets/banner-${safeId(card.id, index)}` };
 }
 function uploadCardCover(card, index) {
   stageUpload(coverSlot(card, index), (path) => {
@@ -1277,7 +1301,7 @@ const LIST_VIEWS = {
       return img;
     },
     addLabel: '添加卡片',
-    create: () => ({ id: 'card-' + Date.now(), name: '新卡片', summary: '', cover: '', category: '互动组件', partnerName: '', platforms: ['HarmonyOS'], tags: [], visible: true }),
+    create: () => ({ id: 'card-' + Date.now(), name: '新卡片', summary: '', cover: '', bannerCover: '', bannerAlt: '', category: '互动组件', partnerName: '', platforms: ['HarmonyOS'], tags: [], visible: true }),
   },
 
   // 以下区块只有一项，但左栏照样列一行——列表始终在，右侧始终是它的细节。
@@ -1430,7 +1454,10 @@ function previewContent() {
   };
   if (draft.hero?.rive?.src) draft.hero.rive.src = replaceAsset(draft.hero.rive.src);
   if (draft.notice?.image) draft.notice.image = replaceAsset(draft.notice.image);
-  for (const card of draft.cards || []) if (card.cover) card.cover = replaceAsset(card.cover);
+  for (const card of draft.cards || []) {
+    if (card.cover) card.cover = replaceAsset(card.cover);
+    if (card.bannerCover) card.bannerCover = replaceAsset(card.bannerCover);
+  }
   return draft;
 }
 function syncPreview() {
@@ -1834,6 +1861,9 @@ function validateContent(value) {
       if (typeof entry.cover !== 'string' || !entry.cover.trim()) {
         throw new Error(`${entry.id} 缺少封面图（封面是必填项）`);
       }
+      for (const key of ['bannerCover', 'bannerAlt']) {
+        if (entry[key] != null && typeof entry[key] !== 'string') throw new Error(`${entry.id} 的 ${key} 必须是字符串`);
+      }
       if (entry.coverAlt != null && typeof entry.coverAlt !== 'string') {
         throw new Error(`${entry.id} 的 coverAlt 必须是字符串`);
       }
@@ -1993,6 +2023,7 @@ function currentUploadRefs() {
   // 每张卡片的封面基名不同，逐个登记，否则换扩展名时会被当成无人引用的旧文件删掉。
   (Array.isArray(content.cards) ? content.cards : []).forEach((card, index) => {
     if (card && card.cover) add(coverSlot(card, index).base, card.cover);
+    if (card && card.bannerCover) add(bannerSlot(card, index).base, card.bannerCover);
   });
   return refs;
 }

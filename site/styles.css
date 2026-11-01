@@ -484,3 +484,23 @@ body { min-width: 0; }
 /* Explicit shortest-column placement avoids multi-column balancing on tablets. */
 .case-grid { position: relative; display: block; columns: auto; }
 .case-grid > .case-card { position: absolute; display: block; margin: 0; }
+
+/* Featured posters live above the waterfall and open the shared card dialog. */
+.featured-banners { width: 100%; max-width: 1440px; margin: 0 auto 32px; }
+.featured-banners[hidden] { display: none; }
+.featured-banners .featured-carousel { margin: 0; }
+.featured-banners .featured-viewport { display: block; }
+.featured-banners .featured-slide { display: none; }
+.featured-banners .featured-slide.is-active { display: block; }
+.featured-banners .case-card-trigger:not(.is-expanded) { display: block; height: auto; min-height: 0; }
+.featured-poster { display: block; width: 100%; aspect-ratio: 3 / 1; height: auto; object-fit: contain; background: var(--surface-soft); }
+.featured-banners .case-card-trigger:not(.is-expanded) .case-media,
+.featured-banners .case-card-trigger:not(.is-expanded) .case-body,
+.featured-banners .featured-dots { display: none; }
+.featured-banners .is-expanded .featured-poster { display: none; }
+.featured-banners .is-expanded .case-media img { height: auto; object-fit: contain; }
+.featured-banners .case-card-trigger:not(.is-expanded):hover { transform: none; }
+@media (max-width: 719px) {
+  .featured-poster { aspect-ratio: 16 / 9; }
+  .featured-banners { margin-bottom: 20px; }
+}

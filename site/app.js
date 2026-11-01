@@ -6,6 +6,7 @@ const activityTemplate = document.querySelector("#activity-template");
 const activityRiveCanvas = document.querySelector("#activity-rive-canvas");
 const caseTemplate = document.querySelector("#case-template");
 const caseGrid = document.querySelector("#case-grid");
+const featuredBanners = document.querySelector("#featured-banners");
 const categoryTabs = document.querySelector("#category-tabs");
 const searchInput = document.querySelector("#case-search");
 const platformButtons = document.querySelector("#platform-buttons");
@@ -846,6 +847,14 @@ function createCaseCard(item, index, options = {}) {
     image.src = item.cover;
     image.alt = item.coverAlt || `${item.name}案例封面`;
   }
+  if (isFeatured) {
+    const poster = document.createElement("img");
+    poster.className = "featured-poster";
+    poster.src = item.bannerCover || item.cover;
+    poster.alt = item.bannerAlt || item.coverAlt || `${item.name}精选海报`;
+    poster.decoding = "async";
+    trigger.prepend(poster);
+  }
   card.__item = item;
   if (SiteMedia.videoSource(item.video)) renderAccessMedia(item, media, "poster");
   else if (!item.cover) media.hidden = true;
@@ -946,9 +955,9 @@ function createFeaturedCarousel(items) {
 }
 
 function bindFeaturedControls() {
-  if (!caseGrid) return;
+  if (!featuredBanners) return;
   let startX = null;
-  caseGrid.addEventListener("pointerdown", event => {
+  featuredBanners.addEventListener("pointerdown", event => {
     if (!event.isPrimary || expandedCard || !event.target.closest(".featured-carousel")) return;
     startX = event.clientX;
     pauseFeatured();
@@ -1055,6 +1064,12 @@ function renderCases() {
   waterfallObserver.disconnect();
   waterfallObserver.observe(caseGrid);
   caseGrid.replaceChildren();
+  if (featuredBanners) {
+    featuredBanners.replaceChildren();
+    const selected = items.filter(item => item.featured && (item.bannerCover || item.cover));
+    featuredBanners.hidden = selected.length === 0;
+    if (selected.length) featuredBanners.append(createFeaturedCarousel(selected));
+  }
 
   // Every content item is its own waterfall tile, including featured items.
   items.forEach((item, index) => {
