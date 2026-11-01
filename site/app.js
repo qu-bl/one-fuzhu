@@ -8,8 +8,6 @@ const caseTemplate = document.querySelector("#case-template");
 const caseGrid = document.querySelector("#case-grid");
 const featuredBanners = document.querySelector("#featured-banners");
 const categoryTabs = document.querySelector("#category-tabs");
-const categoryPicker = document.querySelector("#category-picker");
-const categoryTrigger = document.querySelector("#category-trigger");
 const searchInput = document.querySelector("#case-search");
 const platformButtons = document.querySelector("#platform-buttons");
 const emptyState = document.querySelector("#empty-state");
@@ -570,7 +568,7 @@ function bindCarouselControls() {
   reduceMotion.addEventListener?.("change", scheduleCarousel);
 }
 
-// Filters live in the cabinet title and search field; options appear on demand.
+// Keywords expand inline on the left; system selection lives in the search field.
 function setPlatformExpanded(expanded) {
   const picker = document.querySelector("#platform-picker");
   const trigger = document.querySelector("#platform-trigger");
@@ -586,16 +584,15 @@ function setPlatformExpanded(expanded) {
 }
 
 function setCategoryExpanded(expanded) {
-  categoryPicker.dataset.expanded = String(expanded);
-  categoryTrigger.setAttribute("aria-expanded", String(expanded));
-  categoryTrigger.setAttribute("aria-label", `创意橱柜，当前关键词：${state.category}`);
-  const current = document.querySelector("#category-current");
-  current.textContent = state.category;
-  current.hidden = state.category === "全部";
-  categoryTabs.hidden = !expanded;
+  categoryTabs.dataset.expanded = String(expanded);
   categoryTabs.querySelectorAll("button").forEach(button => {
-    button.setAttribute("aria-pressed", String(button.dataset.category === state.category));
+    const selected = button.dataset.category === state.category;
+    button.setAttribute("aria-pressed", String(selected));
+    button.inert = !expanded && !selected;
+    if (selected) button.setAttribute("aria-expanded", String(expanded));
+    else button.removeAttribute("aria-expanded");
   });
+  categoryTabs.scrollLeft = 0;
 }
 
 function renderFilters() {
@@ -608,13 +605,17 @@ function renderFilters() {
     const button = document.createElement("button");
     button.className = "category-button";
     button.type = "button";
-    button.textContent = category;
+    button.textContent = category === "全部" ? "创意橱柜" : category;
     button.dataset.category = category;
     button.setAttribute("aria-pressed", category === state.category ? "true" : "false");
     button.addEventListener("click", () => {
+      if (categoryTabs.dataset.expanded !== "true") {
+        setCategoryExpanded(true);
+        return;
+      }
       state.category = category;
       setCategoryExpanded(false);
-      categoryTrigger.focus({ preventScroll: true });
+      button.focus({ preventScroll: true });
       renderCases();
     });
     categoryTabs.append(button);
@@ -1705,14 +1706,14 @@ function renderLoadError(error) {
 function bindCollapsibleFilter(picker, options, setExpanded) {
   if (!picker || !options) return;
   const trigger = picker.querySelector('.filter-trigger');
-  trigger.addEventListener("click", () => setExpanded(picker.dataset.expanded !== "true"));
+  trigger?.addEventListener("click", () => setExpanded(picker.dataset.expanded !== "true"));
   document.addEventListener("click", event => {
     if ((picker.dataset.expanded === "true") && !picker.contains(event.target)) setExpanded(false);
   });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && (picker.dataset.expanded === "true")) {
       setExpanded(false);
-      trigger.focus({ preventScroll: true });
+      (trigger || options.querySelector('[aria-pressed="true"]'))?.focus({ preventScroll: true });
       event.preventDefault();
     }
   });
@@ -1968,7 +1969,7 @@ async function initialize() {
     link.href = url.href;
   });
   bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
-  bindCollapsibleFilter(categoryPicker, categoryTabs, setCategoryExpanded);
+  bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
   // 卡片详情弹窗有 × 关闭键；公告弹窗没有，靠 Esc 与点击外部关闭。
   accessDialog?.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);
   bindCarouselControls();
