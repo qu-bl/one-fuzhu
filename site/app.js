@@ -227,6 +227,7 @@ function renderAccessMedia(item, accessMedia = document.querySelector("#access-m
     return;
   }
   if (item.cover) {
+    accessMedia.style.aspectRatio = "auto";
     const poster = document.createElement("img");
     poster.src = item.cover;
     poster.alt = item.coverAlt || `${item.name || item.title}封面`;
