@@ -496,9 +496,9 @@ body { min-width: 0; }
 
 /* The cabinet is a dedicated feed; official information has its own page. */
 [data-page="showcase"] .showcase-section { padding-top: 12px; padding-bottom: 24px; }
-.showcase-controls { position: sticky; top: 0; z-index: 30; padding-block: 12px 4px; background: var(--page); }
+.showcase-controls { position: sticky; top: 0; z-index: 30; padding-block: 12px 4px; background: transparent; }
 [data-page="showcase"] .showcase-header { grid-template-columns: minmax(0, 1fr) minmax(260px, 460px); gap: 16px; margin-bottom: 12px; }
-[data-page="showcase"] .showcase-header h2 { font-size: 24px; }
+[data-page="showcase"] .showcase-header h2 { justify-self: start; margin: -6px -12px; padding: 6px 12px; border-radius: 999px; background: var(--page); font-size: 24px; }
 .search-tools { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .search-tools .search-wrap { flex: 1; min-width: 0; margin: 0; }
 .profile-entry { position: relative; display: block; flex: 0 0 48px; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; background: var(--surface-soft); color: var(--text); }
