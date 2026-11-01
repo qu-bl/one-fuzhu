@@ -19,7 +19,15 @@
     "enabled": true,
     "image": "./assets/notice.webp?v=1793449569735",
     "linkLabel": "复制群号",
-    "linkHref": "https://qm.qq.com/q/cARWUthgDC"
+    "linkHref": "https://qm.qq.com/q/cARWUthgDC",
+    "buttonAction": "link",
+    "copyValue": "",
+    "buttonColor": "",
+    "textColor": "",
+    "buttonX": 50,
+    "buttonY": 100,
+    "textOffsetX": 0,
+    "textOffsetY": 0
   },
   "contact": {
     "visible": true,

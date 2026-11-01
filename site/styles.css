@@ -130,8 +130,8 @@ a { color: var(--accent); }
 .notice-media { width: 100%; }
 .notice-media img { display: block; width: 100%; height: auto; }
 .notice-dialog:focus, .notice-dialog:focus-visible { outline: none; }
-.notice-actions { position: absolute; inset: auto 20px 20px; display: flex; justify-content: center; }
-.notice-actions .banner-action { max-width: 100%; min-height: 48px; padding: 12px 28px; text-align: center; overflow-wrap: anywhere; box-shadow: 0 4px 20px rgb(0 0 0 / .22); }
+.notice-actions { position: absolute; inset: 20px; pointer-events: none; }
+.notice-actions .banner-action { position: absolute; left: var(--notice-button-x, 50%); top: var(--notice-button-y, 100%); transform: translate(calc(-1 * var(--notice-button-x, 50%)), calc(-1 * var(--notice-button-y, 100%))); pointer-events: auto; width: max-content; max-width: 100%; min-height: 48px; padding: 12px 28px; text-align: center; overflow-wrap: anywhere; box-shadow: 0 4px 20px rgb(0 0 0 / .22); }
 .notice-dialog, .notice-sheet { scrollbar-width: none; -ms-overflow-style: none; }
 .notice-dialog::-webkit-scrollbar, .notice-sheet::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .access-option { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-width: 0; min-height: 120px; padding: 16px 12px; border: 0; border-radius: 24px; text-align: center; background: var(--surface-soft); color: var(--text); text-decoration: none; }
@@ -190,7 +190,7 @@ a.contact-method:hover { background: var(--md-sys-color-surface-container-highes
   .case-card { margin-bottom: 16px; }
   .case-body { padding: 18px; }
   .access-sheet { padding: 24px; }
-  .notice-actions { inset: auto 16px 16px; }
+  .notice-actions { inset: 16px; }
   .contact-section { padding-bottom: 48px; }
   .contact-card { grid-template-columns: 1fr; gap: 24px; }
 }
@@ -550,3 +550,9 @@ html, body { min-height: 100%; background: var(--page); }
 :root { --cabinet-top-gap: clamp(24px, 3vh, 40px); }
 [data-page="showcase"] .app-page { padding-top: calc(var(--cabinet-top-gap) + max(env(safe-area-inset-top, 0px), var(--app-safe-area-top))); }
 .showcase-controls { top: calc(var(--cabinet-top-gap) + max(env(safe-area-inset-top, 0px), var(--app-safe-area-top))); }
+
+.notice-button-label { display: inline-block; white-space: pre-wrap; }
+
+.notice-actions .banner-action { overflow: visible; }
+.notice-actions .banner-action:hover, .notice-actions .banner-action:active { transform: translate(calc(-1 * var(--notice-button-x, 50%)), calc(-1 * var(--notice-button-y, 100%))); }
+.notice-actions .ripple { display: none; }

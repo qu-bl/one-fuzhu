@@ -463,7 +463,12 @@ const NOTICE_TEMPLATE = {
   enabled: false,
   image: '',
   linkLabel: '',
-  linkHref: ''
+  linkHref: '',
+  buttonAction: 'close',
+  copyValue: '',
+  buttonColor: '',
+  textColor: '',
+  buttonX: 50, buttonY: 100, textOffsetX: 0, textOffsetY: 0
 };
 // 站点允许直出的链接协议白名单（与 app.js 的 CONTACT_SCHEMES 一致）。
 const LINK_SCHEMES = ['http:', 'https:', 'mailto:', 'tel:', 'sms:', 'mqqwpa:', 'mqq:', 'weixin:', 'alipays:'];
@@ -1198,6 +1203,27 @@ function contactEditor() {
   return details;
 }
 
+function noticeNumberField(parent, label, notice, key, fallback, min, max) {
+  const input = textInput(notice[key] ?? fallback);
+  input.type = 'number'; input.min = String(min); input.max = String(max); input.step = '1';
+  field(parent, label, bind(input, value => { notice[key] = value === '' ? fallback : Number(value); }));
+}
+function noticeColorField(parent, label, notice, key, fallback) {
+  const row = el('div', 'row');
+  const picker = el('input'); picker.type = 'color';
+  picker.setAttribute('aria-label', `${label}选色器`);
+  picker.style.cssText = 'width:48px;height:44px;flex:0 0 48px;padding:3px';
+  const text = textInput(notice[key] || '', '留空跟随主题，如 #3366FF');
+  text.setAttribute('aria-label', `${label}色值`); text.style.minWidth = '0'; text.style.flex = '1';
+  const syncPicker = () => { picker.value = /^#[0-9a-f]{6}$/i.test(text.value) ? text.value : fallback; };
+  syncPicker();
+  text.addEventListener('input', syncPicker);
+  bind(text, value => { notice[key] = value.trim(); });
+  bind(picker, value => { notice[key] = value; text.value = value; });
+  row.append(picker, text);
+  field(parent, label, row);
+}
+
 function noticeEditor() {
   if (!content.notice) content.notice = { ...NOTICE_TEMPLATE };
   const notice = content.notice;
@@ -1211,7 +1237,7 @@ function noticeEditor() {
   const basic = section(details, '海报弹窗', '启用后在创意橱柜打开时展示。整张海报作为背景，只叠加一个按钮；点击外部或按 Esc 可关闭。');
   field(basic.grid, '打开时弹出', bind(checkbox(notice.enabled === true), (v) => (notice.enabled = v)));
 
-  const image = section(details, '背景海报（开启弹窗时必填）', '海报保留原始比例完整铺满弹窗，按钮叠加在底部。支持 WebP、JPEG/JPG；JPEG 自动转为 WebP（质量 82%，保留尺寸），转换后不超过 4 MB。');
+  const image = section(details, '背景海报（开启弹窗时必填）', '海报保留原始比例完整铺满弹窗，按钮的颜色与位置可以单独配置。支持 WebP、JPEG/JPG；JPEG 自动转为 WebP（质量 82%，保留尺寸），转换后不超过 4 MB。');
   const imageSrc = textInput(notice.image, './assets/xxx.webp');
   field(image.grid, '海报图片路径', bind(imageSrc, (v) => (notice.image = v)));
   const preview = el('img');
@@ -1230,9 +1256,26 @@ function noticeEditor() {
   imageRow.append(imageUpload);
   image.box.append(imageRow, preview);
 
-  const button = section(details, '唯一叠加按钮', '显示在海报底部居中。填写链接后打开链接；链接留空时关闭弹窗。');
-  field(button.grid, '按钮文字', bind(textInput(notice.linkLabel), (v) => (notice.linkLabel = v)));
-  field(button.grid, '按钮链接', bind(textInput(notice.linkHref, 'https://…'), (v) => (notice.linkHref = v)));
+  const button = section(details, '按钮文字与交互', '只叠加一个按钮；样式与点击行为互不影响。');
+  field(button.grid, '按钮文字', bind(textInput(notice.linkLabel), v => { notice.linkLabel = v; }));
+  const actionLabels = { link: '打开链接', copy: '复制内容', close: '关闭弹窗' };
+  const behavior = notice.buttonAction || (notice.linkHref ? 'link' : 'close');
+  field(button.grid, '点击行为', bind(select(Object.values(actionLabels), actionLabels[behavior]), v => {
+    notice.buttonAction = Object.keys(actionLabels).find(key => actionLabels[key] === v);
+    renderNotice();
+  }));
+  if (behavior === 'link') field(button.grid, '按钮链接', bind(textInput(notice.linkHref, 'https://…'), v => { notice.linkHref = v; }));
+  if (behavior === 'copy') field(button.grid, '要复制的内容', bind(textArea(notice.copyValue, '群号、网址或其他文本'), v => { notice.copyValue = v; }));
+
+  const colors = section(details, '独立颜色', '按钮背景与文字分别设置。留空跟随网站主题；输入 transparent 可使用透明背景。');
+  noticeColorField(colors.grid, '按钮背景颜色', notice, 'buttonColor', '#4246a8');
+  noticeColorField(colors.grid, '文字颜色', notice, 'textColor', '#ffffff');
+  const position = section(details, '按钮位置', '按海报空间百分比定位：水平 0 在左、100 在右；垂直 0 在上、100 在下。不同屏幕自动适配。');
+  noticeNumberField(position.grid, '水平位置（%）', notice, 'buttonX', 50, 0, 100);
+  noticeNumberField(position.grid, '垂直位置（%）', notice, 'buttonY', 100, 0, 100);
+  const textPosition = section(details, '文字独立偏移', '相对于按钮中间移动文字，不改变按钮背景的位置。0 为居中；正数向右或向下，负数向左或向上。');
+  noticeNumberField(textPosition.grid, '文字水平偏移（px）', notice, 'textOffsetX', 0, -100, 100);
+  noticeNumberField(textPosition.grid, '文字垂直偏移（px）', notice, 'textOffsetY', 0, -100, 100);
 
   return details;
 }
@@ -1926,11 +1969,21 @@ function validateContent(value) {
     if (value.notice.enabled != null && typeof value.notice.enabled !== 'boolean') throw new Error('notice.enabled 必须是布尔值');
     delete value.notice.title;
     delete value.notice.body;
-    for (const key of ['image', 'linkLabel', 'linkHref']) {
+    for (const key of ['image', 'linkLabel', 'linkHref', 'copyValue', 'buttonColor', 'textColor']) {
       if (value.notice[key] != null && typeof value.notice[key] !== 'string') throw new Error(`notice.${key} 必须是字符串`);
     }
     if (value.notice.enabled === true && !String(value.notice.image || '').trim()) throw new Error('开启海报弹窗前请先上传背景海报');
-    if (String(value.notice.linkHref || '').trim() && !linkSchemeOk(value.notice.linkHref)) {
+    const notice = value.notice;
+    if (notice.buttonAction != null && !['link', 'copy', 'close'].includes(notice.buttonAction)) throw new Error('公告按钮交互必须为打开链接、复制内容或关闭弹窗');
+    for (const key of ['buttonColor', 'textColor']) {
+      if (notice[key] && !/^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent)$/i.test(notice[key])) throw new Error(`${key} 请填写十六进制色值或 transparent，留空则跟随主题`);
+    }
+    for (const [key, min, max] of [['buttonX', 0, 100], ['buttonY', 0, 100], ['textOffsetX', -100, 100], ['textOffsetY', -100, 100]]) {
+      if (notice[key] != null && (typeof notice[key] !== 'number' || !Number.isFinite(notice[key]) || notice[key] < min || notice[key] > max)) throw new Error(`${key} 必须在 ${min} 至 ${max} 之间`);
+    }
+    if (notice.enabled && notice.buttonAction === 'link' && !String(notice.linkHref || '').trim()) throw new Error('打开链接时请填写按钮链接');
+    if (notice.enabled && notice.buttonAction === 'copy' && !String(notice.copyValue || '').trim()) throw new Error('复制内容时请填写要复制的内容');
+    if ((!value.notice.buttonAction || value.notice.buttonAction === 'link') && String(value.notice.linkHref || '').trim() && !linkSchemeOk(value.notice.linkHref)) {
       throw new Error(`notice.linkHref 的链接协议不受支持：${value.notice.linkHref}`);
     }
   }

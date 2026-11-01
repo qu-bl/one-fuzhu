@@ -1240,18 +1240,35 @@ function initNotice(options = {}) {
     noticeMedia.replaceChildren(image);
     noticeActions.replaceChildren();
     const href = contactHref(notice.linkHref);
-    const action = document.createElement(href && !appPlatform ? 'a' : 'button');
+    const behavior = ['link', 'copy', 'close'].includes(notice.buttonAction)
+      ? notice.buttonAction : (href ? 'link' : 'close');
+    const action = document.createElement(behavior === 'link' && href && !appPlatform ? 'a' : 'button');
     action.className = 'banner-action';
-    action.textContent = notice.linkLabel?.trim() || (href ? '了解详情' : '知道了');
-    if (href && !appPlatform) {
+    const label = document.createElement('span');
+    label.className = 'notice-button-label';
+    label.textContent = notice.linkLabel?.trim() || ({ link: '了解详情', copy: '复制内容', close: '知道了' })[behavior];
+    action.append(label);
+    const bounded = (value, fallback, min, max) => typeof value === 'number' && Number.isFinite(value)
+      ? Math.min(max, Math.max(min, value)) : fallback;
+    action.style.setProperty('--notice-button-x', `${bounded(notice.buttonX, 50, 0, 100)}%`);
+    action.style.setProperty('--notice-button-y', `${bounded(notice.buttonY, 100, 0, 100)}%`);
+    label.style.transform = `translate(${bounded(notice.textOffsetX, 0, -100, 100)}px, ${bounded(notice.textOffsetY, 0, -100, 100)}px)`;
+    const validColor = value => typeof value === 'string' && /^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent)$/i.test(value);
+    if (validColor(notice.buttonColor)) action.style.backgroundColor = notice.buttonColor;
+    if (validColor(notice.textColor)) action.style.color = notice.textColor;
+    if (behavior === 'link' && href && !appPlatform) {
       action.href = href;
       action.target = '_blank';
       action.rel = 'noopener noreferrer';
     } else {
       action.type = 'button';
-      action.addEventListener('click', () => href
-        ? copyAccessValue(href, '链接', action) : closeNoticeDialog());
-      if (href) action.title = '复制网址，到浏览器打开';
+      if (behavior === 'close') action.addEventListener('click', closeNoticeDialog);
+      else {
+        const value = behavior === 'copy' ? notice.copyValue?.trim() : href;
+        action.disabled = !value;
+        action.addEventListener('click', () => copyAccessValue(value, behavior === 'copy' ? '内容' : '链接', action));
+        if (behavior === 'link') action.title = '复制网址，到浏览器打开';
+      }
     }
     noticeActions.append(action);
     if (!noticeDialog.open && typeof noticeDialog.showModal === 'function') {
