@@ -506,9 +506,7 @@ body { min-width: 0; }
 .search-tools { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .search-tools .search-wrap { flex: 1; min-width: 0; margin: 0; }
 .profile-entry { position: relative; display: block; flex: 0 0 48px; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; background: var(--profile-accent); color: var(--md-sys-color-on-primary); }
-.profile-entry canvas, .profile-fallback { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
-.profile-fallback { padding: 10px; }
-.profile-entry.rive-ready .profile-fallback { visibility: hidden; }
+.profile-entry canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
 .profile-entry:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 [data-page="showcase"] .showcase-toolbar { margin-bottom: 12px; }
 [data-page="about"] .activity-section { padding-top: 28px; }

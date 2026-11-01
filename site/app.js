@@ -491,7 +491,6 @@ function initHeroRive() {
     autoBind: true, // 官方推荐：自动绑定画板默认 ViewModel，之后可用 viewModelInstance 读写数据绑定输入。
     onLoad: () => {
       resize();
-      activityRiveCanvas.closest('.profile-entry')?.classList.add('rive-ready');
       if (!activityRiveCanvas.closest('.profile-entry')) activityRiveCanvas.removeAttribute("aria-hidden");
       startHeroCycle(rive, heroRiveInstance);
     },
