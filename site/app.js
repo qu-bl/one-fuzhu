@@ -1248,11 +1248,15 @@ function initNotice(options = {}) {
     label.className = 'notice-button-label';
     label.textContent = notice.linkLabel?.trim() || ({ link: '了解详情', copy: '复制内容', close: '知道了' })[behavior];
     action.append(label);
-    const bounded = (value, fallback, min, max) => typeof value === 'number' && Number.isFinite(value)
-      ? Math.min(max, Math.max(min, value)) : fallback;
-    action.style.setProperty('--notice-button-x', `${bounded(notice.buttonX, 50, 0, 100)}%`);
-    action.style.setProperty('--notice-button-y', `${bounded(notice.buttonY, 100, 0, 100)}%`);
-    label.style.transform = `translate(${bounded(notice.textOffsetX, 0, -100, 100)}px, ${bounded(notice.textOffsetY, 0, -100, 100)}px)`;
+    const positions = ['top-left', 'top-center', 'top-right', 'middle-left', 'center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'];
+    const snap = (value, fallback) => Number.isFinite(value) ? Math.min(2, Math.max(0, Math.round(value / 50))) : fallback;
+    const buttonIndex = positions.includes(notice.buttonPosition) ? positions.indexOf(notice.buttonPosition)
+      : snap(notice.buttonY, 2) * 3 + snap(notice.buttonX, 1);
+    const textIndex = positions.includes(notice.textPosition) ? positions.indexOf(notice.textPosition) : 4;
+    action.dataset.position = positions[buttonIndex];
+    action.style.setProperty('--notice-button-x', `${buttonIndex % 3 * 50}%`);
+    action.style.setProperty('--notice-button-y', `${Math.floor(buttonIndex / 3) * 50}%`);
+    label.style.transform = `translate(${(textIndex % 3 - 1) * 8}px, ${(Math.floor(textIndex / 3) - 1) * 6}px)`;
     const validColor = value => typeof value === 'string' && /^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent)$/i.test(value);
     if (validColor(notice.buttonColor)) action.style.backgroundColor = notice.buttonColor;
     if (validColor(notice.textColor)) action.style.color = notice.textColor;

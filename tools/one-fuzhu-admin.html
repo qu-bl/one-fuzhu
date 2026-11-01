@@ -255,6 +255,10 @@
   .dialog-body{padding:12px 22px;color:var(--ink-2);line-height:1.6}
   .dialog-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 14px 14px}
   .hidden{display:none !important}
+  .notice-position-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; grid-column:1/-1; }
+  .notice-position-choice { min-height:44px; border:0; border-radius:var(--r-s); background:var(--field); color:var(--ink); font:inherit; cursor:pointer; }
+  .notice-position-choice[aria-pressed="true"] { background:var(--pri); color:#fff; }
+  .notice-position-choice:focus-visible { outline:3px solid var(--pri); outline-offset:2px; }
 </style>
 </head>
 <body>
@@ -468,7 +472,7 @@ const NOTICE_TEMPLATE = {
   copyValue: '',
   buttonColor: '',
   textColor: '',
-  buttonX: 50, buttonY: 100, textOffsetX: 0, textOffsetY: 0
+  buttonPosition: 'bottom-center', textPosition: 'center'
 };
 // 站点允许直出的链接协议白名单（与 app.js 的 CONTACT_SCHEMES 一致）。
 const LINK_SCHEMES = ['http:', 'https:', 'mailto:', 'tel:', 'sms:', 'mqqwpa:', 'mqq:', 'weixin:', 'alipays:'];
@@ -1203,10 +1207,35 @@ function contactEditor() {
   return details;
 }
 
-function noticeNumberField(parent, label, notice, key, fallback, min, max) {
-  const input = textInput(notice[key] ?? fallback);
-  input.type = 'number'; input.min = String(min); input.max = String(max); input.step = '1';
-  field(parent, label, bind(input, value => { notice[key] = value === '' ? fallback : Number(value); }));
+const NOTICE_GRID = [
+  ['top-left', '左上'], ['top-center', '上中'], ['top-right', '右上'],
+  ['middle-left', '左中'], ['center', '正中'], ['middle-right', '右中'],
+  ['bottom-left', '左下'], ['bottom-center', '下中'], ['bottom-right', '右下'],
+];
+function normalizeNoticePosition(notice) {
+  const snap = (value, fallback) => Number.isFinite(value) ? Math.min(2, Math.max(0, Math.round(value / 50))) : fallback;
+  if (notice.buttonPosition == null) notice.buttonPosition = NOTICE_GRID[snap(notice.buttonY, 2) * 3 + snap(notice.buttonX, 1)][0];
+  if (notice.textPosition == null) {
+    const direction = value => Number.isFinite(value) ? (value < 0 ? 0 : value > 0 ? 2 : 1) : 1;
+    notice.textPosition = NOTICE_GRID[direction(notice.textOffsetY) * 3 + direction(notice.textOffsetX)][0];
+  }
+  for (const key of ['buttonX', 'buttonY', 'textOffsetX', 'textOffsetY']) delete notice[key];
+}
+function noticeGridField(parent, label, notice, key) {
+  const grid = el('div', 'notice-position-grid');
+  grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', label);
+  NOTICE_GRID.forEach(([value, name]) => {
+    const button = el('button', 'notice-position-choice', name);
+    button.type = 'button'; button.dataset.position = value;
+    button.setAttribute('aria-pressed', String(notice[key] === value));
+    button.addEventListener('click', () => {
+      notice[key] = value;
+      grid.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.position === value)));
+      markDirty();
+    });
+    grid.append(button);
+  });
+  parent.append(grid);
 }
 function noticeColorField(parent, label, notice, key, fallback) {
   const row = el('div', 'row');
@@ -1227,6 +1256,7 @@ function noticeColorField(parent, label, notice, key, fallback) {
 function noticeEditor() {
   if (!content.notice) content.notice = { ...NOTICE_TEMPLATE };
   const notice = content.notice;
+  normalizeNoticePosition(notice);
   delete notice.title;
   delete notice.body;
   const details = el('section', 'surface editor');
@@ -1270,12 +1300,10 @@ function noticeEditor() {
   const colors = section(details, '独立颜色', '按钮背景与文字分别设置。留空跟随网站主题；输入 transparent 可使用透明背景。');
   noticeColorField(colors.grid, '按钮背景颜色', notice, 'buttonColor', '#4246a8');
   noticeColorField(colors.grid, '文字颜色', notice, 'textColor', '#ffffff');
-  const position = section(details, '按钮位置', '按海报空间百分比定位：水平 0 在左、100 在右；垂直 0 在上、100 在下。不同屏幕自动适配。');
-  noticeNumberField(position.grid, '水平位置（%）', notice, 'buttonX', 50, 0, 100);
-  noticeNumberField(position.grid, '垂直位置（%）', notice, 'buttonY', 100, 0, 100);
-  const textPosition = section(details, '文字独立偏移', '相对于按钮中间移动文字，不改变按钮背景的位置。0 为居中；正数向右或向下，负数向左或向上。');
-  noticeNumberField(textPosition.grid, '文字水平偏移（px）', notice, 'textOffsetX', 0, -100, 100);
-  noticeNumberField(textPosition.grid, '文字垂直偏移（px）', notice, 'textOffsetY', 0, -100, 100);
+  const position = section(details, '按钮位置（海报九宫格）', '直接点选位置：上、中、下各三个固定对齐点，自动适配海报尺寸。');
+  noticeGridField(position.grid, '按钮在海报上的位置', notice, 'buttonPosition');
+  const textPosition = section(details, '文字位置（按钮内）', '文字也使用预设对齐，不输入坐标或像素。默认居中。');
+  noticeGridField(textPosition.grid, '按钮内文字对齐', notice, 'textPosition');
 
   return details;
 }
@@ -1978,8 +2006,9 @@ function validateContent(value) {
     for (const key of ['buttonColor', 'textColor']) {
       if (notice[key] && !/^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent)$/i.test(notice[key])) throw new Error(`${key} 请填写十六进制色值或 transparent，留空则跟随主题`);
     }
-    for (const [key, min, max] of [['buttonX', 0, 100], ['buttonY', 0, 100], ['textOffsetX', -100, 100], ['textOffsetY', -100, 100]]) {
-      if (notice[key] != null && (typeof notice[key] !== 'number' || !Number.isFinite(notice[key]) || notice[key] < min || notice[key] > max)) throw new Error(`${key} 必须在 ${min} 至 ${max} 之间`);
+    normalizeNoticePosition(notice);
+    for (const key of ['buttonPosition', 'textPosition']) {
+      if (!NOTICE_GRID.some(([value]) => notice[key] === value)) throw new Error(`${key} 必须选择九宫格中的一个位置`);
     }
     if (notice.enabled && notice.buttonAction === 'link' && !String(notice.linkHref || '').trim()) throw new Error('打开链接时请填写按钮链接');
     if (notice.enabled && notice.buttonAction === 'copy' && !String(notice.copyValue || '').trim()) throw new Error('复制内容时请填写要复制的内容');

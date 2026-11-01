@@ -24,10 +24,8 @@
     "copyValue": "",
     "buttonColor": "",
     "textColor": "",
-    "buttonX": 50,
-    "buttonY": 100,
-    "textOffsetX": 0,
-    "textOffsetY": 0
+    "buttonPosition": "bottom-center",
+    "textPosition": "center"
   },
   "contact": {
     "visible": true,
