@@ -22,8 +22,8 @@
     "linkHref": "https://qm.qq.com/q/cARWUthgDC",
     "buttonAction": "link",
     "copyValue": "",
-    "buttonColor": "",
-    "textColor": "",
+    "buttonColor": "#ffffff",
+    "textColor": "#a96800",
     "buttonPosition": "bottom-center",
     "textPosition": "center"
   },
