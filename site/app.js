@@ -1015,12 +1015,8 @@ function renderCases() {
   destroyFeatured();
   caseGrid.replaceChildren();
 
-  const featuredItems = items.filter((item) => item.featured);
-  const regularItems = items.filter((item) => !item.featured);
-
-  if (featuredItems.length) caseGrid.append(createFeaturedCarousel(featuredItems));
-
-  regularItems.forEach((item, index) => {
+  // Every content item is its own waterfall tile, including featured items.
+  items.forEach((item, index) => {
     const card = createCaseCard(item, index);
     caseGrid.append(card);
     if (cardObserver) cardObserver.observe(card);

@@ -473,3 +473,10 @@ html[data-preview="true"] .reveal-init { opacity: 1; transform: none; transition
 @media (max-width: 319px) {
   .case-grid { column-count: 1; }
 }
+
+/* Preserve the full cover: its intrinsic ratio determines each tile's height. */
+body { min-width: 0; }
+.case-grid .case-media:has(img) { aspect-ratio: auto; }
+.case-grid .case-media img { width: 100%; height: auto; object-fit: contain; transform: none; }
+.case-grid .case-card-trigger:hover .case-media img { transform: none; }
+.case-grid .case-media[hidden] { display: none; }
