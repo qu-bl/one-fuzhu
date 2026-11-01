@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>千机百变管理后台</title>
 <!-- 本页不依赖任何第三方前端库或境外 CDN：没有外部 JS，样式全部写在下方。
      层级完全靠底色块表达（页面底 / 区块 / 输入框 / 标签 / 选中），不画任何描边。 -->
@@ -391,8 +392,13 @@
         <span class="field-label">GitHub Token</span>
         <input class="field-input" id="tokenInput" type="password" autocomplete="off" placeholder="github_pat_… 或 ghp_…">
       </label>
+      <label class="check-field">
+        <input id="tokenRemember" type="checkbox">
+        <span>在此设备记住令牌</span>
+      </label>
+      <p class="hint ts-body-small" id="tokenStorageStatus" role="status"></p>
       <div class="hint ts-body-small">
-        仅保存在当前标签页的 sessionStorage，关闭标签页即清除；只发送给 api.github.com。
+        默认仅在当前标签页使用。勾选后，在同一浏览器重新打开在线后台仍可使用；清除按钮会移除已保存的令牌。令牌不会写入仓库，只用于 api.github.com 请求。
         需要该仓库的 <b>Contents: Read and write</b> 权限（经典令牌勾 <b>repo</b>）。
         不填也能读取内容，但匿名额度只有 60 次/小时。
       </div>
@@ -435,8 +441,7 @@ const CONFIG = {
     noticeImage: { base: 'site/assets/notice', exts: ['.webp', '.jpg', '.jpeg'], maxBytes: 4 * 1024 * 1024, convertJpeg: true },
     // 卡片封面：基名按卡片 id 动态生成，见 coverSlot()。
     cardCover: { exts: ['.webp', '.jpg', '.jpeg'], maxBytes: 4 * 1024 * 1024, convertJpeg: true }
-  },
-  token: ''
+  }
 };
 const REPO_API = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}`;
 const contentsApi = (path) => `${REPO_API}/contents/${path}`;
@@ -494,7 +499,44 @@ function clearUploadPreviews() {
   for (const url of uploadPreviews.values()) URL.revokeObjectURL(url);
   uploadPreviews.clear();
 }
-let token = CONFIG.token || sessionStorage.getItem('oneFuzhuToken') || '';
+const TOKEN_SESSION_KEY = 'oneFuzhuToken';
+const TOKEN_REMEMBERED_KEY = 'oneFuzhuRememberedToken';
+const TOKEN_PREFERENCE_KEY = 'oneFuzhuRememberToken';
+function readTokenStorage(kind, key) {
+  try { return window[kind].getItem(key) || ''; } catch { return ''; }
+}
+function writeTokenStorage(kind, key, value) {
+  try {
+    if (value) window[kind].setItem(key, value); else window[kind].removeItem(key);
+    return true;
+  } catch { return false; }
+}
+let rememberToken = readTokenStorage('localStorage', TOKEN_PREFERENCE_KEY) === 'true';
+let token = (rememberToken ? readTokenStorage('localStorage', TOKEN_REMEMBERED_KEY) : '')
+  || readTokenStorage('sessionStorage', TOKEN_SESSION_KEY);
+function updateTokenStorageStatus() {
+  $('tokenStorageStatus').textContent = rememberToken
+    ? '此设备已开启令牌记忆，可关闭标签页后再打开。' : '令牌仅保留在当前标签页，关闭标签页后需重新填写。';
+}
+function persistTokenPreferences() {
+  writeTokenStorage('sessionStorage', TOKEN_SESSION_KEY, token);
+  rememberToken = $('tokenRemember').checked;
+  if (rememberToken) {
+    const saved = writeTokenStorage('localStorage', TOKEN_REMEMBERED_KEY, token)
+      && writeTokenStorage('localStorage', TOKEN_PREFERENCE_KEY, 'true');
+    if (!saved) {
+      rememberToken = false;
+      $('tokenRemember').checked = false;
+      writeTokenStorage('localStorage', TOKEN_REMEMBERED_KEY, '');
+      writeTokenStorage('localStorage', TOKEN_PREFERENCE_KEY, '');
+      setStatus('浏览器不允许记住令牌，已改为仅当前标签页使用。', 'err');
+    }
+  } else {
+    writeTokenStorage('localStorage', TOKEN_REMEMBERED_KEY, '');
+    writeTokenStorage('localStorage', TOKEN_PREFERENCE_KEY, '');
+  }
+  updateTokenStorageStatus();
+}
 let dirty = false;
 let busy = false;
 let activeView = 'banners';
@@ -2200,16 +2242,19 @@ async function initialize() {
   if (initialized) return;
   initialized = true;
   $('tokenInput').value = token;
+  $('tokenRemember').checked = rememberToken;
+  updateTokenStorageStatus();
   $('tokenInput').addEventListener('input', () => {
     token = $('tokenInput').value.trim();
-    if (token) sessionStorage.setItem('oneFuzhuToken', token);
-    else sessionStorage.removeItem('oneFuzhuToken');
+    persistTokenPreferences();
   });
+  $('tokenRemember').addEventListener('change', persistTokenPreferences);
   $('tokenClear').addEventListener('click', () => {
     token = '';
     $('tokenInput').value = '';
-    sessionStorage.removeItem('oneFuzhuToken');
-    setStatus('已清除本标签页保存的令牌', 'ok');
+    $('tokenRemember').checked = false;
+    persistTokenPreferences();
+    setStatus('已清除当前标签页和此设备保存的令牌', 'ok');
   });
   $('loadBtn').addEventListener('click', async () => {
     if (dirty && !await confirmAction('重新加载会放弃尚未发布的更改，是否继续？')) return;
