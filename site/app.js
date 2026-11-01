@@ -571,16 +571,15 @@ function bindCarouselControls() {
 // Keywords expand inline on the left; system selection lives in the search field.
 function setPlatformExpanded(expanded) {
   const picker = document.querySelector("#platform-picker");
-  const trigger = document.querySelector("#platform-trigger");
   picker.dataset.expanded = String(expanded);
-  trigger.setAttribute("aria-expanded", String(expanded));
-  trigger.setAttribute("aria-label", `筛选系统：${platformLabel(state.platform)}`);
-  trigger.title = `筛选系统：${platformLabel(state.platform)}`;
-  document.querySelector("#platform-current-icon").replaceChildren(createPlatformIcon(state.platform));
-  platformButtons.hidden = !expanded;
   platformButtons.querySelectorAll("button").forEach(button => {
-    button.setAttribute("aria-pressed", String(button.dataset.platform === state.platform));
+    const selected = button.dataset.platform === state.platform;
+    button.setAttribute("aria-pressed", String(selected));
+    button.inert = !expanded && !selected;
+    if (selected) button.setAttribute("aria-expanded", String(expanded));
+    else button.removeAttribute("aria-expanded");
   });
+  platformButtons.scrollLeft = 0;
 }
 
 function setCategoryExpanded(expanded) {
@@ -633,13 +632,14 @@ function renderFilters() {
     button.setAttribute("aria-pressed", platform === state.platform ? "true" : "false");
     button.title = label;
     button.append(createPlatformIcon(platform));
-    const text = document.createElement("span");
-    text.textContent = label;
-    button.append(text);
     button.addEventListener("click", () => {
+      if (document.querySelector("#platform-picker").dataset.expanded !== "true") {
+        setPlatformExpanded(true);
+        return;
+      }
       state.platform = platform;
       setPlatformExpanded(false);
-      document.querySelector("#platform-trigger").focus({ preventScroll: true });
+      button.focus({ preventScroll: true });
       renderCases();
     });
     platformButtons.append(button);
@@ -1705,15 +1705,13 @@ function renderLoadError(error) {
 
 function bindCollapsibleFilter(picker, options, setExpanded) {
   if (!picker || !options) return;
-  const trigger = picker.querySelector('.filter-trigger');
-  trigger?.addEventListener("click", () => setExpanded(picker.dataset.expanded !== "true"));
   document.addEventListener("click", event => {
     if ((picker.dataset.expanded === "true") && !picker.contains(event.target)) setExpanded(false);
   });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && (picker.dataset.expanded === "true")) {
       setExpanded(false);
-      (trigger || options.querySelector('[aria-pressed="true"]'))?.focus({ preventScroll: true });
+      options.querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true });
       event.preventDefault();
     }
   });
