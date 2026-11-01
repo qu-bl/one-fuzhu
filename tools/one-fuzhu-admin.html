@@ -270,8 +270,8 @@
 <div class="shell" id="shell">
   <nav class="nav" id="nav" aria-label="管理内容">
     <div class="nav-group">内容</div>
-    <button class="nav-item" type="button" data-view="banners">顶部轮播<span class="nav-badge" data-count="banners"></span></button>
-    <button class="nav-item" type="button" data-view="hero">顶部 Rive</button>
+    <button class="nav-item" type="button" data-view="banners">信息页轮播<span class="nav-badge" data-count="banners"></span></button>
+    <button class="nav-item" type="button" data-view="hero">Rive 动画入口</button>
     <button class="nav-item" type="button" data-view="cards">创意橱柜<span class="nav-badge" data-count="cards"></span></button>
     <button class="nav-item" type="button" data-view="contact">联系方式</button>
     <button class="nav-item" type="button" data-view="notice">弹窗</button>
@@ -1100,7 +1100,7 @@ function uploadCardCover(card, index) {
 }
 
 // 页面切走后重新渲染会丢掉未提交的暂存提示，这里在标签处标出已暂存的文件数。
-// ---------- 顶部 Rive ----------
+// ---------- Rive 动画入口 ----------
 
 function heroEditor() {
   if (!content.hero) content.hero = JSON.parse(JSON.stringify(HERO_TEMPLATE));
@@ -1109,7 +1109,7 @@ function heroEditor() {
 
   const details = el('section', 'surface editor');
   const header = el('div', 'editor-header');
-  header.append(el('div', 'title ts-title-medium', '顶部 Rive'));
+  header.append(el('div', 'title ts-title-medium', 'Rive 动画入口'));
   details.append(header);
 
   const basic = section(details, '基本信息');
@@ -1269,7 +1269,7 @@ function viewItems(view = activeView) {
 
 const LIST_VIEWS = {
   banners: {
-    title: '顶部轮播',
+    title: '信息页轮播',
     count: (n) => `${n} 条`,
     name: (b) => (b.title ? String(b.title).replace(/\s+/g, ' ').trim() : '未命名'),
     meta: (b) => [
@@ -1306,9 +1306,9 @@ const LIST_VIEWS = {
 
   // 以下区块只有一项，但左栏照样列一行——列表始终在，右侧始终是它的细节。
   hero: {
-    title: '顶部 Rive', single: true,
+    title: 'Rive 动画入口', single: true,
     count: () => '1 项',
-    name: () => '顶部 Rive',
+    name: () => 'Rive 动画入口',
     meta: () => (content?.hero?.rive?.src ? [['已配置', 'pill--on']] : [['未配置', 'pill--off']]),
     thumb: () => null,
   },
@@ -1364,7 +1364,7 @@ function renderList() {
   }
   const items = viewItems() || [];
   activeIndex = Math.min(Math.max(0, activeIndex), Math.max(0, items.length - 1));
-  // 只有能添加条目的区块才需要「列表项」面板。弹窗、Rive 翻译、顶部 Rive、
+  // 只有能添加条目的区块才需要「列表项」面板。弹窗、Rive 翻译、Rive 动画入口、
   // 官网 JSON、访问令牌这些都只有一条，右栏直接就是它的细节，不空占一块。
   $('inspector').dataset.list = spec.addLabel ? 'on' : 'off';
   list.hidden = false;
@@ -1436,10 +1436,10 @@ function renderBanners() { renderList(); renderForm(); }
 // 预览就是把官网装进 iframe，再把内存里未发布的 content 推给它。官网那边
 // 用的是同一套渲染代码，所以看到的就是发布后的样子，不存在两套实现漂移。
 const PREVIEW_TARGETS = {
-  banners: { scrollTo: '.activity-section', hint: '首页 › 顶部轮播' },
-  hero: { scrollTo: '.hero-section', hint: '首页 › 顶部 Rive' },
+  banners: { page: 'about.html', scrollTo: '.activity-section', hint: '关于千机百变 › 内容轮播' },
+  hero: { scrollTo: '.profile-entry', hint: '创意橱柜 › 圆形 Rive 入口' },
   cards: { scrollTo: '#showcase', hint: '首页 › 创意橱柜' },
-  contact: { scrollTo: '#contact', hint: '首页 › 联系方式' },
+  contact: { page: 'about.html', scrollTo: '#contact', hint: '关于千机百变 › 联系方式' },
   notice: { showNotice: true, hint: '公告弹窗' },
   translations: { scrollTo: '#showcase', hint: '首页 › 创意橱柜' },
   raw: { scrollTo: '.showcase-section', hint: '首页' },
@@ -1465,6 +1465,12 @@ function syncPreview() {
   const target = PREVIEW_TARGETS[activeView] || {};
   $('previewHint').textContent = target.hint || '';
   if (!frame?.contentWindow || !content) return;
+  const page = target.page || 'index.html';
+  if (frame.dataset.page !== page) {
+    frame.dataset.page = page;
+    frame.src = '../site/' + page + '?t=' + Date.now();
+    return;
+  }
   window.clearTimeout(previewTimer);
   previewTimer = window.setTimeout(() => {
     try {
@@ -1490,7 +1496,8 @@ function initPreview() {
   // 预览 iframe 加时间戳：GitHub Pages 对 index.html 也设了 max-age=600，
   // 不加的话 iframe 可能拿到缓存里的旧首页，进而引用旧的 app.js / styles.css，
   // 表现就是「管理台改了、官网代码也改了，画布却没反应」。
-  frame.src = '../site/?t=' + Date.now();
+  frame.dataset.page = 'index.html';
+  frame.src = '../site/index.html?t=' + Date.now();
 }
 
 // ---------- 可拖拽面板 ----------

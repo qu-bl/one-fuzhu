@@ -146,6 +146,7 @@ for (const name of readdirSync(join(ROOT, "cases"))) {
 const now = new Date().toISOString().slice(0, 10);
 const urls = [
   { url: SITE, changefreq: "weekly", priority: "1.0" },
+  { url: SITE + "about.html", changefreq: "monthly", priority: "0.6" },
   { url: SITE + "terms.html", changefreq: "monthly", priority: "0.4" },
   { url: SITE + "privacy.html", changefreq: "monthly", priority: "0.4" },
   ...works.map((w) => ({ url: caseUrl(w), changefreq: "weekly", priority: "0.7" })),
@@ -275,6 +276,13 @@ for (const name of stampedAssets) {
 console.log(`✓ index.html 资源版本号 ${stamped}/${stampedAssets.length} 个已按内容刷新`);
 
 writeFileSync(indexPath, html);
+const aboutPath = join(ROOT, "about.html");
+let aboutHTML = readFileSync(aboutPath, "utf-8");
+for (const name of stampedAssets) {
+  const digest = createHash("sha256").update(readFileSync(join(ROOT, name))).digest("hex").slice(0, 8);
+  aboutHTML = aboutHTML.replace(new RegExp(`(\\./${name.replace(/\./g, "\\.")})\\?v=[^"']*`, "g"), `$1?v=${digest}`);
+}
+writeFileSync(aboutPath, aboutHTML);
 for (const name of ["terms.html", "privacy.html"]) {
   const path = join(ROOT, name);
   const source = readFileSync(path, "utf-8");

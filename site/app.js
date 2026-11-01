@@ -26,6 +26,7 @@ const noticeTitle = document.querySelector("#notice-title");
 const noticeMedia = document.querySelector("#notice-media");
 const noticeBody = document.querySelector("#notice-body");
 const noticeActions = document.querySelector("#notice-actions");
+const isAboutPage = document.body.dataset.page === "about";
 const requestedPlatform = new URLSearchParams(window.location.search).get("appPlatform");
 const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform)
   ? requestedPlatform
@@ -56,7 +57,7 @@ const state = {
   hero: null,
   contact: null,
   notice: null,
-  category: "全部",
+  category: new URLSearchParams(window.location.search).get("category") || "全部",
   platform: appPlatform || "全部平台",
   query: "",
   timer: null,
@@ -379,6 +380,13 @@ function renderActivities() {
     } else if (activity.linkLabel) {
       action.querySelector("span").textContent = activity.linkLabel;
       action.addEventListener("click", () => {
+        if (!caseGrid) {
+          const url = new URL('./', location.href);
+          if (activity.category) url.searchParams.set('category', activity.category);
+          if (appPlatform) url.searchParams.set('appPlatform', appPlatform);
+          location.href = url.href;
+          return;
+        }
         state.category = activity.category || "全部";
         state.platform = "全部平台";
         state.query = "";
@@ -450,7 +458,12 @@ window.addEventListener("pagehide", () => {
   stopHeroCycle();
   heroRiveObserver?.disconnect();
   heroRiveInstance?.cleanup?.();
-}, { once: true });
+  heroRiveInstance = null;
+  heroRiveKey = "";
+});
+window.addEventListener("pageshow", event => {
+  if (event.persisted) initHeroRive();
+});
 
 function initHeroRive() {
   const hero = state.hero || HERO_DEFAULTS;
@@ -478,12 +491,14 @@ function initHeroRive() {
   const options = {
     src: rive.src,
     canvas: activityRiveCanvas,
+    layout: new window.rive.Layout({ fit: window.rive.Fit.Contain, alignment: window.rive.Alignment.Center }),
     autoplay: autoplay,
     isTouchScrollEnabled: true,
     autoBind: true, // 官方推荐：自动绑定画板默认 ViewModel，之后可用 viewModelInstance 读写数据绑定输入。
     onLoad: () => {
       resize();
-      activityRiveCanvas.removeAttribute("aria-hidden");
+      activityRiveCanvas.closest('.profile-entry')?.classList.add('rive-ready');
+      if (!activityRiveCanvas.closest('.profile-entry')) activityRiveCanvas.removeAttribute("aria-hidden");
       startHeroCycle(rive, heroRiveInstance);
     },
   };
@@ -589,6 +604,7 @@ function setCategoryExpanded(expanded) {
 }
 
 function renderFilters() {
+  if (!categoryTabs || !platformButtons) return;
   if (!categoryTabs || !platformButtons) return;
   const categories = ["全部", ...new Set(state.cases.map((item) => item.category))];
 
@@ -1296,6 +1312,7 @@ function renderLoadError(error) {
 }
 
 function bindCollapsibleFilter(picker, options, setExpanded) {
+  if (!picker || !options) return;
   document.addEventListener("click", event => {
     if ((picker.dataset.expanded === "true") && !picker.contains(event.target)) setExpanded(false);
   });
@@ -1353,7 +1370,7 @@ function applyContent(content, options = {}) {
   }
   if (!previous || changed("notice") || options.showNotice !== state.noticeShown) {
     state.noticeShown = options.showNotice;
-    initNotice({ showNotice: options.showNotice });
+    initNotice({ showNotice: !isAboutPage && options.showNotice });
   }
   // 管理台在编辑某张卡的入口时，让这张卡把入口行露出来。这一行平时是
   // display:none，只有展开卡片才出现，不这样做画布上就没有它的位置。
@@ -1397,6 +1414,12 @@ window.addEventListener("message", (event) => {
 });
 
 async function initialize() {
+  document.querySelectorAll('[data-site-page]').forEach(link => {
+    if (!appPlatform) return;
+    const url = new URL(link.href);
+    url.searchParams.set('appPlatform', appPlatform);
+    link.href = url.href;
+  });
   bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
   // 卡片详情弹窗有 × 关闭键；公告弹窗没有，靠 Esc 与点击外部关闭。
