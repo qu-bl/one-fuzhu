@@ -1009,11 +1009,11 @@ function initRipples() {
   });
 }
 
-// Place each tile into the shortest column; columns stay close to 240px.
+// Place each tile into the shortest column; columns stay close to 280px.
 function waterfallGeometry(width, viewportWidth, heights) {
   const gap = viewportWidth < 720 ? 12 : 24;
   const columns = viewportWidth < 320 ? 1 : viewportWidth < 720 ? 2
-    : Math.max(1, Math.round((width + gap) / (240 + gap)));
+    : Math.max(1, Math.round((width + gap) / (280 + gap)));
   const cardWidth = (width - gap * (columns - 1)) / columns;
   const bottoms = Array(columns).fill(0);
   const positions = heights.map(height => {
