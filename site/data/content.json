@@ -17,7 +17,7 @@
   },
   "notice": {
     "enabled": true,
-    "image": "./assets/notice.webp?v=1793449569735",
+    "image": "./assets/notice.avif?v=1793449569735",
     "buttons": [
       {
         "linkHref": "https://qm.qq.com/q/cARWUthgDC",
@@ -180,15 +180,15 @@
           }
         ]
       },
-      "cover": "./assets/cover-image-binding-cards.webp?v=1791188188462",
-      "bannerCover": "./assets/banner-image-binding-cards.webp?v=1793611642712",
+      "cover": "./assets/cover-image-binding-cards.avif?v=1791188188462",
+      "bannerCover": "./assets/banner-image-binding-cards.avif?v=1793611642712",
       "bannerAlt": ""
     },
     {
       "id": "card-1793449583904",
       "name": "长荷专注",
       "summary": "24h颜色变化，天气变化，可设置为壁纸。",
-      "cover": "./assets/cover-card-1793449583904.webp?v=1793449619005",
+      "cover": "./assets/cover-card-1793449583904.avif?v=1793449619005",
       "category": "专注",
       "partnerName": "官方",
       "platforms": [
@@ -217,8 +217,8 @@
       "id": "card-1793610779049",
       "name": "四时草",
       "summary": "四叶草的专注壁纸，",
-      "cover": "./assets/cover-card-1793610779049.webp?v=1793611662506",
-      "bannerCover": "./assets/banner-card-1793610779049.webp?v=1793611608474",
+      "cover": "./assets/cover-card-1793610779049.avif?v=1793611662506",
+      "bannerCover": "./assets/banner-card-1793610779049.avif?v=1793611608474",
       "bannerAlt": "",
       "category": "",
       "partnerName": "官方",

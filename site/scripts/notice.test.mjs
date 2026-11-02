@@ -185,10 +185,10 @@ vm.runInContext(protocols + '\n' + admin.slice(admin.indexOf('function linkSchem
   + admin.slice(admin.indexOf('function normalizeNotice('), admin.indexOf('function noticeActionEditor(')), adminContext);
 const validate = value => { adminContext.notice = value; vm.runInContext('validateNotice(notice)', adminContext); return value; };
 const button = (actions, extra = {}) => ({ label: '测试按钮', actions, linkHref: 'https://example.com/', copyValue: '123', ...extra });
-const notice = buttons => ({ enabled: true, image: 'poster.webp', buttons, imageAction: { actions: [] } });
+const notice = buttons => ({ enabled: true, image: 'poster.avif', buttons, imageAction: { actions: [] } });
 
 await test('admin migrates legacy fields without losing colors or nine-grid positions', () => {
-  const value = validate({ enabled: true, image: 'poster.webp', linkLabel: '原按钮', buttonAction: 'link', linkHref: 'https://example.com', buttonColor: '#fff', buttonPosition: 'top-left' });
+  const value = validate({ enabled: true, image: 'poster.avif', linkLabel: '原按钮', buttonAction: 'link', linkHref: 'https://example.com', buttonColor: '#fff', buttonPosition: 'top-left' });
   assert.equal(value.buttons[0].buttonColor, '#fff'); assert.equal(value.buttons[0].buttonPosition, 'top-left');
   assert.deepEqual(plain(value.buttons[0].actions), ['link', 'close']); assert.equal(value.linkLabel, undefined);
 });
