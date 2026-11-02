@@ -1184,17 +1184,13 @@ function bindNoticeDialog() {
     event.stopImmediatePropagation();
   }, { capture: true });
   document.addEventListener('keydown', event => {
-    if (event.key !== 'Escape' || !noticeDialog.matches(':modal') || noticeDialog.dataset.closing !== 'true') return;
+    if (event.key !== 'Escape' || !noticeDialog.matches(':modal')) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   }, { capture: true });
-  // Esc and the backdrop dismiss an idle poster, but cannot interrupt its exit.
+  // Only configured button/image actions dismiss the poster.
   noticeDialog.addEventListener("cancel", (event) => {
     event.preventDefault();
-    closeNoticeDialog();
-  });
-  noticeDialog.addEventListener("click", (event) => {
-    if (event.target === noticeDialog) closeNoticeDialog();
   });
   noticeDialog.addEventListener("close", () => {
     // Releasing modal input below does not end the visual exit.
@@ -1276,7 +1272,7 @@ function resetNoticeMotion() {
     element.style.removeProperty('transform');
   });
   noticeDialog.classList.remove('closing');
-  noticeDialog.removeAttribute('closedby');
+  noticeDialog.setAttribute('closedby', 'none');
   delete noticeDialog.dataset.closing;
   delete noticeDialog.dataset.motion;
   if (retry && !accessDialog?.open && !document.body.classList.contains('information-open')) {
@@ -1342,6 +1338,7 @@ function finishNoticeActivation(effect, completed = false) {
   }
   effect.action.style.removeProperty('visibility');
   effect.action.removeAttribute('aria-disabled');
+  noticeActions.style.removeProperty('visibility');
   noticeMedia.style.removeProperty('visibility');
   noticeDialog.style.removeProperty('overflow');
   effect.resolve?.(completed);
@@ -1465,14 +1462,14 @@ function dissolveNotice(effect) {
     effect.resolve = resolve;
     try {
       const image = noticeMedia.querySelector('img');
-      const button = noticeRaster(effect.action);
       const poster = noticeRaster(noticeMedia, image);
       const mobile = innerWidth < 720;
       const buttonDuration = 1400;
-      const buttonSand = noticeSand(button, 1400, 0, buttonDuration);
+      const buttonSands = [...noticeActions.querySelectorAll('.banner-action')]
+        .map(button => noticeSand(noticeRaster(button), 1400, 0, buttonDuration));
       const posterStart = buttonDuration / 2;
       const posterSand = noticeSand(poster, mobile ? 11000 : 15000, posterStart, 2050);
-      const end = Math.max(buttonSand.end, posterSand.end);
+      const end = Math.max(posterSand.end, ...buttonSands.map(sand => sand.end));
       const stage = document.createElement('canvas');
       stage.className = 'notice-particle-stage'; stage.setAttribute('aria-hidden', 'true');
       const ratio = Math.min(devicePixelRatio || 1, 1.5);
@@ -1484,7 +1481,7 @@ function dissolveNotice(effect) {
       const ctx = stage.getContext('2d');
       if (!ctx) throw new Error('Canvas unavailable');
       ctx.scale(ratio, ratio);
-      effect.action.style.visibility = 'hidden';
+      noticeActions.style.visibility = 'hidden';
       noticeDialog.dataset.motion = 'button-particles';
       const began = performance.now();
       let posterStarted = false;
@@ -1501,7 +1498,7 @@ function dissolveNotice(effect) {
           if (elapsed >= posterStart + 800) noticeDialog.dataset.motion = 'sand-settling';
           drawNoticeSand(ctx, posterSand, elapsed);
         }
-        drawNoticeSand(ctx, buttonSand, elapsed);
+        buttonSands.forEach(sand => drawNoticeSand(ctx, sand, elapsed));
         if (elapsed >= end) finishNoticeActivation(effect, true);
         else effect.frame = requestAnimationFrame(render);
       };
@@ -1509,48 +1506,126 @@ function dissolveNotice(effect) {
     } catch (error) { reject(error); }
   });
 }
-async function activateNoticeButton(event, action, behavior, href, value) {
-  if (noticeActivation || noticeDialog.dataset.closing === 'true') {
-    event.preventDefault();
+const noticeBusyActions = new WeakSet();
+function noticeInteraction(config = {}) {
+  config ||= {};
+  return {
+    ...config,
+    actions: [...new Set(Array.isArray(config.actions) ? config.actions.filter(action => ['link', 'copy', 'close'].includes(action)) : [])],
+  };
+}
+function noticeConfiguration(notice) {
+  if (Array.isArray(notice.buttons)) return {
+    buttons: notice.buttons.map(noticeInteraction),
+    imageAction: noticeInteraction(notice.imageAction),
+  };
+  const behavior = ['link', 'copy', 'close'].includes(notice.buttonAction)
+    ? notice.buttonAction : (contactHref(notice.linkHref) ? 'link' : 'close');
+  return {
+    buttons: [noticeInteraction({ ...notice, label: notice.linkLabel || '', actions: behavior === 'close' ? ['close'] : [behavior, 'close'] })],
+    imageAction: noticeInteraction(notice.imageAction),
+  };
+}
+async function activateNoticeButton(event, action, config) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (noticeActivation || noticeBusyActions.has(action) || noticeDialog.dataset.closing === 'true') {
     return;
   }
-  if (behavior === 'link' && !appPlatform && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
-  event.preventDefault();
-  noticeDialog.scrollTop = 0;
-  noticeDialog.querySelector('.notice-sheet').scrollTop = 0;
-  const effect = { action, cancelled: false, frame: 0 };
-  noticeActivation = effect;
-  stopNoticeEntry(true);
-  noticeDialog.dataset.closing = 'true';
-  noticeDialog.setAttribute('closedby', 'none');
-  noticeDialog.dataset.motion = 'button-bounce';
+  const actions = config.actions;
+  const href = contactHref(config.linkHref);
+  if (!actions.length || (actions.includes('link') && !href) || (actions.includes('copy') && !config.copyValue?.trim())) return;
+  const closing = actions.includes('close');
+  noticeBusyActions.add(action);
   action.setAttribute('aria-disabled', 'true');
-  // Clipboard access must start within this click's user activation.
-  const operation = behavior === 'copy' || (behavior === 'link' && appPlatform)
-    ? copyAccessValue(value, behavior === 'copy' ? '内容' : '链接', action) : Promise.resolve(true);
-  releaseNoticeModal();
-  const base = getComputedStyle(action).transform;
-  const pose = base === 'none' ? '' : base;
-  effect.bounce = action.animate?.(reduceMotion.matches ? [{ opacity: 1 }, { opacity: .65 }, { opacity: 1 }] : [
-    { transform: `${pose} scale(1)`, offset: 0 },
-    { transform: `${pose} scale(.88)`, offset: .22 },
-    { transform: `${pose} scale(1.1)`, offset: .58 },
-    { transform: `${pose} scale(1)`, offset: 1 },
-  ], { duration: reduceMotion.matches ? 140 : 300, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' }) || { finished: Promise.resolve(), cancel() {} };
+  const effect = { action, cancelled: false, frame: 0 };
   try {
+    // Start external actions synchronously while this click still grants user activation.
+    if (actions.includes('link') && !appPlatform) window.open(href, '_blank', 'noopener,noreferrer');
+    const copies = [];
+    if (actions.includes('copy')) copies.push(copyAccessValue(config.copyValue.trim(), '内容', action));
+    if (actions.includes('link') && appPlatform) copies.push(copyAccessValue(href, '链接', action));
+    const operation = Promise.all(copies).then(results => results.every(Boolean));
+    noticeDialog.scrollTop = 0;
+    noticeDialog.querySelector('.notice-sheet').scrollTop = 0;
+    if (closing) {
+      noticeActions.querySelectorAll('.banner-action').forEach(button => button.getAnimations?.().forEach(animation => animation.cancel()));
+      noticeActivation = effect;
+      stopNoticeEntry(true);
+      noticeDialog.dataset.closing = 'true';
+      noticeDialog.dataset.motion = 'button-bounce';
+      releaseNoticeModal();
+    }
+    const base = getComputedStyle(action).transform;
+    const pose = base === 'none' ? '' : base;
+    const isImage = action.classList.contains('notice-image-action');
+    effect.bounce = action.animate?.(reduceMotion.matches ? [{ opacity: 1 }, { opacity: .65 }, { opacity: 1 }] : [
+      { transform: `${pose} scale(1)`, offset: 0 },
+      { transform: `${pose} scale(${isImage ? .985 : .88})`, offset: .22 },
+      { transform: `${pose} scale(${isImage ? 1.01 : 1.1})`, offset: .58 },
+      { transform: `${pose} scale(1)`, offset: 1 },
+    ], { duration: reduceMotion.matches ? 140 : 300, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' }) || { finished: Promise.resolve(), cancel() {} };
     const [success] = await Promise.all([operation, effect.bounce.finished.catch(() => false)]);
-    if (noticeActivation !== effect || effect.cancelled) return;
     effect.bounce.cancel(); effect.bounce = null;
+    if (!closing) return;
+    if (noticeActivation !== effect || effect.cancelled) return;
     if (!success) { finishNoticeActivation(effect); resetNoticeMotion(); flushNoticeUpdate(); return; }
     const completed = reduceMotion.matches ? (finishNoticeActivation(effect, true), true) : await dissolveNotice(effect);
     if (!completed) return;
     noticeDialog.close(); resetNoticeMotion(); flushNoticeUpdate();
-    if (behavior === 'link' && !appPlatform) location.assign(href);
   } catch {
-    if (noticeActivation !== effect) return;
-    finishNoticeActivation(effect); resetNoticeMotion(); closeNoticeDialog();
-    if (behavior === 'link' && !appPlatform) location.assign(href);
+    if (closing && noticeActivation === effect) {
+      finishNoticeActivation(effect); resetNoticeMotion(); closeNoticeDialog();
+    }
+  } finally {
+    effect.bounce?.cancel();
+    noticeBusyActions.delete(action);
+    action.removeAttribute('aria-disabled');
   }
+}
+
+
+function renderNoticeActions(notice, image) {
+  const config = noticeConfiguration(notice);
+  noticeActions.replaceChildren();
+  if (config.imageAction.actions.length) {
+    const poster = document.createElement('button');
+    poster.type = 'button'; poster.className = 'notice-image-action';
+    poster.setAttribute('aria-label', `海报：${config.imageAction.actions.map(action => ({ link: '打开链接', copy: '复制内容', close: '关闭弹窗' })[action]).join('并')}`);
+    poster.append(image);
+    poster.addEventListener('click', event => activateNoticeButton(event, poster, config.imageAction));
+    noticeMedia.replaceChildren(poster);
+  } else noticeMedia.replaceChildren(image);
+  const positions = ['top-left', 'top-center', 'top-right', 'middle-left', 'center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'];
+  const groups = new Map();
+  config.buttons.forEach(button => {
+    const action = document.createElement('button');
+    action.type = 'button'; action.className = 'banner-action';
+    const label = document.createElement('span'); label.className = 'notice-button-label';
+    label.textContent = button.label?.trim() || (button.actions.includes('link') ? '了解详情' : button.actions.includes('copy') ? '复制内容' : '知道了');
+    action.append(label);
+    const snap = (value, fallback) => Number.isFinite(value) ? Math.min(2, Math.max(0, Math.round(value / 50))) : fallback;
+    const index = positions.includes(button.buttonPosition) ? positions.indexOf(button.buttonPosition)
+      : snap(button.buttonY, 2) * 3 + snap(button.buttonX, 1);
+    const position = positions[index];
+    let group = groups.get(position);
+    if (!group) {
+      group = document.createElement('div'); group.className = 'notice-button-group';
+      group.dataset.position = position;
+      group.style.setProperty('--notice-button-x', `${index % 3 * 50}%`);
+      group.style.setProperty('--notice-button-y', `${Math.floor(index / 3) * 50}%`);
+      group.style.alignItems = ['flex-start', 'center', 'flex-end'][index % 3];
+      groups.set(position, group); noticeActions.append(group);
+    }
+    const textIndex = positions.includes(button.textPosition) ? positions.indexOf(button.textPosition) : 4;
+    label.style.transform = `translate(${(textIndex % 3 - 1) * 8}px, ${(Math.floor(textIndex / 3) - 1) * 6}px)`;
+    const validColor = value => typeof value === 'string' && /^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent)$/i.test(value);
+    if (validColor(button.buttonColor)) action.style.backgroundColor = button.buttonColor;
+    if (validColor(button.textColor)) action.style.color = button.textColor;
+    action.disabled = !button.actions.length || (button.actions.includes('link') && !contactHref(button.linkHref)) || (button.actions.includes('copy') && !button.copyValue?.trim());
+    action.addEventListener('click', event => activateNoticeButton(event, action, button));
+    group.append(action);
+  });
 }
 
 let noticeGeneration = 0;
@@ -1636,42 +1711,7 @@ function initNotice(options = {}) {
     const ready = await waitForNoticeFrames(generation);
     if (!ready || generation !== noticeGeneration) return;
     noticeDialog.style.setProperty('--notice-ratio', String(image.naturalWidth / image.naturalHeight));
-    noticeMedia.replaceChildren(image);
-    noticeActions.replaceChildren();
-    const href = contactHref(notice.linkHref);
-    const behavior = ['link', 'copy', 'close'].includes(notice.buttonAction)
-      ? notice.buttonAction : (href ? 'link' : 'close');
-    const action = document.createElement(behavior === 'link' && href && !appPlatform ? 'a' : 'button');
-    action.className = 'banner-action';
-    const label = document.createElement('span');
-    label.className = 'notice-button-label';
-    label.textContent = notice.linkLabel?.trim() || ({ link: '了解详情', copy: '复制内容', close: '知道了' })[behavior];
-    action.append(label);
-    const positions = ['top-left', 'top-center', 'top-right', 'middle-left', 'center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'];
-    const snap = (value, fallback) => Number.isFinite(value) ? Math.min(2, Math.max(0, Math.round(value / 50))) : fallback;
-    const buttonIndex = positions.includes(notice.buttonPosition) ? positions.indexOf(notice.buttonPosition)
-      : snap(notice.buttonY, 2) * 3 + snap(notice.buttonX, 1);
-    const textIndex = positions.includes(notice.textPosition) ? positions.indexOf(notice.textPosition) : 4;
-    action.dataset.position = positions[buttonIndex];
-    noticeActions.style.transformOrigin = `${buttonIndex % 3 * 50}% ${Math.floor(buttonIndex / 3) * 50}%`;
-    action.style.setProperty('--notice-button-x', `${buttonIndex % 3 * 50}%`);
-    action.style.setProperty('--notice-button-y', `${Math.floor(buttonIndex / 3) * 50}%`);
-    label.style.transform = `translate(${(textIndex % 3 - 1) * 8}px, ${(Math.floor(textIndex / 3) - 1) * 6}px)`;
-    const validColor = value => typeof value === 'string' && /^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent)$/i.test(value);
-    if (validColor(notice.buttonColor)) action.style.backgroundColor = notice.buttonColor;
-    if (validColor(notice.textColor)) action.style.color = notice.textColor;
-    const value = behavior === 'copy' ? notice.copyValue?.trim() : href;
-    if (action.tagName === 'A') {
-      action.href = href;
-      action.target = '_blank';
-      action.rel = 'noopener noreferrer';
-    } else {
-      action.type = 'button';
-      action.disabled = behavior !== 'close' && !value;
-      if (behavior === 'link' && appPlatform) action.title = '复制网址，到浏览器打开';
-    }
-    action.addEventListener('click', event => activateNoticeButton(event, action, behavior, href, value));
-    noticeActions.append(action);
+    renderNoticeActions(notice, image);
     if (!noticeDialog.open && typeof noticeDialog.showModal === 'function') {
       document.body.classList.add('dialog-open');
       noticeDialog.showModal();
@@ -1968,7 +2008,7 @@ async function initialize() {
   });
   bindCollapsibleFilter(document.querySelector("#platform-picker"), platformButtons, setPlatformExpanded);
   bindCollapsibleFilter(categoryTabs, categoryTabs, setCategoryExpanded);
-  // 卡片详情弹窗有 × 关闭键；公告弹窗没有，靠 Esc 与点击外部关闭。
+  // 卡片详情保留关闭键；公告弹窗仅由配置的关闭动作退出。
   accessDialog?.querySelector(".dialog-close")?.addEventListener("click", closeAccessDialog);
   bindCarouselControls();
   bindFeaturedControls();
