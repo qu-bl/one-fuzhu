@@ -5,7 +5,7 @@
   "name": "千机百变·Rive 高级对象",
   "author": "千机百变",
   "description": "使用共享 Worker 独立加载文件，显式推进状态机并读取离屏像素。",
-  "preview": "preview.webp",
+  "preview": "preview.avif",
   "rive": {
     "file": "main.riv",
     "layout": {

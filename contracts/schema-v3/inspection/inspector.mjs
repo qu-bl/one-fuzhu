@@ -257,6 +257,7 @@ function run(input, c) {
     if(m?.javascript&&!text(input.script))waiting.push(`等待 ${c.manifest.validation.fixedFiles.javascript}`);
     if(m&&!m.javascript&&text(input.script))add('javascript','存在脚本但清单未声明 javascript');
     if(!input.hasRive)waiting.push(`等待 ${c.manifest.validation.fixedFiles.rive}`);
+    if(m && m.preview !== c.manifest.validation.fixedFiles.preview)add('preview','制作台导出请使用 preview.avif；旧包仍可直接运行');
     if(!input.hasPreview)waiting.push(`等待 ${c.manifest.validation.fixedFiles.preview}`);
   } else if(input.kind==='ui') {
     uiSets=Array.isArray(input.sets)?input.sets:[input.sets];

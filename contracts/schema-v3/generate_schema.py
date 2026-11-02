@@ -217,7 +217,7 @@ schema = obj({
     "description": {"type": "string", "maxLength": MV["limits"]["descriptionMax"]},
     "license": obj({name: {"type": "string", "pattern": MV["patterns"]["licenseText"]}
                     for name in CONTRACT["manifest"]["nested"]["license"]}, MV["license"]["required"]),
-    "preview": {"const": MV["fixedFiles"]["preview"]},
+    "preview": {"enum": MV["preview"]["fileNames"]},
     "rive": rive,
     "javascript": obj({"entry": {"const": MV["fixedFiles"]["javascript"]},
                        "networkDomains": arr({"type": "string", "pattern": MV["patterns"]["networkDomain"]})},

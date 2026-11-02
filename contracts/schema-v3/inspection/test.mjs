@@ -18,6 +18,23 @@ assert.ok(inspect({kind:'applicationScript',source:'/** @id Demo */\ndefineQuScr
 const errors=inspect({kind:'manifest',source:JSON.stringify({...minimal,id:'bad',name:'',license:{copyright:'',text:''}})}).errors;
 assert.ok(errors.length>=4,JSON.stringify(errors));
 assert.equal(inspect({kind:'package',source:'',script:'',hasRive:false,hasPreview:false}).waiting.length,3);
+for (const preview of ['preview.avif','preview.webp']) {
+ const source=JSON.stringify({...minimal,preview});
+ assert.deepEqual(inspect({kind:'manifest',source}).errors,[]);
+ const draft=inspect({kind:'package',source,script:'',hasRive:true,hasPreview:false});
+ if(preview==='preview.avif')assert.deepEqual(draft.errors,[]);
+ else assert.ok(draft.errors.some(error=>error.includes('preview.avif')));
+ assert.deepEqual(draft.waiting,['等待 preview.avif']);
+}
+for (const preview of ['preview.png','../preview.avif','https://example.com/preview.avif']) {
+ assert.ok(inspect({kind:'manifest',source:JSON.stringify({...minimal,preview})}).errors.length);
+}
+assert.equal(c.manifest.validation.preview.requiredForRuntime,false);
+assert.equal(c.manifest.validation.preview.decodeFailureBlocksRuntime,false);
+assert.ok(!c.manifest.validation.packageFiles.required.some(name=>name.startsWith('preview.')));
+assert.equal(c.manifest.validation.preview.fallbackToLegacyPreview,false);
+assert.equal(c.manifest.validation.preview.displayFile,'preview.avif');
+console.log('PASS AVIF-only authoring/display, old WebP runtime acceptance and presentation-only policy');
 console.log('PASS shared inspector entry, syntax, multiple errors, waiting state');
 
 for(const name of fs.readdirSync(new URL('fixtures/invalid/',root))) {

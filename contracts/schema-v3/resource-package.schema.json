@@ -48,7 +48,10 @@
       "additionalProperties": true
     },
     "preview": {
-      "const": "preview.webp"
+      "enum": [
+        "preview.avif",
+        "preview.webp"
+      ]
     },
     "rive": {
       "type": "object",

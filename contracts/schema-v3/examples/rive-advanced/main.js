@@ -1,4 +1,4 @@
-// Source example: add main.riv, preview.webp and assets/scene.riv before packaging.
+// Source example: add main.riv, preview.avif and assets/scene.riv before packaging.
 // Names are queried from the actual secondary file instead of invented.
 let ownedWorker = null;
 let ownedFiles = [];

@@ -2,7 +2,7 @@
 
 清单与 main.js 必须一起使用。此目录有意不附带第三方 Rive 二进制和预览图，不能直接作为完整资源包导入。
 main.riv 使用已由三端原生探针核验的官方 data_binding_test.riv（Artboard / State Machine 2）；
-另提供 preview.webp 与 assets/scene.riv，scene.riv 至少包含一个画板和状态机。
+另提供 preview.avif 与 assets/scene.riv，scene.riv 至少包含一个画板和状态机。
 官方主文件来源：https://github.com/rive-app/rive-ios/blob/main/Tests/Assets/data_binding_test.riv
 脚本从实际元数据选择首个画板和状态机，不预设名称或数据属性。
 
