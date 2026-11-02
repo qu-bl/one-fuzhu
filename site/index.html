@@ -18,12 +18,12 @@
   <meta name="twitter:description" content="发现互动作品，交流屏幕定制，学习创作，让设计走进日常。">
   <link rel="icon" href="./assets/favicon.svg?v=58" type="image/svg+xml">
   <title>千机百变 · 官方与伙伴们的创意橱柜</title>
-  <link rel="stylesheet" href="./styles.css?v=769b7cc0">
+  <link rel="stylesheet" href="./styles.css?v=d1cb1c57">
   <script src="./theme.js?v=044c9338"></script>
   <script src="./links.js?v=a782055f" defer></script>
   <script src="./media.js?v=1edbcf1e" defer></script>
   <script src="https://unpkg.com/@rive-app/canvas@2.43.1/rive.js" defer></script>
-  <script src="./app.js?v=4b2b5fa8" defer></script>
+  <script src="./app.js?v=e127999c" defer></script>
   <!-- GEO:JSONLD:START -->
 <script type="application/ld+json">
 {
@@ -118,44 +118,34 @@
 </script>
   <!-- GEO:JSONLD:END -->
 </head>
-<body>
+<body data-page="showcase">
   <a class="skip-link" href="#showcase">跳到创意橱柜</a>
 
   <main class="app-page">
-    <h1 class="sr-only">千机百变 · 让创意动起来，让屏幕有个性</h1>
-    <section class="activity-section" aria-label="探索千机百变">
-      <div class="activity-carousel" id="activity-carousel" aria-roledescription="轮播">
-        <div class="activity-layout">
-          <div class="activity-copy">
-            <div class="activity-copy-viewport">
-              <div class="activity-track" id="activity-track"></div>
-            </div>
-            <div class="banner-navigation"><div class="activity-dots" id="activity-dots" aria-label="选择主题"></div></div>
-          </div>
-          <div class="activity-rive" aria-label="猫咪触摸跟随互动动画">
-            <canvas id="activity-rive-canvas" aria-hidden="true"></canvas>
-          </div>
-        </div>
-        <p class="sr-only" id="activity-status" aria-live="polite"></p>
-      </div>
-    </section>
+    <h1 class="sr-only">千机百变 · 创意橱柜</h1>
+
 
     <section class="showcase-section reveal" id="showcase" aria-labelledby="showcase-title">
+      <div class="showcase-controls">
+      <h2 class="sr-only" id="showcase-title">创意橱柜</h2>
       <div class="showcase-header">
-        <h2 id="showcase-title">创意橱柜</h2>
+        <div class="category-tabs" id="category-tabs" data-expanded="false" role="group" aria-label="创意关键词"></div>
+        <div class="search-tools">
         <div class="search-wrap">
+          <div class="platform-picker" id="platform-picker" data-expanded="false">
+            <div class="platform-buttons" id="platform-buttons" role="group" aria-label="按运行系统筛选"></div>
+          </div>
           <label class="sr-only" for="case-search">搜索创意案例</label>
           <input id="case-search" type="search" placeholder="搜索案例或伙伴" autocomplete="off">
         </div>
-      </div>
-
-      <div class="showcase-toolbar" aria-label="创意案例筛选">
-        <div class="category-tabs" id="category-tabs" role="group" aria-label="案例分类"></div>
-        <div class="platform-picker" id="platform-picker" data-expanded="false">
-          <div class="platform-buttons" id="platform-buttons" role="group" aria-label="按运行平台筛选"></div>
+        <button class="profile-entry" type="button" aria-label="个人中心" aria-haspopup="dialog" aria-controls="information-panel" aria-expanded="false" title="个人中心">
+          <canvas id="activity-rive-canvas" aria-hidden="true"></canvas>
+        </button>
         </div>
       </div>
 
+      </div>
+      <div id="featured-banners" class="featured-banners" role="region" aria-label="精选海报" hidden></div>
       <div class="case-grid" id="case-grid" role="list"></div>
       <div class="empty-state" id="empty-state" hidden>
         <strong>没有找到匹配案例</strong>
@@ -163,7 +153,34 @@
       </div>
     </section>
 
-    <section class="contact-section reveal" id="contact" aria-labelledby="contact-title" hidden>
+
+
+  </main>
+
+
+
+  <section id="information-panel" class="information-panel" role="dialog" aria-modal="true" aria-label="个人中心" tabindex="-1" hidden inert>
+    <div class="information-mask" aria-hidden="true"></div>
+    <div class="information-scroll">
+      <div class="information-page">
+    <section class="activity-section" aria-label="探索千机百变">
+      <div class="activity-carousel" id="activity-carousel" aria-roledescription="轮播">
+        <div class="activity-layout">
+          <div class="activity-copy info-reveal">
+            <div class="activity-copy-viewport">
+              <div class="activity-track" id="activity-track"></div>
+            </div>
+            <div class="banner-navigation"><div class="activity-dots" id="activity-dots" aria-label="选择主题"></div></div>
+          </div>
+          <button class="activity-rive information-rive-target" type="button" data-close-information aria-label="点击动画返回创意橱柜" title="点击返回创意橱柜"></button>
+        </div>
+        <p class="sr-only" id="activity-status" aria-live="polite"></p>
+      </div>
+    </section>
+
+
+
+    <section class="contact-section info-reveal" id="contact" aria-labelledby="contact-title" hidden>
       <div class="contact-card">
         <div class="contact-copy">
           <span class="contact-label" id="contact-label"></span>
@@ -174,9 +191,8 @@
       </div>
     </section>
 
-  </main>
-
-  <footer class="site-footer">
+  </div>
+      <footer class="site-footer info-reveal">
     <span>© 2026 千机百变</span>
     <span class="site-footer-sep" aria-hidden="true">·</span>
     <a href="./terms.html">用户协议</a>
@@ -185,6 +201,9 @@
     <span class="site-footer-sep" aria-hidden="true">·</span>
     <a href="https://beian.miit.gov.cn/">APP 备案号：冀ICP备2026040445号-1A</a>
   </footer>
+    </div>
+  </section>
+  <div id="rive-flight" class="rive-flight" aria-hidden="true" hidden></div>
 
   <template id="activity-template">
     <article class="activity-slide">
@@ -231,13 +250,9 @@
     </div>
   </dialog>
 
-  <dialog class="notice-dialog" id="notice-dialog" aria-labelledby="notice-title" tabindex="-1">
+  <dialog class="notice-dialog" id="notice-dialog" aria-label="公告海报" tabindex="-1" closedby="none">
     <div class="notice-sheet">
-      <header class="notice-header">
-        <h2 id="notice-title"></h2>
-      </header>
-      <div class="notice-media" id="notice-media" hidden></div>
-      <p class="notice-body" id="notice-body"></p>
+      <div class="notice-media" id="notice-media"></div>
       <div class="notice-actions" id="notice-actions"></div>
     </div>
   </dialog>

@@ -275,6 +275,13 @@ for (const name of stampedAssets) {
 console.log(`✓ index.html 资源版本号 ${stamped}/${stampedAssets.length} 个已按内容刷新`);
 
 writeFileSync(indexPath, html);
+const aboutPath = join(ROOT, "about.html");
+let aboutHTML = readFileSync(aboutPath, "utf-8");
+for (const name of stampedAssets) {
+  const digest = createHash("sha256").update(readFileSync(join(ROOT, name))).digest("hex").slice(0, 8);
+  aboutHTML = aboutHTML.replace(new RegExp(`(\\./${name.replace(/\./g, "\\.")})\\?v=[^"']*`, "g"), `$1?v=${digest}`);
+}
+writeFileSync(aboutPath, aboutHTML);
 for (const name of ["terms.html", "privacy.html"]) {
   const path = join(ROOT, name);
   const source = readFileSync(path, "utf-8");
