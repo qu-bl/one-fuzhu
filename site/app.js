@@ -529,7 +529,7 @@ function setActivity(index, announce = false) {
 
 function scheduleCarousel() {
   window.clearTimeout(state.timer);
-  if (state.paused || state.activities.length < 2 || document.hidden) return;
+  if (state.paused || state.previewActivityId || state.activities.length < 2 || document.hidden) return;
   state.timer = window.setTimeout(() => setActivity(state.activityIndex + 1), 7000);
 }
 
@@ -1777,7 +1777,14 @@ function bindCollapsibleFilter(picker, options, setExpanded) {
 
 // 用一份内容重绘整页。管理台的实时预览走的就是这个函数——预览和线上
 // 共用同一套渲染代码，所以看到的必然就是发布后的样子，不会有两套实现漂移。
+let previewScrollVersion = 0;
 function applyContent(content, options = {}) {
+  const scrollVersion = ++previewScrollVersion;
+  const previewScroll = options.preserveScroll && !options.focusPreview
+    ? { x: window.scrollX, y: window.scrollY, information: informationScroll?.scrollTop || 0 } : null;
+  const wasPreviewingActivity = state.previewActivityId;
+  state.previewActivityId = options.previewActivity || null;
+  if (wasPreviewingActivity && !state.previewActivityId) scheduleCarousel();
   // 管理台每敲一个字都会推一次内容。如果重绘把打开的面板关掉或留在旧内容上，
   // 改一个字段就得重新点开一次，等于没有反馈。这里先记下开着的是哪张卡。
   const reopenedCardId = accessDialog?.open ? state.dialogCardId : null;
@@ -1807,12 +1814,18 @@ function applyContent(content, options = {}) {
   // 管理台在编辑某张卡的入口时，让这张卡把入口行露出来。这一行平时是
   // display:none，只有展开卡片才出现，不这样做画布上就没有它的位置。
   // 卡片每次都会重建，所以不用清理上一张的标记。
+  document.querySelectorAll(".is-access-preview").forEach(element => element.classList.remove("is-access-preview"));
   if (options.previewAccess) {
     const trigger = document.querySelector(`.case-card[data-id="${CSS.escape(options.previewAccess)}"] .case-card-trigger`);
     if (trigger) {
       trigger.classList.add("is-access-preview");
-      trigger.scrollIntoView({ block: "center", behavior: "instant" });
+      if (options.focusPreview) trigger.scrollIntoView({ block: "center", behavior: "instant" });
     }
+  }
+
+  if (options.previewActivity) {
+    const index = state.activities.findIndex(activity => activity.id === options.previewActivity);
+    if (index >= 0) setActivity(index, false);
   }
 
   const targetCardId = reopenedCardId;
@@ -1833,6 +1846,15 @@ function applyContent(content, options = {}) {
     // 页面本身设了 scroll-behavior:smooth，用 auto 会走平滑滚动，
     // 预览跳转要的是立刻到位，所以显式 instant。
     document.querySelector(options.scrollTo)?.scrollIntoView({ block: "start", behavior: "instant" });
+  }
+  if (previewScroll) {
+    // Restore after masonry layout and cached image sizing have settled.
+    const restore = () => {
+      if (scrollVersion !== previewScrollVersion) return;
+      window.scrollTo({ left: previewScroll.x, top: previewScroll.y, behavior: 'instant' });
+      if (informationScroll) informationScroll.scrollTop = previewScroll.information;
+    };
+    requestAnimationFrame(() => { restore(); requestAnimationFrame(restore); });
   }
 }
 
@@ -2021,7 +2043,8 @@ async function initialize() {
     // 单一数据源：顶部 Rive、公告、联系方式、横幅、卡片都来自同一个 JSON，
     // 因此发布内容只需要编辑 data/content.json，不必改动页面代码。
     const content = await loadJson("./data/content.json");
-    applyContent(content);
+    const adminPreview = window.parent !== window && new URLSearchParams(location.search).has('adminPreview');
+    applyContent(content, adminPreview ? { showNotice: false } : {});
     if (new URLSearchParams(location.search).get('view') === 'about') openInformation({ instant: true });
   } catch (error) {
     // 内容读取失败时仍然初始化顶部：hero 会回退到 HERO_DEFAULTS。

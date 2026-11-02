@@ -41,7 +41,7 @@
   }
   *{box-sizing:border-box}
   [hidden]{display:none !important}
-  /* 锁定视口高度：顶栏固定，四栏各自滚动。用 min-height 的话表单会长高整个页面。 */
+  /* 三栏各自滚动，预览始终使用中栏的实际可用尺寸。 */
   body{margin:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased}
   button,input,select,textarea{font:inherit;color:inherit}
   button{border:0;background:none;cursor:pointer}
@@ -55,8 +55,6 @@
   .app-bar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--block);box-shadow:var(--elev);position:relative;z-index:3}
   .app-bar h1{margin:0;font-size:19px;font-weight:600}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-    background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
-    background-position:calc(100% - 17px) 14px,calc(100% - 12px) 14px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
   .progress{position:absolute;inset:auto 0 0;height:3px;overflow:hidden;background:var(--pri-c)}
   .progress::after{content:"";position:absolute;inset:0 auto 0 0;width:40%;background:var(--pri);animation:slide 1.4s ease-in-out infinite}
   @keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
@@ -68,11 +66,11 @@
     flex:1;min-height:0;overflow:hidden;
     /* 每根竖栏的宽度都经过一层可归零的变量，折叠就是把那一层设成 0。
        显式列号保证某栏隐藏后，其余栏不会往前顶、占错轨道。 */
-    --nav-col:var(--nav-w,184px);
+    --nav-col:min(var(--nav-w,160px),18vw);
     --nav-gutter:5px;
     --canvas-col:minmax(0,1fr);
     --inspector-gutter:5px;
-    --inspector-col:var(--inspector-w,460px);
+    --inspector-col:min(var(--inspector-w,380px),40vw);
     display:grid;
     grid-template-columns:
       var(--nav-col) var(--nav-gutter)
@@ -113,7 +111,7 @@
   /* 上面一块专门管列表项（看有哪些、加新的），下面一块是选中项的细节。
      两块之间那条横向拖拽条把它们连起来，也能各自折叠。 */
   .panel{display:flex;flex-direction:column;min-height:0;overflow:hidden;background:var(--block)}
-  .panel--entries{height:var(--entries-h,240px);flex:0 0 auto}
+  .panel--entries{height:min(var(--entries-h,200px),30vh);flex:0 0 auto}
   .panel--detail{flex:1;min-height:0}
   .panel-head{display:flex;align-items:center;gap:8px;padding:11px 14px;color:inherit}
   .panel-head strong{font-size:12px;font-weight:700;color:var(--ink-2);white-space:nowrap}
@@ -141,32 +139,46 @@
   .list-foot .btn{width:100%}
 
   /* ============ ② 中心画布（官网真实预览） ============ */
-  .canvas{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--canvas-bg)}
-  .canvas-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:11px;color:var(--ink-3);min-width:0}
-  .canvas-bar .dot{width:7px;height:7px;border-radius:50%;background:#2e9e4f;flex-shrink:0}
-  .canvas-hint{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .canvas-bar .spacer{flex:1}
-  .devices{display:flex;gap:2px;flex-shrink:0}
-  .device{padding:0 10px;min-height:24px;border-radius:5px;background:transparent;color:var(--ink-2);font-size:11px;font-weight:600;white-space:nowrap}
-  .device:hover{background:var(--field-hi)}
-  .device[data-active]{background:var(--block);color:var(--pri)}
-  .canvas-stage{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;padding:0 14px 14px}
-  /* 画布按所选设备宽度渲染，装不下时整体缩放（zoom 会一并改变布局尺寸）。 */
-  /* 画布不加边框、不加圆角、不加投影：官网直接铺在画布底色上就是预览本身。 */
-  .canvas-frame{flex-shrink:0;align-self:flex-start;overflow:hidden}
+  .canvas{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--block)}
+  .canvas-stage{flex:1;min-width:0;min-height:0;overflow:hidden;position:relative}
+  .canvas-frame{width:100%;height:100%;overflow:hidden}
   .canvas-frame iframe{width:100%;height:100%;border:0;display:block;background:var(--block)}
+  body.resizing iframe,body.sorting iframe{pointer-events:none}
+  body.sorting{cursor:grabbing;user-select:none}
+  .preview-context{font-size:12px;color:var(--ink-3);max-width:24vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card-dock{flex:0 0 auto;min-width:0;background:var(--block);box-shadow:0 -1px 0 var(--field)}
+  .dock-head{display:flex;gap:12px;align-items:center;padding:9px 14px 0;font-size:12px;color:var(--ink-2)}
+  .dock-head small{margin-left:auto;font-size:11px;color:var(--ink-3)}
+  .card-rail{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding:10px 14px 12px;overscroll-behavior-x:contain;min-width:0;scrollbar-width:thin;touch-action:pan-x}
+  .dock-card{position:relative;flex:0 0 152px;min-width:0;border-radius:9px;background:var(--bg)}
+  .dock-card[data-active]{background:var(--pri-c);box-shadow:inset 0 0 0 2px var(--pri)}
+  .dock-card[data-dragging]{opacity:.4}
+  .dock-card[data-drop]::after{content:'';position:absolute;inset:-3px auto -3px -6px;width:3px;background:var(--pri);border-radius:4px}
+  .dock-card[data-drop="after"]::after{left:auto;right:-6px}
+  .dock-select{display:block;padding:5px;width:100%;text-align:left;border-radius:9px}
+  .dock-image{height:76px;border-radius:6px;background:var(--field);overflow:hidden;display:grid;place-items:center;color:var(--ink-3);font-size:12px}
+  .dock-image img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
+  .dock-name{display:block;font-size:12px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:7px 4px 3px}
+  .dock-meta{display:flex;gap:4px;margin:0 4px 4px;min-height:16px;overflow:hidden;white-space:nowrap}
+  .dock-grip{position:absolute;right:9px;top:9px;display:grid;place-items:center;width:25px;height:25px;border-radius:5px;background:rgb(255 255 255 / .92);color:var(--ink-2);cursor:grab;touch-action:none;font-size:17px}
+  .dock-add{flex:0 0 110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;border-radius:9px;background:var(--field);color:var(--pri);font-size:12px;font-weight:600;min-height:132px}
+  .dock-add:hover{background:var(--field-hi)}
+  .dock-add span{font-size:30px;font-weight:400;line-height:1}
+  .info-tabs{display:flex;gap:4px;padding:12px;background:var(--block);flex:0 0 auto}
+  .info-tabs button{flex:1;min-height:34px;padding:6px;border-radius:6px;font-size:12px;color:var(--ink-2);background:var(--field)}
+  .info-tabs button[aria-selected="true"]{background:var(--pri-c);color:var(--pri-ink);font-weight:650}
 
   /* ============ ③ 右栏：列表在上，细节在下 ============ */
   .inspector{background:var(--block);display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
 
   /* ============ ③ 表单 ============ */
-  .form{flex:1;min-height:0;padding:16px 18px 48px;overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0}
+  .form{flex:1;min-height:0;padding:16px 18px 48px;overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0;scrollbar-gutter:stable}
   .status{font-size:12px;line-height:1.7;color:var(--ink-3);min-height:0;overflow-wrap:anywhere}
   .status:empty{display:none}
   /* 出错时给一块底色，否则长报错挤成一团看不清。 */
   .status.err{background:var(--err-c);color:var(--err);padding:10px 12px;border-radius:6px}
   .status.ok{color:var(--ok)}
-  .surface{background:var(--block);padding:16px 18px}
+  .surface{background:var(--block);padding:0}
   .editor{display:flex;flex-direction:column;gap:0}
   .editor-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
   .editor-header .title{flex:1;min-width:0;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -176,7 +188,7 @@
   .form-section-info{margin-left:5px;font-weight:400;opacity:.5;cursor:help}
   .form-section > .grid{margin-top:0}
   .form-section > .row{margin-top:0}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px 14px}
   .field-wide{grid-column:1/-1}
   .grid > .check-field{align-self:end}
   .row{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:10px}
@@ -229,6 +241,34 @@
   .access-item .field-input{background:var(--block)}
   .access-item .field-input:hover,.access-item .field-input:focus{background:#f8f6fc}
   .access-item .check-field{background:var(--block)}
+  .access-item{padding:12px;border-radius:8px}
+  .access-item-head{margin-bottom:9px}
+  .access-logo{width:24px;height:24px;object-fit:contain}
+  .access-item-title{font-size:12px;color:var(--ink-2);letter-spacing:0}
+  .platform-add{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .platform-add .btn{font-size:11px;padding:0 9px;min-height:30px;gap:5px}
+  .platform-add img{width:16px;height:16px}
+  .action-feedback{margin:7px 0 0;font-size:11px;line-height:1.6;color:var(--ink-2)}
+  .action-feedback[data-invalid]{color:var(--err)}
+  .advanced{margin-top:10px;color:var(--ink-2);font-size:12px}
+  .advanced summary{cursor:pointer;padding:5px 0;color:var(--ink-3)}
+  .advanced .grid{margin-top:8px}
+  .image-upload{display:flex;flex-direction:column;gap:8px}
+  .image-upload-button{position:relative;width:100%;height:150px;border-radius:8px;overflow:hidden;background:var(--field);color:var(--pri);padding:0;display:grid;place-items:center;font-size:12px}
+  .image-upload-button img{width:100%;height:100%;object-fit:contain;display:block}
+  .image-upload-button::after{content:'更换图片';position:absolute;right:8px;bottom:8px;padding:5px 9px;border-radius:5px;background:rgb(255 255 255 / .94);font-size:11px}
+  .image-upload-button[data-empty]::after{display:none}
+  .image-caption{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;color:var(--ink-3)}
+  .image-caption .btn{min-height:24px;font-size:11px;padding:0 8px}
+  .tag-editor{display:flex;gap:6px;flex-wrap:wrap}
+  .tag-editor .pill{display:flex;align-items:center;gap:5px;font-size:12px;line-height:26px}
+  .tag-editor .pill button{padding:0 2px;color:var(--ink-2)}
+  .tag-entry{display:flex;gap:5px;margin-top:6px}
+  .tag-entry input{min-width:0;flex:1}
+  .editor-actions{display:flex;gap:4px}
+  .empty-editor{padding:30px 4px;color:var(--ink-3);font-size:13px;line-height:1.7}
+  @media(max-width:1000px){.app-bar h1{font-size:16px}.app-bar{padding-inline:12px;gap:8px}.preview-context{display:none}.nav{padding-inline:6px}.nav-item{padding-inline:10px;font-size:12px}.nav-badge{padding-inline:5px}.dock-head small{font-size:10px}.form{padding-inline:12px}.dock-card{flex-basis:140px}}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 
   /* ============ 词典表格 ============ */
   .translation-toolbar{display:grid;grid-template-columns:minmax(180px,1fr) auto auto;gap:8px;align-items:end}
@@ -267,6 +307,7 @@
 <body>
 <header class="app-bar">
   <h1>千机百变管理后台</h1>
+  <span class="preview-context" id="previewHint"></span>
   <span class="pill pill--on" id="dirtyTag" hidden>有未发布改动</span>
   <span style="flex:1"></span>
   <button class="btn btn--text" id="loadBtn" type="button">重新加载</button>
@@ -277,10 +318,9 @@
 <div class="shell" id="shell">
   <nav class="nav" id="nav" aria-label="管理内容">
     <div class="nav-group">内容</div>
-    <button class="nav-item" type="button" data-view="banners">信息页轮播<span class="nav-badge" data-count="banners"></span></button>
+    <button class="nav-item" type="button" data-view="banners">信息页<span class="nav-badge" data-count="banners"></span></button>
     <button class="nav-item" type="button" data-view="hero">Rive 动画入口</button>
     <button class="nav-item" type="button" data-view="cards">创意橱柜<span class="nav-badge" data-count="cards"></span></button>
-    <button class="nav-item" type="button" data-view="contact">联系方式</button>
     <button class="nav-item" type="button" data-view="notice">弹窗</button>
     <div class="nav-group">翻译</div>
     <button class="nav-item" type="button" data-view="translations">Rive 翻译<span class="nav-badge" data-count="terms"></span></button>
@@ -292,28 +332,24 @@
   <div class="gutter" data-panel="nav" data-axis="x" role="separator" aria-orientation="vertical" tabindex="0" aria-label="拖动调整导航宽度"></div>
 
   <main class="canvas" id="canvas" aria-label="官网实时预览">
-    <div class="canvas-bar">
-      <span class="dot"></span>
-      <span>实时预览 · 未发布内容</span>
-      <span class="canvas-hint" id="previewHint"></span>
-      <span class="spacer"></span>
-      <div class="devices" id="devices" role="group" aria-label="预览宽度">
-        <button class="device" type="button" data-width="390">手机</button>
-        <button class="device" type="button" data-width="820">平板</button>
-        <button class="device" type="button" data-width="1280">桌面</button>
-        <button class="device" type="button" data-width="0">全宽</button>
-      </div>
-    </div>
     <div class="canvas-stage" id="canvasStage">
       <div class="canvas-frame" id="canvasFrame">
         <iframe id="previewFrame" title="官网预览"></iframe>
       </div>
     </div>
+    <section class="card-dock" id="cardDock" aria-label="创意橱柜卡片" hidden>
+      <div class="dock-head"><strong>创意橱柜 <span id="dockCount"></span></strong><small>点击编辑 · 拖动右上角排序</small></div>
+      <div class="card-rail" id="cardRail" role="list" aria-label="卡片列表"></div>
+    </section>
   </main>
 
   <div class="gutter" data-panel="inspector" data-axis="x" role="separator" aria-orientation="vertical" tabindex="0" aria-label="拖动调整右栏宽度"></div>
 
   <aside class="inspector" id="inspector" data-list="on" aria-label="列表与字段编辑">
+    <div class="info-tabs" id="infoTabs" role="tablist" aria-label="信息页设置" hidden>
+      <button type="button" role="tab" data-info="banners" aria-selected="true">轮播内容</button>
+      <button type="button" role="tab" data-info="contact" aria-selected="false">联系与合作</button>
+    </div>
     <section class="panel panel--entries" id="list" hidden>
       <div class="panel-head">
         <strong id="listTitle"></strong>
@@ -448,7 +484,11 @@ const CONFIG = {
 const REPO_API = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}`;
 const contentsApi = (path) => `${REPO_API}/contents/${path}`;
 
-const PLATFORM_OPTIONS = ['', 'youtube', 'bilibili', 'xiaohongshu', 'douyin', 'kdocs', 'qq', 'github'];
+const ACCESS_PLATFORMS = {
+  bilibili: '哔哩哔哩', xiaohongshu: '小红书', douyin: '抖音',
+  youtube: 'YouTube', qq: 'QQ', kdocs: '金山文档', github: 'GitHub'
+};
+const PLATFORM_OPTIONS = Object.keys(ACCESS_PLATFORMS);
 // 卡片的「平台」必须是官网认得的名字：官网用固定的图标表查图标，
 // 筛选按钮也是写死的这四项，填别的会渲染成空白图标且筛选不到。
 const CARD_PLATFORMS = [
@@ -537,6 +577,7 @@ let dirty = false;
 let busy = false;
 let activeView = 'banners';
 let activeIndex = 0;   // 当前区块里选中的条目（仅列表型区块用）
+let infoMode = 'banners';
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
@@ -562,6 +603,9 @@ function setBusy(value) {
   busy = value;
   $('progress').hidden = !value;
   $('formBody').inert = value;
+  $('cardDock').inert = value;
+  $('list').inert = value;
+  $('infoTabs').inert = value;
   $('loadBtn').disabled = value;
   $('saveBtn').disabled = value || !dirty;
   ['addTranslation', 'importReportBtn', 'uploadHeroRive', 'uploadNoticeImage']
@@ -785,103 +829,147 @@ function guessVideo(text) {
   return null;
 }
 
+function labelledSelect(options, value) {
+  const node = select(options.map(([key]) => key), value);
+  [...node.options].forEach((option, index) => option.textContent = options[index][1]);
+  return node;
+}
+function videoIsValid(video) {
+  return Boolean(video && typeof video.id === 'string' && ({ bilibili: /^BV[A-Za-z0-9]{10}$/, youtube: /^[A-Za-z0-9_-]{11}$/, douyin: /^\d{10,25}$/ }[video.platform])?.test(video.id));
+}
 function renderVideoEditor(grid, video, onChange) {
-  const state = video && typeof video === 'object' ? { ...video } : {};
-  const platform = select(VIDEO_PLATFORMS, state.platform || '');
-  const vid = textInput(state.id || '', '粘贴 BV号 / 视频链接 / iframe 代码均可');
-  const apply = () => {
-    const guess = guessVideo(vid.value);
-    let p = platform.value;
-    if (!p && guess) { p = guess.platform; platform.value = p; }
-    const id = guess && guess.platform === p ? guess.id : vid.value.trim();
-    if (!p || !id) { onChange(null); markDirty(); return; }
-    state.platform = p;
-    state.id = id;
-    onChange({ ...state });
-    markDirty();
+  const current = { ...(video || {}) };
+  const platform = labelledSelect([['', '自动识别'], ['bilibili', '哔哩哔哩'], ['youtube', 'YouTube'], ['douyin', '抖音']], current.platform || '');
+  const input = textInput(current.id || '', '粘贴视频链接、BV 号或嵌入代码');
+  const status = el('p', 'action-feedback');
+  status.setAttribute('role', 'status');
+  const refresh = () => {
+    const value = input.value.trim();
+    const parsed = guessVideo(value);
+    if (parsed) platform.value = parsed.platform;
+    const next = value ? { ...current, platform: platform.value, id: parsed?.id || value } : null;
+    onChange(next);
+    status.textContent = !next ? '未添加视频，展开后继续显示封面。'
+      : videoIsValid(next) ? `${ACCESS_PLATFORMS[next.platform]} · 可在卡片内播放`
+      : '还未识别到有效视频，请粘贴完整链接或选择平台后填写视频编号。';
+    status.toggleAttribute('data-invalid', Boolean(next && !videoIsValid(next)));
   };
+  const apply = () => { refresh(); markDirty(); };
+  input.addEventListener('input', apply);
   platform.addEventListener('change', apply);
-  vid.addEventListener('input', apply);
-  vid.addEventListener('blur', () => { const g = guessVideo(vid.value); if (g) { vid.value = g.id; if (!platform.value) platform.value = g.platform; } apply(); });
-  field(grid, '视频平台', platform);
-  field(grid, '视频 ID', vid);
+  field(grid, '视频链接或编号', input);
+  field(grid, '播放平台', platform);
+  const ratios = [['', '跟随官网默认（16:9）'], ['1.7777777777777777', '横屏 16:9'], ['0.5625', '竖屏 9:16'], ['1', '方形 1:1']];
+  if (current.aspectRatio && !ratios.some(([key]) => Number(key) === current.aspectRatio)) ratios.push([String(current.aspectRatio), '保留当前比例']);
+  const ratio = labelledSelect(ratios, current.aspectRatio ? String(current.aspectRatio) : '');
+  ratio.addEventListener('change', () => { if (ratio.value) current.aspectRatio = Number(ratio.value); else delete current.aspectRatio; apply(); });
+  field(grid, '播放器比例', ratio);
+  grid.append(status);
+  refresh();
 }
 
-
+function accessFeedback(item) {
+  const value = String(item.url || item.value || '').trim();
+  if (item.copyable === false || !value) return '官网显示「待发布」，点击不执行操作。';
+  if (item.platform === 'qq') return '点击复制内容；如需复制群号，直接填写群号。';
+  if (httpUrlOk(value)) return '点击后在新窗口打开链接。';
+  if (/^[a-z][a-z\d+.-]*:/i.test(value)) return '此内容无法作为官网入口使用，请填写 http(s) 链接或普通文本。';
+  return '点击后复制这段内容。';
+}
 function renderAccessEditor(container, access, onAccess) {
-  const state = access && Array.isArray(access.items) ? { items: access.items.map((it) => ({ ...it })) } : { items: [] };
-  state.items = state.items || [];
-  const commit = () => onAccess(state.items.length ? { items: JSON.parse(JSON.stringify(state.items)) } : null);
-
+  const state = { ...(access || {}), items: (access?.items || []).map(item => ({ ...item })) };
+  const commit = () => onAccess(state.items.length ? JSON.parse(JSON.stringify(state)) : null);
   const list = el('div');
   const redraw = () => {
     list.replaceChildren();
+    if (!state.items.length) list.append(el('p', 'hint', '还没有平台入口。选择下方平台添加，按钮会显示在展开后的卡片中。'));
     state.items.forEach((item, index) => {
       const box = el('div', 'access-item');
       const head = el('div', 'access-item-head');
-      head.append(el('span', 'access-item-title', `入口 ${index + 1}`));
-      const del = actionButton('删除', 'danger');
-      head.append(del);
-      box.append(head);
-
-      const g = el('div', 'grid');
-      field(g, '平台', select(PLATFORM_OPTIONS, item.platform));
-      field(g, '按钮文字', textInput(item.label, '如：哔哩哔哩'));
-      const valueIn = textInput(item.url || item.value || '', 'https://… 或 QQ 群号');
-      field(g, '链接或内容', valueIn);
-      box.append(g);
-
-      const holdCheck = checkbox(item.copyable === false);
-      const holdLabel = el('label', 'check-field');
-      holdLabel.append(holdCheck, document.createTextNode('暂不开放（入口照常列出，但按钮是灰的、写「待发布」，点了没反应）'));
-      const holdRow = el('div', 'row');
-      holdRow.append(holdLabel);
-      box.append(holdRow);
-
-      const [platformSel, labelIn] = [g.querySelectorAll('select')[0], g.querySelectorAll('input')[0]];
+      const logo = el('img', 'access-logo'); logo.src = siteAssetUrl(`./assets/platforms/${item.platform}.svg`); logo.alt = '';
+      head.append(logo, el('span', 'access-item-title', ACCESS_PLATFORMS[item.platform] || '请选择平台'));
+      const del = actionButton('移除', 'danger'); head.append(del); box.append(head);
+      const grid = el('div', 'grid');
+      const platforms = Object.entries(ACCESS_PLATFORMS);
+      const platform = labelledSelect([['', '选择平台'], ...platforms], item.platform || '');
+      const value = textInput(item.url || item.value || '', item.platform === 'qq' ? '填写 QQ 群号或要复制的内容' : 'https://… 或要复制的内容');
+      const availability = labelledSelect([['open', '开放入口'], ['hold', '显示为待发布']], item.copyable === false ? 'hold' : 'open');
+      field(grid, '入口平台', platform);
+      field(grid, item.platform === 'qq' ? '复制内容 / 群号' : '网址或复制内容', value);
+      field(grid, '入口状态', availability);
+      box.append(grid);
+      const feedback = el('p', 'action-feedback', accessFeedback(item)); feedback.setAttribute('role', 'status'); box.append(feedback);
+      const advanced = el('details', 'advanced'); advanced.append(el('summary', '', '自定义按钮名称'));
+      const extra = el('div', 'grid'), label = textInput(item.label || '', ACCESS_PLATFORMS[item.platform] || '使用平台默认名称');
+      field(extra, '按钮名称（可选）', label); advanced.append(extra); box.append(advanced);
       const sync = () => {
-        const next = { ...state.items[index] };
-        if (platformSel.value) next.platform = platformSel.value;
-        else delete next.platform;
-        if (labelIn.value.trim()) next.label = labelIn.value.trim();
-        else delete next.label;
-        // 不再有「点击行为」字段：值像网址就存 url（前台跳转），否则存 value（前台复制）。
-        const v = valueIn.value.trim();
-        delete next.url;
-        delete next.value;
-        if (v) { if (/^[a-z][a-z\d+.-]*:\/\//i.test(v)) next.url = v; else next.value = v; }
-        state.items[index] = next;
-        commit();
-        markDirty();
+        item.platform = platform.value;
+        if (label.value.trim()) item.label = label.value.trim(); else delete item.label;
+        delete item.url; delete item.value;
+        const text = value.value.trim();
+        if (text) { if (httpUrlOk(text)) item.url = text; else item.value = text; }
+        if (availability.value === 'hold') item.copyable = false; else delete item.copyable;
+        feedback.textContent = accessFeedback(item);
+        feedback.toggleAttribute('data-invalid', Boolean(text && item.platform !== 'qq' && /^[a-z][a-z\d+.-]*:/i.test(text) && !httpUrlOk(text)));
+        commit(); markDirty();
       };
-      const toggleHold = () => {
-        const next = { ...state.items[index] };
-        if (holdCheck.checked) next.copyable = false; else delete next.copyable;
-        state.items[index] = next;
-        commit();
-        markDirty();
-      };
-      platformSel.addEventListener('change', sync);
-      labelIn.addEventListener('input', sync);
-      valueIn.addEventListener('input', sync);
-      holdCheck.addEventListener('change', toggleHold);
+      [value, label].forEach(node => node.addEventListener('input', sync));
+      availability.addEventListener('change', sync);
+      platform.addEventListener('change', () => { sync(); redraw(); });
       del.addEventListener('click', async () => {
-        if (!await confirmAction(`删除入口 ${index + 1}？`)) return;
-        state.items.splice(index, 1);
-        commit();
-        markDirty();
-        redraw();
+        if (!await confirmAction(`移除${ACCESS_PLATFORMS[item.platform] || '此'}入口？`)) return;
+        state.items.splice(index, 1); commit(); markDirty(); redraw();
       });
       list.append(box);
     });
   };
-  redraw();
-
-  const add = actionButton('添加入口');
-  add.addEventListener('click', () => { state.items.push({ platform: 'bilibili', label: '', url: '' }); commit(); markDirty(); redraw(); });
-  container.append(list, add);
+  const add = el('div', 'platform-add');
+  for (const [key, label] of Object.entries(ACCESS_PLATFORMS)) {
+    const button = actionButton(`＋ ${label}`);
+    const icon = el('img'); icon.src = siteAssetUrl(`./assets/platforms/${key}.svg`); icon.alt = ''; button.prepend(icon);
+    button.addEventListener('click', () => { state.items.push({ platform: key, value: '' }); commit(); markDirty(); redraw(); list.lastElementChild?.scrollIntoView({ block: 'nearest' }); });
+    add.append(button);
+  }
+  redraw(); container.append(list, add);
 }
 
+function tagEditor(parent, values, onChange) {
+  let tags = [...new Set(values || [])];
+  const wrapper = el('div', 'field field-wide'); wrapper.append(el('span', 'field-label', '卡片标签'));
+  const chips = el('div', 'tag-editor'), row = el('div', 'tag-entry'), input = textInput('', '输入标签，回车添加');
+  const add = actionButton('添加'); row.append(input, add);
+  const redraw = () => {
+    chips.replaceChildren();
+    for (const tag of tags) {
+      const chip = el('span', 'pill', tag), remove = el('button', '', '×'); remove.type = 'button'; remove.setAttribute('aria-label', `移除标签 ${tag}`);
+      remove.addEventListener('click', () => { tags = tags.filter(value => value !== tag); onChange(tags); markDirty(); redraw(); });
+      chip.append(remove); chips.append(chip);
+    }
+  };
+  const commit = () => { const entered = splitList(input.value); if (!entered.length) return; tags = [...new Set([...tags, ...entered])]; onChange(tags); input.value = ''; markDirty(); redraw(); input.focus(); };
+  add.addEventListener('click', commit); input.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); commit(); } });
+  wrapper.append(chips, row, el('span', 'hint', '显示为卡片上的胶囊，也能被搜索。与左侧分类筛选分别设置。')); parent.append(wrapper); redraw();
+}
+
+function imageEditor(parent, title, value, slot, onChange, { optional = false, alt = '', onAlt } = {}) {
+  const sectionNode = section(parent, title);
+  const wrap = el('div', 'image-upload');
+  const upload = el('button', 'image-upload-button'); upload.type = 'button'; upload.setAttribute('aria-label', `上传${title}`);
+  const path = textInput(value || '', './assets/image.avif');
+  const update = () => {
+    const url = siteAssetUrl(path.value.trim()); upload.replaceChildren(); upload.toggleAttribute('data-empty', !url);
+    if (url) { const image = el('img'); image.src = url; image.alt = title; upload.append(image); }
+    else upload.textContent = `＋ 上传${title}`;
+  };
+  upload.addEventListener('click', () => stageUpload(slot, file => { path.value = versioned(repoPathToUrl(file)); onChange(path.value); update(); renderCardRail(); }));
+  const caption = el('div', 'image-caption'); caption.append(el('span', '', optional ? '仅精选时使用；留空沿用封面' : 'AVIF · 保留原图比例'));
+  if (optional) { const clear = actionButton('清除', 'text'); clear.addEventListener('click', () => { path.value = ''; onChange(''); markDirty(); update(); }); caption.append(clear); }
+  const advanced = el('details', 'advanced'); advanced.append(el('summary', '', '图片地址与说明'));
+  const grid = el('div', 'grid'); field(grid, '图片地址', path);
+  path.addEventListener('input', () => { onChange(path.value.trim()); markDirty(); update(); renderCardRail(); });
+  if (onAlt) field(grid, '图片说明（可选）', bind(textInput(alt), onAlt));
+  advanced.append(grid); wrap.append(upload, caption, advanced); sectionNode.box.append(wrap); update();
+}
 
 function editorShell(index, label, onDelete) {
   const details = el('section', 'surface editor');
@@ -899,102 +987,69 @@ function editorShell(index, label, onDelete) {
 }
 
 function cardEditor(card, index) {
-  const shell = editorShell(index, card.name || card.id || '未命名', () => { content.cards.splice(index, 1); renderCards(); });
+  const shell = editorShell(index, card.name || '未命名卡片', () => { content.cards.splice(index, 1); renderCards(); });
   const details = shell.details;
-
-  const basic = section(details, '基本信息');
-  field(basic.grid, '名称', bind(textInput(card.name), (v) => { card.name = v; shell.title.textContent = `${index + 1}. ${v || card.id || '未命名'}`; renderList(); }));
-  field(basic.grid, '简介', bind(textArea(card.summary), (v) => (card.summary = v)));
-  field(basic.grid, '详情', bind(textArea(card.details), (v) => (card.details = v)));
-
-  const meta = section(details, '分类与标签', '决定卡片在橱柜里被哪个分类和平台筛出来。多个值用英文逗号分隔。');
-  field(meta.grid, '伙伴', bind(textInput(card.partnerName), (v) => (card.partnerName = v)));
-  field(meta.grid, '分类', bind(textInput(card.category), (v) => (card.category = v)));
-  checkGroupField(meta.grid, '平台', CARD_PLATFORMS.map((p) => p.value), card.platforms,
-    (v) => { card.platforms = v; markDirty(); }, (v) => CARD_PLATFORMS.find((p) => p.value === v).label);
-  field(meta.grid, '标签', bind(textInput((card.tags || []).join(', '), 'Rive, 状态机'), (v) => (card.tags = splitList(v))));
-
-  const cover = section(details, '封面图', '必填。折叠时卡片显示的就是这张封面；点开后如果有视频就播视频，没有视频仍然是这张封面。支持 AVIF、WebP、JPEG/JPG、PNG；统一保存为 AVIF，保留尺寸与透明背景，转换后不超过 4 MB。');
-  const coverInput = textInput(card.cover, './assets/xxx.avif');
-  field(cover.grid, '封面图路径', bind(coverInput, (v) => { card.cover = v; renderList(); }));
-  const coverRow = el('div', 'row');
-  const coverUpload = actionButton('上传封面图', 'outlined');
-  coverUpload.addEventListener('click', () => uploadCardCover(card, index));
-  coverRow.append(coverUpload);
-  const coverPreview = el('img');
-  coverPreview.alt = '';
-  coverPreview.style.cssText = 'max-width:150px;width:100%;max-height:88px;object-fit:cover;border-radius:6px;display:block;margin-top:8px;background:var(--c-surface-container)';
-  const syncCover = () => {
-    const url = siteAssetUrl(coverInput.value.trim());
-    coverPreview.hidden = !url;
-    coverPreview.src = url;
-  };
-  syncCover();
-  coverInput.addEventListener('input', syncCover);
-  cover.box.append(coverRow, coverPreview);
-
-  const banner = section(details, '精选横幅图（可选）', '仅开启精选后生效。电脑和平板建议 3:1，手机显示在 16:9 容器内。图片等比铺满、居中裁切，短边贴边，长边超出部分裁掉。默认只显示海报，点击后展开视频、文字和入口。未上传时回退到普通封面。');
-  const bannerInput = textInput(card.bannerCover || '', './assets/banner-xxx.avif');
-  field(banner.grid, '横幅图路径', bind(bannerInput, v => { card.bannerCover = v; }));
-  field(banner.grid, '横幅图片说明', bind(textInput(card.bannerAlt || ''), v => { card.bannerAlt = v; }));
-  const bannerUpload = actionButton('上传精选横幅图', 'outlined');
-  bannerUpload.addEventListener('click', () => stageUpload(bannerSlot(card, index), path => {
-    card.bannerCover = versioned(repoPathToUrl(path));
-    renderCards();
-  }));
-  const bannerPreview = el('img');
-  bannerPreview.alt = '精选横幅预览';
-  bannerPreview.style.cssText = 'width:100%;max-width:450px;aspect-ratio:3/1;object-fit:cover;object-position:center;display:block;margin-top:8px';
-  const syncBanner = () => {
-    const url = siteAssetUrl(bannerInput.value.trim());
-    bannerPreview.hidden = !url;
-    if (url) bannerPreview.src = url; else bannerPreview.removeAttribute('src');
-  };
-  bannerInput.addEventListener('input', syncBanner);
-  syncBanner();
-  banner.box.append(bannerUpload, bannerPreview);
-
-  const media = section(details, '视频', '填了就在卡片和弹窗里显示「播放视频」按钮；不填则只显示封面。');
-  renderVideoEditor(media.grid, card.video, (v) => { if (v) card.video = v; else delete card.video; });
-
-  const links = section(details, '平台链接与联系方式',
-    '点开卡片后，底部出现的那排平台按钮。值是网址就跳转；是纯文本（例如 QQ 群号）就点了复制到剪贴板。'
-    + '每个入口都是独立的，填了视频也不会自动多出按钮——要哪个就加哪个。'
-    + '「链接或内容」留空、或勾了「暂不开放」，前台都会画成灰色的「待发布」。'
-    + '这排按钮平时折在卡片里，你在管理台选中哪张卡，画布上就会把那张卡的入口行展开。');
-  renderAccessEditor(links.box, card.access, (a) => { if (a) card.access = a; else delete card.access; });
-
-  const show = section(details, '显示');
-  field(show.grid, '精选', bind(checkbox(card.featured), (v) => { card.featured = v; renderList(); }));
-  field(show.grid, '显示', bind(checkbox(card.visible), (v) => { card.visible = v; renderList(); }));
-
+  const duplicate = actionButton('复制', 'text');
+  duplicate.addEventListener('click', () => {
+    const copy = JSON.parse(JSON.stringify(card)); copy.id = uniqueEntryId('card'); copy.name = `${card.name || '卡片'} · 副本`; copy.featured = false;
+    content.cards.splice(index + 1, 0, copy); activeIndex = index + 1; markDirty(); renderCards(); syncPreview(true);
+  });
+  shell.title.after(duplicate);
+  const display = section(details, '发布状态');
+  field(display.grid, '在橱柜显示', bind(checkbox(card.visible !== false), value => { card.visible = value; renderCardRail(); }));
+  field(display.grid, '加入精选横幅', bind(checkbox(card.featured === true), value => { card.featured = value; renderCardRail(); }));
+  const basic = section(details, '卡片内容');
+  field(basic.grid, '作品名称', bind(textInput(card.name), value => { card.name = value; shell.title.textContent = value || '未命名卡片'; renderCardRail(); }));
+  field(basic.grid, '卡片简介', bind(textArea(card.summary, '显示在卡片中的简短介绍'), value => { card.summary = value; }));
+  field(basic.grid, '展开后的详细介绍', bind(textArea(card.details, '点开卡片后显示'), value => { card.details = value; }));
+  imageEditor(details, '普通封面', card.cover, coverSlot(card, index), value => { card.cover = value; }, { alt: card.coverAlt, onAlt: value => { card.coverAlt = value; } });
+  imageEditor(details, '精选横幅', card.bannerCover, bannerSlot(card, index), value => { card.bannerCover = value; }, { optional: true, alt: card.bannerAlt, onAlt: value => { card.bannerAlt = value; } });
+  const filters = section(details, '筛选与署名');
+  field(filters.grid, '创作者 / 伙伴', bind(textInput(card.partnerName, '创作者名称，可被搜索'), value => { card.partnerName = value; }));
+  const category = textInput(card.category, '选择已有分类，或输入新分类');
+  category.setAttribute('list', 'cabinetCategories');
+  const suggestions = el('datalist'); suggestions.id = 'cabinetCategories';
+  for (const text of [...new Set((content.cards || []).map(item => item.category).filter(Boolean))]) { const option = el('option'); option.value = text; suggestions.append(option); }
+  field(filters.grid, '橱柜分类', bind(category, value => { card.category = value.trim(); renderCardRail(); })); filters.grid.append(suggestions);
+  filters.grid.append(el('p', 'hint field-wide', '对应官网左侧展开的分类列表。相同分类会自动合并。'));
+  checkGroupField(filters.grid, '支持的运行系统', CARD_PLATFORMS.map(item => item.value), card.platforms, values => { card.platforms = values; markDirty(); }, value => CARD_PLATFORMS.find(item => item.value === value).label);
+  tagEditor(filters.grid, card.tags, values => { card.tags = values; });
+  const media = section(details, '卡片内播放的视频');
+  renderVideoEditor(media.grid, card.video, value => { if (value) card.video = value; else delete card.video; });
+  const links = section(details, '展开后的平台入口');
+  links.box.append(el('p', 'hint', '下方按钮与上面的视频分别配置。入口文字、开放状态和点击后的行为会实时显示。'));
+  renderAccessEditor(links.box, card.access, value => { if (value) card.access = value; else delete card.access; });
   return details;
 }
 
 // 轮播只需编辑官网真正读取的字段。ID 由程序生成、视频轮播不渲染，都不再暴露。
 function bannerEditor(banner, index) {
-  const shell = editorShell(index, banner.title || '未命名', () => { content.banners.splice(index, 1); renderBanners(); });
+  const shell = editorShell(index, banner.title || '未命名轮播', () => { content.banners.splice(index, 1); renderBanners(); });
   const details = shell.details;
-
   const text = section(details, '轮播文案');
-  field(text.grid, '标题', bind(textArea(banner.title), (v) => { banner.title = v; shell.title.textContent = `${index + 1}. ${v || '未命名'}`; renderList(); }));
-  field(text.grid, '圆点文字', bind(textInput(banner.label), (v) => (banner.label = v)));
-  field(text.grid, '简介', bind(textArea(banner.summary), (v) => (banner.summary = v)));
-
-  const action = section(details, '按钮', '留空按钮文字就不显示按钮。');
-  field(action.grid, '按钮文字', bind(textInput(banner.linkLabel), (v) => (banner.linkLabel = v)));
-  field(action.grid, '跳转分类', bind(textInput(banner.category, '留空＝全部'), (v) => (banner.category = v)));
-
-  const links = section(details, '平台链接与联系方式',
-    '留空则按钮跳转到橱柜；填了内容，按钮就改为打开信息面板，并在面板里列出这些平台入口。'
-    + '每个入口都是独立的，填了视频也不会自动多出按钮。'
-    + '「链接或内容」留空、或勾了「暂不开放」，前台都会画成灰色的「待发布」。');
-  renderAccessEditor(links.box, banner.access, (a) => { if (a) banner.access = a; else delete banner.access; });
-
-  const show = section(details, '显示');
-  field(show.grid, '显示', bind(checkbox(banner.visible), (v) => { banner.visible = v; renderList(); }));
-
-  return details;
+  field(text.grid, '轮播标题', bind(textArea(banner.title), value => { banner.title = value; shell.title.textContent = value || '未命名轮播'; renderList(); }));
+  field(text.grid, '轮播导航文字', bind(textInput(banner.label), value => { banner.label = value; }));
+  field(text.grid, '轮播简介', bind(textArea(banner.summary), value => { banner.summary = value; }));
+  const action = section(details, '轮播按钮');
+  const label = textInput(banner.linkLabel, '未配置平台入口时，留空可隐藏按钮');
+  field(action.grid, '按钮文字', bind(label, value => { banner.linkLabel = value; }));
+  const categoryWrap = el('div', 'grid field-wide');
+  const category = textInput(banner.category, '留空进入全部创意'); category.setAttribute('list', 'bannerCategories');
+  const options = el('datalist'); options.id = 'bannerCategories';
+  for (const value of [...new Set((content.cards || []).map(card => card.category).filter(Boolean))]) { const option = el('option'); option.value = value; options.append(option); }
+  field(categoryWrap, '进入橱柜后筛选的分类', bind(category, value => { banner.category = value.trim(); })); categoryWrap.append(options); action.grid.append(categoryWrap);
+  const feedback = el('p', 'action-feedback'); action.box.append(feedback);
+  const refresh = () => {
+    const hasAccess = Boolean(banner.access?.items?.length);
+    categoryWrap.hidden = hasAccess;
+    label.placeholder = hasAccess ? '留空使用「获取信息」' : '留空隐藏轮播按钮';
+    feedback.textContent = hasAccess ? '点击轮播按钮后展示下方平台入口。' : '点击轮播按钮后进入创意橱柜，并应用上方分类。';
+  };
+  const links = section(details, '轮播按钮中的平台入口');
+  renderAccessEditor(links.box, banner.access, value => { if (value) banner.access = value; else delete banner.access; refresh(); });
+  const show = section(details, '发布状态');
+  field(show.grid, '在信息页显示', bind(checkbox(banner.visible !== false), value => { banner.visible = value; renderList(); }));
+  refresh(); return details;
 }
 
 // ---------- 二进制上传：先暂存，随「保存并发布」一起提交 ----------
@@ -1473,9 +1528,119 @@ function viewItems(view = activeView) {
   return null;
 }
 
+function uniqueEntryId(prefix) {
+  return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`}`;
+}
+function addCard() {
+  const cards = content.cards ||= [];
+  const card = LIST_VIEWS.cards.create(); card.id = uniqueEntryId('card');
+  cards.push(card); activeIndex = cards.length - 1;
+  markDirty(); renderCards(); syncPreview(true);
+  $('cardRail').lastElementChild?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+function selectCard(index) {
+  if (!content.cards?.[index]) return;
+  activeIndex = index; renderCardRail(); renderForm(); $('formBody').scrollTop = 0; syncPreview(true);
+}
+function reorderCard(from, to) {
+  const cards = content.cards || [];
+  if (from === to || from < 0 || to < 0 || from >= cards.length || to >= cards.length) return false;
+  const selected = cards[activeIndex];
+  const [moved] = cards.splice(from, 1); cards.splice(to, 0, moved);
+  activeIndex = Math.max(0, cards.indexOf(selected));
+  markDirty(); renderCardRail(); renderForm(); syncPreview();
+  setStatus(`已调整「${moved.name || '卡片'}」的顺序，保存后同步到官网。`, 'ok');
+  return true;
+}
+function bindCardSort(handle, tile, from) {
+  handle.addEventListener('keydown', event => {
+    const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+    if (step === undefined) return;
+    event.preventDefault();
+    if (reorderCard(from, from + step)) $('cardRail').querySelector(`[data-card-index="${from + step}"] .dock-grip`)?.focus();
+  });
+  handle.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || busy) return;
+    event.preventDefault();
+    const pointerId = event.pointerId;
+    const rail = $('cardRail');
+    let target = from, moved = false, lastX = event.clientX, scrollFrame = 0;
+    const markTarget = x => {
+      const tiles = [...rail.querySelectorAll('[data-card-index]')];
+      let distance = Infinity;
+      for (const candidate of tiles) {
+        const rect = candidate.getBoundingClientRect(), delta = Math.abs(x - (rect.left + rect.width / 2));
+        if (delta < distance) { distance = delta; target = Number(candidate.dataset.cardIndex); }
+        candidate.removeAttribute('data-drop');
+      }
+      const drop = tiles.find(candidate => Number(candidate.dataset.cardIndex) === target);
+      if (drop && target !== from) drop.dataset.drop = target > from ? 'after' : 'before';
+    };
+    const autoscroll = () => {
+      if (moved) {
+        const rect = rail.getBoundingClientRect();
+        const speed = lastX < rect.left + 40 ? -9 : lastX > rect.right - 40 ? 9 : 0;
+        if (speed) { rail.scrollLeft += speed; markTarget(lastX); }
+      }
+      scrollFrame = requestAnimationFrame(autoscroll);
+    };
+    const move = next => {
+      if (next.pointerId !== pointerId) return;
+      lastX = next.clientX;
+      if (!moved && Math.abs(next.clientX - event.clientX) < 5) return;
+      moved = true; document.body.classList.add('sorting'); tile.dataset.dragging = '';
+      markTarget(lastX);
+    };
+    const finish = next => {
+      if (next.pointerId !== pointerId) return;
+      cancelAnimationFrame(scrollFrame);
+      window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', finish); window.removeEventListener('pointercancel', finish);
+      window.removeEventListener('blur', cancel);
+      document.body.classList.remove('sorting'); tile.removeAttribute('data-dragging');
+      rail.querySelectorAll('[data-drop]').forEach(node => node.removeAttribute('data-drop'));
+      if (moved && next.type !== 'pointercancel') reorderCard(from, target);
+    };
+    const cancel = () => finish({ pointerId, type: 'pointercancel' });
+    window.addEventListener('blur', cancel);
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', finish); window.addEventListener('pointercancel', finish);
+    scrollFrame = requestAnimationFrame(autoscroll);
+  });
+}
+function renderCardRail() {
+  const dock = $('cardDock'), rail = $('cardRail');
+  dock.hidden = activeView !== 'cards';
+  if (dock.hidden) return;
+  const scroll = rail.scrollLeft;
+  const cards = content.cards || [];
+  $('dockCount').textContent = `· ${cards.length} 张`;
+  rail.replaceChildren();
+  const add = el('button', 'dock-add'); add.type = 'button'; add.append(el('span', '', '＋'), document.createTextNode('添加卡片')); add.addEventListener('click', addCard); rail.append(add);
+  cards.forEach((card, index) => {
+    const tile = el('div', 'dock-card'); tile.setAttribute('role', 'listitem'); tile.dataset.cardIndex = index;
+    if (index === activeIndex) tile.dataset.active = '';
+    const select = el('button', 'dock-select'); select.type = 'button'; select.setAttribute('aria-label', `编辑卡片：${card.name || '未命名'}`); select.setAttribute('aria-pressed', String(index === activeIndex));
+    const thumb = el('span', 'dock-image');
+    if (card.cover) { const image = el('img'); image.src = siteAssetUrl(card.cover); image.alt = ''; image.draggable = false; thumb.append(image); } else thumb.textContent = '待上传封面';
+    const meta = el('span', 'dock-meta');
+    for (const [text, cls] of [[card.visible === false ? '已隐藏' : '', 'pill--off'], [card.featured ? '精选' : '', 'pill--on'], [card.category || '未分类', '']]) if (text) meta.append(el('span', `pill ${cls}`, text));
+    select.append(thumb, el('span', 'dock-name', card.name || '未命名'), meta); select.addEventListener('click', () => selectCard(index));
+    select.addEventListener('keydown', event => {
+      const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+      if (step === undefined) return;
+      event.preventDefault();
+      const next = Math.min(cards.length - 1, Math.max(0, index + step));
+      if (event.altKey) reorderCard(index, next); else selectCard(next);
+      rail.querySelector(`[data-card-index="${event.altKey ? next : activeIndex}"] .dock-select`)?.focus();
+    });
+    const handle = el('button', 'dock-grip', '⠿'); handle.type = 'button'; handle.setAttribute('aria-label', `拖动排序：${card.name || '未命名'}`); handle.title = '左右拖动排序；也可用方向键移动';
+    bindCardSort(handle, tile, index); tile.append(select, handle); rail.append(tile);
+  });
+  rail.scrollLeft = scroll;
+}
+
 const LIST_VIEWS = {
   banners: {
-    title: '信息页轮播',
+    title: '轮播内容',
     count: (n) => `${n} 条`,
     name: (b) => (b.title ? String(b.title).replace(/\s+/g, ' ').trim() : '未命名'),
     meta: (b) => [
@@ -1507,7 +1672,7 @@ const LIST_VIEWS = {
       return img;
     },
     addLabel: '添加卡片',
-    create: () => ({ id: 'card-' + Date.now(), name: '新卡片', summary: '', cover: '', bannerCover: '', bannerAlt: '', category: '互动组件', partnerName: '', platforms: ['HarmonyOS'], tags: [], visible: true }),
+    create: () => ({ id: 'card-' + Date.now(), name: '新卡片', summary: '', cover: '', bannerCover: '', bannerAlt: '', category: '', partnerName: '', platforms: ['HarmonyOS'], tags: [], featured: false, visible: true }),
   },
 
   // 以下区块只有一项，但左栏照样列一行——列表始终在，右侧始终是它的细节。
@@ -1563,16 +1728,19 @@ const LIST_VIEWS = {
 function renderList() {
   const spec = LIST_VIEWS[activeView];
   const list = $('list');
-  if (!spec) {
-    // 只有还没载入内容的极端情况会走到这里；正常每个区块都有列表。
-    list.hidden = true;
-    return;
-  }
+  const available = viewItems() || [];
+  activeIndex = Math.min(Math.max(0, activeIndex), Math.max(0, available.length - 1));
+  const isBanners = activeView === 'banners' && infoMode === 'banners';
+  $('infoTabs').hidden = activeView !== 'banners';
+  $('infoTabs').querySelectorAll('[data-info]').forEach(button => button.setAttribute('aria-selected', String(button.dataset.info === infoMode)));
+  $('inspector').dataset.list = isBanners ? 'on' : 'off';
+  list.hidden = !isBanners;
+  renderCardRail();
+  if (!isBanners || !spec) return;
   const items = viewItems() || [];
   activeIndex = Math.min(Math.max(0, activeIndex), Math.max(0, items.length - 1));
   // 只有能添加条目的区块才需要「列表项」面板。弹窗、Rive 翻译、Rive 动画入口、
   // 官网 JSON、访问令牌这些都只有一条，右栏直接就是它的细节，不空占一块。
-  $('inspector').dataset.list = spec.addLabel ? 'on' : 'off';
   list.hidden = false;
   $('listTitle').textContent = spec.title;
   $('listCount').textContent = spec.count(items.length);
@@ -1597,7 +1765,7 @@ function renderList() {
     row.append(el('span', 'entry-grip', '⠿'));
     if (thumb) row.append(thumb);
     row.append(main);
-    row.addEventListener('click', () => { activeIndex = index; renderList(); renderForm(); syncPreview(); });
+    row.addEventListener('click', () => { activeIndex = index; renderList(); renderForm(); $('formBody').scrollTop = 0; syncPreview(true); });
     rows.append(row);
   });
   const foot = $('listFoot');
@@ -1607,7 +1775,7 @@ function renderList() {
   add.type = 'button';
   add.addEventListener('click', () => {
     const arr = viewItems();
-    arr.push(spec.create());
+    const item = spec.create(); item.id = uniqueEntryId('banner'); arr.push(item);
     activeIndex = arr.length - 1;
     markDirty();
     renderList();
@@ -1623,8 +1791,9 @@ function renderForm() {
     const items = viewItems() || [];
     const box = $(activeView === 'banners' ? 'bannerForm' : 'cardForm');
     box.replaceChildren();
+    if (activeView === 'banners' && infoMode === 'contact') { box.append(contactEditor()); return; }
     const item = items[activeIndex];
-    if (!item) { box.append(el('div', 'hint', '左边还没有条目，点「＋」新建一条。')); return; }
+    if (!item) { box.append(el('div', 'empty-editor', activeView === 'cards' ? '点击预览底栏的「添加卡片」，开始创建作品。' : '点击上方「添加横幅」，开始编辑信息页。')); return; }
     box.append(activeView === 'banners' ? bannerEditor(item, activeIndex) : cardEditor(item, activeIndex));
     return;
   }
@@ -1652,6 +1821,7 @@ const PREVIEW_TARGETS = {
   token: { scrollTo: '.showcase-section', hint: '首页' },
 };
 let previewTimer = null;
+let previewFocusPending = true;
 function previewContent() {
   const draft = JSON.parse(JSON.stringify(content));
   const replaceAsset = (url) => {
@@ -1666,26 +1836,32 @@ function previewContent() {
   }
   return draft;
 }
-function syncPreview() {
+function syncPreview(focus = false) {
+  previewFocusPending ||= focus;
   const frame = $('previewFrame');
-  const target = PREVIEW_TARGETS[activeView] || {};
+  const target = PREVIEW_TARGETS[activeView === 'banners' && infoMode === 'contact' ? 'contact' : activeView] || {};
   $('previewHint').textContent = target.hint || '';
   if (!frame?.contentWindow || !content) return;
   const page = target.page || 'index.html';
   if (frame.dataset.page !== page) {
     frame.dataset.page = page;
-    frame.src = '../site/' + page + '?t=' + Date.now();
+    frame.src = '../site/' + page + '?adminPreview=1&t=' + Date.now();
     return;
   }
   window.clearTimeout(previewTimer);
   previewTimer = window.setTimeout(() => {
     try {
       const card = activeView === 'cards' ? (viewItems() || [])[activeIndex] : null;
+      const focusPreview = previewFocusPending; previewFocusPending = false;
+      const activity = activeView === 'banners' && infoMode === 'banners' ? content.banners?.[activeIndex] : null;
       frame.contentWindow.postMessage({
         type: 'qianji:preview',
         content: previewContent(),
         options: {
-          scrollTo: target.scrollTo || null,
+          scrollTo: focusPreview && (!card || activeIndex === 0) ? target.scrollTo || null : null,
+          focusPreview,
+          preserveScroll: !focusPreview,
+          previewActivity: activity?.id || null,
           showNotice: target.showNotice === true,
           showInformation: target.showInformation === true,
           // 入口行平时折在卡片里。告诉画布正在编辑哪张卡，让它把那一行露出来，
@@ -1699,22 +1875,22 @@ function syncPreview() {
 function initPreview() {
   const frame = $('previewFrame');
   if (!frame) return;
-  frame.addEventListener('load', () => syncPreview());
+  frame.addEventListener('load', () => syncPreview(true));
   // 预览 iframe 加时间戳：GitHub Pages 对 index.html 也设了 max-age=600，
   // 不加的话 iframe 可能拿到缓存里的旧首页，进而引用旧的 app.js / styles.css，
   // 表现就是「管理台改了、官网代码也改了，画布却没反应」。
   frame.dataset.page = 'index.html';
-  frame.src = '../site/index.html?t=' + Date.now();
+  frame.src = '../site/index.html?adminPreview=1&t=' + Date.now();
 }
 
 // ---------- 可拖拽面板 ----------
 // 面板宽度只存在 CSS 变量里。拖拽条改的是变量，布局代码不用知道有拖拽这回事。
 const PANELS = {
-  nav: { prop: '--nav-w', min: 150, max: 320, fallback: 184, axis: 'x' },
+  nav: { prop: '--nav-w', min: 110, max: 260, fallback: 160, axis: 'x' },
   // 右栏在最右侧，指针往左拖才是变宽，所以方向要反过来。
-  inspector: { prop: '--inspector-w', min: 320, max: 820, fallback: 460, axis: 'x', invert: true },
+  inspector: { prop: '--inspector-w', min: 280, max: 720, fallback: 380, axis: 'x', invert: true },
   // 右栏内部：列表高度，上下拖动。
-  entries: { prop: '--entries-h', min: 96, max: 640, fallback: 240, axis: 'y' },
+  entries: { prop: '--entries-h', min: 96, max: 400, fallback: 200, axis: 'y' },
 };
 
 function panelWidth(name) {
@@ -1730,7 +1906,6 @@ function setPanelWidth(name, width, persist = true) {
   if (persist) {
     try { localStorage.setItem('oneFuzhuPanel.' + name, String(clamped)); } catch { /* 隐私模式下忽略 */ }
   }
-  layoutCanvas();
   return clamped;
 }
 
@@ -1754,8 +1929,11 @@ function bindGutters() {
       dragging = false;
       gutter.removeAttribute('data-dragging');
       document.body.style.cursor = '';
+      document.body.classList.remove('resizing');
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+      window.removeEventListener('blur', stop);
     };
     gutter.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
@@ -1765,9 +1943,12 @@ function bindGutters() {
       startWidth = panelWidth(name);
       gutter.setAttribute('data-dragging', '');
       document.body.style.cursor = horizontal ? 'row-resize' : 'col-resize';
+      document.body.classList.add('resizing');
       // 指针很容易拖出这条 5px 的窄条，监听必须挂在 window 上。
       window.addEventListener('pointermove', move);
       window.addEventListener('pointerup', stop);
+      window.addEventListener('pointercancel', stop);
+      window.addEventListener('blur', stop);
     });
     // 键盘也能调：方向键 16px 一档，Home / End 到最小 / 最大，双击复位。
     gutter.addEventListener('keydown', (event) => {
@@ -1792,38 +1973,8 @@ function restorePanels() {
   });
 }
 
-// ---------- 中心画布 ----------
-// 画布就是官网本身。设备按钮只决定 iframe 用多宽渲染；装不下就整体缩放。
-// 用 zoom 而不是 transform:scale —— zoom 会同时改变布局尺寸，不会留下多余空白。
-let deviceWidth = 1280;
-
-function layoutCanvas() {
-  const stage = $('canvasStage');
-  const frame = $('canvasFrame');
-  if (!stage || !frame) return;
-  const pad = 24;
-  const availWidth = Math.max(240, stage.clientWidth - pad);
-  const availHeight = Math.max(240, stage.clientHeight - pad);
-  const target = deviceWidth > 0 ? deviceWidth : availWidth;
-  const scale = Math.min(1, availWidth / target);
-  frame.style.width = target + 'px';
-  frame.style.zoom = String(scale);
-  frame.style.height = Math.round(availHeight / scale) + 'px';
-}
-
-function bindDevices() {
-  const buttons = Array.from(document.querySelectorAll('#devices .device'));
-  const apply = (width) => {
-    deviceWidth = width;
-    buttons.forEach((button) => button.toggleAttribute('data-active', Number(button.dataset.width) === width));
-    try { localStorage.setItem('oneFuzhuDeviceWidth', String(width)); } catch { /* 忽略 */ }
-    layoutCanvas();
-  };
-  buttons.forEach((button) => button.addEventListener('click', () => apply(Number(button.dataset.width))));
-  let stored = NaN;
-  try { stored = parseFloat(localStorage.getItem('oneFuzhuDeviceWidth')); } catch { /* 忽略 */ }
-  apply(Number.isFinite(stored) ? stored : 1280);
-}
+// ---------- 中心预览 ----------
+// 无设备模拟和缩放，iframe 始终填满中栏的实际空间。
 
 function filteredTranslationTerms() {
   const query = $('translationSearch').value.trim().toLocaleLowerCase();
@@ -1951,10 +2102,11 @@ function renderAll() {
   // 先让当前区块可见，再画它。其余区块交给 selectTab 在切换时按需重画，
   // 不必在这里全渲染一遍（那会留下一堆看不见的旧副本）。
   applyVisibility(activeView);
+  setNavActive(activeView);
   renderList();
   renderForm();
   renderNavBadges();
-  syncPreview();
+  syncPreview(true);
 }
 
 // 左侧栏直接标出条目数，不用点进去才知道有多少。
@@ -2035,7 +2187,8 @@ function selectTab(which) {
   renderList();
   renderForm();
   if (which === 'translations') renderTranslations();
-  syncPreview();
+  $('formBody').scrollTop = 0;
+  syncPreview(true);
   return true;
 }
 
@@ -2045,7 +2198,7 @@ function linkSchemeOk(value) {
 function httpUrlOk(value) {
   const raw = String(value).trim();
   if (!/^https?:\/\/\S+$/i.test(raw)) return false;
-  try { return ['http:', 'https:'].includes(new URL(raw).protocol); } catch { return false; }
+  try { const url = new URL(raw); return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password; } catch { return false; }
 }
 
 function validateContent(value) {
@@ -2066,8 +2219,8 @@ function validateContent(value) {
         throw new Error(`${entry.id} 的 ${key} 必须是字符串数组`);
       }
     }
-    if (entry.video != null && (typeof entry.video !== 'object' || !entry.video.platform || !entry.video.id)) {
-      throw new Error(`${entry.id} 的 video 缺少 platform 或 id`);
+    if (entry.video != null && !videoIsValid(entry.video)) {
+      throw new Error(`${entry.name || entry.title || entry.id} 的视频无法识别，请填写有效的哔哩哔哩、YouTube 或抖音视频链接/编号`);
     }
     // 封面图只有卡片支持，而且是必填的：视频可以没有，封面不能没有。
     // 折叠时卡片显示的就是封面，缺了它就是一块空白。
@@ -2085,13 +2238,14 @@ function validateContent(value) {
     if (entry.access != null) {
       if (typeof entry.access !== 'object' || !Array.isArray(entry.access.items)) throw new Error(`${entry.id} 的 access.items 必须是数组`);
       entry.access.items.forEach((item, itemIndex) => {
-        if (!item || typeof item !== 'object' || (!String(item.url || '').trim() && !String(item.value || '').trim())) {
-          throw new Error(`${entry.id} 的访问入口 ${itemIndex + 1} 缺少链接或值`);
+        if (!item || typeof item !== 'object' || Array.isArray(item) || !PLATFORM_OPTIONS.includes(item.platform)) {
+          throw new Error(`${entry.name || entry.title || entry.id} 的第 ${itemIndex + 1} 个入口需要选择官网支持的平台`);
         }
         // url 会被站点渲染成可点击链接，必须是 http(s) 地址；纯文本（群号、iframe 代码等）应当填在 value。
         if (String(item.url || '').trim() && !httpUrlOk(item.url)) {
           throw new Error(`${entry.id} 的访问入口 ${itemIndex + 1} 的 url 不是 http(s) 链接，纯文本请填在 value 字段`);
         }
+        if (item.value && item.copyable !== false && item.platform !== 'qq' && /^[a-z][a-z\d+.-]*:/i.test(item.value) && !httpUrlOk(item.value)) throw new Error(`${entry.id} 的入口内容不是有效的网页链接或可复制文本`);
         if (item.copyable != null && typeof item.copyable !== 'boolean') {
           throw new Error(`${entry.id} 的访问入口 ${itemIndex + 1} 的 copyable 必须是布尔值`);
         }
@@ -2230,6 +2384,9 @@ function currentUploadRefs() {
     if (!clean.startsWith('site/assets/')) return;
     if (!refs.has(base)) refs.set(base, new Set());
     refs.get(base).add(clean);
+    const sourceBase = clean.replace(/\.[A-Za-z0-9]+$/, '');
+    if (!refs.has(sourceBase)) refs.set(sourceBase, new Set());
+    refs.get(sourceBase).add(clean);
   };
   add(CONFIG.uploads.heroRive.base, content.hero?.rive?.src);
   add(CONFIG.uploads.noticeImage.base, content.notice?.image);
@@ -2339,6 +2496,11 @@ async function initialize() {
     catch (e) { setStatus('加载失败：' + friendlyError(e), 'err'); }
   });
   $('saveBtn').addEventListener('click', save);
+  document.addEventListener('keydown', event => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault(); if (dirty && !busy) save();
+    }
+  });
   // 左栏切换区块：点击选中；方向键在区块之间移动。
   const items = navItems();
   items.forEach((item) => {
@@ -2360,11 +2522,15 @@ async function initialize() {
   initPreview();
   bindGutters();
   restorePanels();
-  bindDevices();
-  layoutCanvas();
-  // 画布尺寸变化（拖拽条、窗口缩放、列表显隐）都要重算缩放。
-  if (window.ResizeObserver) new ResizeObserver(() => layoutCanvas()).observe($('canvasStage'));
-  else window.addEventListener('resize', layoutCanvas);
+  $('infoTabs').querySelectorAll('[data-info]').forEach(button => button.addEventListener('click', () => {
+    infoMode = button.dataset.info; renderList(); renderForm(); $('formBody').scrollTop = 0; syncPreview(true);
+  }));
+  $('cardRail').addEventListener('wheel', event => {
+    const rail = $('cardRail');
+    if (Math.abs(event.deltaX) >= Math.abs(event.deltaY) || rail.scrollWidth <= rail.clientWidth) return;
+    const canScroll = event.deltaY > 0 ? rail.scrollLeft < rail.scrollWidth - rail.clientWidth - 1 : rail.scrollLeft > 0;
+    if (canScroll) { event.preventDefault(); rail.scrollLeft += event.deltaY; }
+  }, { passive: false });
   // 上传按钮由编辑器渲染，切换区块时会重建，所以代理绑一次就够。
   $('formBody').addEventListener('click', (event) => {
     const button = event.target.closest('#uploadHeroRive, #uploadNoticeImage');
