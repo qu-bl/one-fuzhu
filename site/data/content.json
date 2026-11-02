@@ -150,41 +150,6 @@
   ],
   "cards": [
     {
-      "id": "image-binding-cards",
-      "name": "RIVE中文系列课程",
-      "summary": "rive101系列官方课，中文译制版",
-      "details": "rive101 系列官方课程的中文译制版，从 Rive 基础到互动设计，配合调试台与编辑器，适合零基础到进阶创作者。",
-      "partnerName": "千机百变官方",
-      "category": "模板与示例",
-      "platforms": [
-        "Apple",
-        "Android",
-        "HarmonyOS"
-      ],
-      "tags": [
-        "课程系列",
-        "测试"
-      ],
-      "featured": false,
-      "visible": true,
-      "video": {
-        "platform": "bilibili",
-        "id": "BV1NahH6SEfV"
-      },
-      "access": {
-        "items": [
-          {
-            "platform": "bilibili",
-            "label": "B站",
-            "url": "https://www.bilibili.com/video/BV1NahH6SEfV/?share_source=copy_web&vd_source=14eadbe419c9f5bda683a4a89fdd03a5"
-          }
-        ]
-      },
-      "cover": "./assets/cover-image-binding-cards.avif?v=1791188188462",
-      "bannerCover": "./assets/banner-image-binding-cards.avif?v=1793611642712",
-      "bannerAlt": ""
-    },
-    {
       "id": "card-1793449583904",
       "name": "长荷专注",
       "summary": "24h颜色变化，天气变化，可设置为壁纸。",
@@ -197,7 +162,8 @@
         "Apple"
       ],
       "tags": [
-        "专注"
+        "专注",
+        "壁纸"
       ],
       "visible": true,
       "access": {
@@ -232,7 +198,43 @@
         "专注"
       ],
       "visible": true,
-      "details": "点击中心展开四叶草的倒计时表盘。点击周围区域可以收起表盘，可以当作动态壁纸加载"
+      "details": "点击中心展开四叶草的倒计时表盘。点击周围区域可以收起表盘，可以当作动态壁纸加载",
+      "featured": true
+    },
+    {
+      "id": "image-binding-cards",
+      "name": "RIVE中文系列课程",
+      "summary": "rive101系列官方课，中文译制版",
+      "details": "rive101 系列官方课程的中文译制版，从 Rive 基础到互动设计，配合调试台与编辑器，适合零基础到进阶创作者。",
+      "partnerName": "千机百变官方",
+      "category": "模板与示例",
+      "platforms": [
+        "Apple",
+        "Android",
+        "HarmonyOS"
+      ],
+      "tags": [
+        "课程系列",
+        "测试"
+      ],
+      "featured": false,
+      "visible": true,
+      "video": {
+        "platform": "bilibili",
+        "id": "BV1NahH6SEfV"
+      },
+      "access": {
+        "items": [
+          {
+            "platform": "bilibili",
+            "label": "B站",
+            "url": "https://www.bilibili.com/video/BV1NahH6SEfV/?share_source=copy_web&vd_source=14eadbe419c9f5bda683a4a89fdd03a5"
+          }
+        ]
+      },
+      "cover": "./assets/cover-image-binding-cards.avif?v=1791188188462",
+      "bannerCover": "",
+      "bannerAlt": ""
     }
   ]
 }
