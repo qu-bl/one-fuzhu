@@ -98,6 +98,21 @@ await test('legacy link and copy notices retain their implicit close action', ()
   }
 });
 
+await test('legacy text alignment cannot offset labels while button positions stay independent', () => {
+  const h = setup();
+  h.context.poster = {};
+  h.context.notice = { buttons: [
+    { label: '左上按钮', actions: ['close'], buttonPosition: 'top-left', textPosition: 'bottom-right', textOffsetX: 25, textOffsetY: 30 },
+    { label: '右下按钮', actions: ['close'], buttonPosition: 'bottom-right', textPosition: 'top-left' },
+  ] };
+  h.inspect('renderNoticeActions(notice, poster)');
+  const groups = h.inspect('noticeActions.children');
+  assert.deepEqual(Array.from(groups, group => group.dataset.position), ['top-left', 'bottom-right']);
+  assert.equal(groups[0].style['--notice-button-x'], '0%');
+  assert.equal(groups[1].style['--notice-button-x'], '100%');
+  for (const group of groups) assert.equal(group.children[0].children[0].style.transform, undefined);
+});
+
 await test('blank clicks, repeated Escape and cancel requests never dismiss an idle poster', () => {
   const h = setup();
   h.dispatch('click'); h.dispatch('cancel'); h.dispatch('cancel');
@@ -196,6 +211,17 @@ await test('admin migrates legacy fields without losing colors or nine-grid posi
 await test('admin accepts independent buttons and image-only close entry', () => {
   validate(notice([button(['link']), button(['close'])]));
   const value = notice([]); value.imageAction = { actions: ['link', 'close'], linkHref: 'https://example.com/' }; validate(value);
+});
+
+await test('admin drops obsolete text positions while retaining button positions, colors and actions', () => {
+  const value = validate(notice([
+    button(['link', 'close'], { buttonPosition: 'top-left', textPosition: 'bottom-right', textOffsetX: 12, textOffsetY: -9, buttonColor: '#fff', textColor: '#123' }),
+    button(['close'], { buttonPosition: 'bottom-right', textPosition: 'top-left' }),
+  ]));
+  assert.deepEqual(value.buttons.map(item => item.buttonPosition), ['top-left', 'bottom-right']);
+  assert.equal(value.buttons[0].buttonColor, '#fff'); assert.equal(value.buttons[0].textColor, '#123');
+  assert.deepEqual(value.buttons[0].actions, ['link', 'close']);
+  for (const item of value.buttons) for (const key of ['textPosition', 'textOffsetX', 'textOffsetY']) assert.equal(key in item, false);
 });
 
 await test('admin rejects a poster with no configured close entry', () => {

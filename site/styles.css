@@ -550,7 +550,7 @@ html:has(body.information-open) { background: var(--profile-accent); scrollbar-c
 [data-page="showcase"] .app-page { padding-top: calc(var(--cabinet-top-gap) + max(env(safe-area-inset-top, 0px), var(--app-safe-area-top))); }
 .showcase-controls { top: calc(var(--cabinet-top-gap) + max(env(safe-area-inset-top, 0px), var(--app-safe-area-top))); }
 
-.notice-button-label { display: inline-block; white-space: pre-wrap; }
+.notice-button-label { display: inline-block; min-width: 0; white-space: pre-wrap; text-align: center; }
 
 .notice-actions .banner-action { overflow: visible; }
 .notice-actions .banner-action:hover, .notice-actions .banner-action:active { transform: none; }

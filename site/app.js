@@ -1617,8 +1617,6 @@ function renderNoticeActions(notice, image) {
       group.style.alignItems = ['flex-start', 'center', 'flex-end'][index % 3];
       groups.set(position, group); noticeActions.append(group);
     }
-    const textIndex = positions.includes(button.textPosition) ? positions.indexOf(button.textPosition) : 4;
-    label.style.transform = `translate(${(textIndex % 3 - 1) * 8}px, ${(Math.floor(textIndex / 3) - 1) * 6}px)`;
     const validColor = value => typeof value === 'string' && /^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent)$/i.test(value);
     if (validColor(button.buttonColor)) action.style.backgroundColor = button.buttonColor;
     if (validColor(button.textColor)) action.style.color = button.textColor;
