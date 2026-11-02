@@ -311,6 +311,7 @@ a.contact-method:hover { background: var(--md-sys-color-surface-container-highes
 .featured-viewport { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "slide"; }
 .featured-slide { grid-area: slide; margin: 0; opacity: 0; visibility: hidden; }
 .featured-slide.is-active { opacity: 1; visibility: visible; }
+.featured-carousel[data-rotating="false"] .featured-slide { transition: none; }
 @media (prefers-reduced-motion: no-preference) {
   .featured-slide { transition: opacity 440ms var(--ease-out), visibility 0s linear 440ms; }
   .featured-slide.is-active { transition: opacity 440ms var(--ease-out), visibility 0s; }

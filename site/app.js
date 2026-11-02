@@ -817,7 +817,7 @@ function createCaseCard(item, index, options = {}) {
   trigger.addEventListener("click", event => {
     if (expandedCard || event.target.closest("button, a, iframe")) return;
     // A horizontal swipe that changed slides should not also open the card.
-    if (isFeatured && Date.now() - featured.lastSwipe < 400) return;
+    if (isFeatured && featured.slides.length > 1 && Date.now() - featured.lastSwipe < 400) return;
     expandCard(trigger);
   });
   trigger.addEventListener("keydown", event => {
@@ -859,6 +859,7 @@ function createCaseCard(item, index, options = {}) {
     poster.src = item.bannerCover || item.cover;
     poster.alt = item.bannerAlt || item.coverAlt || `${item.name}精选海报`;
     poster.decoding = "async";
+    poster.draggable = false;
     trigger.prepend(poster);
   }
   card.__item = item;
@@ -894,6 +895,7 @@ function setFeatured(index, announce = false) {
 
 function scheduleFeatured() {
   window.clearTimeout(featured.timer);
+  featured.timer = null;
   if (featured.paused || featured.slides.length < 2 || document.hidden || expandedCard) return;
   featured.timer = window.setTimeout(() => setFeatured(featured.index + 1), 6000);
 }
@@ -901,6 +903,7 @@ function scheduleFeatured() {
 function pauseFeatured() {
   featured.paused = true;
   window.clearTimeout(featured.timer);
+  featured.timer = null;
 }
 
 function resumeFeatured() {
@@ -910,20 +913,25 @@ function resumeFeatured() {
 
 function destroyFeatured() {
   window.clearTimeout(featured.timer);
+  featured.timer = null;
   featured.index = 0;
   featured.paused = false;
   featured.slides = [];
   featured.dots = [];
   featured.status = null;
+  featured.lastSwipe = 0;
 }
 
 // The featured banner is the first tile of the waterfall: it spans every column
 // and cycles through all cards marked "featured" in data/content.json.
 function createFeaturedCarousel(items) {
+  const rotating = items.length > 1;
   const wrapper = document.createElement("div");
   wrapper.className = "featured-carousel";
-  wrapper.setAttribute("role", "listitem");
+  wrapper.dataset.rotating = String(rotating);
+  wrapper.setAttribute("role", "group");
   wrapper.setAttribute("aria-label", "卡片精选");
+  if (rotating) wrapper.setAttribute("aria-roledescription", "轮播");
 
   const viewport = document.createElement("div");
   viewport.className = "featured-viewport";
@@ -937,7 +945,7 @@ function createFeaturedCarousel(items) {
 
   featured.slides = [];
   featured.dots = [];
-  featured.status = status;
+  featured.status = rotating ? status : null;
 
   items.forEach((item, index) => {
     const card = createCaseCard(item, index, { featured: true });
@@ -946,16 +954,19 @@ function createFeaturedCarousel(items) {
     viewport.append(card);
     featured.slides.push(card);
 
-    const dot = document.createElement("button");
-    dot.type = "button";
-    dot.className = "featured-dot";
-    dot.setAttribute("aria-label", `显示精选：${item.name}`);
-    dot.addEventListener("click", () => setFeatured(index, true));
-    dots.append(dot);
-    featured.dots.push(dot);
+    if (rotating) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "featured-dot";
+      dot.setAttribute("aria-label", `显示精选：${item.name}`);
+      dot.addEventListener("click", () => setFeatured(index, true));
+      dots.append(dot);
+      featured.dots.push(dot);
+    }
   });
 
-  wrapper.append(viewport, dots, status);
+  wrapper.append(viewport);
+  if (rotating) wrapper.append(dots, status);
   setFeatured(0, false);
   return wrapper;
 }
@@ -964,7 +975,7 @@ function bindFeaturedControls() {
   if (!featuredBanners) return;
   let startX = null;
   featuredBanners.addEventListener("pointerdown", event => {
-    if (!event.isPrimary || expandedCard || !event.target.closest(".featured-carousel")) return;
+    if (!event.isPrimary || featured.slides.length < 2 || expandedCard || !event.target.closest(".featured-carousel")) return;
     startX = event.clientX;
     pauseFeatured();
   });
@@ -972,7 +983,7 @@ function bindFeaturedControls() {
     if (startX === null) return;
     const delta = event.clientX - startX;
     startX = null;
-    if (Math.abs(delta) > 48) {
+    if (featured.slides.length > 1 && Math.abs(delta) > 48) {
       featured.lastSwipe = Date.now();
       setFeatured(featured.index + (delta < 0 ? 1 : -1), true);
     }
@@ -982,6 +993,13 @@ function bindFeaturedControls() {
     if (startX === null) return;
     startX = null;
     resumeFeatured();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && startX !== null) {
+      startX = null;
+      featured.paused = false;
+    }
+    scheduleFeatured();
   });
 }
 
