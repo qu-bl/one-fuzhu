@@ -67,4 +67,61 @@ await test('a failed save retains both image variants and leaves the draft retry
  assert.match(h.statuses.at(-1).message,/发布失败/);assert.equal(h.statuses.at(-1).kind,'err');
  assert.equal(h.requests.some(x=>x.method==='PATCH'),false);
 });
+function selectionHarness() {
+ const callbacks=[],revoked=[],inputs=[];
+ let resolvePrepared,rejectPrepared;
+ const prepared=new Promise((resolve,reject)=>{resolvePrepared=resolve;rejectPrepared=reject;});
+ const ctx=vm.createContext({busy:false,processingUpload:false,activeView:'cards',processingImagePreviews:new Map(),syncPreview(){},callbacks,
+  el(){const node={events:{},files:[{name:'sample.png',size:5}],removed:false,addEventListener(type,run){this.events[type]=run;},remove(){this.removed=true;},click(){}};inputs.push(node);return node;},
+  document:{body:{append(){}}},URL:{createObjectURL:()=> 'blob:selection',revokeObjectURL:url=>revoked.push(url)},
+  setStatus(message){callbacks.push(['status',message]);},setBusy(value){ctx.busy=value;},markDirty(){callbacks.push(['dirty']);},
+  prepareUpload:()=>prepared,stagePreparedUpload:async()=>{callbacks.push(['stage']);return {path:'site/assets/banner.avif',bytes:5,count:2};},
+ });
+ vm.runInContext(between('function stageUpload(', '\nfunction uploadHeroRive('),ctx);
+ const start=(onPreview=()=>callbacks.push(['preview']),onError=error=>callbacks.push(['error',error.message]))=>{
+  ctx.stageUpload({base:'site/assets/banner',convertToAvif:true,exts:['.png']},path=>callbacks.push(['committed',path]),{onPreview,onError});
+  return inputs.at(-1).events.change();
+ };
+ return {ctx,inputs,callbacks,revoked,start,resolvePrepared,rejectPrepared};
+}
+await test('selection shows its local preview immediately while conversion is pending',async()=>{
+ const h=selectionHarness(),task=h.start();
+ assert.equal(h.callbacks.some(x=>x[0]==='preview'),true);
+ assert.equal(h.callbacks.some(x=>x[0]==='committed'),false);
+ assert.equal(h.inputs[0].removed,false);assert.equal(h.ctx.busy,true);assert.equal(h.ctx.processingUpload,true);
+ assert.equal(h.ctx.processingImagePreviews.get('site/assets/banner'),'blob:selection');
+ h.resolvePrepared({file:{size:5}});await task;
+ assert.equal(h.callbacks.some(x=>x[0]==='committed'),true);
+ assert.ok(h.callbacks.findIndex(x=>x[0]==='preview')<h.callbacks.findIndex(x=>x[0]==='committed'));
+ assert.equal(h.inputs[0].removed,true);assert.equal(h.ctx.busy,false);assert.equal(h.ctx.processingUpload,false);
+ assert.deepEqual(h.revoked,['blob:selection']);assert.equal(h.ctx.processingImagePreviews.size,0);
+});
+await test('opening the JSON panel during conversion cannot save an old image reference',async()=>{
+ const h=selectionHarness(),task=h.start();
+ h.ctx.activeView='raw';h.ctx.refreshRaw=()=>h.callbacks.push(['raw-refreshed']);
+ h.resolvePrepared({file:{size:5}});await task;
+ const commit=h.callbacks.findIndex(x=>x[0]==='committed'),refresh=h.callbacks.findIndex(x=>x[0]==='raw-refreshed'),dirty=h.callbacks.findIndex(x=>x[0]==='dirty');
+ assert.ok(commit>=0&&refresh>commit&&dirty>refresh);
+});
+await test('conversion failure reports the actual cause, releases its preview and never stages an invalid image',async()=>{
+ const h=selectionHarness(),task=h.start();h.rejectPrepared(Error('decoder failed'));await task;
+ assert.equal(h.callbacks.some(x=>x[0]==='committed'||x[0]==='stage'||x[0]==='dirty'),false);
+ assert.ok(h.callbacks.some(x=>x[0]==='error'&&x[1]==='decoder failed'));
+ assert.equal(h.ctx.busy,false);assert.equal(h.ctx.processingUpload,false);assert.equal(h.inputs[0].removed,true);
+ assert.deepEqual(h.revoked,['blob:selection']);assert.equal(h.ctx.processingImagePreviews.size,0);
+});
+await test('uploads without image preview hooks retain the existing Rive and notice workflow',async()=>{
+ const h=selectionHarness();h.ctx.stageUpload({exts:['.png']},()=>h.callbacks.push(['committed']));
+ const task=h.inputs[0].events.change();h.resolvePrepared({file:{size:5}});await task;
+ assert.equal(h.callbacks.some(x=>x[0]==='committed'),true);assert.equal(h.ctx.busy,false);assert.equal(h.inputs[0].removed,true);
+});
+await test('the full website preview can show a new image during conversion without mutating saved content',()=>{
+ const source={cards:[{id:'sample',cover:'./assets/cover-sample.avif',bannerCover:''}],notice:{image:'./assets/notice.avif'}};
+ const previews=new Map([['site/assets/banner-sample','blob:original-image']]);
+ const ctx=vm.createContext({content:source,processingImagePreviews:previews,uploadPreviews:new Map(),CONFIG:{uploads:{cardCover:{},noticeImage:{base:'site/assets/notice'}}}});
+ vm.runInContext(between('function safeId(', 'function uploadCardCover(')+between('function previewContent(', 'function syncPreview('),ctx);
+ const original=JSON.stringify(source),draft=ctx.previewContent();
+ assert.equal(draft.cards[0].bannerCover,'blob:original-image');assert.equal(JSON.stringify(source),original);
+ previews.clear();assert.equal(ctx.previewContent().cards[0].bannerCover,'');
+});
 console.log(`${checks} admin upload/save checks passed.`);

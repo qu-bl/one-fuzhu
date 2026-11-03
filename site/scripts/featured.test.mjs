@@ -46,6 +46,14 @@ function setup() {
 let checks = 0;
 function test(label, run) { try { run(); checks++; } catch (error) { error.message = `${label}: ${error.message}`; throw error; } }
 
+test('editing a featured poster pauses rotation and leaving it resumes rotation', () => {
+  const h = setup(); h.create(2);
+  h.featured.previewId = 'selected'; h.context.scheduleFeatured();
+  assert.equal(h.timers.size, 0);
+  h.featured.previewId = null; h.context.scheduleFeatured();
+  assert.equal(h.timers.size, 1);
+});
+
 test('one featured item is a static poster with no timer or carousel controls', () => {
   const h = setup(), wrapper = h.create(1);
   assert.equal(wrapper.dataset.rotating, 'false');

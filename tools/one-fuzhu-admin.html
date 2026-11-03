@@ -255,12 +255,15 @@
   .advanced summary{cursor:pointer;padding:5px 0;color:var(--ink-3)}
   .advanced .grid{margin-top:8px}
   .image-upload{display:flex;flex-direction:column;gap:8px}
-  .image-upload-button{position:relative;width:100%;height:150px;border-radius:8px;overflow:hidden;background:var(--field);color:var(--pri);padding:0;display:grid;place-items:center;font-size:12px}
-  .image-upload-button img{width:100%;height:100%;object-fit:contain;display:block}
+  .image-upload-button{position:relative;width:100%;height:150px;border-radius:8px;overflow:hidden;background:var(--field);color:var(--pri);padding:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:center;font-size:12px}
+  .image-upload-button img{width:100%;height:100%;min-width:0;min-height:0;object-fit:contain;display:block}
   .image-upload-button::after{content:'更换图片';position:absolute;right:8px;bottom:8px;padding:5px 9px;border-radius:5px;background:rgb(255 255 255 / .94);font-size:11px}
   .image-upload-button[data-empty]::after{display:none}
   .image-caption{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;color:var(--ink-3)}
   .image-caption .btn{min-height:24px;font-size:11px;padding:0 8px}
+  .image-upload-state{font-size:12px;line-height:1.6;color:var(--ink-2);overflow-wrap:anywhere}
+  .image-upload-state:empty{display:none}
+  .image-upload-state[data-error]{color:var(--err)}
   .tag-editor{display:flex;gap:6px;flex-wrap:wrap}
   .tag-editor .pill{display:flex;align-items:center;gap:5px;font-size:12px;line-height:26px}
   .tag-editor .pill button{padding:0 2px;color:var(--ink-2)}
@@ -532,6 +535,8 @@ const TRANSLATION_PAGE_SIZE = 80;
 const pendingUploads = new Map();
 // 本地预览与提交内容分开保存，blob 地址绝不写进仓库。
 const uploadPreviews = new Map();
+// Original-image previews exist only during conversion and never enter saved content.
+const processingImagePreviews = new Map();
 function clearUploadPreviews() {
   for (const url of uploadPreviews.values()) URL.revokeObjectURL(url);
   uploadPreviews.clear();
@@ -957,19 +962,33 @@ function imageEditor(parent, title, value, slot, onChange, { optional = false, a
   const wrap = el('div', 'image-upload');
   const upload = el('button', 'image-upload-button'); upload.type = 'button'; upload.setAttribute('aria-label', `上传${title}`);
   const path = textInput(value || '', './assets/image.avif');
+  const progress = el('div', 'image-upload-state'); progress.setAttribute('role', 'status');
   const update = () => {
     const url = siteAssetUrl(path.value.trim()); upload.replaceChildren(); upload.toggleAttribute('data-empty', !url);
     if (url) { const image = el('img'); image.alt = title; upload.append(imagePicture(image, url)); }
     else upload.textContent = `＋ 上传${title}`;
   };
-  upload.addEventListener('click', () => stageUpload(slot, file => { path.value = versioned(repoPathToUrl(file)); onChange(path.value); update(); renderCardRail(); }));
+  upload.addEventListener('click', () => stageUpload(slot, file => {
+    path.value = versioned(repoPathToUrl(file)); onChange(path.value); update(); renderCardRail();
+    progress.textContent = '图片已暂存，等待「保存并发布」。'; progress.removeAttribute('data-error');
+  }, {
+    onPreview: (url, file) => {
+      const image = el('img'); image.alt = title;
+      image.addEventListener('error', () => { image.hidden = true; });
+      image.src = url; upload.replaceChildren(image); upload.removeAttribute('data-empty');
+      progress.textContent = `已选择「${file.name}」，正在处理图片…`; progress.removeAttribute('data-error');
+    },
+    onError: error => {
+      update(); progress.textContent = '图片未暂存：' + error.message; progress.setAttribute('data-error', '');
+    }
+  }));
   const caption = el('div', 'image-caption'); caption.append(el('span', '', optional ? '仅精选时使用；留空沿用封面' : 'AVIF + WebP 备用图 · 保留原图比例'));
   if (optional) { const clear = actionButton('清除', 'text'); clear.addEventListener('click', () => { path.value = ''; onChange(''); markDirty(); update(); }); caption.append(clear); }
   const advanced = el('details', 'advanced'); advanced.append(el('summary', '', '图片地址与说明'));
   const grid = el('div', 'grid'); field(grid, '图片地址', path);
   path.addEventListener('input', () => { onChange(path.value.trim()); markDirty(); update(); renderCardRail(); });
   if (onAlt) field(grid, '图片说明（可选）', bind(textInput(alt), onAlt));
-  advanced.append(grid); wrap.append(upload, caption, advanced); sectionNode.box.append(wrap); update();
+  advanced.append(grid); wrap.append(upload, progress, caption, advanced); sectionNode.box.append(wrap); update();
 }
 
 function editorShell(index, label, onDelete) {
@@ -1118,11 +1137,11 @@ function siteAssetUrl(url) {
 // 加版本号，避免 GitHub Pages 缓存导致替换文件后站点仍拿到旧内容。
 function versioned(url) { return url ? url.split('?')[0] + '?v=' + Date.now() : url; }
 
-// AVIF 编解码在独立线程中按需加载；不支持 AVIF 的后台也能生成备用图。
+// 图片编解码在独立线程中按需加载，不依赖浏览器自带的 AVIF/WebP 编码能力。
 function avifTask(task, payload, transfer) {
   const workerUrl = /^https?:$/.test(location.protocol)
-    ? new URL('./image-avif-worker.js?v=2', location.href).href
-    : `https://${CONFIG.owner}.github.io/${CONFIG.repo}/tools/image-avif-worker.js?v=2`;
+    ? new URL('./image-avif-worker.js?v=3', location.href).href
+    : `https://${CONFIG.owner}.github.io/${CONFIG.repo}/tools/image-avif-worker.js?v=3`;
   const bootstrap = URL.createObjectURL(new Blob([`import ${JSON.stringify(workerUrl)};`], { type: 'text/javascript' }));
   return new Promise((resolve, reject) => {
     let worker, timer;
@@ -1145,11 +1164,21 @@ async function encodeAvif(imageData) {
   const result = await avifTask('encode', { pixels: imageData.data, width: imageData.width, height: imageData.height }, [imageData.data.buffer]);
   return new Blob([result.buffer], { type: 'image/avif' });
 }
-function encodeWebp(canvas) {
-  return new Promise((resolve, reject) => canvas.toBlob(blob => {
-    if (blob?.type === 'image/webp' && blob.size) resolve(blob);
-    else reject(new Error('当前浏览器无法生成 WebP 备用图，请更换浏览器后上传'));
-  }, 'image/webp', .9));
+async function encodeWebp(canvas) {
+  let native;
+  try { native = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', .9)); } catch {}
+  // Some browsers decode WebP but silently return PNG from canvas.toBlob().
+  if (native?.type === 'image/webp' && native.size) return native;
+  setStatus('正在使用兼容方式生成 WebP 备用图…');
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('浏览器无法读取图片像素，请重新选择图片');
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+  const result = await avifTask('webp', { pixels: pixels.data, width: pixels.width, height: pixels.height }, [pixels.data.buffer]);
+  const bytes = new Uint8Array(result.buffer);
+  if (bytes.length < 12 || String.fromCharCode(...bytes.subarray(0, 4)) !== 'RIFF' || String.fromCharCode(...bytes.subarray(8, 12)) !== 'WEBP') {
+    throw new Error('WebP 备用图生成失败，请重试');
+  }
+  return new Blob([result.buffer], { type: 'image/webp' });
 }
 async function prepareUpload(file, slot, ext) {
   const convert = slot.convertToAvif && ext !== '.avif';
@@ -1230,33 +1259,48 @@ async function stagePreparedUpload(slot, prepared) {
   return { path: slot.base + prepared.ext, bytes: variants.reduce((sum, variant) => sum + variant.file.size, 0), count: variants.length };
 }
 
-function stageUpload(slot, onStaged) {
+function stageUpload(slot, onStaged, { onPreview, onError } = {}) {
   const input = el('input');
   input.type = 'file';
   input.accept = slot.exts.join(',');
   input.addEventListener('change', async () => {
     const file = input.files && input.files[0];
-    input.remove();
-    if (!file) return;
+    if (!file) { input.remove(); return; }
     const match = String(file.name).match(/\.[A-Za-z0-9]+$/);
     const ext = match ? match[0].toLowerCase() : '';
     if (!slot.exts.includes(ext)) {
+      input.remove();
       setStatus(`只支持 ${slot.exts.join(' / ')} 格式`, 'err');
       return;
     }
-    if (busy) { setStatus('正在处理文件，请稍后再试', 'err'); return; }
+    if (busy) { input.remove(); setStatus('正在处理文件，请稍后再试', 'err'); return; }
     processingUpload = true;
     setBusy(true);
+    let previewUrl;
     try {
       setStatus('正在处理上传文件…');
+      if (slot.convertToAvif || onPreview) {
+        previewUrl = URL.createObjectURL(file);
+        processingImagePreviews.set(slot.base, previewUrl);
+        onPreview?.(previewUrl, file);
+        syncPreview();
+      }
       const prepared = await prepareUpload(file, slot, ext);
       const staged = await stagePreparedUpload(slot, prepared);
       onStaged(staged.path, prepared.file.size);
+      // The JSON panel may have been opened while conversion was running.
+      // Refresh its snapshot so saving there cannot restore the previous image URL.
+      if (activeView === 'raw') refreshRaw();
       markDirty();
       setStatus(`已暂存 ${staged.count > 1 ? 'AVIF 和 WebP 两份图片' : staged.path}（共 ${(staged.bytes / 1024).toFixed(0)} KB），尚未发布。请点右上角「保存并发布」；刷新或重新加载会放弃暂存文件。`, 'ok');
     } catch (error) {
+      onError?.(error);
       setStatus('读取文件失败：' + error.message, 'err');
     } finally {
+      input.remove();
+      processingImagePreviews.delete(slot.base);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      syncPreview();
       processingUpload = false;
       setBusy(false);
     }
@@ -1886,15 +1930,16 @@ let previewTimer = null;
 let previewFocusPending = true;
 function previewContent() {
   const draft = JSON.parse(JSON.stringify(content));
-  const replaceAsset = (url) => {
+  const replaceAsset = (url, base) => {
+    if (base && processingImagePreviews.has(base)) return processingImagePreviews.get(base);
     const clean = String(url || '').split('?')[0].trim();
     return uploadPreviews.get('site/' + clean.replace(/^\.\//, '')) || url;
   };
   if (draft.hero?.rive?.src) draft.hero.rive.src = replaceAsset(draft.hero.rive.src);
-  if (draft.notice?.image) draft.notice.image = replaceAsset(draft.notice.image);
-  for (const card of draft.cards || []) {
-    if (card.cover) card.cover = replaceAsset(card.cover);
-    if (card.bannerCover) card.bannerCover = replaceAsset(card.bannerCover);
+  if (draft.notice) draft.notice.image = replaceAsset(draft.notice.image, CONFIG.uploads.noticeImage.base);
+  for (const [index, card] of (draft.cards || []).entries()) {
+    if (card.cover || processingImagePreviews.has(coverSlot(card, index).base)) card.cover = replaceAsset(card.cover, coverSlot(card, index).base);
+    if (card.bannerCover || processingImagePreviews.has(bannerSlot(card, index).base)) card.bannerCover = replaceAsset(card.bannerCover, bannerSlot(card, index).base);
   }
   return draft;
 }

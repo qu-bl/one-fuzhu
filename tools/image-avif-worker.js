@@ -3,6 +3,19 @@ import { defaultOptions } from './vendor/avif/meta.js';
 // One worker per upload keeps encoding off the UI thread and releases WASM memory afterwards.
 self.onmessage = async ({ data: { task = 'encode', pixels, width, height, buffer: input } }) => {
   try {
+    if (task === 'webp') {
+      const [{ default: createWebpEncoder }, { defaultOptions: webpOptions }] = await Promise.all([
+        import('./vendor/webp/webp_enc.js'), import('./vendor/webp/meta.js')
+      ]);
+      const encoder = await createWebpEncoder();
+      const encoded = encoder.encode(pixels, width, height, {
+        ...webpOptions, quality: 90, alpha_quality: 100, exact: 1
+      });
+      if (!encoded?.length) throw new Error('WebP 备用图生成失败，请重试');
+      const buffer = encoded.slice().buffer;
+      self.postMessage({ buffer }, [buffer]);
+      return;
+    }
     if (task === 'decode') {
       const { default: createDecoder } = await import('./vendor/avif/avif_dec.js');
       const decoder = await createDecoder();
@@ -25,6 +38,6 @@ self.onmessage = async ({ data: { task = 'encode', pixels, width, height, buffer
     const buffer = encoded.slice().buffer;
     self.postMessage({ buffer }, [buffer]);
   } catch (error) {
-    self.postMessage({ error: error.message || 'AVIF 转换失败，请重试' });
+    self.postMessage({ error: error.message || '图片转换失败，请重试' });
   }
 };

@@ -894,7 +894,7 @@ function setFeatured(index, announce = false) {
 function scheduleFeatured() {
   window.clearTimeout(featured.timer);
   featured.timer = null;
-  if (featured.paused || featured.slides.length < 2 || document.hidden || expandedCard) return;
+  if (featured.paused || featured.previewId || featured.slides.length < 2 || document.hidden || expandedCard) return;
   featured.timer = window.setTimeout(() => setFeatured(featured.index + 1), 6000);
 }
 
@@ -918,6 +918,7 @@ function destroyFeatured() {
   featured.dots = [];
   featured.status = null;
   featured.lastSwipe = 0;
+  featured.previewId = null;
 }
 
 // The featured banner is the first tile of the waterfall: it spans every column
@@ -1842,6 +1843,12 @@ function applyContent(content, options = {}) {
     const index = state.activities.findIndex(activity => activity.id === options.previewActivity);
     if (index >= 0) setActivity(index, false);
   }
+
+  // Keep the selected featured work visible while editing its artwork.
+  const previewFeaturedIndex = featured.slides.findIndex(card => card.dataset.id === options.previewAccess);
+  featured.previewId = previewFeaturedIndex >= 0 ? options.previewAccess : null;
+  if (previewFeaturedIndex >= 0) setFeatured(previewFeaturedIndex, false);
+  else scheduleFeatured();
 
   const targetCardId = reopenedCardId;
   const target = targetCardId ? state.cases.find((entry) => entry.id === targetCardId) : null;

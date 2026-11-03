@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import vm from 'node:vm';
 import createDecoder from '../../tools/vendor/avif/avif_dec.js';
+import createWebpEncoder from '../../tools/vendor/webp/webp_enc.js';
+import {defaultOptions as webpOptions} from '../../tools/vendor/webp/meta.js';
 
 const media = readFileSync(new URL('../media.js', import.meta.url), 'utf8');
 const admin = readFileSync(new URL('../../tools/one-fuzhu-admin.html', import.meta.url), 'utf8');
@@ -66,7 +68,7 @@ const uploads = vm.createContext({ Blob, Uint8Array, Uint8ClampedArray, DataView
   pendingUploads, uploadPreviews, setStatus() {},
 });
 vm.runInContext(between(admin, 'function bytesToBase64(', '// 与官网保持相同')
-  + between(admin, 'function encodeWebp(', '\nfunction stageUpload('), uploads);
+  + between(admin, 'async function encodeWebp(', '\nfunction stageUpload('), uploads);
 const prepared = { file: new Blob(['avif'], { type: 'image/avif' }), ext: '.avif', backup: { file: new Blob(['webp'], { type: 'image/webp' }), ext: '.webp' } };
 await test('one upload stages both images together and a repeated upload replaces both', async () => {
   const slot = { base: 'site/assets/notice' };
@@ -90,8 +92,50 @@ await test('Rive uploads remain a single untouched file', async () => {
   const result = await uploads.stagePreparedUpload({ base: 'site/assets/hero' }, { file: new Blob(['rive']), ext: '.riv' });
   assert.equal(result.count, 1); assert.equal(pendingUploads.get('site/assets/hero.riv'), 'cml2ZQ==');
 });
-await test('an unsupported WebP encoder rejects PNG output rather than mislabelling it', async () => {
-  await assert.rejects(uploads.encodeWebp({ toBlob(callback) { callback(new Blob(['png'], { type: 'image/png' })); } }), /WebP/);
+const webpEncoder=await createWebpEncoder({wasmBinary:readFileSync(new URL('../../tools/vendor/webp/webp_enc.wasm',import.meta.url))});
+const samplePixels=new Uint8ClampedArray([40,180,70,0,40,180,70,128,40,180,70,128,40,180,70,0]);
+const encodedWebp=webpEncoder.encode(samplePixels,2,2,{...webpOptions,quality:90,alpha_quality:100,exact:1}).slice();
+const webpResult=()=>({buffer:encodedWebp.slice().buffer});
+let fallbackCalls=0;
+function fallbackWorker(task,payload,transfer){
+ assert.equal(task,'webp');assert.equal(payload.width,2);assert.equal(payload.height,2);
+ assert.deepEqual(Array.from(payload.pixels),Array.from(samplePixels));assert.equal(transfer[0],payload.pixels.buffer);
+ fallbackCalls++;return Promise.resolve(webpResult());
+}
+function fallbackCanvas(output){return {width:2,height:2,toBlob(callback){if(output==='throw')throw Error('no canvas encoder');callback(output);},getContext(){return {getImageData(){return {data:samplePixels.slice(),width:2,height:2};}};}};}
+uploads.avifTask=fallbackWorker;
+await test('native WebP encoding remains the fast path without loading a worker',async()=>{
+ const native=new Blob([encodedWebp],{type:'image/webp'}),before=fallbackCalls;
+ assert.equal(await uploads.encodeWebp(fallbackCanvas(native)),native);assert.equal(fallbackCalls,before);
+});
+await test('browsers that silently return PNG automatically use the compatible WebP encoder',async()=>{
+ const backup=await uploads.encodeWebp(fallbackCanvas(new Blob(['png'],{type:'image/png'})));
+ assert.equal(backup.type,'image/webp');const bytes=Buffer.from(await backup.arrayBuffer());
+ assert.equal(bytes.toString('ascii',0,4),'RIFF');assert.equal(bytes.toString('ascii',8,12),'WEBP');
+});
+await test('null native canvas output falls back instead of failing the upload',async()=>{
+ const before=fallbackCalls;const backup=await uploads.encodeWebp(fallbackCanvas(null));
+ assert.equal(fallbackCalls,before+1);assert.equal(backup.type,'image/webp');
+});
+await test('a native canvas encoding exception also falls back',async()=>{
+ const before=fallbackCalls;const backup=await uploads.encodeWebp(fallbackCanvas('throw'));
+ assert.equal(fallbackCalls,before+1);assert.equal(backup.type,'image/webp');
+});
+await test('a fallback worker can never pass PNG bytes off as WebP',async()=>{
+ uploads.avifTask=async()=>({buffer:new TextEncoder().encode('not a webp image').buffer});
+ await assert.rejects(uploads.encodeWebp(fallbackCanvas(null)),/WebP/);uploads.avifTask=fallbackWorker;
+});
+await test('a failed fallback retains the real error for the retryable upload UI',async()=>{
+ uploads.avifTask=async()=>{throw Error('encoder unavailable');};
+ await assert.rejects(uploads.encodeWebp(fallbackCanvas(null)),/encoder unavailable/);uploads.avifTask=fallbackWorker;
+});
+await test('the actual portable WebP encoder preserves dimensions and writes an alpha channel',()=>{
+ const pixels=new Uint8Array(32*24*4);
+ for(let i=0;i<32*24;i++){pixels[i*4]=40;pixels[i*4+1]=180;pixels[i*4+2]=70;pixels[i*4+3]=i<32*12?0:128;}
+ const bytes=Buffer.from(webpEncoder.encode(pixels,32,24,{...webpOptions,quality:90,alpha_quality:100,exact:1}));
+ assert.equal(bytes.toString('ascii',0,4),'RIFF');assert.equal(bytes.toString('ascii',8,12),'WEBP');
+ assert.equal(bytes.toString('ascii',12,16),'VP8X');assert.equal(bytes[20]&16,16);
+ assert.equal(bytes.readUIntLE(24,3)+1,32);assert.equal(bytes.readUIntLE(27,3)+1,24);
 });
 
 const slot = { convertToAvif: true, maxBytes: 4194304 };

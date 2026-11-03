@@ -123,7 +123,7 @@ function previewHarness() {
     document: { hidden: false, querySelectorAll: () => [], querySelector: () => null },
     informationScroll: { scrollTop: 120 }, accessDialog: { open: false },
     requestAnimationFrame: frame => frames.push(frame),
-    setActivity: index => activityChanges.push(index),
+    setActivity: index => activityChanges.push(index), featured: { slides: [] }, scheduleFeatured() {},
     initHeroRive() {}, renderContact() {}, renderActivities() {}, renderFilters() {}, renderCases() {}, initNotice() {},
   });
   const start = site.indexOf('let previewScrollVersion =');
@@ -132,6 +132,16 @@ function previewHarness() {
   const flush = () => { while (frames.length) frames.shift()(); };
   return { preview, frames, scrolls, activityChanges, flush };
 }
+test('the website preview selects the featured poster matching the edited card', () => {
+  const h = previewHarness(), selected = [];
+  h.preview.featured.slides = [{ dataset: { id: 'first' } }, { dataset: { id: 'selected' } }];
+  h.preview.CSS = { escape: value => value };
+  h.preview.setFeatured = index => selected.push(index);
+  vm.runInContext('applyContent(value, { previewAccess: "selected" })', h.preview);
+  assert.deepEqual(selected, [1]); assert.equal(h.preview.featured.previewId, 'selected');
+  vm.runInContext('applyContent(value, {})', h.preview);
+  assert.equal(h.preview.featured.previewId, null);
+});
 test('editing restores scroll after masonry layout without moving to the selected card', () => {
   const h = previewHarness();
   vm.runInContext('applyContent(value, { preserveScroll: true })', h.preview);
