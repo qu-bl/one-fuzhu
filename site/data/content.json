@@ -68,11 +68,19 @@
   "banners": [
     {
       "id": "discover",
-      "label": "发现创意",
-      "title": "我是谁",
-      "summary": "发现设计师的互动作品与趣味工具，让每一块屏幕，都有属于自己的精彩。",
-      "linkLabel": "探索创意作品",
-      "visible": true
+      "label": "我是谁",
+      "title": "千机百变是什么",
+      "summary": "借助rive与js实现底层技术。致力于超越wallpaperengine、klwg、kwgt成为全新一代美化工具。",
+      "linkLabel": "加入我们",
+      "visible": true,
+      "access": {
+        "items": [
+          {
+            "platform": "qq",
+            "value": "862835994"
+          }
+        ]
+      }
     },
     {
       "id": "custom",
