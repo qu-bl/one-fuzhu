@@ -1,5 +1,40 @@
 /* Shared data contract for external links and official video embeds. */
 (function (root) {
+  // Uploaded AVIF assets always have a same-name WebP companion. Do not guess
+  // companion URLs for externally hosted or manually embedded images.
+  function imageSources(value) {
+    const primary = String(value || '');
+    let fallback = '';
+    if (/\.avif(?:[?#]|$)/i.test(primary)) {
+      try {
+        const base = globalThis.location?.href || 'https://qu-bl.github.io/one-fuzhu/site/';
+        const url = new URL(primary, base);
+        if ((url.origin === new URL(base).origin || url.origin === 'https://qu-bl.github.io')
+          && /\/site\/assets\/[^/]+\.avif$/i.test(url.pathname)) {
+          fallback = primary.replace(/\.avif(?=[?#]|$)/i, '.webp');
+        }
+      } catch {}
+    }
+    return { primary, fallback };
+  }
+  function imagePicture(image, value) {
+    const { primary, fallback } = imageSources(value);
+    if (!fallback) { image.src = primary; return image; }
+    const picture = document.createElement('picture');
+    picture.className = 'image-picture';
+    const source = document.createElement('source');
+    source.type = 'image/avif'; source.srcset = primary;
+    // Also recover if a browser advertises AVIF but fails to decode this image.
+    image.addEventListener('error', event => {
+      if (!source.parentNode || image.currentSrc === new URL(fallback, document.baseURI).href) return;
+      event.stopImmediatePropagation();
+      source.remove(); image.src = fallback;
+    }, true);
+    image.parentNode?.replaceChild(picture, image);
+    picture.append(source, image);
+    image.src = fallback;
+    return picture;
+  }
   function webUrl(value) {
     try {
       const url = new URL(value);
@@ -35,5 +70,5 @@
     if (/^[a-z][a-z\d+.-]*:/i.test(value)) return {type:'unavailable'};
     return {type:'copy', value};
   }
-  root.SiteMedia = {webUrl, videoSource, accessAction};
+  root.SiteMedia = {webUrl, videoSource, accessAction, imageSources, imagePicture};
 })(globalThis);

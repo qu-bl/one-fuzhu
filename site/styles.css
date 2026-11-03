@@ -461,6 +461,7 @@ html[data-preview="true"] .reveal-init { opacity: 1; transform: none; transition
 
 /* Preserve the full cover: its intrinsic ratio determines each tile's height. */
 body { min-width: 0; }
+.image-picture { display: contents; }
 .case-grid .case-media:has(img) { aspect-ratio: auto; }
 .case-grid .case-media img { width: 100%; height: auto; object-fit: contain; transform: none; }
 .case-grid .case-card-trigger:hover .case-media img { transform: none; }

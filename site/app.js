@@ -229,9 +229,8 @@ function renderAccessMedia(item, accessMedia = document.querySelector("#access-m
   if (item.cover) {
     accessMedia.style.aspectRatio = "auto";
     const poster = document.createElement("img");
-    poster.src = item.cover;
     poster.alt = item.coverAlt || `${item.name || item.title}封面`;
-    accessMedia.append(poster);
+    accessMedia.append(SiteMedia.imagePicture(poster, item.cover));
     return;
   }
   // 走到这里说明是折叠状态且没有封面：这里没有可显示的东西，整块收起，
@@ -850,17 +849,16 @@ function createCaseCard(item, index, options = {}) {
   // entirely when there is neither a cover nor a video link.
   const media = fragment.querySelector(".case-media");
   if (item.cover) {
-    image.src = item.cover;
+    SiteMedia.imagePicture(image, item.cover);
     image.alt = item.coverAlt || `${item.name}案例封面`;
   }
   if (isFeatured) {
     const poster = document.createElement("img");
     poster.className = "featured-poster";
-    poster.src = item.bannerCover || item.cover;
     poster.alt = item.bannerAlt || item.coverAlt || `${item.name}精选海报`;
     poster.decoding = "async";
     poster.draggable = false;
-    trigger.prepend(poster);
+    trigger.prepend(SiteMedia.imagePicture(poster, item.bannerCover || item.cover));
   }
   card.__item = item;
   if (SiteMedia.videoSource(item.video)) renderAccessMedia(item, media, "poster");
@@ -1605,15 +1603,16 @@ async function activateNoticeButton(event, action, config) {
 
 function renderNoticeActions(notice, image) {
   const config = noticeConfiguration(notice);
+  const artwork = image.closest?.('picture') || image;
   noticeActions.replaceChildren();
   if (config.imageAction.actions.length) {
     const poster = document.createElement('button');
     poster.type = 'button'; poster.className = 'notice-image-action';
     poster.setAttribute('aria-label', `海报：${config.imageAction.actions.map(action => ({ link: '打开链接', copy: '复制内容', close: '关闭弹窗' })[action]).join('并')}`);
-    poster.append(image);
+    poster.append(artwork);
     poster.addEventListener('click', event => activateNoticeButton(event, poster, config.imageAction));
     noticeMedia.replaceChildren(poster);
-  } else noticeMedia.replaceChildren(image);
+  } else noticeMedia.replaceChildren(artwork);
   const positions = ['top-left', 'top-center', 'top-right', 'middle-left', 'center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'];
   const groups = new Map();
   config.buttons.forEach(button => {
@@ -1738,7 +1737,7 @@ function initNotice(options = {}) {
     }
   };
   image.onerror = fail;
-  image.src = notice.image;
+  SiteMedia.imagePicture(image, notice.image);
 }
 
 function renderLoadError(error) {
