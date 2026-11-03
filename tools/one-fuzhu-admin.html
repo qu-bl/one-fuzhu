@@ -174,10 +174,10 @@
 
   /* ============ ③ 表单 ============ */
   .form{flex:1;min-height:0;padding:16px 18px 48px;overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0;scrollbar-gutter:stable}
-  .status{font-size:12px;line-height:1.7;color:var(--ink-3);min-height:0;overflow-wrap:anywhere}
+  .status{flex:0 0 auto;font-size:12px;line-height:1.7;color:var(--ink-3);min-height:0;max-height:25vh;overflow:auto;overflow-wrap:anywhere;padding:10px 18px}
   .status:empty{display:none}
   /* 出错时给一块底色，否则长报错挤成一团看不清。 */
-  .status.err{background:var(--err-c);color:var(--err);padding:10px 12px;border-radius:6px}
+  .status.err{background:var(--err-c);color:var(--err)}
   .status.ok{color:var(--ok)}
   .surface{background:var(--block);padding:0}
   .editor{display:flex;flex-direction:column;gap:0}
@@ -363,8 +363,8 @@
     <div class="gutter gutter--h" data-panel="entries" data-axis="y" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="拖动调整列表高度"></div>
 
     <section class="panel panel--detail" id="detailPanel">
+      <div class="status" id="status" role="status" aria-live="polite"></div>
       <main class="form" id="formBody">
-    <div class="status" id="status" role="status" aria-live="polite"></div>
 
     <section id="viewBanners" hidden>
       <div class="surface editor" id="bannerForm"></div>
@@ -576,6 +576,7 @@ function persistTokenPreferences() {
 }
 let dirty = false;
 let busy = false;
+let processingUpload = false;
 let activeView = 'banners';
 let activeIndex = 0;   // 当前区块里选中的条目（仅列表型区块用）
 let infoMode = 'banners';
@@ -583,14 +584,13 @@ let infoMode = 'banners';
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 let statusTimer = null;
-// 「已加载」「已发布」这类只是确认一下，几秒后自己消失——一直挂着占地方，
-// 而且和别处重复（翻译条数左栏角标已经写了）。出错信息留着，需要人处理。
+// 普通确认提示稍后消失；暂存、发布结果和错误一直保留，便于核对图片是否已保存。
 const setStatus = (msg, kind = '') => {
   const s = $('status');
   s.textContent = msg;
   s.className = 'status ' + kind;
   window.clearTimeout(statusTimer);
-  if (kind === 'ok' && msg && !msg.startsWith('已暂存')) {
+  if (kind === 'ok' && msg && !msg.startsWith('已暂存') && !msg.startsWith('已发布')) {
     statusTimer = window.setTimeout(() => { s.textContent = ''; s.className = 'status'; }, 4000);
   }
 };
@@ -1105,13 +1105,14 @@ function repoPathToUrl(path) { return './' + path.replace(/^site\//, ''); }
 // content.json 里的资源路径以站点根目录为基准（./assets/…），而管理台位于 /tools/ 下，
 // 直接引用会解析成 /tools/assets/… 而 404。这里换算成站点下的可访问地址。
 function siteAssetUrl(url) {
-  const clean = String(url || '').split('?')[0].trim();
-  if (!clean) return '';
+  const value = String(url || '').trim();
+  if (!value) return '';
+  const clean = value.split(/[?#]/)[0];
   const staged = uploadPreviews.get('site/' + clean.replace(/^\.\//, ''));
   if (staged) return staged;
-  if (/^(https?:)?\/\//i.test(clean) || clean.startsWith('data:')) return clean;
+  if (/^(https?:)?\/\//i.test(value) || /^(?:data|blob):/.test(value)) return value;
   const base = location.protocol === 'file:' ? `https://${CONFIG.owner}.github.io/${CONFIG.repo}/site/` : '../site/';
-  return base + clean.replace(/^\.\//, '');
+  return base + value.replace(/^\.\//, '');
 }
 
 // 加版本号，避免 GitHub Pages 缓存导致替换文件后站点仍拿到旧内容。
@@ -1244,6 +1245,7 @@ function stageUpload(slot, onStaged) {
       return;
     }
     if (busy) { setStatus('正在处理文件，请稍后再试', 'err'); return; }
+    processingUpload = true;
     setBusy(true);
     try {
       setStatus('正在处理上传文件…');
@@ -1251,10 +1253,11 @@ function stageUpload(slot, onStaged) {
       const staged = await stagePreparedUpload(slot, prepared);
       onStaged(staged.path, prepared.file.size);
       markDirty();
-      setStatus(`已暂存 ${staged.count > 1 ? 'AVIF 和 WebP 两份图片' : staged.path}（共 ${(staged.bytes / 1024).toFixed(0)} KB），预览已更新；点「保存并发布」后才会更新网站`, 'ok');
+      setStatus(`已暂存 ${staged.count > 1 ? 'AVIF 和 WebP 两份图片' : staged.path}（共 ${(staged.bytes / 1024).toFixed(0)} KB），尚未发布。请点右上角「保存并发布」；刷新或重新加载会放弃暂存文件。`, 'ok');
     } catch (error) {
       setStatus('读取文件失败：' + error.message, 'err');
     } finally {
+      processingUpload = false;
       setBusy(false);
     }
   }, { once: true });
@@ -2630,7 +2633,7 @@ async function initialize() {
 }
 
 window.addEventListener('beforeunload', (event) => {
-  if (!dirty) return;
+  if (!dirty && !processingUpload) return;
   event.preventDefault();
   event.returnValue = '';
 });
