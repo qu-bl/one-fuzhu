@@ -25,7 +25,6 @@
         "buttonColor": "#ffffff",
         "textColor": "#a96800",
         "buttonPosition": "bottom-center",
-        "textPosition": "center",
         "id": "notice-button-1",
         "label": "复制群号",
         "actions": [
@@ -184,7 +183,7 @@
       "name": "四时草",
       "summary": "四叶草的专注壁纸，",
       "cover": "./assets/cover-card-1793610779049.avif?v=1793611662506",
-      "bannerCover": "./assets/banner-card-1793610779049.avif?v=1793611608474",
+      "bannerCover": "",
       "bannerAlt": "",
       "category": "",
       "partnerName": "官方",
