@@ -26,7 +26,7 @@
         "textColor": "#a96800",
         "buttonPosition": "bottom-center",
         "id": "notice-button-1",
-        "label": "去Q群获取所有资源包",
+        "label": "复制群号去获取所有资源包",
         "actions": [
           "link",
           "close"
