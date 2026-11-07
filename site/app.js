@@ -29,7 +29,19 @@ const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform
   ? requestedPlatform
   : null;
 
-if (!appPlatform) document.getElementById("android-apk-download")?.removeAttribute("hidden");
+const androidDownload = document.getElementById("android-apk-download");
+if (!appPlatform && androidDownload) {
+  fetch("./data/android-play-release.json")
+    .then((response) => response.ok ? response.json() : null)
+    .then((release) => {
+      const version = release?.versionName;
+      if (typeof version !== "string" || !/^[0-9]{1,6}\.[0-9]{1,6}\.[0-9]{1,6}$/.test(version)) return;
+      androidDownload.querySelector("a").href =
+        `https://github.com/qu-bl/one-fuzhu/releases/download/android-v${version}/qianji-android-arm64.apk`;
+      androidDownload.hidden = false;
+    })
+    .catch((error) => console.warn("Android download metadata unavailable", error));
+}
 
 // 站点在 content.json 缺少某些分区时（旧版 schemaVersion 1）回退到这些默认值，
 // 保证只更新站点文件、不更新内容文件时页面仍然可用。

@@ -1,0 +1,9 @@
+{
+  "versionName": "1.0.20",
+  "versionCode": 62,
+  "minSdk": 33,
+  "abi": "arm64-v8a",
+  "apkBytes": 12221141,
+  "apkSha256": "f98b7ad3f5f4f0e5d1fc1739dc01782d47c73ac6680dd2f15acb1b3646b8eda6",
+  "signingCertificateSha256": "b43ae170551e3db2ffccf0b19b3547beb518ea8c402f954cd611d7416dab5170"
+}
