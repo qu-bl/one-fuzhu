@@ -29,6 +29,8 @@ const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform
   ? requestedPlatform
   : null;
 
+if (!appPlatform) document.getElementById("android-apk-download")?.removeAttribute("hidden");
+
 // 站点在 content.json 缺少某些分区时（旧版 schemaVersion 1）回退到这些默认值，
 // 保证只更新站点文件、不更新内容文件时页面仍然可用。
 const HERO_DEFAULTS = {
