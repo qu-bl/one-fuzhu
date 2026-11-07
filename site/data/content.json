@@ -17,7 +17,7 @@
   },
   "notice": {
     "enabled": true,
-    "image": "./assets/notice.avif?v=1793449569735",
+    "image": "./assets/notice.avif?v=1794030249093",
     "buttons": [
       {
         "linkHref": "https://qm.qq.com/q/cARWUthgDC",
@@ -26,7 +26,7 @@
         "textColor": "#a96800",
         "buttonPosition": "bottom-center",
         "id": "notice-button-1",
-        "label": "复制群号",
+        "label": "去Q群获取所有资源包",
         "actions": [
           "link",
           "close"
