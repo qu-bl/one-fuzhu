@@ -31,7 +31,7 @@ const appPlatform = ["Apple", "Android", "HarmonyOS"].includes(requestedPlatform
 
 const androidDownload = document.getElementById("android-apk-download");
 if (!appPlatform && androidDownload) {
-  fetch("./data/android-play-release.json")
+  fetch("./data/android-release.json")
     .then((response) => response.ok ? response.json() : null)
     .then((release) => {
       const version = release?.versionName;
