@@ -1,11 +1,14 @@
 # 三端已核对的差异
 
-核对范围：schema v3 资源包字段、8 种 UI 组件类型及其字段、79 个公开 QVMI 观察字段（含 `app.theme.brand`）、11 个运行时触发项、30 个 JS 宿主调用和 5 个脚本注解。字段集合已对齐；下列差异是平台能力、值语义或资源处理上的实际区别。
+核对范围：schema v3 资源包字段、8 种 UI 组件类型及其字段、公开 QVMI 观察字段（含 `app.theme.brand`）、11 个运行时触发项、30 个 JS 宿主调用和 5 个脚本注解。字段集合已对齐；下列差异是平台能力、值语义或资源处理上的实际区别。
 
 | 范围 | 鸿蒙 | Android | Apple |
 | --- | --- | --- | --- |
 | `device.ambientLight.normalized` | 环境光传感器更新 | 光传感器更新 | 未注册该字段 |
 | `device.proximity.isNear`、`normalized` | 已注册 | 已注册 | iOS 已注册，macOS 不提供 |
+| `device.wallpaper.*` | 未注册 | 壁纸运行位置提供可见性、锁屏状态、交互状态、系统缩放、桌面偏移及唤醒和解锁完成事件 | 未注册 |
+
+Android 资源包在 `capabilities.observe` 声明 `device.wallpaper.*` 或所需字段。缩放与偏移来自壁纸引擎的系统回调，取值范围为 0–1，收到首次回调前没有数值。唤醒和解锁完成是一次性 Trigger，仅投递给当前订阅者。可移植资源包可用可选绑定，并在脚本中按字段可用性启用壁纸交互。
 
 `system.deviceInfo` 三端都有 35 个字段，但以下值不能视为同一语义：
 

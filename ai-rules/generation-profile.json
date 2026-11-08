@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "12.0.2",
+  "contractVersion": "12.0.3",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -517,7 +517,8 @@
         "dialog",
         "scriptUi",
         "applicationScript",
-        "packageBuilder"
+        "packageBuilder",
+        "riveEditor"
       ],
       "layout": [
         "column",
@@ -1963,7 +1964,15 @@
       "device.touch.phase": "enum",
       "device.touch.pointerId": "number",
       "system.network.isConnected": "boolean",
-      "system.network.type": "enum"
+      "system.network.type": "enum",
+      "device.wallpaper.isVisible": "boolean",
+      "device.wallpaper.isInteractive": "boolean",
+      "device.wallpaper.keyguardShowing": "boolean",
+      "device.wallpaper.zoom": "number",
+      "device.wallpaper.offsetX": "number",
+      "device.wallpaper.offsetY": "number",
+      "device.wallpaper.wake": "trigger",
+      "device.wallpaper.unlocked": "trigger"
     },
     "writablePublicPaths": [
       "app.theme.brand"
@@ -2351,6 +2360,48 @@
           "ethernet",
           "other"
         ]
+      },
+      "device.wallpaper.isVisible": {
+        "delivery": "state"
+      },
+      "device.wallpaper.isInteractive": {
+        "delivery": "state"
+      },
+      "device.wallpaper.keyguardShowing": {
+        "delivery": "state"
+      },
+      "device.wallpaper.zoom": {
+        "delivery": "state",
+        "unit": "normalized",
+        "range": [
+          0,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.wallpaper.offsetX": {
+        "delivery": "state",
+        "unit": "normalized",
+        "range": [
+          0,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.wallpaper.offsetY": {
+        "delivery": "state",
+        "unit": "normalized",
+        "range": [
+          0,
+          1
+        ],
+        "displayPrecision": 3
+      },
+      "device.wallpaper.wake": {
+        "delivery": "event"
+      },
+      "device.wallpaper.unlocked": {
+        "delivery": "event"
       }
     }
   }

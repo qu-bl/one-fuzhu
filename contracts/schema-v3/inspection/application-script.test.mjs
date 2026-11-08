@@ -14,6 +14,14 @@ export function testApplicationScript(inspect) {
   assert.deepEqual(metadata.observedValues,['app.theme.brand','device.battery.level']);
   const ui=script(sources[2]).metadata.uiSets[0];
   assert.equal(ui.slot,'applicationScript');
+  const editor = script(sources[2].replace('"applicationScript"', '"riveEditor"'));
+  assert.deepEqual(editor.errors, []);
+  const editorSet = editor.metadata.uiSets[0];
+  assert.equal(editorSet.slot, 'riveEditor');
+  const inspectEditorUi = (context, set) => inspect({kind:'ui', context, sets:[set]});
+  assert.deepEqual(inspectEditorUi('applicationScript', editorSet).errors, []);
+  assert.ok(inspectEditorUi('applicationScript', {...editorSet, presentation:'dialog'}).errors.some(x => x.includes('.presentation')));
+  assert.ok(inspectEditorUi('resourcePackage', editorSet).errors.some(x => x.includes('.slot')));
   assert.deepEqual(ui.components.map(x=>x.type),['text','input']);
   assert.equal(ui.components[1].bindings.value.path,'app.panel.value');
   for(const id of ['1bad','a'.repeat(65),'abc.def'])assert.ok(script(`/** @id ${id} */ defineQuScript({});`).errors.some(x=>x.startsWith('@id')));

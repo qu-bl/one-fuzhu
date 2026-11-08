@@ -1,4 +1,4 @@
-# 三端动态原生 UI 规范 12.0.1
+# 三端动态原生 UI 规范 12.0.3
 
 本规范是 Apple、Android、鸿蒙动态 UI 的共同最小集合。权威机器规则位于
 [`contract.json`](contract.json) 的 `ui` 段；本文用于说明它能表达什么。
@@ -14,7 +14,8 @@
 
 ## 一份声明，两种承载方式
 
-- `presentation=inline`：常驻区域。应用脚本使用 `scriptUi`、`applicationScript` 或 `packageBuilder` 位置；并非存储持久化。
+- `presentation=inline`：常驻区域。应用脚本使用 `scriptUi`、`applicationScript`、`packageBuilder` 或 `riveEditor` 位置。
+- `slot=riveEditor` 将界面挂到 Rive 编辑器侧栏下半区，上半区保留编辑器工具。
 - `presentation=dialog`：按需弹窗，应用脚本对应 `slot=dialog`；并非另一种动态 UI 引擎。
 - 常驻区域和弹窗都可以通过 QVMI 更新内容、值与状态。
 - 每个运行中的所有者只有一份当前 UI 声明。`@ui` 在 `onStart` 前作为初始声明加载。
