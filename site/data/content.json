@@ -242,6 +242,35 @@
       "cover": "./assets/cover-image-binding-cards.avif?v=1791188188462",
       "bannerCover": "",
       "bannerAlt": ""
+    },
+    {
+      "id": "card-1c2adf58-678c-438f-9f2c-6b732f52e070",
+      "name": "银杏蝶专注壁纸",
+      "summary": "长按呼出专注表盘。可以设置壁纸模式。每次解锁都会全部化蝶",
+      "cover": "./assets/cover-card-1c2adf58-678c-438f-9f2c-6b732f52e070.avif?v=1794414243484",
+      "bannerCover": "",
+      "bannerAlt": "",
+      "category": "专注",
+      "partnerName": "千机百变",
+      "platforms": [
+        "HarmonyOS",
+        "Android",
+        "Apple"
+      ],
+      "tags": [
+        "壁纸",
+        "专注"
+      ],
+      "featured": false,
+      "visible": true,
+      "access": {
+        "items": [
+          {
+            "platform": "xiaohongshu",
+            "value": ""
+          }
+        ]
+      }
     }
   ]
 }
