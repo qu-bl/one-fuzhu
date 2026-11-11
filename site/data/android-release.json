@@ -1,9 +1,9 @@
 {
-  "versionName": "1.0.22",
-  "versionCode": 64,
+  "versionName": "1.0.23",
+  "versionCode": 65,
   "minSdk": 33,
   "abi": "arm64-v8a",
   "apkBytes": 14589956,
-  "apkSha256": "37776a70876ae6fb143efe71f8b93fe7bbd95845dab674adadb5503f448153d6",
+  "apkSha256": "66378f2e946d60f22f1b7ae433e03af9dff683da286c72e55392dee73e3760b1",
   "signingCertificateSha256": "0b4975c3f3da4f1c1886dff97b959d1a4ddcbc99310fbc502484216b43a0cfd1"
 }
