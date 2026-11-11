@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 const html=readFileSync(new URL('../../tools/one-fuzhu-admin.html',import.meta.url),'utf8');
 const between=(start,end)=>html.slice(html.indexOf(start),html.indexOf(end,html.indexOf(start)));
@@ -25,10 +26,12 @@ await test('desktop standalone image previews preserve versions on their public 
 function harness({fail=false}={}){
  const pendingUploads=new Map(),uploadPreviews=new Map(),requests=[],statuses=[];
  const content={cards:[{id:'sample',bannerCover:'./assets/banner-sample.avif?v=2'}]};
- const docs={content:JSON.stringify(content)+'\n',contract:'{}',release:'{}'};
+ const contentText=JSON.stringify(content)+'\n';
+ const hash=createHash('sha256').update(contentText).digest('hex');
+ const docs={content:contentText,contentVersion:JSON.stringify({version:hash})+'\n',contract:'{}',release:'{}'};
  const state={pendingUploads,uploadPreviews,requests,statuses,content,loadedTexts:{content:'old',contract:'{}',release:'{}'},loadedHeadSha:'old-head',token:'test-only',busy:false,activeView:'cards',clean:false,
   Blob,Uint8Array,btoa,atob,TextEncoder,TextDecoder,URL:{createObjectURL:()=> 'blob:preview',revokeObjectURL(){}},
-  CONFIG:{branch:'main',paths:{content:'site/data/content.json',contract:'contracts/contract.json',release:'contracts/release.json',translation:'rive-editor/translation.json'}},REPO_API:'https://api.github.com/repos/test/example',
+  CONFIG:{branch:'main',paths:{content:'site/data/content.json',contentVersion:'site/data/version.json',contract:'contracts/contract.json',release:'contracts/release.json',translation:'rive-editor/translation.json'}},REPO_API:'https://api.github.com/repos/test/example',
   setBusy(value){thisBusy(value);},setStatus(message,kind){statuses.push({message,kind});},
   buildPublishDocuments:async()=>docs,staleUploadPaths:async()=>[],renderAll(){},renderTranslations(){},
   gh:async(method,url,body)=>{
@@ -54,10 +57,12 @@ await test('saving a staged banner includes its JSON reference and both real ima
  const h=harness();await h.upload();await h.ctx.save();
  const tree=h.requests.find(x=>x.url.endsWith('/git/trees')).body;
  assert.equal(tree.base_tree,'base-tree');
- assert.deepEqual(Array.from(tree.tree,x=>x.path).sort(),['site/assets/banner-sample.avif','site/assets/banner-sample.webp','site/data/content.json']);
+ assert.deepEqual(Array.from(tree.tree,x=>x.path).sort(),['site/assets/banner-sample.avif','site/assets/banner-sample.webp','site/data/content.json','site/data/version.json']);
  const blobs=h.requests.filter(x=>x.url.endsWith('/git/blobs')).map(x=>Buffer.from(x.body.content,'base64').toString());
  assert.ok(blobs.includes('AVIF'));assert.ok(blobs.includes('WEBP'));
- assert.ok(blobs.some(x=>x.includes('./assets/banner-sample.avif?v=2')));
+ const contentBlob=blobs.find(x=>x.includes('./assets/banner-sample.avif?v=2'));
+ assert.ok(contentBlob);
+ assert.ok(blobs.includes(JSON.stringify({version:createHash('sha256').update(contentBlob).digest('hex')})+'\n'));
  assert.equal(h.requests.at(-1).method,'PATCH');assert.equal(h.requests.at(-1).body.force,false);
  assert.equal(h.pendingUploads.size,0);assert.equal(h.ctx.clean,true);
 });

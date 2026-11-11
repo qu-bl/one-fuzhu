@@ -33,7 +33,10 @@ const FAQ = [
 
 // ---------- 作品数据（来自 data/content.json，仅可见且有内容的卡片） ----------
 
-const content = JSON.parse(readFileSync(join(ROOT, "data/content.json"), "utf-8"));
+const contentBytes = readFileSync(join(ROOT, "data/content.json"));
+const content = JSON.parse(contentBytes.toString("utf-8"));
+const contentVersion = createHash("sha256").update(contentBytes).digest("hex");
+writeFileSync(join(ROOT, "data/version.json"), JSON.stringify({ version: contentVersion }) + "\n");
 const works = content.cards.filter((c) => c.visible && (c.summary || "").trim() && c.id && !/^card-/.test(c.id));
 
 function esc(s) {

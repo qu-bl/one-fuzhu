@@ -55,6 +55,6 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # 只提交派生文件，绝不碰 content.json 等源文件。
-          git add site/cases site/sitemap.xml site/index.md site/llms.txt site/index.html llms.txt
+          git add site/cases site/sitemap.xml site/index.md site/llms.txt site/index.html site/data/version.json llms.txt
           git commit -m "Rebuild site artifacts from content.json"
           git push

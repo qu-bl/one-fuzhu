@@ -366,6 +366,62 @@ async function loadJson(url) {
   return response.json();
 }
 
+const SITE_CONTENT_CACHE_KEY = "qianji:site:content";
+const SITE_CONTENT_URL = "./data/content.json";
+
+function isSiteContentVersion(version) {
+  return typeof version === "string" && /^[0-9a-f]{64}$/.test(version);
+}
+
+function isSiteContent(content) {
+  return Array.isArray(content?.cards) && Array.isArray(content?.banners);
+}
+
+function readCachedSiteContent() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(SITE_CONTENT_CACHE_KEY));
+    if (isSiteContentVersion(cached?.version) && isSiteContent(cached.content)) return cached;
+  } catch {
+    // Storage can be unavailable in an embedded or private browser.
+  }
+  return null;
+}
+
+async function loadSiteContent(render) {
+  const cached = readCachedSiteContent();
+  if (cached) render(cached.content);
+
+  try {
+    const { version } = await loadJson("./data/version.json");
+    if (!isSiteContentVersion(version)) throw new Error("官网内容版本无效");
+    if (version === cached?.version) return;
+
+    const response = await fetch(`${SITE_CONTENT_URL}?v=${version}`, { cache: "no-cache" });
+    if (!response.ok) throw new Error("无法下载新版官网内容");
+    const bytes = await response.arrayBuffer();
+    const hash = await crypto.subtle.digest("SHA-256", bytes);
+    const digest = Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, "0")).join("");
+    // A CDN edge may serve the previous content while the version file is already updated.
+    if (digest !== version) throw new Error("官网内容尚未同步到当前版本");
+    const content = JSON.parse(new TextDecoder().decode(bytes));
+    if (!isSiteContent(content)) throw new Error("官网内容格式无效");
+    render(content, Boolean(cached));
+
+    try {
+      localStorage.setItem(SITE_CONTENT_CACHE_KEY, JSON.stringify({ version, content }));
+    } catch {
+      // The verified content is already rendered if saving it fails.
+    }
+  } catch (error) {
+    if (!cached) {
+      // A first visit can still load content while the version file is being deployed.
+      render(await loadJson(SITE_CONTENT_URL));
+    } else {
+      console.warn("官网内容更新检查失败", error);
+    }
+  }
+}
+
 function renderActivities() {
   if (!activityTrack || !activityTemplate) return;
   activityTrack.replaceChildren();
@@ -2075,20 +2131,28 @@ async function initialize() {
   bindAccessDialog();
   bindNoticeDialog();
   initRipples();
+  const query = new URLSearchParams(location.search);
+  const adminPreview = window.parent !== window && query.has('adminPreview');
+  const render = (content, preserveScroll = false) => {
+    applyContent(content, adminPreview ? { showNotice: false } : { preserveScroll });
+    if (!preserveScroll) {
+      if (query.get('view') === 'about') openInformation({ instant: true });
+      // 内容渲染后再观察滚动入场。
+      initReveal();
+    }
+  };
   try {
-    // 单一数据源：顶部 Rive、公告、联系方式、横幅、卡片都来自同一个 JSON，
-    // 因此发布内容只需要编辑 data/content.json，不必改动页面代码。
-    const content = await loadJson("./data/content.json");
-    const adminPreview = window.parent !== window && new URLSearchParams(location.search).has('adminPreview');
-    applyContent(content, adminPreview ? { showNotice: false } : {});
-    if (new URLSearchParams(location.search).get('view') === 'about') openInformation({ instant: true });
+    if (adminPreview || !globalThis.crypto?.subtle) {
+      render(await loadJson(SITE_CONTENT_URL));
+    } else {
+      await loadSiteContent(render);
+    }
   } catch (error) {
     // 内容读取失败时仍然初始化顶部：hero 会回退到 HERO_DEFAULTS。
     initHeroRive();
     renderLoadError(error);
+    initReveal();
   }
-  // 内容渲染后再观察滚动入场，避免 content 加载前区块就已“进入视口”。
-  initReveal();
 }
 
 initialize();
