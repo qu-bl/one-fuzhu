@@ -209,6 +209,36 @@
       "featured": true
     },
     {
+      "id": "card-1c2adf58-678c-438f-9f2c-6b732f52e070",
+      "name": "银杏蝶专注壁纸",
+      "summary": "长按呼出专注表盘。可以设置壁纸模式。每次解锁都会全部化蝶",
+      "cover": "./assets/cover-card-1c2adf58-678c-438f-9f2c-6b732f52e070.avif?v=1794414243484",
+      "bannerCover": "",
+      "bannerAlt": "",
+      "category": "专注",
+      "partnerName": "千机百变",
+      "platforms": [
+        "HarmonyOS",
+        "Android",
+        "Apple"
+      ],
+      "tags": [
+        "壁纸",
+        "专注"
+      ],
+      "featured": false,
+      "visible": true,
+      "access": {
+        "items": [
+          {
+            "platform": "xiaohongshu",
+            "value": ""
+          }
+        ]
+      },
+      "details": "壁纸模式：自由设置叶片数量，关闭专注表盘。\n专注模式：长按空白处呼出表盘，拨动叶脉选择时长，松手开始计时；每完成5分钟获得一片叶子。\n收起表盘：点击叶片外围，计时继续。\n触摸化蝶：划过叶片即可让它飞走；可开启保留选项，避免消耗已积累的叶子。\n\n设计理念是用叶片的积累与消散表达时间，让壁纸既能欣赏，也能记录专注。"
+    },
+    {
       "id": "image-binding-cards",
       "name": "RIVE中文系列课程",
       "summary": "rive101系列官方课，中文译制版",
@@ -242,36 +272,6 @@
       "cover": "./assets/cover-image-binding-cards.avif?v=1791188188462",
       "bannerCover": "",
       "bannerAlt": ""
-    },
-    {
-      "id": "card-1c2adf58-678c-438f-9f2c-6b732f52e070",
-      "name": "银杏蝶专注壁纸",
-      "summary": "长按呼出专注表盘。可以设置壁纸模式。每次解锁都会全部化蝶",
-      "cover": "./assets/cover-card-1c2adf58-678c-438f-9f2c-6b732f52e070.avif?v=1794414243484",
-      "bannerCover": "",
-      "bannerAlt": "",
-      "category": "专注",
-      "partnerName": "千机百变",
-      "platforms": [
-        "HarmonyOS",
-        "Android",
-        "Apple"
-      ],
-      "tags": [
-        "壁纸",
-        "专注"
-      ],
-      "featured": false,
-      "visible": true,
-      "access": {
-        "items": [
-          {
-            "platform": "xiaohongshu",
-            "value": ""
-          }
-        ]
-      },
-      "details": "壁纸模式：自由设置叶片数量，关闭专注表盘。\n专注模式：长按空白处呼出表盘，拨动叶脉选择时长，松手开始计时；每完成5分钟获得一片叶子。\n收起表盘：点击叶片外围，计时继续。\n触摸化蝶：划过叶片即可让它飞走；可开启保留选项，避免消耗已积累的叶子。\n\n设计理念是用叶片的积累与消散表达时间，让壁纸既能欣赏，也能记录专注。"
     }
   ]
 }
