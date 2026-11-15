@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": "12.0.3",
+  "contractVersion": "12.0.4",
   "purpose": "模型生成前使用的精简索引；最终结果仍由宿主使用完整契约和 JSON Schema 校验。",
   "manifest": {
     "required": [
@@ -1888,6 +1888,7 @@
     "fieldTypes": {
       "app.theme.brand": "color",
       "system.time.epochMs": "number",
+      "system.lifecycle.isForeground": "boolean",
       "system.appearance.colorMode": "enum",
       "system.appearance.language": "string",
       "system.appearance.region": "string",
@@ -2146,6 +2147,9 @@
         ],
         "displayPrecision": 0,
         "displaySuffix": "%"
+      },
+      "system.lifecycle.isForeground": {
+        "delivery": "state"
       },
       "system.battery.isCharging": {
         "delivery": "state"

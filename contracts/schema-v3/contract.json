@@ -1,5 +1,5 @@
 {
-  "contractVersion": "12.0.3",
+  "contractVersion": "12.0.4",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -1022,6 +1022,9 @@
       "system.time": [
         "epochMs"
       ],
+      "system.lifecycle": [
+        "isForeground"
+      ],
       "system.appearance": [
         "colorMode",
         "language",
@@ -1133,6 +1136,7 @@
     "fieldTypes": {
       "app.theme.brand": "color",
       "system.time.epochMs": "number",
+      "system.lifecycle.isForeground": "boolean",
       "system.appearance.colorMode": "enum",
       "system.appearance.language": "string",
       "system.appearance.region": "string",
@@ -1519,6 +1523,9 @@
         ],
         "displayPrecision": 0,
         "displaySuffix": "%"
+      },
+      "system.lifecycle.isForeground": {
+        "delivery": "state"
       },
       "system.battery.isCharging": {
         "delivery": "state"
