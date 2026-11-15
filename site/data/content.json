@@ -209,6 +209,35 @@
       "featured": true
     },
     {
+      "id": "card-bf503165-a58f-41d4-a40a-b37a91c15184",
+      "name": "竹林专注壁纸",
+      "summary": "24h颜色变化的竹林专注壁纸",
+      "cover": "./assets/cover-card-bf503165-a58f-41d4-a40a-b37a91c15184.avif?v=1794702471351",
+      "bannerCover": "",
+      "bannerAlt": "",
+      "category": "",
+      "partnerName": "千机百变官方",
+      "platforms": [
+        "HarmonyOS",
+        "Android",
+        "Apple"
+      ],
+      "tags": [
+        "壁纸",
+        "专注"
+      ],
+      "featured": false,
+      "visible": true,
+      "access": {
+        "items": [
+          {
+            "platform": "xiaohongshu",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
       "id": "card-1c2adf58-678c-438f-9f2c-6b732f52e070",
       "name": "银杏蝶专注壁纸",
       "summary": "长按呼出专注表盘。可以设置壁纸模式。每次解锁都会全部化蝶",
@@ -237,35 +266,6 @@
         ]
       },
       "details": "壁纸模式：自由设置叶片数量，关闭专注表盘。\n专注模式：长按空白处呼出表盘，拨动叶脉选择时长，松手开始计时；每完成5分钟获得一片叶子。\n收起表盘：点击叶片外围，计时继续。\n触摸化蝶：划过叶片即可让它飞走；可开启保留选项，避免消耗已积累的叶子。\n\n设计理念是用叶片的积累与消散表达时间，让壁纸既能欣赏，也能记录专注。"
-    },
-    {
-      "id": "card-bf503165-a58f-41d4-a40a-b37a91c15184",
-      "name": "竹林专注壁纸",
-      "summary": "24h颜色变化的竹林专注壁纸",
-      "cover": "./assets/cover-card-bf503165-a58f-41d4-a40a-b37a91c15184.avif?v=1794702471351",
-      "bannerCover": "",
-      "bannerAlt": "",
-      "category": "",
-      "partnerName": "千机百变官方",
-      "platforms": [
-        "HarmonyOS",
-        "Android",
-        "Apple"
-      ],
-      "tags": [
-        "壁纸",
-        "专注"
-      ],
-      "featured": false,
-      "visible": true,
-      "access": {
-        "items": [
-          {
-            "platform": "xiaohongshu",
-            "value": ""
-          }
-        ]
-      }
     },
     {
       "id": "image-binding-cards",
