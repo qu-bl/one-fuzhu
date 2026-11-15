@@ -272,6 +272,35 @@
       "cover": "./assets/cover-image-binding-cards.avif?v=1791188188462",
       "bannerCover": "",
       "bannerAlt": ""
+    },
+    {
+      "id": "card-bf503165-a58f-41d4-a40a-b37a91c15184",
+      "name": "竹林专注壁纸",
+      "summary": "24h颜色变化的竹林专注壁纸",
+      "cover": "./assets/cover-card-bf503165-a58f-41d4-a40a-b37a91c15184.avif?v=1794702471351",
+      "bannerCover": "",
+      "bannerAlt": "",
+      "category": "",
+      "partnerName": "千机百变官方",
+      "platforms": [
+        "HarmonyOS",
+        "Android",
+        "Apple"
+      ],
+      "tags": [
+        "壁纸",
+        "专注"
+      ],
+      "featured": false,
+      "visible": true,
+      "access": {
+        "items": [
+          {
+            "platform": "xiaohongshu",
+            "value": ""
+          }
+        ]
+      }
     }
   ]
 }
