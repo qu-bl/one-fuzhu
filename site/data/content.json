@@ -158,7 +158,7 @@
   "cards": [
     {
       "id": "card-1793449583904",
-      "name": "长荷专注",
+      "name": "荷塘专注壁纸",
       "summary": "24h颜色变化，天气变化，可设置为壁纸。",
       "cover": "./assets/cover-card-1793449583904.avif?v=1793705591452",
       "category": "专注",
@@ -188,8 +188,8 @@
     },
     {
       "id": "card-1793610779049",
-      "name": "四叶草的时间",
-      "summary": "四叶草的专注壁纸，",
+      "name": "四叶草专注壁纸",
+      "summary": "四叶草的专注壁纸",
       "cover": "./assets/cover-card-1793610779049.avif?v=1793611662506",
       "bannerCover": "./assets/banner-card-1793610779049.avif?v=1793702736478",
       "bannerAlt": "",
