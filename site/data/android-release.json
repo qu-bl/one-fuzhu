@@ -1,9 +1,9 @@
 {
-  "versionName": "1.0.28",
-  "versionCode": 70,
+  "versionName": "1.0.29",
+  "versionCode": 71,
   "minSdk": 33,
   "abi": "arm64-v8a",
-  "apkBytes": 15753488,
-  "apkSha256": "d2c6842c6936c4c3fb73cba4ed540bb0dd87aaa0c23c23d71b7cf17212362db3",
+  "apkBytes": 15757160,
+  "apkSha256": "4317559c9a0804690b852760590cdf04a4133dcbbd9a4c2991a5220b8b4feca8",
   "signingCertificateSha256": "0b4975c3f3da4f1c1886dff97b959d1a4ddcbc99310fbc502484216b43a0cfd1"
 }
