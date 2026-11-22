@@ -1,5 +1,5 @@
 {
-  "contractVersion": "12.0.4",
+  "contractVersion": "12.0.5",
   "sourceOfTruth": "one-fuzhu published schema-v3 contract; HarmonyOS is the behavior baseline",
   "builder": {
     "projectNameMax": 40,
@@ -3052,8 +3052,8 @@
   "archive": {
     "extension": ".qjpkg",
     "maxFiles": 256,
-    "maxTotalBytes": 134217728,
-    "maxSingleFileBytes": 67108864,
+    "maxTotalBytes": 2147483648,
+    "maxSingleFileBytes": 2147483648,
     "maxPathUtf8Bytes": 512,
     "normalizeUnicode": "NFC",
     "rejectCaseFoldCollisions": true,
@@ -3096,12 +3096,12 @@
   },
   "resources": {
     "readTextMaxBytes": 8388608,
-    "readBinaryMaxBytes": 33554432,
-    "riveImageMaxBytes": 33554432,
+    "readBinaryMaxBytes": 2147483648,
+    "riveImageMaxBytes": 2147483648,
     "referenceRoot": "assets/",
     "referenceRejectTraversal": true,
     "referenceRejectForeignOwner": true,
-    "riveAssetMaxBytes": 33554432,
+    "riveAssetMaxBytes": 2147483648,
     "duplicateBasenamesAcrossDirectoriesAllowed": true,
     "bareBasenameRequiresUnique": true
   },
@@ -3110,7 +3110,7 @@
     "requiresDeclaredDomain": true,
     "requestMaxBytes": 1048576,
     "responseMaxBytes": 1048576,
-    "transferMaxBytes": 67108864,
+    "transferMaxBytes": 2147483648,
     "streamMaxBytes": 16777216,
     "redirectModes": [
       "error",
